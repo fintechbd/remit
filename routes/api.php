@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 if (Config::get('fintech.remit.enabled')) {
-    Route::prefix('skeleton')->group(function () {
+    Route::prefix('remit')->group(function () {
 
         //DO NOT REMOVE THIS LINE//
     });
