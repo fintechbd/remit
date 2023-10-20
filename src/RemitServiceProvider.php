@@ -20,6 +20,7 @@ class RemitServiceProvider extends ServiceProvider
         );
 
         $this->app->register(RouteServiceProvider::class);
+        $this->app->register(RepositoryServiceProvider::class);
     }
 
     /**
