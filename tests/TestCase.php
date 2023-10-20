@@ -2,9 +2,9 @@
 
 namespace Fintech\Remit\Tests;
 
+use Fintech\Remit\RemitServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Fintech\Remit\RemitServiceProvider;
 
 class TestCase extends Orchestra
 {

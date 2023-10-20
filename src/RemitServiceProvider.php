@@ -2,9 +2,9 @@
 
 namespace Fintech\Remit;
 
-use Illuminate\Support\ServiceProvider;
 use Fintech\Remit\Commands\InstallCommand;
 use Fintech\Remit\Commands\RemitCommand;
+use Illuminate\Support\ServiceProvider;
 
 class RemitServiceProvider extends ServiceProvider
 {

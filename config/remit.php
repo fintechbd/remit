@@ -3,7 +3,6 @@
 // config for Fintech/Remit
 return [
 
-
     /*
     |--------------------------------------------------------------------------
     | Enable Module APIs
