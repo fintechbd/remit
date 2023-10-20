@@ -3,6 +3,15 @@
 // config for VendorName/Skeleton
 return [
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Enable Module APIs
+    |--------------------------------------------------------------------------
+    | this setting enable the api will be available or not
+    */
+    'enabled' => true,
+
     /*
     |--------------------------------------------------------------------------
     | Skeleton Group Root Prefix
