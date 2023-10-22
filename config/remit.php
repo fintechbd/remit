@@ -9,7 +9,7 @@ return [
     |--------------------------------------------------------------------------
     | this setting enable the api will be available or not
     */
-    'enabled' => true,
+    'enabled' => env('PACKAGE_REMIT_ENABLED', true),
 
     /*
     |--------------------------------------------------------------------------
