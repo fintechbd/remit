@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 if (Config::get('fintech.remit.enabled')) {
-    Route::prefix('remit')->group(function () {
+    Route::prefix('remit')->name('remit.')
+        ->middleware(config('fintech.auth.middleware'))
+        ->group(function () {
 
         //DO NOT REMOVE THIS LINE//
     });
