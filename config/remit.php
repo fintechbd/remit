@@ -24,6 +24,16 @@ return [
 
     'root_prefix' => 'test/',
 
+    
+    /*
+    |--------------------------------------------------------------------------
+    | BankTransfer Model
+    |--------------------------------------------------------------------------
+    |
+    | This value will be used to across system where model is needed
+    */
+    'bank_transfer_model' => \Fintech\Remit\Models\BankTransfer::class,
+
     //** Model Config Point Do not Remove **//
 
     /*
@@ -35,6 +45,8 @@ return [
     */
 
     'repositories' => [
+        \Fintech\Remit\Interfaces\BankTransferRepository::class => \Fintech\Remit\Repositories\Eloquent\BankTransferRepository::class,
+
         //** Repository Binding Config Point Do not Remove **//
     ],
 

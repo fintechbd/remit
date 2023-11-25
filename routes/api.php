@@ -18,6 +18,9 @@ if (Config::get('fintech.remit.enabled')) {
         ->middleware(config('fintech.auth.middleware'))
         ->group(function () {
 
-            //DO NOT REMOVE THIS LINE//
+            Route::apiResource('bank-transfers', \Fintech\Remit\Http\Controllers\BankTransferController::class);
+    Route::post('bank-transfers/{bank_transfer}/restore', [\Fintech\Remit\Http\Controllers\BankTransferController::class, 'restore'])->name('bank-transfers.restore');
+
+    //DO NOT REMOVE THIS LINE//
         });
 }
