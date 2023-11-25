@@ -2,8 +2,8 @@
 
 namespace Fintech\Remit\Seeders;
 
-use Illuminate\Database\Seeder;
 use Fintech\Remit\Facades\Remit;
+use Illuminate\Database\Seeder;
 
 class BankTransferSeeder extends Seeder
 {
@@ -24,6 +24,6 @@ class BankTransferSeeder extends Seeder
 
     private function data()
     {
-        return array();
+        return [];
     }
 }

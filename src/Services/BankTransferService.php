@@ -2,26 +2,22 @@
 
 namespace Fintech\Remit\Services;
 
-
 use Fintech\Remit\Interfaces\BankTransferRepository;
 
 /**
  * Class BankTransferService
- * @package Fintech\Remit\Services
- *
  */
 class BankTransferService
 {
     /**
      * BankTransferService constructor.
-     * @param BankTransferRepository $bankTransferRepository
      */
-    public function __construct(BankTransferRepository $bankTransferRepository) {
+    public function __construct(BankTransferRepository $bankTransferRepository)
+    {
         $this->bankTransferRepository = $bankTransferRepository;
     }
 
     /**
-     * @param array $filters
      * @return mixed
      */
     public function list(array $filters = [])

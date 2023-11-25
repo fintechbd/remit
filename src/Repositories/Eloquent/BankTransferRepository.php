@@ -11,19 +11,18 @@ use InvalidArgumentException;
 
 /**
  * Class BankTransferRepository
- * @package Fintech\Remit\Repositories\Eloquent
  */
 class BankTransferRepository extends EloquentRepository implements InterfacesBankTransferRepository
 {
     public function __construct()
     {
-       $model = app(config('fintech.remit.bank_transfer_model', \Fintech\Remit\Models\BankTransfer::class));
+        $model = app(config('fintech.remit.bank_transfer_model', \Fintech\Remit\Models\BankTransfer::class));
 
-       if (!$model instanceof Model) {
-           throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
-       }
+        if (! $model instanceof Model) {
+            throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
+        }
 
-       $this->model = $model;
+        $this->model = $model;
     }
 
     /**
@@ -47,7 +46,7 @@ class BankTransferRepository extends EloquentRepository implements InterfacesBan
         }
 
         //Display Trashed
-        if (isset($filters['trashed']) && !empty($filters['trashed'])) {
+        if (isset($filters['trashed']) && ! empty($filters['trashed'])) {
             $query->onlyTrashed();
         }
 
