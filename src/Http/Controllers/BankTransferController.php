@@ -45,6 +45,7 @@ class BankTransferController extends Controller
         try {
             $inputs = $request->validated();
 
+            $inputs['transaction_form_id'] = 2;
             $bankTransferPaginate = Remit::bankTransfer()->list($inputs);
 
             return new BankTransferCollection($bankTransferPaginate);
