@@ -59,10 +59,10 @@ class BankTransfer extends Model
         $primaryKey = $this->getKey();
 
         $links = [
-            'show' => action_link(route('remit.bank-transfer.show', $primaryKey), __('core::messages.action.show'), 'get'),
-            'update' => action_link(route('remit.bank-transfer.update', $primaryKey), __('core::messages.action.update'), 'put'),
-            'destroy' => action_link(route('remit.bank-transfer.destroy', $primaryKey), __('core::messages.action.destroy'), 'delete'),
-            'restore' => action_link(route('remit.bank-transfer.restore', $primaryKey), __('core::messages.action.restore'), 'post'),
+            'show' => action_link(route('remit.bank-transfers.show', $primaryKey), __('core::messages.action.show'), 'get'),
+            'update' => action_link(route('remit.bank-transfers.update', $primaryKey), __('core::messages.action.update'), 'put'),
+            'destroy' => action_link(route('remit.bank-transfers.destroy', $primaryKey), __('core::messages.action.destroy'), 'delete'),
+            'restore' => action_link(route('remit.bank-transfers.restore', $primaryKey), __('core::messages.action.restore'), 'post'),
         ];
 
         if ($this->getAttribute('deleted_at') == null) {
