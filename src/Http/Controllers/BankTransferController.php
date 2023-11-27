@@ -3,7 +3,6 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
-use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Auth\SystemRole;
@@ -46,8 +45,6 @@ class BankTransferController extends Controller
      * *```paginate=false``` returns all resource as list not pagination*
      *
      * @lrd:end
-     * @param IndexBankTransferRequest $request
-     * @return BankTransferCollection|JsonResponse
      */
     public function index(IndexBankTransferRequest $request): BankTransferCollection|JsonResponse
     {
@@ -70,9 +67,6 @@ class BankTransferController extends Controller
      * Create a new *BankTransfer* resource in storage.
      *
      * @lrd:end
-     *
-     * @param StoreBankTransferRequest $request
-     * @return JsonResponse
      */
     public function store(StoreBankTransferRequest $request): JsonResponse
     {
@@ -189,10 +183,6 @@ class BankTransferController extends Controller
      * Update a specified *BankTransfer* resource using id.
      *
      * @lrd:end
-     *
-     * @param UpdateBankTransferRequest $request
-     * @param string|int $id
-     * @return JsonResponse
      */
     public function update(UpdateBankTransferRequest $request, string|int $id): JsonResponse
     {
@@ -228,8 +218,6 @@ class BankTransferController extends Controller
      * Soft delete a specified *BankTransfer* resource using id.
      *
      * @lrd:end
-     *
-     * @return JsonResponse
      *
      * @throws ModelNotFoundException
      * @throws DeleteOperationException
@@ -267,9 +255,6 @@ class BankTransferController extends Controller
      * ** ```Soft Delete``` needs to enabled to use this feature**
      *
      * @lrd:end
-     *
-     * @param string|int $id
-     * @return JsonResponse
      */
     public function restore(string|int $id): JsonResponse
     {
@@ -326,11 +311,8 @@ class BankTransferController extends Controller
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
-     *
-     * @param ImportBankTransferRequest $request
-     * @return JsonResponse | BankTransferCollection
      */
-    public function import(ImportBankTransferRequest $request): JsonResponse | BankTransferCollection
+    public function import(ImportBankTransferRequest $request): JsonResponse|BankTransferCollection
     {
         try {
             $inputs = $request->validated();
