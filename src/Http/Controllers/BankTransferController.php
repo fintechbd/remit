@@ -136,7 +136,8 @@ class BankTransferController extends Controller
             $inputs['order_data']['current_amount'] = ($inputs['order_data']['previous_amount'] + $inputs['amount']);
             //TODO ALL Beneficiary Data with bank and branch data
             $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
-            print_r($beneficiaryData);exit();
+            print_r($beneficiaryData);
+            exit();
 
             Remit::bankTransfer()->update($bankTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
 
