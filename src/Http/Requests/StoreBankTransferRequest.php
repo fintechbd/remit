@@ -25,7 +25,7 @@ class StoreBankTransferRequest extends FormRequest
         return [
             'user_id' => ['nullable', 'integer', 'min:1'],
             'source_country_id' => ['required', 'integer', 'min:1'],
-            'destination_country_id' => ['required', 'integer', 'min:1', 'same:source_country_id'],
+            'destination_country_id' => ['required', 'integer', 'min:1'],
             'service_id' => ['required', 'integer', 'min:1'],
             'ordered_at' => ['required', 'date', 'date_format:Y-m-d', 'before_or_equal:'.date('Y-m-d')],
             'amount' => ['required', 'numeric'],
