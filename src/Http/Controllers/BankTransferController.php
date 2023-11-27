@@ -3,6 +3,7 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
+use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Auth\SystemRole;
@@ -99,9 +100,9 @@ class BankTransferController extends Controller
             $inputs['transaction_form_id'] = 1;
             $inputs['user_id'] = $user_id ?? $depositor->getKey();
             $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
-            if ($delayCheck['countValue'] > 0) {
+            /*if ($delayCheck['countValue'] > 0) {
                 throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
-            }
+            }*/
             $inputs['sender_receiver_id'] = $masterUser->getKey();
             $inputs['is_refunded'] = false;
             $inputs['status'] = DepositStatus::Processing->value;
@@ -109,7 +110,6 @@ class BankTransferController extends Controller
             //TODO CONVERTER
             $inputs['converted_amount'] = $inputs['amount'];
             $inputs['converted_currency'] = $inputs['currency'];
-            //TODO ALL Beneficiary Data with bank and branch data
             $inputs['order_data']['created_by'] = $depositor->name;
             $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
             $inputs['order_data']['created_at'] = now();
@@ -126,14 +126,17 @@ class BankTransferController extends Controller
             }
             $order_data = $bankTransfer->order_data;
             $order_data['purchase_number'] = entry_number($bankTransfer->getKey(), $bankTransfer->sourceCountry->iso3, OrderStatusConfig::Purchased->value);
-            $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
-            $order_data['user_name'] = $depositor->name;
+            //$order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
+            $order_data['user_name'] = $bankTransfer->user->name;
             $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
                 'user_id' => $depositor->getKey(),
                 'country_id' => $bankTransfer->source_country_id,
             ])->first();
             $inputs['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
             $inputs['order_data']['current_amount'] = ($inputs['order_data']['previous_amount'] + $inputs['amount']);
+            //TODO ALL Beneficiary Data with bank and branch data
+            $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
+            print_r($beneficiaryData);exit();
 
             Remit::bankTransfer()->update($bankTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
 
