@@ -3,6 +3,12 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
+use Fintech\Banco\Facades\Banco;
+use Fintech\Business\Facades\Business;
+use Fintech\Core\Enums\Auth\RiskProfile;
+use Fintech\Core\Enums\Auth\SystemRole;
+use Fintech\Core\Enums\Reload\DepositStatus;
+use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
@@ -15,6 +21,7 @@ use Fintech\Remit\Http\Requests\StoreBankTransferRequest;
 use Fintech\Remit\Http\Requests\UpdateBankTransferRequest;
 use Fintech\Remit\Http\Resources\BankTransferCollection;
 use Fintech\Remit\Http\Resources\BankTransferResource;
+use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -45,6 +52,7 @@ class BankTransferController extends Controller
         try {
             $inputs = $request->validated();
 
+            $inputs['transaction_form_id'] = 2;
             $bankTransferPaginate = Remit::bankTransfer()->list($inputs);
 
             return new BankTransferCollection($bankTransferPaginate);
@@ -60,19 +68,77 @@ class BankTransferController extends Controller
      * Create a new *BankTransfer* resource in storage.
      *
      * @lrd:end
-     *
-     * @throws StoreOperationException
      */
     public function store(StoreBankTransferRequest $request): JsonResponse
     {
         try {
             $inputs = $request->validated();
+            if ($request->input('user_id') > 0) {
+                $user_id = $request->input('user_id');
+            }
+            $depositor = $request->user('sanctum');
+
+            $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+                'user_id' => $user_id ?? $depositor->getKey(),
+                'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
+            ])->first();
+
+            if (! $depositAccount) {
+                throw new Exception("User don't have account deposit balance");
+            }
+
+            $masterUser = \Fintech\Auth\Facades\Auth::user()->list([
+                'role_name' => SystemRole::MasterUser->value,
+                'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
+            ])->first();
+
+            if (! $masterUser) {
+                throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
+            }
+
+            //set pre defined conditions of deposit
+            $inputs['transaction_form_id'] = 1;
+            $inputs['user_id'] = $user_id ?? $depositor->getKey();
+            $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
+            if ($delayCheck['countValue'] > 0) {
+                throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
+            }
+            $inputs['sender_receiver_id'] = $masterUser->getKey();
+            $inputs['is_refunded'] = false;
+            $inputs['status'] = DepositStatus::Processing->value;
+            $inputs['risk'] = RiskProfile::Low->value;
+            //TODO CONVERTER
+            $inputs['converted_amount'] = $inputs['amount'];
+            $inputs['converted_currency'] = $inputs['currency'];
+            $inputs['order_data']['created_by'] = $depositor->name;
+            $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
+            $inputs['order_data']['created_at'] = now();
+            $inputs['order_data']['master_user_name'] = $masterUser['name'];
+            //$inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
+            $inputs['order_data']['assign_order'] = 'no';
+            $inputs['order_data']['system_notification_variable_success'] = 'bank_transfer_success';
+            $inputs['order_data']['system_notification_variable_failed'] = 'bank_transfer_failed';
 
             $bankTransfer = Remit::bankTransfer()->create($inputs);
 
             if (! $bankTransfer) {
                 throw (new StoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'));
             }
+            $order_data = $bankTransfer->order_data;
+            $order_data['purchase_number'] = entry_number($bankTransfer->getKey(), $bankTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
+            $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
+            $order_data['user_name'] = $bankTransfer->user->name;
+            $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+                'user_id' => $depositor->getKey(),
+                'country_id' => $bankTransfer->source_country_id,
+            ])->first();
+            $order_data['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
+            $order_data['order_data']['current_amount'] = ($order_data['order_data']['previous_amount'] + $inputs['amount']);
+            //TODO ALL Beneficiary Data with bank and branch data
+            $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
+            $order_data['order_data']['beneficiary_data'] = $beneficiaryData;
+
+            Remit::bankTransfer()->update($bankTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
 
             return $this->created([
                 'message' => __('core::messages.resource.created', ['model' => 'Bank Transfer']),
@@ -120,9 +186,6 @@ class BankTransferController extends Controller
      * Update a specified *BankTransfer* resource using id.
      *
      * @lrd:end
-     *
-     * @throws ModelNotFoundException
-     * @throws UpdateOperationException
      */
     public function update(UpdateBankTransferRequest $request, string|int $id): JsonResponse
     {
@@ -159,12 +222,10 @@ class BankTransferController extends Controller
      *
      * @lrd:end
      *
-     * @return JsonResponse
-     *
      * @throws ModelNotFoundException
      * @throws DeleteOperationException
      */
-    public function destroy(string|int $id)
+    public function destroy(string|int $id): JsonResponse
     {
         try {
 
@@ -197,10 +258,8 @@ class BankTransferController extends Controller
      * ** ```Soft Delete``` needs to enabled to use this feature**
      *
      * @lrd:end
-     *
-     * @return JsonResponse
      */
-    public function restore(string|int $id)
+    public function restore(string|int $id): JsonResponse
     {
         try {
 
@@ -229,7 +288,7 @@ class BankTransferController extends Controller
 
     /**
      * @lrd:start
-     * Create a exportable list of the *BankTransfer* resource as document.
+     * Create an exportable list of the *BankTransfer* resource as document.
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
@@ -251,14 +310,12 @@ class BankTransferController extends Controller
 
     /**
      * @lrd:start
-     * Create a exportable list of the *BankTransfer* resource as document.
+     * Create an exportable list of the *BankTransfer* resource as document.
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
-     *
-     * @return BankTransferCollection|JsonResponse
      */
-    public function import(ImportBankTransferRequest $request): JsonResponse
+    public function import(ImportBankTransferRequest $request): JsonResponse|BankTransferCollection
     {
         try {
             $inputs = $request->validated();
