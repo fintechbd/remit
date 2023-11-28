@@ -24,6 +24,9 @@ if (Config::get('fintech.remit.enabled')) {
             Route::apiResource('cash-pickups', \Fintech\Remit\Http\Controllers\CashPickupController::class)->except('update', 'destroy');
             //Route::post('cash-pickups/{cash_pickup}/restore', [\Fintech\Remit\Http\Controllers\CashPickupController::class, 'restore'])->name('cash-pickups.restore');
 
+            Route::apiResource('wallet-transfers', \Fintech\Remit\Http\Controllers\WalletTransferController::class)->except('update', 'destroy');
+            //Route::post('wallet-transfers/{wallet_transfer}/restore', [\Fintech\Remit\Http\Controllers\WalletTransferController::class, 'restore'])->name('wallet-transfers.restore');
+
             //DO NOT REMOVE THIS LINE//
         });
 }
