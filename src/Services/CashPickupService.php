@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 
 /**
  * Class CashPickupService
+ * @property CashPickupRepository $cashPickupRepository
  */
 class CashPickupService
 {
