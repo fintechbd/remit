@@ -128,6 +128,7 @@ class BankTransferController extends Controller
             $order_data['purchase_number'] = entry_number($bankTransfer->getKey(), $bankTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
             $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
             $order_data['user_name'] = $bankTransfer->user->name;
+            Remit::bankTransfer()->debitTransaction($bankTransfer);
             $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
                 'user_id' => $depositor->getKey(),
                 'country_id' => $bankTransfer->source_country_id,
