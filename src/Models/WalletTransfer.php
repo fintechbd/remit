@@ -3,13 +3,19 @@
 namespace Fintech\Remit\Models;
 
 use Fintech\Core\Traits\AuditableTrait;
+use Fintech\Remit\Traits\AuthRelations;
+use Fintech\Remit\Traits\BusinessRelations;
+use Fintech\Remit\Traits\MetaDataRelations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WalletTransfer extends Model
 {
-   use AuditableTrait;
-   use SoftDeletes;
+    use AuditableTrait;
+    use AuthRelations;
+    use BusinessRelations;
+    use MetaDataRelations;
+    use SoftDeletes;
 
     /*
     |--------------------------------------------------------------------------
@@ -17,13 +23,15 @@ class WalletTransfer extends Model
     |--------------------------------------------------------------------------
     */
 
+    protected $table = 'orders';
+
     protected $primaryKey = 'id';
 
     protected $guarded = ['id'];
 
     protected $appends = ['links'];
 
-    protected $casts = ['wallet_transfer_data' => 'array', 'restored_at' => 'datetime', 'enabled' => 'bool'];
+    protected $casts = ['order_data' => 'array', 'restored_at' => 'datetime'];
 
     protected $hidden = ['creator_id', 'editor_id', 'destroyer_id', 'restorer_id'];
 
@@ -32,7 +40,13 @@ class WalletTransfer extends Model
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
-
+    /**
+     * @return mixed
+     */
+    public function currentStatus(): mixed
+    {
+        return $this->status;
+    }
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
