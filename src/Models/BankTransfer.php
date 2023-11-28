@@ -40,7 +40,10 @@ class BankTransfer extends Model
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
-    public function currentStatus()
+    /**
+     * @return mixed
+     */
+    public function currentStatus(): mixed
     {
         return $this->status;
     }
