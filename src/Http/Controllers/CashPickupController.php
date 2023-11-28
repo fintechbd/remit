@@ -14,6 +14,7 @@ use Fintech\Remit\Http\Requests\ImportCashPickupRequest;
 use Fintech\Remit\Http\Requests\StoreCashPickupRequest;
 use Fintech\Remit\Http\Requests\UpdateCashPickupRequest;
 use Fintech\Remit\Http\Requests\IndexCashPickupRequest;
+use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -48,6 +49,7 @@ class CashPickupController extends Controller
         try {
             $inputs = $request->validated();
 
+            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code'=>'money_transfer'])->first()->getKey();
             $cashPickupPaginate = Remit::cashPickup()->list($inputs);
 
             return new CashPickupCollection($cashPickupPaginate);
