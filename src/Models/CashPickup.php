@@ -40,9 +40,7 @@ class CashPickup extends Model
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
-    /**
-     * @return mixed
-     */
+
     public function currentStatus(): mixed
     {
         return $this->status;

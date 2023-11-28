@@ -33,7 +33,6 @@ return [
     */
     'bank_transfer_model' => \Fintech\Remit\Models\BankTransfer::class,
 
-    
     /*
     |--------------------------------------------------------------------------
     | CashPickup Model

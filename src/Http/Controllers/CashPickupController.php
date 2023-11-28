@@ -1,24 +1,25 @@
 <?php
 
 namespace Fintech\Remit\Http\Controllers;
+
 use Exception;
 use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Auth\SystemRole;
 use Fintech\Core\Enums\Transaction\OrderStatus;
-use Fintech\Core\Exceptions\StoreOperationException;
-use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
+use Fintech\Core\Exceptions\StoreOperationException;
+use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Remit\Facades\Remit;
-use Fintech\Remit\Http\Resources\CashPickupResource;
-use Fintech\Remit\Http\Resources\CashPickupCollection;
 use Fintech\Remit\Http\Requests\ImportCashPickupRequest;
+use Fintech\Remit\Http\Requests\IndexCashPickupRequest;
 use Fintech\Remit\Http\Requests\StoreCashPickupRequest;
 use Fintech\Remit\Http\Requests\UpdateCashPickupRequest;
-use Fintech\Remit\Http\Requests\IndexCashPickupRequest;
+use Fintech\Remit\Http\Resources\CashPickupCollection;
+use Fintech\Remit\Http\Resources\CashPickupResource;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -26,15 +27,13 @@ use Illuminate\Routing\Controller;
 
 /**
  * Class CashPickupController
- * @package Fintech\Remit\Http\Controllers
  *
  * @lrd:start
  * This class handle create, display, update, delete & restore
  * operation related to CashPickup
- * @lrd:end
  *
+ * @lrd:end
  */
-
 class CashPickupController extends Controller
 {
     use ApiResponseTrait;
@@ -44,17 +43,15 @@ class CashPickupController extends Controller
      * Return a listing of the *CashPickup* resource as collection.
      *
      * *```paginate=false``` returns all resource as list not pagination*
-     * @lrd:end
      *
-     * @param IndexCashPickupRequest $request
-     * @return CashPickupCollection|JsonResponse
+     * @lrd:end
      */
     public function index(IndexCashPickupRequest $request): CashPickupCollection|JsonResponse
     {
         try {
             $inputs = $request->validated();
 
-            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code'=>'money_transfer'])->first()->getKey();
+            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'money_transfer'])->first()->getKey();
             $cashPickupPaginate = Remit::cashPickup()->list($inputs);
 
             return new CashPickupCollection($cashPickupPaginate);
@@ -68,10 +65,9 @@ class CashPickupController extends Controller
     /**
      * @lrd:start
      * Create a new *CashPickup* resource in storage.
+     *
      * @lrd:end
      *
-     * @param StoreCashPickupRequest $request
-     * @return JsonResponse
      * @throws StoreOperationException
      */
     public function store(StoreCashPickupRequest $request): JsonResponse
@@ -103,7 +99,7 @@ class CashPickupController extends Controller
             }
 
             //set pre defined conditions of deposit
-            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code'=>'money_transfer'])->first()->getKey();
+            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'money_transfer'])->first()->getKey();
             $inputs['user_id'] = $user_id ?? $depositor->getKey();
             $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
             if ($delayCheck['countValue'] > 0) {
@@ -127,7 +123,7 @@ class CashPickupController extends Controller
 
             $cashPickup = Remit::cashPickup()->create($inputs);
 
-            if (!$cashPickup) {
+            if (! $cashPickup) {
                 throw (new StoreOperationException)->setModel(config('fintech.remit.cash_pickup_model'));
             }
 
@@ -150,8 +146,8 @@ class CashPickupController extends Controller
 
             return $this->created([
                 'message' => __('core::messages.resource.created', ['model' => 'Cash Pickup']),
-                'id' => $cashPickup->id
-             ]);
+                'id' => $cashPickup->id,
+            ]);
 
         } catch (Exception $exception) {
 
@@ -162,10 +158,9 @@ class CashPickupController extends Controller
     /**
      * @lrd:start
      * Return a specified *CashPickup* resource found by id.
+     *
      * @lrd:end
      *
-     * @param string|int $id
-     * @return CashPickupResource|JsonResponse
      * @throws ModelNotFoundException
      */
     public function show(string|int $id): CashPickupResource|JsonResponse
@@ -174,7 +169,7 @@ class CashPickupController extends Controller
 
             $cashPickup = Remit::cashPickup()->find($id);
 
-            if (!$cashPickup) {
+            if (! $cashPickup) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
@@ -193,11 +188,9 @@ class CashPickupController extends Controller
     /**
      * @lrd:start
      * Update a specified *CashPickup* resource using id.
+     *
      * @lrd:end
      *
-     * @param UpdateCashPickupRequest $request
-     * @param string|int $id
-     * @return JsonResponse
      * @throws ModelNotFoundException
      * @throws UpdateOperationException
      */
@@ -207,13 +200,13 @@ class CashPickupController extends Controller
 
             $cashPickup = Remit::cashPickup()->find($id);
 
-            if (!$cashPickup) {
+            if (! $cashPickup) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
             $inputs = $request->validated();
 
-            if (!Remit::cashPickup()->update($id, $inputs)) {
+            if (! Remit::cashPickup()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
@@ -233,10 +226,11 @@ class CashPickupController extends Controller
     /**
      * @lrd:start
      * Soft delete a specified *CashPickup* resource using id.
+     *
      * @lrd:end
      *
-     * @param string|int $id
      * @return JsonResponse
+     *
      * @throws ModelNotFoundException
      * @throws DeleteOperationException
      */
@@ -246,11 +240,11 @@ class CashPickupController extends Controller
 
             $cashPickup = Remit::cashPickup()->find($id);
 
-            if (!$cashPickup) {
+            if (! $cashPickup) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
-            if (!Remit::cashPickup()->destroy($id)) {
+            if (! Remit::cashPickup()->destroy($id)) {
 
                 throw (new DeleteOperationException())->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
@@ -271,9 +265,9 @@ class CashPickupController extends Controller
      * @lrd:start
      * Restore the specified *CashPickup* resource from trash.
      * ** ```Soft Delete``` needs to enabled to use this feature**
+     *
      * @lrd:end
      *
-     * @param string|int $id
      * @return JsonResponse
      */
     public function restore(string|int $id)
@@ -282,11 +276,11 @@ class CashPickupController extends Controller
 
             $cashPickup = Remit::cashPickup()->find($id, true);
 
-            if (!$cashPickup) {
+            if (! $cashPickup) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
-            if (!Remit::cashPickup()->restore($id)) {
+            if (! Remit::cashPickup()->restore($id)) {
 
                 throw (new RestoreOperationException())->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
@@ -309,9 +303,6 @@ class CashPickupController extends Controller
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
-     *
-     * @param IndexCashPickupRequest $request
-     * @return JsonResponse
      */
     public function export(IndexCashPickupRequest $request): JsonResponse
     {
@@ -335,7 +326,6 @@ class CashPickupController extends Controller
      *
      * @lrd:end
      *
-     * @param ImportCashPickupRequest $request
      * @return CashPickupCollection|JsonResponse
      */
     public function import(ImportCashPickupRequest $request): JsonResponse

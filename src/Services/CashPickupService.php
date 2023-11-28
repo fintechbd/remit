@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Services;
 
-
 use Fintech\Remit\Interfaces\CashPickupRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Contracts\Pagination\Paginator;
@@ -11,89 +10,53 @@ use Illuminate\Support\Collection;
 
 /**
  * Class CashPickupService
- * @package Fintech\Remit\Services
- *
  */
 class CashPickupService
 {
     /**
      * CashPickupService constructor.
-     * @param CashPickupRepository $cashPickupRepository
      */
-    public function __construct(CashPickupRepository $cashPickupRepository) {
+    public function __construct(CashPickupRepository $cashPickupRepository)
+    {
         $this->cashPickupRepository = $cashPickupRepository;
     }
 
-    /**
-     * @param array $filters
-     * @return Collection|Paginator
-     */
     public function list(array $filters = []): Collection|Paginator
     {
         return $this->cashPickupRepository->list($filters);
 
     }
 
-    /**
-     * @param array $inputs
-     * @return Model|\MongoDB\Laravel\Eloquent\Model|null
-     */
     public function create(array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
     {
         return $this->cashPickupRepository->create($inputs);
     }
 
-    /**
-     * @param $id
-     * @param bool $onlyTrashed
-     * @return Model|\MongoDB\Laravel\Eloquent\Model|null
-     */
     public function find($id, bool $onlyTrashed = false): Model|\MongoDB\Laravel\Eloquent\Model|null
     {
         return $this->cashPickupRepository->find($id, $onlyTrashed);
     }
 
-    /**
-     * @param $id
-     * @param array $inputs
-     * @return Model|\MongoDB\Laravel\Eloquent\Model|null
-     */
     public function update($id, array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
     {
         return $this->cashPickupRepository->update($id, $inputs);
     }
 
-    /**
-     * @param $id
-     * @return mixed
-     */
     public function destroy($id): mixed
     {
         return $this->cashPickupRepository->delete($id);
     }
 
-    /**
-     * @param $id
-     * @return mixed
-     */
     public function restore($id): mixed
     {
         return $this->cashPickupRepository->restore($id);
     }
 
-    /**
-     * @param array $filters
-     * @return Paginator|Collection
-     */
     public function export(array $filters): Paginator|Collection
     {
         return $this->cashPickupRepository->list($filters);
     }
 
-    /**
-     * @param array $filters
-     * @return Model|\MongoDB\Laravel\Eloquent\Model|null
-     */
     public function import(array $filters): Model|\MongoDB\Laravel\Eloquent\Model|null
     {
         return $this->cashPickupRepository->create($filters);
@@ -250,5 +213,4 @@ class CashPickupService
         ];
 
     }
-
 }

@@ -11,19 +11,18 @@ use InvalidArgumentException;
 
 /**
  * Class CashPickupRepository
- * @package Fintech\Remit\Repositories\Eloquent
  */
 class CashPickupRepository extends EloquentRepository implements InterfacesCashPickupRepository
 {
     public function __construct()
     {
-       $model = app(config('fintech.remit.cash_pickup_model', \Fintech\Remit\Models\CashPickup::class));
+        $model = app(config('fintech.remit.cash_pickup_model', \Fintech\Remit\Models\CashPickup::class));
 
-       if (!$model instanceof Model) {
-           throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
-       }
+        if (! $model instanceof Model) {
+            throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
+        }
 
-       $this->model = $model;
+        $this->model = $model;
     }
 
     /**
