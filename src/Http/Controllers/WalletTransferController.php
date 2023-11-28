@@ -14,6 +14,7 @@ use Fintech\Remit\Http\Requests\ImportWalletTransferRequest;
 use Fintech\Remit\Http\Requests\StoreWalletTransferRequest;
 use Fintech\Remit\Http\Requests\UpdateWalletTransferRequest;
 use Fintech\Remit\Http\Requests\IndexWalletTransferRequest;
+use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -47,7 +48,7 @@ class WalletTransferController extends Controller
     {
         try {
             $inputs = $request->validated();
-
+            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'wallet_transfer'])->first()->getKey();
             $walletTransferPaginate = Remit::walletTransfer()->list($inputs);
 
             return new WalletTransferCollection($walletTransferPaginate);
@@ -72,6 +73,7 @@ class WalletTransferController extends Controller
         try {
             $inputs = $request->validated();
 
+            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'wallet_transfer'])->first()->getKey();
             $walletTransfer = Remit::walletTransfer()->create($inputs);
 
             if (!$walletTransfer) {
