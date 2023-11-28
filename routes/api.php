@@ -27,6 +27,6 @@ if (Config::get('fintech.remit.enabled')) {
             Route::apiResource('wallet-transfers', \Fintech\Remit\Http\Controllers\WalletTransferController::class)->except('update', 'destroy');
             //Route::post('wallet-transfers/{wallet_transfer}/restore', [\Fintech\Remit\Http\Controllers\WalletTransferController::class, 'restore'])->name('wallet-transfers.restore');
 
-    //DO NOT REMOVE THIS LINE//
+            //DO NOT REMOVE THIS LINE//
         });
 }

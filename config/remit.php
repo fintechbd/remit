@@ -42,7 +42,6 @@ return [
     */
     'cash_pickup_model' => \Fintech\Remit\Models\CashPickup::class,
 
-    
     /*
     |--------------------------------------------------------------------------
     | WalletTransfer Model
