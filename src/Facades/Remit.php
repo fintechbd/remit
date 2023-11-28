@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static \Fintech\Remit\Services\BankTransferService bankTransfer()
+ * @method static \Fintech\Remit\Services\CashPickupService cashPickup()
  * // Crud Service Method Point Do not Remove //
  *
  * @see \Fintech\Remit\Remit
