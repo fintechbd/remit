@@ -14,47 +14,46 @@ use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Remit\Facades\Remit;
-use Fintech\Remit\Http\Requests\ImportBankTransferRequest;
-use Fintech\Remit\Http\Requests\IndexBankTransferRequest;
-use Fintech\Remit\Http\Requests\StoreBankTransferRequest;
-use Fintech\Remit\Http\Requests\UpdateBankTransferRequest;
-use Fintech\Remit\Http\Resources\BankTransferCollection;
-use Fintech\Remit\Http\Resources\BankTransferResource;
+use Fintech\Remit\Http\Requests\ImportWalletTransferRequest;
+use Fintech\Remit\Http\Requests\IndexWalletTransferRequest;
+use Fintech\Remit\Http\Requests\StoreWalletTransferRequest;
+use Fintech\Remit\Http\Requests\UpdateWalletTransferRequest;
+use Fintech\Remit\Http\Resources\WalletTransferCollection;
+use Fintech\Remit\Http\Resources\WalletTransferResource;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
 /**
- * Class BankTransferController
+ * Class WalletTransferController
  *
  * @lrd:start
  * This class handle create, display, update, delete & restore
- * operation related to BankTransfer
+ * operation related to WalletTransfer
  *
  * @lrd:end
  */
-class BankTransferController extends Controller
+class WalletTransferController extends Controller
 {
     use ApiResponseTrait;
 
     /**
      * @lrd:start
-     * Return a listing of the *BankTransfer* resource as collection.
+     * Return a listing of the *WalletTransfer* resource as collection.
      *
      * *```paginate=false``` returns all resource as list not pagination*
      *
      * @lrd:end
      */
-    public function index(IndexBankTransferRequest $request): BankTransferCollection|JsonResponse
+    public function index(IndexWalletTransferRequest $request): WalletTransferCollection|JsonResponse
     {
         try {
             $inputs = $request->validated();
+            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'wallet_transfer'])->first()->getKey();
+            $walletTransferPaginate = Remit::walletTransfer()->list($inputs);
 
-            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'money_transfer'])->first()->getKey();
-            $bankTransferPaginate = Remit::bankTransfer()->list($inputs);
-
-            return new BankTransferCollection($bankTransferPaginate);
+            return new WalletTransferCollection($walletTransferPaginate);
 
         } catch (Exception $exception) {
 
@@ -64,14 +63,17 @@ class BankTransferController extends Controller
 
     /**
      * @lrd:start
-     * Create a new *BankTransfer* resource in storage.
+     * Create a new *WalletTransfer* resource in storage.
      *
      * @lrd:end
+     *
+     * @throws StoreOperationException
      */
-    public function store(StoreBankTransferRequest $request): JsonResponse
+    public function store(StoreWalletTransferRequest $request): JsonResponse
     {
         try {
             $inputs = $request->validated();
+
             if ($request->input('user_id') > 0) {
                 $user_id = $request->input('user_id');
             }
@@ -96,7 +98,7 @@ class BankTransferController extends Controller
             }
 
             //set pre defined conditions of deposit
-            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'money_transfer'])->first()->getKey();
+            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'wallet_transfer'])->first()->getKey();
             $inputs['user_id'] = $user_id ?? $depositor->getKey();
             $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
             if ($delayCheck['countValue'] > 0) {
@@ -115,22 +117,23 @@ class BankTransferController extends Controller
             $inputs['order_data']['master_user_name'] = $masterUser['name'];
             //$inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
             $inputs['order_data']['assign_order'] = 'no';
-            $inputs['order_data']['system_notification_variable_success'] = 'bank_transfer_success';
-            $inputs['order_data']['system_notification_variable_failed'] = 'bank_transfer_failed';
+            $inputs['order_data']['system_notification_variable_success'] = 'wallet_transfer_success';
+            $inputs['order_data']['system_notification_variable_failed'] = 'wallet_transfer_failed';
 
-            $bankTransfer = Remit::bankTransfer()->create($inputs);
+            $walletTransfer = Remit::walletTransfer()->create($inputs);
 
-            if (! $bankTransfer) {
-                throw (new StoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'));
+            if (! $walletTransfer) {
+                throw (new StoreOperationException)->setModel(config('fintech.remit.wallet_transfer_model'));
             }
-            $order_data = $bankTransfer->order_data;
-            $order_data['purchase_number'] = entry_number($bankTransfer->getKey(), $bankTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
-            $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
-            $order_data['user_name'] = $bankTransfer->user->name;
-            Remit::bankTransfer()->debitTransaction($bankTransfer);
+
+            $order_data = $walletTransfer->order_data;
+            $order_data['purchase_number'] = entry_number($walletTransfer->getKey(), $walletTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
+            $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($walletTransfer);
+            $order_data['user_name'] = $walletTransfer->user->name;
+            Remit::walletTransfer()->debitTransaction($walletTransfer);
             $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
                 'user_id' => $depositor->getKey(),
-                'country_id' => $bankTransfer->source_country_id,
+                'country_id' => $walletTransfer->source_country_id,
             ])->first();
             $order_data['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
             $order_data['order_data']['current_amount'] = ($order_data['order_data']['previous_amount'] + $inputs['amount']);
@@ -138,11 +141,11 @@ class BankTransferController extends Controller
             $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
             $order_data['order_data']['beneficiary_data'] = $beneficiaryData;
 
-            Remit::bankTransfer()->update($bankTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+            Remit::walletTransfer()->update($walletTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
 
             return $this->created([
-                'message' => __('core::messages.resource.created', ['model' => 'Bank Transfer']),
-                'id' => $bankTransfer->id,
+                'message' => __('core::messages.resource.created', ['model' => 'Wallet Transfer']),
+                'id' => $walletTransfer->id,
             ]);
 
         } catch (Exception $exception) {
@@ -153,23 +156,23 @@ class BankTransferController extends Controller
 
     /**
      * @lrd:start
-     * Return a specified *BankTransfer* resource found by id.
+     * Return a specified *WalletTransfer* resource found by id.
      *
      * @lrd:end
      *
      * @throws ModelNotFoundException
      */
-    public function show(string|int $id): BankTransferResource|JsonResponse
+    public function show(string|int $id): WalletTransferResource|JsonResponse
     {
         try {
 
-            $bankTransfer = Remit::bankTransfer()->find($id);
+            $walletTransfer = Remit::walletTransfer()->find($id);
 
-            if (! $bankTransfer) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            if (! $walletTransfer) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return new BankTransferResource($bankTransfer);
+            return new WalletTransferResource($walletTransfer);
 
         } catch (ModelNotFoundException $exception) {
 
@@ -183,28 +186,31 @@ class BankTransferController extends Controller
 
     /**
      * @lrd:start
-     * Update a specified *BankTransfer* resource using id.
+     * Update a specified *WalletTransfer* resource using id.
      *
      * @lrd:end
+     *
+     * @throws ModelNotFoundException
+     * @throws UpdateOperationException
      */
-    public function update(UpdateBankTransferRequest $request, string|int $id): JsonResponse
+    public function update(UpdateWalletTransferRequest $request, string|int $id): JsonResponse
     {
         try {
 
-            $bankTransfer = Remit::bankTransfer()->find($id);
+            $walletTransfer = Remit::walletTransfer()->find($id);
 
-            if (! $bankTransfer) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            if (! $walletTransfer) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
             $inputs = $request->validated();
 
-            if (! Remit::bankTransfer()->update($id, $inputs)) {
+            if (! Remit::walletTransfer()->update($id, $inputs)) {
 
-                throw (new UpdateOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
+                throw (new UpdateOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return $this->updated(__('core::messages.resource.updated', ['model' => 'Bank Transfer']));
+            return $this->updated(__('core::messages.resource.updated', ['model' => 'Wallet Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -218,29 +224,31 @@ class BankTransferController extends Controller
 
     /**
      * @lrd:start
-     * Soft delete a specified *BankTransfer* resource using id.
+     * Soft delete a specified *WalletTransfer* resource using id.
      *
      * @lrd:end
+     *
+     * @return JsonResponse
      *
      * @throws ModelNotFoundException
      * @throws DeleteOperationException
      */
-    public function destroy(string|int $id): JsonResponse
+    public function destroy(string|int $id)
     {
         try {
 
-            $bankTransfer = Remit::bankTransfer()->find($id);
+            $walletTransfer = Remit::walletTransfer()->find($id);
 
-            if (! $bankTransfer) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            if (! $walletTransfer) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            if (! Remit::bankTransfer()->destroy($id)) {
+            if (! Remit::walletTransfer()->destroy($id)) {
 
-                throw (new DeleteOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
+                throw (new DeleteOperationException())->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return $this->deleted(__('core::messages.resource.deleted', ['model' => 'Bank Transfer']));
+            return $this->deleted(__('core::messages.resource.deleted', ['model' => 'Wallet Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -254,27 +262,29 @@ class BankTransferController extends Controller
 
     /**
      * @lrd:start
-     * Restore the specified *BankTransfer* resource from trash.
+     * Restore the specified *WalletTransfer* resource from trash.
      * ** ```Soft Delete``` needs to enabled to use this feature**
      *
      * @lrd:end
+     *
+     * @return JsonResponse
      */
-    public function restore(string|int $id): JsonResponse
+    public function restore(string|int $id)
     {
         try {
 
-            $bankTransfer = Remit::bankTransfer()->find($id, true);
+            $walletTransfer = Remit::walletTransfer()->find($id, true);
 
-            if (! $bankTransfer) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            if (! $walletTransfer) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            if (! Remit::bankTransfer()->restore($id)) {
+            if (! Remit::walletTransfer()->restore($id)) {
 
-                throw (new RestoreOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
+                throw (new RestoreOperationException())->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return $this->restored(__('core::messages.resource.restored', ['model' => 'Bank Transfer']));
+            return $this->restored(__('core::messages.resource.restored', ['model' => 'Wallet Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -288,19 +298,19 @@ class BankTransferController extends Controller
 
     /**
      * @lrd:start
-     * Create an exportable list of the *BankTransfer* resource as document.
+     * Create a exportable list of the *WalletTransfer* resource as document.
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
      */
-    public function export(IndexBankTransferRequest $request): JsonResponse
+    public function export(IndexWalletTransferRequest $request): JsonResponse
     {
         try {
             $inputs = $request->validated();
 
-            $bankTransferPaginate = Remit::bankTransfer()->export($inputs);
+            $walletTransferPaginate = Remit::walletTransfer()->export($inputs);
 
-            return $this->exported(__('core::messages.resource.exported', ['model' => 'Bank Transfer']));
+            return $this->exported(__('core::messages.resource.exported', ['model' => 'Wallet Transfer']));
 
         } catch (Exception $exception) {
 
@@ -310,19 +320,21 @@ class BankTransferController extends Controller
 
     /**
      * @lrd:start
-     * Create an exportable list of the *BankTransfer* resource as document.
+     * Create a exportable list of the *WalletTransfer* resource as document.
      * After export job is done system will fire  export completed event
      *
      * @lrd:end
+     *
+     * @return WalletTransferCollection|JsonResponse
      */
-    public function import(ImportBankTransferRequest $request): JsonResponse|BankTransferCollection
+    public function import(ImportWalletTransferRequest $request): JsonResponse
     {
         try {
             $inputs = $request->validated();
 
-            $bankTransferPaginate = Remit::bankTransfer()->list($inputs);
+            $walletTransferPaginate = Remit::walletTransfer()->list($inputs);
 
-            return new BankTransferCollection($bankTransferPaginate);
+            return new WalletTransferCollection($walletTransferPaginate);
 
         } catch (Exception $exception) {
 
