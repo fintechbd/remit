@@ -105,7 +105,7 @@ class BankTransferController extends Controller
             }
             $inputs['sender_receiver_id'] = $masterUser->getKey();
             $inputs['is_refunded'] = false;
-            $inputs['status'] = DepositStatus::Processing->value;
+            $inputs['status'] = OrderStatus::Successful->value;
             $inputs['risk'] = RiskProfile::Low->value;
             //TODO CONVERTER
             $inputs['converted_amount'] = $inputs['amount'];
