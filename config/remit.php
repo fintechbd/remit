@@ -33,6 +33,16 @@ return [
     */
     'bank_transfer_model' => \Fintech\Remit\Models\BankTransfer::class,
 
+    
+    /*
+    |--------------------------------------------------------------------------
+    | CashPickup Model
+    |--------------------------------------------------------------------------
+    |
+    | This value will be used to across system where model is needed
+    */
+    'cash_pickup_model' => \Fintech\Remit\Models\CashPickup::class,
+
     //** Model Config Point Do not Remove **//
 
     /*
@@ -45,6 +55,8 @@ return [
 
     'repositories' => [
         \Fintech\Remit\Interfaces\BankTransferRepository::class => \Fintech\Remit\Repositories\Eloquent\BankTransferRepository::class,
+
+        \Fintech\Remit\Interfaces\CashPickupRepository::class => \Fintech\Remit\Repositories\Eloquent\CashPickupRepository::class,
 
         //** Repository Binding Config Point Do not Remove **//
     ],
