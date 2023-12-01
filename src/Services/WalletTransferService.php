@@ -69,6 +69,19 @@ class WalletTransferService
      */
     public function debitTransaction($data): array
     {
+        $userAccountData = [
+            'previous_amount' => null,
+            'current_amount' => null,
+            'spent_amount' => null,
+        ];
+
+        //Collect Current Balance as Previous Balance
+        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
+            'get_order_detail_amount_sum' => true,
+            'user_id' => $data->user_id,
+            'order_detail_currency' => $data->currency,
+        ]);
+
         $serviceStatData = $data->order_data['service_stat_data'];
         $master_user_name = $data->order_data['master_user_name'];
         $user_name = $data->order_data['user_name'];
@@ -120,7 +133,7 @@ class WalletTransferService
         $data->notes = 'Wallet Transfer Discount form '.$master_user_name;
         $data->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
-        $updateData['order_data']['previous_amount'] = 0;
+        //$updateData['order_data']['previous_amount'] = 0;
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $data->sender_receiver_id;
@@ -134,10 +147,19 @@ class WalletTransferService
 
         //'Point Transfer Commission Send to ' . $masterUser->name;
         //'Point Transfer Commission Receive from ' . $receiver->name;
-        return [
-            'previous_amount' => 0,
-            'current_amount' => 0,
-        ];
+
+        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
+            'get_order_detail_amount_sum' => true,
+            'user_id' => $data->user_id,
+            'order_detail_currency' => $data->currency,
+        ]);
+
+        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
+            'get_order_detail_amount_sum' => true,
+            'order_id' => $data->user_id,
+        ]);
+
+        return $userAccountData;
 
     }
 
@@ -146,6 +168,19 @@ class WalletTransferService
      */
     public function creditTransaction($data): array
     {
+        $userAccountData = [
+            'previous_amount' => null,
+            'current_amount' => null,
+            'spent_amount' => null,
+        ];
+
+        //Collect Current Balance as Previous Balance
+        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
+            'get_order_detail_amount_sum' => true,
+            'user_id' => $data->user_id,
+            'order_detail_currency' => $data->currency,
+        ]);
+
         $serviceStatData = $data->order_data['service_stat_data'];
         $master_user_name = $data->order_data['master_user_name'];
         $user_name = $data->order_data['user_name'];
@@ -209,10 +244,19 @@ class WalletTransferService
 
         //'Point Transfer Commission Send to ' . $masterUser->name;
         //'Point Transfer Commission Receive from ' . $receiver->name;
-        return [
-            'previous_amount' => 0,
-            'current_amount' => 0,
-        ];
+
+        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
+            'get_order_detail_amount_sum' => true,
+            'user_id' => $data->user_id,
+            'order_detail_currency' => $data->currency,
+        ]);
+
+        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
+            'get_order_detail_amount_sum' => true,
+            'order_id' => $data->user_id,
+        ]);
+
+        return $userAccountData;
 
     }
 }
