@@ -76,82 +76,85 @@ class BankTransferController extends Controller
                 $user_id = $request->input('user_id');
             }
             $depositor = $request->user('sanctum');
+            if (Transaction::orderQueue()->addToQueueOrderWise(($user_id ?? $depositor->getKey())) > 0) {
+                $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+                    'user_id' => $user_id ?? $depositor->getKey(),
+                    'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
+                ])->first();
 
-            $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
-                'user_id' => $user_id ?? $depositor->getKey(),
-                'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
-            ])->first();
+                if (!$depositAccount) {
+                    throw new Exception("User don't have account deposit balance");
+                }
 
-            if (! $depositAccount) {
-                throw new Exception("User don't have account deposit balance");
+                $masterUser = \Fintech\Auth\Facades\Auth::user()->list([
+                    'role_name' => SystemRole::MasterUser->value,
+                    'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
+                ])->first();
+
+                if (!$masterUser) {
+                    throw new Exception('Master User Account not found for ' . $request->input('source_country_id', $depositor->profile?->country_id) . ' country');
+                }
+
+                //set pre defined conditions of deposit
+                $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'money_transfer'])->first()->getKey();
+                $inputs['user_id'] = $user_id ?? $depositor->getKey();
+                $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
+                if ($delayCheck['countValue'] > 0) {
+                    throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
+                }
+                $inputs['sender_receiver_id'] = $masterUser->getKey();
+                $inputs['is_refunded'] = false;
+                $inputs['status'] = OrderStatus::Successful->value;
+                $inputs['risk'] = RiskProfile::Low->value;
+                //TODO CONVERTER
+                $inputs['converted_amount'] = $inputs['amount'];
+                $inputs['converted_currency'] = $inputs['currency'];
+                $inputs['order_data']['created_by'] = $depositor->name;
+                $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
+                $inputs['order_data']['created_at'] = now();
+                $inputs['order_data']['master_user_name'] = $masterUser['name'];
+                //$inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
+                $inputs['order_data']['assign_order'] = 'no';
+                $inputs['order_data']['system_notification_variable_success'] = 'bank_transfer_success';
+                $inputs['order_data']['system_notification_variable_failed'] = 'bank_transfer_failed';
+
+                $bankTransfer = Remit::bankTransfer()->create($inputs);
+
+                if (!$bankTransfer) {
+                    throw (new StoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'));
+                }
+                $order_data = $bankTransfer->order_data;
+                $order_data['purchase_number'] = entry_number($bankTransfer->getKey(), $bankTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
+                $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
+                $order_data['user_name'] = $bankTransfer->user->name;
+                $userUpdatedBalance = Remit::bankTransfer()->debitTransaction($bankTransfer);
+                $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+                    'user_id' => $depositor->getKey(),
+                    'country_id' => $bankTransfer->source_country_id,
+                ])->first();
+                //update User Account
+                $depositedUpdatedAccount = $depositedAccount->toArray();
+                $depositedUpdatedAccount['user_account_data']['spent_amount'] = $depositedUpdatedAccount['user_account_data']['spent_amount'] + $userUpdatedBalance['spent_amount'];
+                $depositedUpdatedAccount['user_account_data']['available_amount'] = $userUpdatedBalance['current_amount'];
+
+                $order_data['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
+                $order_data['order_data']['current_amount'] = ($order_data['order_data']['previous_amount'] + $inputs['amount']);
+                //TODO ALL Beneficiary Data with bank and branch data
+                $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
+                $order_data['order_data']['beneficiary_data'] = $beneficiaryData;
+
+                Remit::bankTransfer()->update($bankTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+                Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
+                return $this->created([
+                    'message' => __('core::messages.resource.created', ['model' => 'Bank Transfer']),
+                    'id' => $bankTransfer->id,
+                ]);
+            } else {
+                throw new Exception('Your another order is in process...!');
             }
-
-            $masterUser = \Fintech\Auth\Facades\Auth::user()->list([
-                'role_name' => SystemRole::MasterUser->value,
-                'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
-            ])->first();
-
-            if (! $masterUser) {
-                throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
-            }
-
-            //set pre defined conditions of deposit
-            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'money_transfer'])->first()->getKey();
-            $inputs['user_id'] = $user_id ?? $depositor->getKey();
-            $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
-            if ($delayCheck['countValue'] > 0) {
-                throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
-            }
-            $inputs['sender_receiver_id'] = $masterUser->getKey();
-            $inputs['is_refunded'] = false;
-            $inputs['status'] = OrderStatus::Successful->value;
-            $inputs['risk'] = RiskProfile::Low->value;
-            //TODO CONVERTER
-            $inputs['converted_amount'] = $inputs['amount'];
-            $inputs['converted_currency'] = $inputs['currency'];
-            $inputs['order_data']['created_by'] = $depositor->name;
-            $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
-            $inputs['order_data']['created_at'] = now();
-            $inputs['order_data']['master_user_name'] = $masterUser['name'];
-            //$inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
-            $inputs['order_data']['assign_order'] = 'no';
-            $inputs['order_data']['system_notification_variable_success'] = 'bank_transfer_success';
-            $inputs['order_data']['system_notification_variable_failed'] = 'bank_transfer_failed';
-
-            $bankTransfer = Remit::bankTransfer()->create($inputs);
-
-            if (! $bankTransfer) {
-                throw (new StoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'));
-            }
-            $order_data = $bankTransfer->order_data;
-            $order_data['purchase_number'] = entry_number($bankTransfer->getKey(), $bankTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
-            $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
-            $order_data['user_name'] = $bankTransfer->user->name;
-            $userUpdatedBalance = Remit::bankTransfer()->debitTransaction($bankTransfer);
-            $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
-                'user_id' => $depositor->getKey(),
-                'country_id' => $bankTransfer->source_country_id,
-            ])->first();
-            //update User Account
-            $depositedUpdatedAccount = $depositedAccount->toArray();
-            $depositedUpdatedAccount['user_account_data']['spent_amount'] = $depositedUpdatedAccount['user_account_data']['spent_amount'] + $userUpdatedBalance['spent_amount'];
-            $depositedUpdatedAccount['user_account_data']['available_amount'] = $userUpdatedBalance['current_amount'];
-
-            $order_data['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
-            $order_data['order_data']['current_amount'] = ($order_data['order_data']['previous_amount'] + $inputs['amount']);
-            //TODO ALL Beneficiary Data with bank and branch data
-            $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
-            $order_data['order_data']['beneficiary_data'] = $beneficiaryData;
-
-            Remit::bankTransfer()->update($bankTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
-
-            return $this->created([
-                'message' => __('core::messages.resource.created', ['model' => 'Bank Transfer']),
-                'id' => $bankTransfer->id,
-            ]);
-
         } catch (Exception $exception) {
 
+            Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
             return $this->failed($exception->getMessage());
         }
     }
@@ -170,7 +173,7 @@ class BankTransferController extends Controller
 
             $bankTransfer = Remit::bankTransfer()->find($id);
 
-            if (! $bankTransfer) {
+            if (!$bankTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
@@ -198,13 +201,13 @@ class BankTransferController extends Controller
 
             $bankTransfer = Remit::bankTransfer()->find($id);
 
-            if (! $bankTransfer) {
+            if (!$bankTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
             $inputs = $request->validated();
 
-            if (! Remit::bankTransfer()->update($id, $inputs)) {
+            if (!Remit::bankTransfer()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
@@ -236,11 +239,11 @@ class BankTransferController extends Controller
 
             $bankTransfer = Remit::bankTransfer()->find($id);
 
-            if (! $bankTransfer) {
+            if (!$bankTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
-            if (! Remit::bankTransfer()->destroy($id)) {
+            if (!Remit::bankTransfer()->destroy($id)) {
 
                 throw (new DeleteOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
@@ -270,11 +273,11 @@ class BankTransferController extends Controller
 
             $bankTransfer = Remit::bankTransfer()->find($id, true);
 
-            if (! $bankTransfer) {
+            if (!$bankTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
-            if (! Remit::bankTransfer()->restore($id)) {
+            if (!Remit::bankTransfer()->restore($id)) {
 
                 throw (new RestoreOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
