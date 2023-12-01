@@ -85,7 +85,7 @@ class WalletTransferController extends Controller
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
                 ])->first();
 
-                if (!$depositAccount) {
+                if (! $depositAccount) {
                     throw new Exception("User don't have account deposit balance");
                 }
 
@@ -94,8 +94,8 @@ class WalletTransferController extends Controller
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
                 ])->first();
 
-                if (!$masterUser) {
-                    throw new Exception('Master User Account not found for ' . $request->input('source_country_id', $depositor->profile?->country_id) . ' country');
+                if (! $masterUser) {
+                    throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
                 }
 
                 //set pre defined conditions of deposit
@@ -123,7 +123,7 @@ class WalletTransferController extends Controller
 
                 $walletTransfer = Remit::walletTransfer()->create($inputs);
 
-                if (!$walletTransfer) {
+                if (! $walletTransfer) {
                     throw (new StoreOperationException)->setModel(config('fintech.remit.wallet_transfer_model'));
                 }
 
@@ -149,6 +149,7 @@ class WalletTransferController extends Controller
 
                 Remit::walletTransfer()->update($walletTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
+
                 return $this->created([
                     'message' => __('core::messages.resource.created', ['model' => 'Wallet Transfer']),
                     'id' => $walletTransfer->id,
@@ -159,6 +160,7 @@ class WalletTransferController extends Controller
         } catch (Exception $exception) {
 
             Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
+
             return $this->failed($exception->getMessage());
         }
     }
@@ -177,7 +179,7 @@ class WalletTransferController extends Controller
 
             $walletTransfer = Remit::walletTransfer()->find($id);
 
-            if (!$walletTransfer) {
+            if (! $walletTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
@@ -208,13 +210,13 @@ class WalletTransferController extends Controller
 
             $walletTransfer = Remit::walletTransfer()->find($id);
 
-            if (!$walletTransfer) {
+            if (! $walletTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
             $inputs = $request->validated();
 
-            if (!Remit::walletTransfer()->update($id, $inputs)) {
+            if (! Remit::walletTransfer()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
@@ -248,11 +250,11 @@ class WalletTransferController extends Controller
 
             $walletTransfer = Remit::walletTransfer()->find($id);
 
-            if (!$walletTransfer) {
+            if (! $walletTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            if (!Remit::walletTransfer()->destroy($id)) {
+            if (! Remit::walletTransfer()->destroy($id)) {
 
                 throw (new DeleteOperationException())->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
@@ -284,11 +286,11 @@ class WalletTransferController extends Controller
 
             $walletTransfer = Remit::walletTransfer()->find($id, true);
 
-            if (!$walletTransfer) {
+            if (! $walletTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            if (!Remit::walletTransfer()->restore($id)) {
+            if (! Remit::walletTransfer()->restore($id)) {
 
                 throw (new RestoreOperationException())->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
