@@ -78,7 +78,7 @@ class WalletTransferController extends Controller
                 $user_id = $request->input('user_id');
             }
             $depositor = $request->user('sanctum');
-            if (Transaction::orderQueue()->addToQueueOrderWise(($user_id ?? $depositor->getKey())) > 0) {
+            if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
 
                 $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
                     'user_id' => $user_id ?? $depositor->getKey(),
@@ -131,6 +131,7 @@ class WalletTransferController extends Controller
                 $order_data['purchase_number'] = entry_number($walletTransfer->getKey(), $walletTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
                 $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($walletTransfer);
                 $order_data['user_name'] = $walletTransfer->user->name;
+                $walletTransfer->order_data = $order_data;
                 $userUpdatedBalance = Remit::walletTransfer()->debitTransaction($walletTransfer);
                 $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
                     'user_id' => $depositor->getKey(),
