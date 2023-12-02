@@ -24,6 +24,7 @@ use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class WalletTransferController
@@ -71,6 +72,7 @@ class WalletTransferController extends Controller
      */
     public function store(StoreWalletTransferRequest $request): JsonResponse
     {
+        DB::beginTransaction();
         try {
             $inputs = $request->validated();
 
@@ -150,7 +152,7 @@ class WalletTransferController extends Controller
 
                 Remit::walletTransfer()->update($walletTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
-
+                DB::commit();
                 return $this->created([
                     'message' => __('core::messages.resource.created', ['model' => 'Wallet Transfer']),
                     'id' => $walletTransfer->id,
@@ -161,7 +163,7 @@ class WalletTransferController extends Controller
         } catch (Exception $exception) {
 
             Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
-
+            DB::rollBack();
             return $this->failed($exception->getMessage());
         }
     }
