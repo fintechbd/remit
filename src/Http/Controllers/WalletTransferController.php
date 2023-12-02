@@ -153,6 +153,7 @@ class WalletTransferController extends Controller
                 Remit::walletTransfer()->update($walletTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
                 DB::commit();
+
                 return $this->created([
                     'message' => __('core::messages.resource.created', ['model' => 'Wallet Transfer']),
                     'id' => $walletTransfer->id,
@@ -164,6 +165,7 @@ class WalletTransferController extends Controller
 
             Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
             DB::rollBack();
+
             return $this->failed($exception->getMessage());
         }
     }

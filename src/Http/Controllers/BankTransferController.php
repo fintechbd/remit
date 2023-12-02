@@ -150,6 +150,7 @@ class BankTransferController extends Controller
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
 
                 DB::commit();
+
                 return $this->created([
                     'message' => __('core::messages.resource.created', ['model' => 'Bank Transfer']),
                     'id' => $bankTransfer->id,
