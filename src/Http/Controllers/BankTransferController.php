@@ -76,7 +76,7 @@ class BankTransferController extends Controller
                 $user_id = $request->input('user_id');
             }
             $depositor = $request->user('sanctum');
-            if (Transaction::orderQueue()->addToQueueOrderWise(($user_id ?? $depositor->getKey())) > 0) {
+            if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
                 $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
                     'user_id' => $user_id ?? $depositor->getKey(),
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
@@ -127,6 +127,7 @@ class BankTransferController extends Controller
                 $order_data['purchase_number'] = entry_number($bankTransfer->getKey(), $bankTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
                 $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
                 $order_data['user_name'] = $bankTransfer->user->name;
+                $bankTransfer->order_data = $order_data;
                 $userUpdatedBalance = Remit::bankTransfer()->debitTransaction($bankTransfer);
                 $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
                     'user_id' => $depositor->getKey(),
