@@ -79,7 +79,7 @@ class CashPickupController extends Controller
                 $user_id = $request->input('user_id');
             }
             $depositor = $request->user('sanctum');
-            if (Transaction::orderQueue()->addToQueueOrderWise(($user_id ?? $depositor->getKey())) > 0) {
+            if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
                 $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
                     'user_id' => $user_id ?? $depositor->getKey(),
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
@@ -131,6 +131,7 @@ class CashPickupController extends Controller
                 $order_data['purchase_number'] = entry_number($cashPickup->getKey(), $cashPickup->sourceCountry->iso3, OrderStatus::Successful->value);
                 $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($cashPickup);
                 $order_data['user_name'] = $cashPickup->user->name;
+                $cashPickup->order_data = $order_data;
                 $userUpdatedBalance = Remit::cashPickup()->debitTransaction($cashPickup);
                 $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
                     'user_id' => $depositor->getKey(),
