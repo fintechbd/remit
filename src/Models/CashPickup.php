@@ -72,16 +72,16 @@ class CashPickup extends Model
 
         $links = [
             'show' => action_link(route('remit.cash-pickups.show', $primaryKey), __('core::messages.action.show'), 'get'),
-//            'update' => action_link(route('remit.cash-pickups.update', $primaryKey), __('core::messages.action.update'), 'put'),
-//            'destroy' => action_link(route('remit.cash-pickups.destroy', $primaryKey), __('core::messages.action.destroy'), 'delete'),
-//            'restore' => action_link(route('remit.cash-pickups.restore', $primaryKey), __('core::messages.action.restore'), 'post'),
+            //            'update' => action_link(route('remit.cash-pickups.update', $primaryKey), __('core::messages.action.update'), 'put'),
+            //            'destroy' => action_link(route('remit.cash-pickups.destroy', $primaryKey), __('core::messages.action.destroy'), 'delete'),
+            //            'restore' => action_link(route('remit.cash-pickups.restore', $primaryKey), __('core::messages.action.restore'), 'post'),
         ];
 
-//        if ($this->getAttribute('deleted_at') == null) {
-//            unset($links['restore']);
-//        } else {
-//            unset($links['destroy']);
-//        }
+        //        if ($this->getAttribute('deleted_at') == null) {
+        //            unset($links['restore']);
+        //        } else {
+        //            unset($links['destroy']);
+        //        }
 
         return $links;
     }
