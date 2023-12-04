@@ -111,9 +111,9 @@ class WalletTransferController extends Controller
                 $inputs['is_refunded'] = false;
                 $inputs['status'] = OrderStatus::Successful->value;
                 $inputs['risk'] = RiskProfile::Low->value;
-                //TODO CONVERTER
-                $inputs['converted_amount'] = $inputs['amount'];
-                $inputs['converted_currency'] = $inputs['currency'];
+                $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
+                $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
+                $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
                 $inputs['order_data']['created_by'] = $depositor->name;
                 $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
                 $inputs['order_data']['created_at'] = now();
