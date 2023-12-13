@@ -1,10 +1,7 @@
 <?php
 
-
 namespace Fintech\Remit\Vendors;
 
-
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 
 class ValYouApi
@@ -24,26 +21,32 @@ class ValYouApi
     private $apiUrl;
 
     private $status = 'sandbox';
+
     /**
      * @var string
      */
     protected $agent_code;
+
     /**
      * @var string
      */
     protected $ClientId;
+
     /**
      * @var string
      */
     protected $agent_session_id;
+
     /**
      * @var string
      */
     protected $ClientPass;
+
     /**
      * @var string
      */
     protected $payment_mode;
+
     /**
      * @var string
      */
@@ -76,9 +79,11 @@ class ValYouApi
      * from time to time for the purpose of server ‘warm-up’ or keep-alive purpose
      *
      * @return mixed
+     *
      * @throws \Exception
      */
-    public function getEcho (){
+    public function getEcho()
+    {
         $signature = $this->agent_code.$this->ClientId.$this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
@@ -88,9 +93,10 @@ class ValYouApi
         ';
         $soapMethod = 'GetEcho';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string,$soapMethod);
-        Log::info(json_decode(json_encode($response->GetEchoResponse),true));
-        return json_decode(json_encode($response->GetEchoResponse),true);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->GetEchoResponse), true));
+
+        return json_decode(json_encode($response->GetEchoResponse), true);
     }
 
     /**
@@ -103,14 +109,15 @@ class ValYouApi
      * AGT (Cash Pickup Payout Payee) are use ADDITIONAL_FIELD1: Destination country Name and
      * ADDITIONAL_FIELD2: Payment Mode (C: cash pickup | B: Account Deposit| H: Home Delivery)
      * @return mixed
+     *
      * @throws \Exception
      */
     public function getCatalogue($input_data)
     {
         $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.$input_data['catalogue_type'].
-            (isset($input_data['additional_field_1'])?$input_data['additional_field_1']:'').
-            (isset($input_data['additional_field_2'])?$input_data['additional_field_2']:'').
-            (isset($input_data['additional_field_3'])?$input_data['additional_field_3']:'').
+            (isset($input_data['additional_field_1']) ? $input_data['additional_field_1'] : '').
+            (isset($input_data['additional_field_2']) ? $input_data['additional_field_2'] : '').
+            (isset($input_data['additional_field_3']) ? $input_data['additional_field_3'] : '').
             $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
@@ -118,35 +125,37 @@ class ValYouApi
             <USER_ID>'.$this->ClientId.'</USER_ID>
             <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
             <CATALOGUE_TYPE>'.$input_data['catalogue_type'].'</CATALOGUE_TYPE>
-            <ADDITIONAL_FIELD1>'.(isset($input_data['additional_field_1'])?$input_data['additional_field_1']:'').'</ADDITIONAL_FIELD1>
-            <ADDITIONAL_FIELD1>'.(isset($input_data['additional_field_2'])?$input_data['additional_field_2']:'').'</ADDITIONAL_FIELD1>
-            <ADDITIONAL_FIELD1>'.(isset($input_data['additional_field_3'])?$input_data['additional_field_3']:'').'</ADDITIONAL_FIELD1>
+            <ADDITIONAL_FIELD1>'.(isset($input_data['additional_field_1']) ? $input_data['additional_field_1'] : '').'</ADDITIONAL_FIELD1>
+            <ADDITIONAL_FIELD1>'.(isset($input_data['additional_field_2']) ? $input_data['additional_field_2'] : '').'</ADDITIONAL_FIELD1>
+            <ADDITIONAL_FIELD1>'.(isset($input_data['additional_field_3']) ? $input_data['additional_field_3'] : '').'</ADDITIONAL_FIELD1>
             <SIGNATURE>'.$hash_signature.'</SIGNATURE>
         ';
         $soapMethod = 'GetCatalogue';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string,$soapMethod);
-        Log::info(json_decode(json_encode($response->GetCatalogueResponse->GetCatalogueResult),true));
-        return json_decode(json_encode($response->GetCatalogueResponse->GetCatalogueResult),true);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->GetCatalogueResponse->GetCatalogueResult), true));
+
+        return json_decode(json_encode($response->GetCatalogueResponse->GetCatalogueResult), true);
     }
 
     /**
      * Call GetAgentList to get the detailed location information of Payout Partners from System.
      * Location ID should pass to calculate GetExRate and to call SendTransaction method.
      *
-     * @param $input_data
      * @return mixed
+     *
      * @throws \Exception
      */
-    public function getAgentList ($input_data){
+    public function getAgentList($input_data)
+    {
         $pay_out_country = $input_data['pay_out_country'];
-        $bank_name = isset($input_data['valyou_bank_name'])?$input_data['valyou_bank_name']:'';
-        $bank_branch_state = isset($input_data['valyou_bank_branch_state'])?$input_data['valyou_bank_branch_state']:'';
-        $pay_out_agent_code = isset($input_data['pay_out_agent_code'])?$input_data['pay_out_agent_code']:'';
-        if($input_data['recipient_type_name'] == 'Cash'):
+        $bank_name = isset($input_data['valyou_bank_name']) ? $input_data['valyou_bank_name'] : '';
+        $bank_branch_state = isset($input_data['valyou_bank_branch_state']) ? $input_data['valyou_bank_branch_state'] : '';
+        $pay_out_agent_code = isset($input_data['pay_out_agent_code']) ? $input_data['pay_out_agent_code'] : '';
+        if ($input_data['recipient_type_name'] == 'Cash') {
             $this->payment_mode = 'C';
             //$this->calculated_by_sending_payout_currency = 'C';
-        endif;
+        }
         $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
             $this->payment_mode.$pay_out_country.$bank_name.$bank_branch_state.$pay_out_agent_code.
             $this->ClientPass;
@@ -164,9 +173,10 @@ class ValYouApi
         ';
         $soapMethod = 'GetAgentList';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string,$soapMethod);
-        Log::info(json_decode(json_encode($response->GetAgentListResponse->GetAgentListResult),true));
-        return json_decode(json_encode($response->GetAgentListResponse->GetAgentListResult),true);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->GetAgentListResponse->GetAgentListResult), true));
+
+        return json_decode(json_encode($response->GetAgentListResponse->GetAgentListResult), true);
     }
 
     /**
@@ -175,20 +185,22 @@ class ValYouApi
      * @param $input_data
      * LOCATION_ID (location_id), TRANSFERAMOUNT (transfer_amount), PAYOUT_COUNTRY (payout_country)
      * @return mixed
+     *
      * @throws \Exception
      */
-    public function exRate($input_data){
+    public function exRate($input_data)
+    {
         //dd($input_data);
         $location_id = $input_data['location_id'];
         $transfer_amount = $input_data['transfer_amount'];
         $payout_country = $input_data['payout_country'];
-        if($input_data['recipient_type_name'] == 'Cash'):
+        if ($input_data['recipient_type_name'] == 'Cash') {
             $location_id = '96700015P39319013P743723';
             $this->payment_mode = 'C';
-            //$this->calculated_by_sending_payout_currency = 'C';
-        elseif($input_data['recipient_type_name'] == 'Wallet'):
+        //$this->calculated_by_sending_payout_currency = 'C';
+        } elseif ($input_data['recipient_type_name'] == 'Wallet') {
             $location_id = '96700241P96836978';
-        endif;
+        }
         $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
             $transfer_amount.$this->payment_mode.$this->calculated_by_sending_payout_currency.
             $location_id.$payout_country.$this->ClientPass;
@@ -205,12 +217,13 @@ class ValYouApi
             <PROMOTION_CODE></PROMOTION_CODE>
             <SIGNATURE>'.$hash_signature.'</SIGNATURE>
         ';
-        Log::info('exrate xml: '.$xml_string );
+        Log::info('exrate xml: '.$xml_string);
         $soapMethod = 'GetEXRate';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string,$soapMethod);
-        Log::info(json_decode(json_encode($response->GetEXRateResponse->GetEXRateResult),true));
-        return json_decode(json_encode($response->GetEXRateResponse->GetEXRateResult),true);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->GetEXRateResponse->GetEXRateResult), true));
+
+        return json_decode(json_encode($response->GetEXRateResponse->GetEXRateResult), true);
     }
 
     /**
@@ -221,11 +234,12 @@ class ValYouApi
      *
      * The Authorized_Confirmed method has to be called within 30 minutes of SendTransaction
      *
-     * @param $input_data
      * @return mixed
+     *
      * @throws \Exception
      */
-    public function sendTransaction($input_data){
+    public function sendTransaction($input_data)
+    {
         //dd($input_data);
         $location_id = $input_data->valyou_location_routing_id[0]->bank_branch_location_field_value;
         $AGENT_TXNID = $input_data->purchase_number;
@@ -253,28 +267,28 @@ class ValYouApi
         //$PURPOSE_OF_REMITTANCE = $input_data->purpose_of_remittance;
         $PURPOSE_OF_REMITTANCE = 'FAMILY MAINTENANCE/SAVINGS';
         $RECEIVER_FIRST_NAME = $input_data->receiver_first_name;
-        $RECEIVER_MIDDLE_NAME = '';//$input_data->receiver_middle_name;
+        $RECEIVER_MIDDLE_NAME = ''; //$input_data->receiver_middle_name;
         $RECEIVER_LAST_NAME = $input_data->receiver_last_name;
         $RECEIVER_ADDRESS = $input_data->receiver_address;
         $RECEIVER_CONTACT_NUMBER = ''; //$input_data->receiver_contact_number;
         $RECEIVER_COUNTRY = $input_data->receiver_country;
         $RECEIVER_CITY = $input_data->receiver_country;
         $TRANSFER_AMOUNT = $input_data->transfer_amount;
-        $REMIT_CURRENCY = '';//$input_data->sender_currency;
+        $REMIT_CURRENCY = ''; //$input_data->sender_currency;
         $TRANSFER_CURRENCY = $input_data->transfer_currency;
         $BANK_NAME = $input_data->valyou_bank_name;
         $BANK_BRANCH_NAME = $input_data->valyou_bank_branch_name;
-        if($TRANSFER_CURRENCY == 'INR'):
+        if ($TRANSFER_CURRENCY == 'INR') {
             $BANK_BRANCH_NAME = $input_data->valyou_location_routing_id[1]->bank_branch_location_field_value;
-        endif;
+        }
         $BANK_ACCOUNT_NUMBER = $input_data->bank_account_number;
-        if($input_data['recipient_type_name'] == 'Cash'):
-            $location_id = is_null($input_data['location_id'])?$input_data['location_id']:'96700015P39319013P743723';
+        if ($input_data['recipient_type_name'] == 'Cash') {
+            $location_id = is_null($input_data['location_id']) ? $input_data['location_id'] : '96700015P39319013P743723';
             $this->payment_mode = 'C';
-            //$this->calculated_by_sending_payout_currency = 'C';
-        elseif($input_data['recipient_type_name'] == 'Wallet'):
-            $location_id = is_null($input_data['location_id'])?$input_data['location_id']:'96700241P96836978';
-        endif;
+        //$this->calculated_by_sending_payout_currency = 'C';
+        } elseif ($input_data['recipient_type_name'] == 'Wallet') {
+            $location_id = is_null($input_data['location_id']) ? $input_data['location_id'] : '96700241P96836978';
+        }
         $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.$AGENT_TXNID.$location_id.
             $SENDER_FIRST_NAME.$SENDER_MIDDLE_NAME.$SENDER_LAST_NAME.$SENDER_GENDER.
             $SENDER_ADDRESS.$SENDER_CITY.$SENDER_STATES.$SENDER_ZIPCODE.$SENDER_COUNTRY.$SENDER_MOBILE.
@@ -339,9 +353,10 @@ class ValYouApi
         ';
         $soapMethod = 'SendTransaction';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string,$soapMethod);
-        Log::info(json_decode(json_encode($response->SendTransactionResponse->SendTransactionResult),true));
-        return json_decode(json_encode($response->SendTransactionResponse->SendTransactionResult),true);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->SendTransactionResponse->SendTransactionResult), true));
+
+        return json_decode(json_encode($response->SendTransactionResponse->SendTransactionResult), true);
     }
 
     /**
@@ -350,11 +365,12 @@ class ValYouApi
      * Session will be expired in 30 mins.
      * All those transactions which are not Authorized, will be truncated from system at End of Day.
      *
-     * @param $input_data
      * @return mixed
+     *
      * @throws \Exception
      */
-    public function authorizedConfirmed($input_data){
+    public function authorizedConfirmed($input_data)
+    {
         $PINNO = $input_data['PINNO'];
         $signature = $this->agent_code.$this->ClientId.$PINNO.$this->agent_session_id.$this->ClientPass;
         $hash_signature = hash('sha256', $signature);
@@ -367,9 +383,10 @@ class ValYouApi
         ';
         $soapMethod = 'Authorized_Confirmed';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string,$soapMethod);
-        Log::info(json_decode(json_encode($response->Authorized_ConfirmedResponse->Authorized_ConfirmedResult),true));
-        return json_decode(json_encode($response->Authorized_ConfirmedResponse->Authorized_ConfirmedResult),true);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->Authorized_ConfirmedResponse->Authorized_ConfirmedResult), true));
+
+        return json_decode(json_encode($response->Authorized_ConfirmedResponse->Authorized_ConfirmedResult), true);
     }
 
     /**
@@ -378,9 +395,11 @@ class ValYouApi
      * @param $input_data
      * PINNO (PINNO), AGENT_TXNID (AGENT_TXNID)
      * @return mixed
+     *
      * @throws \Exception
      */
-    public function queryTxnStatus($input_data){
+    public function queryTxnStatus($input_data)
+    {
         $PINNO = $input_data['PINNO'];
         $AGENT_TXNID = $input_data['AGENT_TXNID'];
         $signature = $this->agent_code.$this->ClientId.$PINNO.$this->agent_session_id.$AGENT_TXNID.$this->ClientPass;
@@ -395,9 +414,10 @@ class ValYouApi
         ';
         $soapMethod = 'QueryTXNStatus';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string,$soapMethod);
-        Log::info(json_decode(json_encode($response->QueryTXNStatusResponse->QueryTXNStatusResult),true));
-        return json_decode(json_encode($response->QueryTXNStatusResponse->QueryTXNStatusResult),true);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->QueryTXNStatusResponse->QueryTXNStatusResult), true));
+
+        return json_decode(json_encode($response->QueryTXNStatusResponse->QueryTXNStatusResult), true);
     }
 
     /**
@@ -412,6 +432,7 @@ class ValYouApi
      * U: List all the TXN Sent Date wise with UN-PAID TXN only
      * FROM_DATE ($input_data['from_date']), TO_DATE ($input_data['to_date'])
      * @return mixed
+     *
      * @throws \Exception
      */
     public function reconcileReport($input_data)
@@ -433,16 +454,17 @@ class ValYouApi
         ';
         $soapMethod = 'ReconcileReport';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string,$soapMethod);
-        Log::info(json_decode(json_encode($response->ReconcileReportResponse->ReconcileReportResult),true));
-        return json_decode(json_encode($response->ReconcileReportResponse->ReconcileReportResult),true);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->ReconcileReportResponse->ReconcileReportResult), true));
+
+        return json_decode(json_encode($response->ReconcileReportResponse->ReconcileReportResult), true);
     }
 
     /**
      * Call this method to view send/paid and the status of Transaction report.
      *
-     * @param $input_data
      * @return mixed
+     *
      * @throws \Exception
      */
     public function reconcileReportV2($input_data)
@@ -464,15 +486,17 @@ class ValYouApi
         ';
         $soapMethod = 'ReconcileReportV2';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string,$soapMethod);
-        Log::info(json_decode(json_encode($response->ReconcileReportV2Response->ReconcileReportV2Result),true));
-        return json_decode(json_encode($response->ReconcileReportV2Response->ReconcileReportV2Result),true);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->ReconcileReportV2Response->ReconcileReportV2Result), true));
+
+        return json_decode(json_encode($response->ReconcileReportV2Response->ReconcileReportV2Result), true);
     }
 
     /**
      * @param $input_data
      * PAYOUT_COUNTRY ($input_data['country_name'])
      * @return mixed
+     *
      * @throws \Exception
      */
     public function getCountryWiseRate($input_data)
@@ -488,19 +512,21 @@ class ValYouApi
         ';
         $soapMethod = 'GetCountryWiseRate';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string,$soapMethod);
-        Log::info(json_decode(json_encode($response->GetCountryWiseRateResponse->GetCountryWiseRateResult),true));
-        return json_decode(json_encode($response->GetCountryWiseRateResponse->GetCountryWiseRateResult),true);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->GetCountryWiseRateResponse->GetCountryWiseRateResult), true));
+
+        return json_decode(json_encode($response->GetCountryWiseRateResponse->GetCountryWiseRateResult), true);
     }
 
     /**
      * Call this method to check the validation of the account.
      *
-     * @param $input_data
      * @return mixed
+     *
      * @throws \Exception
      */
-    public function accountValidate($input_data){
+    public function accountValidate($input_data)
+    {
         $location_id = $input_data['location_id'];
         $account = $input_data['account'];
         $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.$location_id.$account.$this->ClientPass;
@@ -515,9 +541,10 @@ class ValYouApi
         ';
         $soapMethod = 'AccountValidate';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string,$soapMethod);
-        Log::info(json_decode(json_encode($response->AccountValidateResponse->AccountValidateResult),true));
-        return json_decode(json_encode($response->AccountValidateResponse->AccountValidateResult),true);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->AccountValidateResponse->AccountValidateResult), true));
+
+        return json_decode(json_encode($response->AccountValidateResponse->AccountValidateResult), true);
     }
 
     /**
@@ -528,8 +555,8 @@ class ValYouApi
      * "Y" = List report incremental basis
      * "N" = List report within date range
      * If "y" then FROM_DATE and TO_DATE not required
-     *
      * @return mixed
+     *
      * @throws \Exception
      */
     public function notificationStatus($input_data)
@@ -549,24 +576,24 @@ class ValYouApi
         ';
         $soapMethod = 'NotificationStatus';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string,$soapMethod);
-        Log::info(json_decode(json_encode($response->NotificationStatusResponse->NotificationStatusResult),true));
-        return json_decode(json_encode($response->NotificationStatusResponse->NotificationStatusResult),true);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->NotificationStatusResponse->NotificationStatusResult), true));
+
+        return json_decode(json_encode($response->NotificationStatusResponse->NotificationStatusResult), true);
     }
 
     /**
-     * @param $xml_post_string
-     * @param $method
      * @return \SimpleXMLElement
+     *
      * @throws \Exception
      */
     public function connectionCheck($xml_post_string, $method)
     {
         $headers = [
-            "Host: " . $this->config[$this->status]['app_host'],
-            "Content-type: text/xml;charset=\"utf-8\"",
-            "Content-length: " . strlen($xml_post_string),
-            "SOAPAction: WebServices/" .$method,
+            'Host: '.$this->config[$this->status]['app_host'],
+            'Content-type: text/xml;charset="utf-8"',
+            'Content-length: '.strlen($xml_post_string),
+            'SOAPAction: WebServices/'.$method,
         ];
 
         // PHP cURL  for connection
@@ -584,20 +611,19 @@ class ValYouApi
         if ($response === false) {
             throw new \Exception(curl_error($ch), curl_errno($ch));
             $response .= "\nError occoured when connecting to the SMS SOAP Server!";
-            $response .= "\nSoap Exception: " . $exception;
+            $response .= "\nSoap Exception: ".$exception;
             $response .= "\nSOAP Fault: (faultcode: {curl_errno($ch)}, faultstring: {curl_error($ch)})";
             Log::error('CURL reported error: ', $response);
         }
         curl_close($ch);
-        $response1 = str_replace("<soap:Body>", "", $response);
-        $response2 = str_replace("</soap:Body>", "", $response1);
+        $response1 = str_replace('<soap:Body>', '', $response);
+        $response2 = str_replace('</soap:Body>', '', $response1);
         $response = str_replace('xmlns="WebServices"', '', $response2);
+
         return simplexml_load_string($response);
     }
 
     /**
-     * @param $string
-     * @param $method
      * @return string
      */
     public function xmlGenerate($string, $method)
@@ -616,21 +642,21 @@ class ValYouApi
     }
 
     /**
-     * @param $input
      * @return object
      */
     public function topUp($input)
     {
         $sendTransfer = $this->sendTransaction($input);
-        if($sendTransfer['CODE'] == 0):
+        if ($sendTransfer['CODE'] == 0) {
             $sendTransfer['status_code'] = 200;
             $authorizedConfirmed = $this->authorizedConfirmed($sendTransfer);
-        else:
-            $authorizedConfirmed = array(
+        } else {
+            $authorizedConfirmed = [
                 'MESSAGE' => 'Transaction Error',
-                'CODE' => '3007'
-            );
-        endif;
+                'CODE' => '3007',
+            ];
+        }
+
         return (object) array_merge($sendTransfer, $authorizedConfirmed);
     }
 }
