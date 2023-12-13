@@ -22,11 +22,11 @@ class WalletTransferSeeder extends Seeder
                     unset($entry['serviceTypeChild']);
                 }
 
-                $findServiceTypeModel = \Fintech\Business\Facades\Business::serviceType()->list(['service_type_slug'=>$entry['service_type_slug']])->first();
-                if($findServiceTypeModel){
+                $findServiceTypeModel = \Fintech\Business\Facades\Business::serviceType()->list(['service_type_slug' => $entry['service_type_slug']])->first();
+                if ($findServiceTypeModel) {
                     $serviceTypeModel = \Fintech\Business\Facades\Business::serviceType()->update($findServiceTypeModel->id, $entry);
-                }else{
-                   $serviceTypeModel = \Fintech\Business\Facades\Business::serviceType()->create($entry);
+                } else {
+                    $serviceTypeModel = \Fintech\Business\Facades\Business::serviceType()->create($entry);
                 }
 
                 if (! empty($serviceTypeChild)) {
