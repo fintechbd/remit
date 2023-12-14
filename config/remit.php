@@ -55,10 +55,99 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Service Providers
+    |--------------------------------------------------------------------------
+    |
+    | This value will be used across systems where a repository instance is needed
+    */
+    'providers' => [
+        'agrani' => [
+            'mode' => 'sandbox',
+            'driver' => Fintech\Remit\Vendors\AgraniBankApi::class,
+            'live' => [
+                'endpoint' => 'https://fex.agranibank.org/remapiuat',
+                'username' => '7106UAT',
+                'password' => '7106@Pass',
+                'excode' => '7106',
+            ],
+            'sandbox' => [
+                'endpoint' => 'https://fex.agranibank.org/remapiuat',
+                'username' => '7086UAT',
+                'password' => '7086@Pass',
+                'excode' => '7086'
+            ],
+        ],
+        'citybank' => [
+            'mode' => 'sandbox',
+            'driver' => Fintech\Remit\Vendors\CityBankApi::class,
+            'live' => [
+                'endpoint' => 'https://fex.agranibank.org/remapiuat',
+                'username' => '7106UAT',
+                'password' => '7106@Pass',
+                'excode' => '7106',
+            ],
+            'sandbox' => [
+                'endpoint' => 'https://fex.agranibank.org/remapiuat',
+                'username' => '7086UAT',
+                'password' => '7086@Pass',
+                'excode' => '7086'
+            ],
+        ],
+        'emqapi' => [
+            'mode' => 'sandbox',
+            'driver' => Fintech\Remit\Vendors\EmqApi::class,
+            'live' => [
+                'endpoint' => 'https://fex.agranibank.org/remapiuat',
+                'username' => '7106UAT',
+                'password' => '7106@Pass',
+                'excode' => '7106',
+            ],
+            'sandbox' => [
+                'endpoint' => 'https://fex.agranibank.org/remapiuat',
+                'username' => '7086UAT',
+                'password' => '7086@Pass',
+                'excode' => '7086'
+            ],
+        ],
+        'transfast' => [
+            'mode' => 'sandbox',
+            'driver' => Fintech\Remit\Vendors\TransFastApi::class,
+            'live' => [
+                'endpoint' => 'https://fex.agranibank.org/remapiuat',
+                'username' => '7106UAT',
+                'password' => '7106@Pass',
+                'excode' => '7106',
+            ],
+            'sandbox' => [
+                'endpoint' => 'https://fex.agranibank.org/remapiuat',
+                'username' => '7086UAT',
+                'password' => '7086@Pass',
+                'excode' => '7086'
+            ],
+        ],
+        'valyou' => [
+            'mode' => 'sandbox',
+            'driver' => Fintech\Remit\Vendors\ValYouApi::class,
+            'live' => [
+                'endpoint' => 'https://fex.agranibank.org/remapiuat',
+                'username' => '7106UAT',
+                'password' => '7106@Pass',
+                'excode' => '7106',
+            ],
+            'sandbox' => [
+                'endpoint' => 'https://fex.agranibank.org/remapiuat',
+                'username' => '7086UAT',
+                'password' => '7086@Pass',
+                'excode' => '7086'
+            ],
+        ],
+    ],
+    /*
+    |--------------------------------------------------------------------------
     | Repositories
     |--------------------------------------------------------------------------
     |
-    | This value will be used across systems where a repositoy instance is needed
+    | This value will be used across systems where a repository instance is needed
     */
 
     'repositories' => [

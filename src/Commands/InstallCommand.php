@@ -8,12 +8,12 @@ class InstallCommand extends Command
 {
     public $signature = 'remit:install';
 
-    public $description = 'My command';
+    public $description = 'install required fields';
 
     public function handle(): int
     {
-        $this->comment('All done');
 
         return self::SUCCESS;
     }
+
 }
