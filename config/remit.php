@@ -74,7 +74,7 @@ return [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
                 'username' => '7086UAT',
                 'password' => '7086@Pass',
-                'excode' => '7086'
+                'excode' => '7086',
             ],
         ],
         'citybank' => [
@@ -90,7 +90,7 @@ return [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
                 'username' => '7086UAT',
                 'password' => '7086@Pass',
-                'excode' => '7086'
+                'excode' => '7086',
             ],
         ],
         'emqapi' => [
@@ -106,7 +106,7 @@ return [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
                 'username' => '7086UAT',
                 'password' => '7086@Pass',
-                'excode' => '7086'
+                'excode' => '7086',
             ],
         ],
         'transfast' => [
@@ -122,7 +122,7 @@ return [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
                 'username' => '7086UAT',
                 'password' => '7086@Pass',
-                'excode' => '7086'
+                'excode' => '7086',
             ],
         ],
         'valyou' => [
@@ -138,7 +138,7 @@ return [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
                 'username' => '7086UAT',
                 'password' => '7086@Pass',
-                'excode' => '7086'
+                'excode' => '7086',
             ],
         ],
     ],
