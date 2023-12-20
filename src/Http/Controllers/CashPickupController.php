@@ -148,6 +148,12 @@ class CashPickupController extends Controller
 
                 $order_data['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
                 $order_data['order_data']['current_amount'] = ($order_data['order_data']['previous_amount'] + $inputs['converted_currency']);
+                if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                    throw new Exception(__('User Account Balance does not update', [
+                        'current_status' => $cashPickup->currentStatus(),
+                        'target_status' => OrderStatus::Success->value,
+                    ]));
+                }
                 //TODO ALL Beneficiary Data with bank and branch data
                 $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
                 $order_data['order_data']['beneficiary_data'] = $beneficiaryData;
