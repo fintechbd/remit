@@ -4,6 +4,7 @@ namespace Fintech\Remit\Http\Controllers;
 
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Remit\Http\Requests\WalletVerificationRequest;
+use Fintech\Remit\Http\Resources\WalletVerificationResource;
 use Illuminate\Routing\Controller;
 
 class WalletVerificationController extends Controller
@@ -13,7 +14,7 @@ class WalletVerificationController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(WalletVerificationRequest $request)
+    public function __invoke(WalletVerificationRequest $request): \Illuminate\Http\JsonResponse|WalletVerificationResource
     {
 
         try {
@@ -23,14 +24,12 @@ class WalletVerificationController extends Controller
             }
 
             $data = [
-                'data' => [
-                    'name' => 'Bkash',
-                    'account_title' => 'MT TECHNOLOGIES LTD',
-                    'account_no' => $request->input('wallet_no', '01689553434'),
-                ],
+                'name' => 'Bkash',
+                'account_title' => 'MT TECHNOLOGIES LTD',
+                'account_no' => $request->input('wallet_no', '01689553434'),
             ];
 
-            return $this->success($data);
+            return new WalletVerificationResource($data);
 
         } catch (\Exception $exception) {
 
