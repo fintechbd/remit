@@ -111,7 +111,9 @@ class CashPickupController extends Controller
                 $inputs['is_refunded'] = false;
                 $inputs['status'] = OrderStatus::Successful->value;
                 $inputs['risk'] = RiskProfile::Low->value;
+                $inputs['reverse'] = true;
                 $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
+                unset($inputs['reverse']);
                 $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
                 $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
                 $inputs['order_data']['created_by'] = $depositor->name;
@@ -145,7 +147,7 @@ class CashPickupController extends Controller
                 $depositedUpdatedAccount['user_account_data']['available_amount'] = $userUpdatedBalance['current_amount'];
 
                 $order_data['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
-                $order_data['order_data']['current_amount'] = ($order_data['order_data']['previous_amount'] + $inputs['amount']);
+                $order_data['order_data']['current_amount'] = ($order_data['order_data']['previous_amount'] + $inputs['converted_currency']);
                 //TODO ALL Beneficiary Data with bank and branch data
                 $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
                 $order_data['order_data']['beneficiary_data'] = $beneficiaryData;
