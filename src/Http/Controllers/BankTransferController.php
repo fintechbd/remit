@@ -143,7 +143,7 @@ class BankTransferController extends Controller
                 $depositedUpdatedAccount['user_account_data']['available_amount'] = $userUpdatedBalance['current_amount'];
 
                 $order_data['order_data']['previous_amount'] = $depositedAccount->user_account_data['available_amount'];
-                $order_data['order_data']['current_amount'] = ($order_data['order_data']['previous_amount'] + $inputs['converted_currency']);
+                $order_data['order_data']['current_amount'] = ((float) $order_data['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
                 if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'current_status' => $bankTransfer->currentStatus(),
