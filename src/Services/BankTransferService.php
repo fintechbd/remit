@@ -85,7 +85,7 @@ class BankTransferService
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
-            'order_detail_currency' => $data->converted_currency,
+            'converted_currency' => $data->converted_currency,
         ]);
 
         $serviceStatData = $data->order_data['service_stat_data'];
@@ -157,12 +157,14 @@ class BankTransferService
         $userAccountData['current_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
-            'order_detail_currency' => $data->converted_currency,
+            'converted_currency' => $data->converted_currency,
         ]);
 
         $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
-            'order_id' => $data->user_id,
+            'user_id' => $data->user_id,
+            'order_id' => $data->getKey(),
+            'converted_currency' => $data->converted_currency,
         ]);
 
         return $userAccountData;
@@ -184,7 +186,7 @@ class BankTransferService
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
-            'order_detail_currency' => $data->converted_currency,
+            'converted_currency' => $data->converted_currency,
         ]);
 
         $serviceStatData = $data->order_data['service_stat_data'];
@@ -254,12 +256,14 @@ class BankTransferService
         $userAccountData['current_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
-            'order_detail_currency' => $data->converted_currency,
+            'converted_currency' => $data->converted_currency,
         ]);
 
         $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
-            'order_id' => $data->user_id,
+            'user_id' => $data->user_id,
+            'order_id' => $data->getKey(),
+            'converted_currency' => $data->converted_currency,
         ]);
 
         return $userAccountData;
