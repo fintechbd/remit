@@ -108,7 +108,7 @@ class BankTransferController extends Controller
                 $inputs['is_refunded'] = false;
                 $inputs['status'] = OrderStatus::Successful->value;
                 $inputs['risk'] = RiskProfile::Low->value;
-                $inputs['reverse'] = true;
+                $inputs['reverse'] = false;
                 $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
                 unset($inputs['reverse']);
                 $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
