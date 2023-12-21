@@ -2,6 +2,7 @@
 
 namespace Fintech\Remit;
 
+use Fintech\Remit\Commands\AgraniInstallCommand;
 use Fintech\Remit\Commands\InstallCommand;
 use Fintech\Remit\Commands\RemitCommand;
 use Illuminate\Support\ServiceProvider;
@@ -49,6 +50,7 @@ class RemitServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 InstallCommand::class,
+                AgraniInstallCommand::class,
                 RemitCommand::class,
             ]);
         }

@@ -46,7 +46,7 @@ class CityBankApi implements BankTransfer
      *
      * @throws \Exception
      */
-    public function doAuthenticate()
+    private function doAuthenticate()
     {
         $return = 'AUTH_FAILED';
         $xml_string = '
@@ -656,5 +656,52 @@ class CityBankApi implements BankTransfer
         }
 
         return $returnValue;
+    }
+
+    /**
+     * Execute the transfer operation
+     *
+     * @param array $orderInfo
+     * @return mixed
+     */
+    public function makeTransfer(array $orderInfo): mixed
+    {
+        // TODO: Implement makeTransfer() method.
+    }
+
+    /**
+     * @param array $orderInfo
+     * @return mixed
+     */
+    public function transferStatus(array $orderInfo): mixed
+    {
+        // TODO: Implement transferStatus() method.
+    }
+
+    /**
+     * @param array $orderInfo
+     * @return mixed
+     */
+    public function cancelTransfer(array $orderInfo): mixed
+    {
+        // TODO: Implement cancelTransfer() method.
+    }
+
+    /**
+     * @param array $accountInfo
+     * @return mixed
+     */
+    public function verifyAccount(array $accountInfo): mixed
+    {
+        // TODO: Implement verifyAccount() method.
+    }
+
+    /**
+     * @param array $accountInfo
+     * @return mixed
+     */
+    public function vendorBalance(array $accountInfo): mixed
+    {
+        // TODO: Implement vendorBalance() method.
     }
 }

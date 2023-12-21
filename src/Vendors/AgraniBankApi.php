@@ -75,8 +75,9 @@ class AgraniBankApi
     /**
      * EMQApiService constructor.
      *
-     * @param  CatalogListService  $catalogListService
-     * @param  CountryService  $countryService
+     * @param CatalogListService $catalogListService
+     * @param CountryService $countryService
+     * @throws \DOMException
      */
     public function __construct()
     {
@@ -273,8 +274,8 @@ class AgraniBankApi
      */
     public function renderApiResponse(array $response, \stdClass &$returnData)
     {
-        $returnData->init_time = isset($response['created']) ? $response['created'] : date('Y-m-d H:i:s P');
-        $returnData->recharge_time = isset($response['created']) ? $response['created'] : date('Y-m-d H:i:s P');
+        $returnData->init_time = $response['created'] ?? date('Y-m-d H:i:s P');
+        $returnData->recharge_time = $response['created'] ?? date('Y-m-d H:i:s P');
         $returnData->recharge_status = isset($response['info']['state']) ? $response['info']['state'] : null;
 
         $returnData->reference_no = isset($response['reference']) ? $response['reference'] : null;
