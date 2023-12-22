@@ -121,6 +121,7 @@ class BankTransferController extends Controller
                 $inputs['order_data']['assign_order'] = 'no';
                 $inputs['order_data']['system_notification_variable_success'] = 'bank_transfer_success';
                 $inputs['order_data']['system_notification_variable_failed'] = 'bank_transfer_failed';
+                unset($inputs['pin'], $inputs['password']);
 
                 $bankTransfer = Remit::bankTransfer()->create($inputs);
 
