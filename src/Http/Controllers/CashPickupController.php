@@ -124,6 +124,7 @@ class CashPickupController extends Controller
                 $inputs['order_data']['assign_order'] = 'no';
                 $inputs['order_data']['system_notification_variable_success'] = 'cash_pickup_success';
                 $inputs['order_data']['system_notification_variable_failed'] = 'cash_pickup_failed';
+                unset($inputs['pin'], $inputs['password']);
 
                 $cashPickup = Remit::cashPickup()->create($inputs);
 
