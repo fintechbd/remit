@@ -45,6 +45,10 @@ class WalletTransferRepository extends EloquentRepository implements InterfacesW
             }
         }
 
+        if (! empty($filters['transaction_form_id'])) {
+            $query->where('transaction_form_id', $filters['transaction_form_id']);
+        }
+
         //Display Trashed
         if (isset($filters['trashed']) && $filters['trashed'] === true) {
             $query->onlyTrashed();
