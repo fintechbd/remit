@@ -75,8 +75,9 @@ class AgraniBankApi
     /**
      * EMQApiService constructor.
      *
-     * @param CatalogListService $catalogListService
-     * @param CountryService $countryService
+     * @param  CatalogListService  $catalogListService
+     * @param  CountryService  $countryService
+     *
      * @throws \DOMException
      */
     public function __construct()

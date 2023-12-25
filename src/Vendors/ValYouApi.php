@@ -643,6 +643,7 @@ class ValYouApi
 
     /**
      * @return object
+     *
      * @throws \Exception
      */
     public function topUp($input)
