@@ -362,6 +362,40 @@ class BankTransferController extends Controller
      * @param string|int $id
      * @return JsonResponse
      */
+    public function fetchAssignableVendors(string|int $id): JsonResponse
+    {
+        try {
+
+            $bankTransfer = Remit::bankTransfer()->find($id, true);
+
+            if (! $bankTransfer) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            }
+
+            if (! Remit::bankTransfer()->restore($id)) {
+
+                throw (new RestoreOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            }
+
+            return $this->restored(__('core::messages.resource.restored', ['model' => 'Bank Transfer']));
+
+        } catch (ModelNotFoundException $exception) {
+
+            return $this->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return $this->failed($exception->getMessage());
+        }
+    }
+
+    /**
+     * @lrd:start
+     * Assign vendor to a specified *BankTransfer* resource from systems.
+     * @lrd:end
+     * @param string|int $id
+     * @return JsonResponse
+     */
     public function assignVendor(string|int $id): JsonResponse
     {
         try {
