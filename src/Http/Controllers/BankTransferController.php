@@ -358,9 +358,8 @@ class BankTransferController extends Controller
     /**
      * @lrd:start
      * Assign vendor to a specified *BankTransfer* resource from systems.
+     *
      * @lrd:end
-     * @param string|int $id
-     * @return JsonResponse
      */
     public function fetchAssignableVendors(string|int $id): JsonResponse
     {
@@ -392,9 +391,8 @@ class BankTransferController extends Controller
     /**
      * @lrd:start
      * Assign vendor to a specified *BankTransfer* resource from systems.
+     *
      * @lrd:end
-     * @param string|int $id
-     * @return JsonResponse
      */
     public function assignVendor(string|int $id): JsonResponse
     {
