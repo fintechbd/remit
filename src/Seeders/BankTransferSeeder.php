@@ -22,11 +22,17 @@ class BankTransferSeeder extends Seeder
                     unset($entry['serviceTypeChild']);
                 }
 
-                $serviceTypeModel = \Fintech\Business\Facades\Business::serviceType()->create($entry);
+                $findServiceTypeModel = \Fintech\Business\Facades\Business::serviceType()->create($entry);
+
+                if ($findServiceTypeModel) {
+                    $serviceTypeModel = \Fintech\Business\Facades\Business::serviceType()->update($findServiceTypeModel->getKey(), $entry);
+                } else {
+                    $serviceTypeModel = \Fintech\Business\Facades\Business::serviceType()->create($entry);
+                }
 
                 if (! empty($serviceTypeChild)) {
                     array_walk($serviceTypeChild, function ($item) use (&$serviceTypeModel) {
-                        $item['service_type_parent_id'] = $serviceTypeModel->id;
+                        $item['service_type_parent_id'] = $serviceTypeModel->getKey();
                         \Fintech\Business\Facades\Business::serviceType()->create($item);
                     });
                 }
