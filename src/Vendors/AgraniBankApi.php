@@ -269,8 +269,8 @@ class AgraniBankApi
     /**
      * Render Emq Response to pointed StdClass
      *
-     * @param  array  $response emq response
-     * @param  \stdClass  $returnData class that will get rendered response
+     * @param  array  $response  emq response
+     * @param  \stdClass  $returnData  class that will get rendered response
      * @return void
      */
     public function renderApiResponse(array $response, \stdClass &$returnData)

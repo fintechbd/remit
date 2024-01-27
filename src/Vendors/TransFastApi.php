@@ -406,7 +406,7 @@ class TransFastApi
      * Note, a Payer ID is not required for these countries when creating a transaction
      * Get available cash pickup country
      *
-     * @param $country
+     * @param  $country
      * @return array
      *
      * @throws \Exception
@@ -599,7 +599,7 @@ class TransFastApi
     /**
      * Retrieve a catalog of complaint types that should be used when creating a complaint
      *
-     * @param $onlyForCustomerCare -- i.e. true or false
+     * @param  $onlyForCustomerCare  -- i.e. true or false
      * @return array
      *
      * @throws \Exception

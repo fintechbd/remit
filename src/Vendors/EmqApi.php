@@ -167,8 +167,8 @@ class EmqApi
     /**
      * Render Emq Response to pointed StdClass
      *
-     * @param  array  $response emq response
-     * @param  \stdClass  $returnData class that will get rendered response
+     * @param  array  $response  emq response
+     * @param  \stdClass  $returnData  class that will get rendered response
      * @return void
      */
     public function renderApiResponse(array $response, \stdClass &$returnData)
@@ -352,7 +352,7 @@ class EmqApi
     /**
      * Convert Country full into ISO 3 value
      *
-     * @param  string|null  $country country full name
+     * @param  string|null  $country  country full name
      * @return string|null country iso3 country code
      */
     public function getCountryISO3FromName(?string $country = null)
@@ -365,7 +365,7 @@ class EmqApi
     /**
      * Get Catalog Emq Code of catalog
      *
-     * @param  string|null  $catalog country full name
+     * @param  string|null  $catalog  country full name
      * @return string|null country iso3 country code
      */
     public function getCatalogeEmqCodeFromName(string $catalog, string $type)
@@ -585,7 +585,7 @@ class EmqApi
     /**
      * Retrieve a daily statement for a given day.
      *
-     * @param  string  $date 'YYYY-MM-DD' format date string
+     * @param  string  $date  'YYYY-MM-DD' format date string
      * @return array
      *
      * @throws Exception
@@ -602,7 +602,7 @@ class EmqApi
      * Retrieve a monthly statement up to a given day.
      *  Example 2021-04-01
      *
-     * @param  string  $date 'YYYY-MM-DD' format date string
+     * @param  string  $date  'YYYY-MM-DD' format date string
      *
      * @throws Exception
      */
@@ -617,9 +617,9 @@ class EmqApi
     /**
      * Retrieve the settlement report for a given date and a given destination country
      *
-     * @param  string  $param ['source_country'] source country ISO3
-     * @param  string  $param ['dest_country'] source country ISO3
-     * @param  string  $param ['date'] 'YYYY-MM-DD' format date string
+     * @param  string  $param  ['source_country'] source country ISO3
+     * @param  string  $param  ['dest_country'] source country ISO3
+     * @param  string  $param  ['date'] 'YYYY-MM-DD' format date string
      *
      * @throws Exception
      */
@@ -634,7 +634,7 @@ class EmqApi
     /**
      * List or search senders
      *
-     * @param  array  $params [sender_id, name, mobile_number, id_number, page=1, page_size = 20]
+     * @param  array  $params  [sender_id, name, mobile_number, id_number, page=1, page_size = 20]
      * @return array
      *
      * @throws Exception
@@ -657,7 +657,7 @@ class EmqApi
     /**
      * Retrieve a sender
      *
-     * @param  string  $senderId string
+     * @param  string  $senderId  string
      *
      * @throws Exception
      */
@@ -1059,7 +1059,7 @@ class EmqApi
     /**
      * List transfers, oldest first.
      *
-     * @param  array  $data [page, page_size, start_datetime, end_datetime]
+     * @param  array  $data  [page, page_size, start_datetime, end_datetime]
      * @return array
      *
      * @throws Exception
@@ -1073,7 +1073,7 @@ class EmqApi
     /*********************************** Transaction ***************************************/
 
     /**
-     * @param  array  $reference MCM6196575170666
+     * @param  array  $reference  MCM6196575170666
      * @return array|mixed
      *
      * @throws Exception

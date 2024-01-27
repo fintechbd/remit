@@ -321,7 +321,7 @@ class CityBankApi implements BankTransfer
     /**
      * Do bKash transfer service will help you to send a bkash transaction
      *
-     * @param $input_data
+     * @param  $input_data
      * @return mixed
      *
      * @throws \Exception
@@ -548,7 +548,7 @@ class CityBankApi implements BankTransfer
     /**
      * Do nagad transfer service will help you to send a nagad transaction
      *
-     * @param $input_data
+     * @param  $input_data
      * @return mixed
      *
      * @throws \Exception
