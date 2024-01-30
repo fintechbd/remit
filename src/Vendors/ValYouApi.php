@@ -102,12 +102,12 @@ class ValYouApi
     /**
      * Call this method to Get the Static Data like Countries, list Payment Mode, Get Payout Agent List
      *
-     * @param $input_data
-     * CTY (Country), OCC (Occupation), SOF (Source of Fund), REL (Relationship),
-     * PRO (Purpose of Remittance), DOC (Customer Document ID Type)
-     * PTY (Payment method), AOD (Bank Name (Account Deposit)) are use ADDITIONAL_FIELD1: Destination country Name
-     * AGT (Cash Pickup Payout Payee) are use ADDITIONAL_FIELD1: Destination country Name and
-     * ADDITIONAL_FIELD2: Payment Mode (C: cash pickup | B: Account Deposit| H: Home Delivery)
+     * @param  $input_data
+     *                     CTY (Country), OCC (Occupation), SOF (Source of Fund), REL (Relationship),
+     *                     PRO (Purpose of Remittance), DOC (Customer Document ID Type)
+     *                     PTY (Payment method), AOD (Bank Name (Account Deposit)) are use ADDITIONAL_FIELD1: Destination country Name
+     *                     AGT (Cash Pickup Payout Payee) are use ADDITIONAL_FIELD1: Destination country Name and
+     *                     ADDITIONAL_FIELD2: Payment Mode (C: cash pickup | B: Account Deposit| H: Home Delivery)
      * @return mixed
      *
      * @throws \Exception
@@ -182,8 +182,8 @@ class ValYouApi
     /**
      * Partner call GetEXRateCommand get the latest Exchange Rate and Service Charges.
      *
-     * @param $input_data
-     * LOCATION_ID (location_id), TRANSFERAMOUNT (transfer_amount), PAYOUT_COUNTRY (payout_country)
+     * @param  $input_data
+     *                     LOCATION_ID (location_id), TRANSFERAMOUNT (transfer_amount), PAYOUT_COUNTRY (payout_country)
      * @return mixed
      *
      * @throws \Exception
@@ -197,7 +197,7 @@ class ValYouApi
         if ($input_data['recipient_type_name'] == 'Cash') {
             $location_id = '96700015P39319013P743723';
             $this->payment_mode = 'C';
-        //$this->calculated_by_sending_payout_currency = 'C';
+            //$this->calculated_by_sending_payout_currency = 'C';
         } elseif ($input_data['recipient_type_name'] == 'Wallet') {
             $location_id = '96700241P96836978';
         }
@@ -285,7 +285,7 @@ class ValYouApi
         if ($input_data['recipient_type_name'] == 'Cash') {
             $location_id = is_null($input_data['location_id']) ? $input_data['location_id'] : '96700015P39319013P743723';
             $this->payment_mode = 'C';
-        //$this->calculated_by_sending_payout_currency = 'C';
+            //$this->calculated_by_sending_payout_currency = 'C';
         } elseif ($input_data['recipient_type_name'] == 'Wallet') {
             $location_id = is_null($input_data['location_id']) ? $input_data['location_id'] : '96700241P96836978';
         }
@@ -392,8 +392,8 @@ class ValYouApi
     /**
      * This method is used the check current status of transaction by PINNO or by Agent TXN ID.
      *
-     * @param $input_data
-     * PINNO (PINNO), AGENT_TXNID (AGENT_TXNID)
+     * @param  $input_data
+     *                     PINNO (PINNO), AGENT_TXNID (AGENT_TXNID)
      * @return mixed
      *
      * @throws \Exception
@@ -423,14 +423,14 @@ class ValYouApi
     /**
      * Call this method to view send/paid and the status of Transaction report.
      *
-     * @param $input_data
-     * REPORT_TYPE ($input_data['report_type']) data are
-     * A: List ALL TXN by SENT Date wise (including Cancel, PAID, UN-Paid TXN)
-     * S: List ALL TXN by SENT Date wise exclude CANCEL TXN and included PAID, UN-PAID
-     * P: List all Paid TXN by PAID Date wise
-     * C: List all Cancelled TXN by Cancel Date wise
-     * U: List all the TXN Sent Date wise with UN-PAID TXN only
-     * FROM_DATE ($input_data['from_date']), TO_DATE ($input_data['to_date'])
+     * @param  $input_data
+     *                     REPORT_TYPE ($input_data['report_type']) data are
+     *                     A: List ALL TXN by SENT Date wise (including Cancel, PAID, UN-Paid TXN)
+     *                     S: List ALL TXN by SENT Date wise exclude CANCEL TXN and included PAID, UN-PAID
+     *                     P: List all Paid TXN by PAID Date wise
+     *                     C: List all Cancelled TXN by Cancel Date wise
+     *                     U: List all the TXN Sent Date wise with UN-PAID TXN only
+     *                     FROM_DATE ($input_data['from_date']), TO_DATE ($input_data['to_date'])
      * @return mixed
      *
      * @throws \Exception
@@ -493,8 +493,8 @@ class ValYouApi
     }
 
     /**
-     * @param $input_data
-     * PAYOUT_COUNTRY ($input_data['country_name'])
+     * @param  $input_data
+     *                     PAYOUT_COUNTRY ($input_data['country_name'])
      * @return mixed
      *
      * @throws \Exception
@@ -550,11 +550,11 @@ class ValYouApi
     /**
      * Call this method to get the notification of the amended transaction.
      *
-     * @param $input_data
-     * SHOW_INCREMENTAL ($input_data['show_incremental']) data are
-     * "Y" = List report incremental basis
-     * "N" = List report within date range
-     * If "y" then FROM_DATE and TO_DATE not required
+     * @param  $input_data
+     *                     SHOW_INCREMENTAL ($input_data['show_incremental']) data are
+     *                     "Y" = List report incremental basis
+     *                     "N" = List report within date range
+     *                     If "y" then FROM_DATE and TO_DATE not required
      * @return mixed
      *
      * @throws \Exception
