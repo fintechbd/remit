@@ -4,6 +4,8 @@ namespace Fintech\Remit\Repositories\Eloquent;
 
 use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Remit\Interfaces\CashPickupRepository as InterfacesCashPickupRepository;
+use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +14,7 @@ use InvalidArgumentException;
 /**
  * Class CashPickupRepository
  */
-class CashPickupRepository extends EloquentRepository implements InterfacesCashPickupRepository
+class CashPickupRepository extends OrderRepository implements InterfacesCashPickupRepository
 {
     public function __construct()
     {
@@ -30,35 +32,11 @@ class CashPickupRepository extends EloquentRepository implements InterfacesCashP
      * filtered options
      *
      * @return Paginator|Collection
+     * @throws BindingResolutionException
      */
     public function list(array $filters = [])
     {
-        $query = $this->model->newQuery();
-
-        //Searching
-        if (! empty($filters['search'])) {
-            if (is_numeric($filters['search'])) {
-                $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
-            } else {
-                $query->where('name', 'like', "%{$filters['search']}%");
-                $query->orWhere('cash_pickup_data', 'like', "%{$filters['search']}%");
-            }
-        }
-
-        if (! empty($filters['transaction_form_id'])) {
-            $query->where('transaction_form_id', $filters['transaction_form_id']);
-        }
-
-        //Display Trashed
-        if (isset($filters['trashed']) && $filters['trashed'] === true) {
-            $query->onlyTrashed();
-        }
-
-        //Handle Sorting
-        $query->orderBy($filters['sort'] ?? $this->model->getKeyName(), $filters['dir'] ?? 'asc');
-
-        //Execute Output
-        return $this->executeQuery($query, $filters);
+        return parent::list($filters);
 
     }
 }

@@ -2,19 +2,11 @@
 
 namespace Fintech\Remit\Models;
 
-use Fintech\Core\Traits\AuditableTrait;
-use Fintech\Remit\Traits\AuthRelations;
-use Fintech\Remit\Traits\BusinessRelations;
-use Fintech\Remit\Traits\MetaDataRelations;
-use Illuminate\Database\Eloquent\Model;
+use Fintech\Transaction\Models\Order;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class BankTransfer extends Model
+class BankTransfer extends Order
 {
-    use AuditableTrait;
-    use AuthRelations;
-    use BusinessRelations;
-    use MetaDataRelations;
     use SoftDeletes;
 
     /*
@@ -23,28 +15,12 @@ class BankTransfer extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'orders';
-
-    protected $primaryKey = 'id';
-
-    protected $guarded = ['id'];
-
-    protected $appends = ['links'];
-
-    protected $casts = ['order_data' => 'array', 'restored_at' => 'datetime'];
-
-    protected $hidden = ['creator_id', 'editor_id', 'destroyer_id', 'restorer_id'];
-
     /*
     |--------------------------------------------------------------------------
     | FUNCTIONS
     |--------------------------------------------------------------------------
     */
 
-    public function currentStatus(): mixed
-    {
-        return $this->status;
-    }
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
@@ -70,20 +46,9 @@ class BankTransfer extends Model
     {
         $primaryKey = $this->getKey();
 
-        $links = [
+        return [
             'show' => action_link(route('remit.bank-transfers.show', $primaryKey), __('core::messages.action.show'), 'get'),
-            //            'update' => action_link(route('remit.bank-transfers.update', $primaryKey), __('core::messages.action.update'), 'put'),
-            //            'destroy' => action_link(route('remit.bank-transfers.destroy', $primaryKey), __('core::messages.action.destroy'), 'delete'),
-            //            'restore' => action_link(route('remit.bank-transfers.restore', $primaryKey), __('core::messages.action.restore'), 'post'),
         ];
-
-        //        if ($this->getAttribute('deleted_at') == null) {
-        //            unset($links['restore']);
-        //        } else {
-        //            unset($links['destroy']);
-        //        }
-
-        return $links;
     }
 
     /*
