@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Repositories\Eloquent;
 
-use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Remit\Interfaces\CashPickupRepository as InterfacesCashPickupRepository;
 use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -32,6 +31,7 @@ class CashPickupRepository extends OrderRepository implements InterfacesCashPick
      * filtered options
      *
      * @return Paginator|Collection
+     *
      * @throws BindingResolutionException
      */
     public function list(array $filters = [])

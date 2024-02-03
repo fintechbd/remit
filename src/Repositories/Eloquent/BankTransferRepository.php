@@ -2,12 +2,8 @@
 
 namespace Fintech\Remit\Repositories\Eloquent;
 
-use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Remit\Interfaces\BankTransferRepository as InterfacesBankTransferRepository;
 use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Contracts\Pagination\Paginator;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
