@@ -5,7 +5,6 @@ namespace Fintech\Remit\Repositories\Eloquent;
 use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Remit\Interfaces\BankTransferRepository as InterfacesBankTransferRepository;
 use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
-use http\Params;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -27,6 +26,4 @@ class BankTransferRepository extends OrderRepository implements InterfacesBankTr
 
         $this->model = $model;
     }
-
-AX_196 AX) Am
 }
