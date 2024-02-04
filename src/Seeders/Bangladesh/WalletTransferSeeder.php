@@ -58,8 +58,8 @@ class WalletTransferSeeder extends Seeder
 
     private function serviceType(): array
     {
-        $image_svg = __DIR__ . '/../../resources/img/service_type/logo_svg/';
-        $image_png = __DIR__ . '/../../resources/img/service_type/logo_png/';
+        $image_svg = __DIR__ . '/../../../resources/img/service_type/logo_svg/';
+        $image_png = __DIR__ . '/../../../resources/img/service_type/logo_png/';
 
         return [
             [
@@ -153,8 +153,8 @@ class WalletTransferSeeder extends Seeder
 
     private function service(): array
     {
-        $image_svg = __DIR__ . '/../../resources/img/service/logo_svg/';
-        $image_png = __DIR__ . '/../../resources/img/service/logo_png/';
+        $image_svg = __DIR__ . '/../../../resources/img/service/logo_svg/';
+        $image_png = __DIR__ . '/../../../resources/img/service/logo_png/';
 
         return [
             ['service_type_id' => \Fintech\Business\Facades\Business::serviceType()->list(['service_type_slug' => 'mfs_bkash'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'bKash',
