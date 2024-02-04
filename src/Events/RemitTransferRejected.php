@@ -15,8 +15,8 @@ class RemitTransferRejected
 
     /**
      * Create a new event instance.
-     * @param \Fintech\Remit\Models\BankTransfer|\Fintech\Remit\Models\CashPickup|\Fintech\Remit\Models\WalletTransfer
      *
+     * @param \Fintech\Remit\Models\BankTransfer|\Fintech\Remit\Models\CashPickup|\Fintech\Remit\Models\WalletTransfer
      */
     public function __construct($transfer)
     {
