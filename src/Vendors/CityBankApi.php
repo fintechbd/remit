@@ -161,6 +161,8 @@ class CityBankApi implements BankTransfer
     /**
      * Get transaction status service will help you to get the transaction status
      *
+     * @param  $inputs_data
+     *                      reference_no like system transaction number
      * @return mixed
      *
      * @throws \Exception
@@ -193,6 +195,8 @@ class CityBankApi implements BankTransfer
     /**
      * Do amendment or cancel service will help you to send the transaction cancel/amendment request
      *
+     * @param  $inputData
+     *                    reference_no like system transaction number, amend_query like cancel/amendment
      * @return mixed
      *
      * @throws \Exception
@@ -256,6 +260,9 @@ class CityBankApi implements BankTransfer
     /**
      * bKash customer validation service will help you to validate the beneficiary bkash number before send the transaction
      *
+     * @param  $inputData
+     *                    receiver_first_name like receiver name
+     *                    bank_account_number like receiver bkash number or wallet number
      * @return mixed
      *
      * @throws \Exception
@@ -289,6 +296,8 @@ class CityBankApi implements BankTransfer
     /**
      * bKash customer validation service will help you to validate the beneficiary bkash number before send the transaction
      *
+     * @param  $inputData
+     *                    bank_account_number like receiver bkash number or wallet number
      * @return mixed
      *
      * @throws \Exception
@@ -385,6 +394,8 @@ class CityBankApi implements BankTransfer
     /**
      * This service call will provide you the bkash transaction status.
      *
+     * @param  $inputData
+     *                    reference_no like system transaction number
      * @return mixed
      *
      * @throws \Exception
@@ -514,6 +525,9 @@ class CityBankApi implements BankTransfer
     /**
      * nagad customer validation service will help you to validate the beneficiary nagad number before send the transaction
      *
+     * @param  $inputData
+     *                    receiver_first_name like receiver name
+     *                    bank_account_number like receiver nagad number or wallet number
      * @return mixed
      *
      * @throws \Exception
@@ -613,6 +627,8 @@ class CityBankApi implements BankTransfer
     /**
      * This service call will provide you the nagad transaction status.
      *
+     * @param  $inputData
+     *                    txnNo like system transaction number
      * @return mixed
      *
      * @throws \Exception

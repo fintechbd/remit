@@ -646,6 +646,19 @@ class EmqApi
     }
 
     /**
+     * @param
+     * "sender_id": "1234567890",
+     * "segment": "individual",
+     * "legal_name_first": "John",
+     * "legal_name_last": "Smith",
+     * "mobile_number": "+886965716066",
+     * "nationality": "TWN",
+     * "date_of_birth": "1970-01-01",
+     * "gender": "M",
+     * "id_number": "A199267867",
+     * "id_type": "national",
+     * "id_country": "TWN"
+     *
      * @throws Exception
      */
     public function createSender(array $data)
@@ -707,6 +720,13 @@ class EmqApi
     }
 
     /**
+     * @param  array  $data
+     *                       ["country": "PHL",
+     *                       "segment": "individual",
+     *                       "legal_name_first": "Joe P.",
+     *                       "legal_name_last": "Smith",
+     *                       "mobile_number": "+85212345678"]
+     *
      * @throws Exception
      */
     public function createRecipient(string $senderId, array $data)
@@ -733,6 +753,12 @@ class EmqApi
     /**
      * Update a recipient.
      *
+     * @param  array  $data
+     *                       ["country": "PHL",
+     *                       "segment": "individual",
+     *                       "legal_name_first": "Joe P.",
+     *                       "legal_name_last": "Smith",
+     *                       "mobile_number": "+85212345678"]
      * @return array|mixed
      *
      * @throws Exception
@@ -746,6 +772,15 @@ class EmqApi
     /**
      * Verify a recipient.
      *
+     * @param  array  $data
+     *                       {
+     *                       "type": "bank_account",
+     *                       "country": "CHN",
+     *                       "legal_name_first": "hui",
+     *                       "legal_name_last": "lu",
+     *                       "mobile_number": "+8613800001111",
+     *                       "account_number": "6217900100010200001"
+     *                       }
      * @return array
      *
      * @throws Exception

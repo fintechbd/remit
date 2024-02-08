@@ -13,6 +13,7 @@ use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
+use Fintech\Remit\Events\RemitTransferRequested;
 use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\ImportBankTransferRequest;
 use Fintech\Remit\Http\Requests\IndexBankTransferRequest;
@@ -157,6 +158,8 @@ class BankTransferController extends Controller
 
                 Remit::bankTransfer()->update($bankTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
+
+                event(new RemitTransferRequested('bank_deposit', $bankTransfer));
 
                 DB::commit();
 

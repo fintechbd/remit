@@ -2,17 +2,15 @@
 
 namespace Fintech\Remit\Repositories\Eloquent;
 
-use Fintech\Core\Repositories\EloquentRepository;
 use Fintech\Remit\Interfaces\BankTransferRepository as InterfacesBankTransferRepository;
-use Illuminate\Contracts\Pagination\Paginator;
-use Illuminate\Database\Eloquent\Collection;
+use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
 /**
  * Class BankTransferRepository
  */
-class BankTransferRepository extends EloquentRepository implements InterfacesBankTransferRepository
+class BankTransferRepository extends OrderRepository implements InterfacesBankTransferRepository
 {
     public function __construct()
     {
@@ -23,42 +21,5 @@ class BankTransferRepository extends EloquentRepository implements InterfacesBan
         }
 
         $this->model = $model;
-    }
-
-    /**
-     * return a list or pagination of items from
-     * filtered options
-     *
-     * @return Paginator|Collection
-     */
-    public function list(array $filters = [])
-    {
-        $query = $this->model->newQuery();
-
-        //Searching
-        if (isset($filters['search']) && ! empty($filters['search'])) {
-            if (is_numeric($filters['search'])) {
-                $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
-            } else {
-                $query->where('name', 'like', "%{$filters['search']}%");
-                $query->orWhere('bank_transfer_data', 'like', "%{$filters['search']}%");
-            }
-        }
-
-        if (! empty($filters['transaction_form_id'])) {
-            $query->where('transaction_form_id', $filters['transaction_form_id']);
-        }
-
-        //Display Trashed
-        if (isset($filters['trashed']) && ! empty($filters['trashed'])) {
-            $query->onlyTrashed();
-        }
-
-        //Handle Sorting
-        $query->orderBy($filters['sort'] ?? $this->model->getKeyName(), $filters['dir'] ?? 'asc');
-
-        //Execute Output
-        return $this->executeQuery($query, $filters);
-
     }
 }
