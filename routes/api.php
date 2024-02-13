@@ -17,7 +17,7 @@ if (Config::get('fintech.remit.enabled')) {
     Route::prefix('remit')->name('remit.')
         ->middleware(config('fintech.auth.middleware'))
         ->group(function () {
-            if(\Fintech\Core\Facades\Core::packageExists('Transaction')) {
+            if (\Fintech\Core\Facades\Core::packageExists('Transaction')) {
                 Route::get('assignable-vendors/{order_id}',
                     [\Fintech\Remit\Http\Controllers\AssignVendorController::class, 'available'])
                     ->name('assignable-vendors.available');

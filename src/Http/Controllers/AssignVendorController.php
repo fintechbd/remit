@@ -4,12 +4,9 @@ namespace Fintech\Remit\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Exception;
-use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Traits\ApiResponseTrait;
-use Fintech\Remit\Facades\Remit;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AssignVendorController extends Controller
@@ -31,7 +28,7 @@ class AssignVendorController extends Controller
 
             $serviceVendors = \Fintech\Business\Facades\Business::serviceVendor()->list([
                 'service_id_array' => [$order->service_id],
-                'paginate' => false
+                'paginate' => false,
             ]);
             dd($serviceVendors);
 
