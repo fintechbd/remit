@@ -28,7 +28,8 @@ class CityBankApi implements BankTransfer
      */
     public function __construct()
     {
-        $this->config = config('city-bank');
+        $this->config = config('fintech.remit.providers.citybank');
+
         if ($this->config['mode'] === 'sandbox') {
             $this->apiUrl = 'https://'.$this->config[$this->status]['app_host'].'/nrb_api_test/dynamicApi.php?wsdl';
             $this->status = 'sandbox';
@@ -430,7 +431,7 @@ class CityBankApi implements BankTransfer
      *
      * @throws \Exception
      */
-    public function connectionCheck($xml_post_string, $method)
+    private function connectionCheck($xml_post_string, $method)
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
         Log::info($method.'<br>'.$xml_string);

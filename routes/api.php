@@ -17,18 +17,14 @@ if (Config::get('fintech.remit.enabled')) {
     Route::prefix('remit')->name('remit.')
         ->middleware(config('fintech.auth.middleware'))
         ->group(function () {
-
+            if(\Fintech\Core\Facades\Core::packageExists('Transaction')) {
+                Route::get('assignable-vendors/{order_id}',
+                    [\Fintech\Remit\Http\Controllers\AssignVendorController::class, 'available'])
+                    ->name('assignable-vendors.available');
+            }
             Route::apiResource('bank-transfers', \Fintech\Remit\Http\Controllers\BankTransferController::class)->except('update', 'destroy');
-            //Route::post('bank-transfers/{bank_transfer}/restore', [\Fintech\Remit\Http\Controllers\BankTransferController::class, 'restore'])->name('bank-transfers.restore');
-            Route::post('bank-transfers/{bank_transfer}/assign-vendor', [\Fintech\Remit\Http\Controllers\BankTransferController::class, 'assignVendor'])->name('bank-transfers.assign-vendor');
-
             Route::apiResource('cash-pickups', \Fintech\Remit\Http\Controllers\CashPickupController::class)->except('update', 'destroy');
-            //Route::post('cash-pickups/{cash_pickup}/restore', [\Fintech\Remit\Http\Controllers\CashPickupController::class, 'restore'])->name('cash-pickups.restore');
-            Route::post('cash-pickups/{cash_pickup}/assign-vendor', [\Fintech\Remit\Http\Controllers\CashPickupController::class, 'assignVendor'])->name('cash-pickups.assign-vendor');
-
             Route::apiResource('wallet-transfers', \Fintech\Remit\Http\Controllers\WalletTransferController::class)->except('update', 'destroy');
-            //Route::post('wallet-transfers/{wallet_transfer}/restore', [\Fintech\Remit\Http\Controllers\WalletTransferController::class, 'restore'])->name('wallet-transfers.restore');
-            Route::post('wallet-transfers/{wallet_transfer}/assign-vendor', [\Fintech\Remit\Http\Controllers\WalletTransferController::class, 'assignVendor'])->name('wallet-transfers.assign-vendor');
 
             Route::post('wallet-verification', \Fintech\Remit\Http\Controllers\WalletVerificationController::class)->name('wallet-verification');
 
