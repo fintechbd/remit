@@ -5,9 +5,14 @@ namespace Fintech\Remit\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Exception;
 use Fintech\Core\Traits\ApiResponseTrait;
+use Fintech\Remit\Facades\Remit;
+use Fintech\Remit\Http\Requests\AssignableVendorInfoRequest;
+use Fintech\Remit\Http\Resources\AssignableVendorCollection;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AssignVendorController extends Controller
 {
@@ -16,10 +21,9 @@ class AssignVendorController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function available(string $id): \Illuminate\Http\JsonResponse|\Fintech\Remit\Http\Resources\AssignableVendorCollection
+    public function available(string $id): JsonResponse|AssignableVendorCollection
     {
         try {
-
             $order = Transaction::order()->find($id);
 
             if (! $order) {
@@ -32,7 +36,7 @@ class AssignVendorController extends Controller
                 'paginate' => false,
             ]);
 
-            return new \Fintech\Remit\Http\Resources\AssignableVendorCollection($serviceVendors);
+            return new AssignableVendorCollection($serviceVendors);
 
         } catch (ModelNotFoundException $exception) {
 
@@ -47,9 +51,46 @@ class AssignVendorController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function vendor(AssignableVendorInfoRequest $request):JsonResponse
     {
-        //
+        try {
+            $order = Transaction::order()->find($request->input('order_id'));
+
+            if (! $order) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $request->input('order_id'));
+            }
+
+            $availableVendors = config('fintech.remit.providers');
+
+            if (!array_key_exists($request->input('vendor_slug'), $availableVendors)) {
+                throw new \ErrorException('Service Vendor is not available on the configuration.');
+            }
+
+            $jsonResponse = [];
+
+           return  $this->success($jsonResponse);
+
+        } catch (ModelNotFoundException $exception) {
+
+            return $this->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return $this->failed($exception->getMessage());
+        }
+    }
+
+    private function defaultVendorData(): array
+    {
+        return [
+            'balance' => 'test',
+            'approved' => true
+        ];
+    }
+
+    private function cityBankVendorData(): array
+    {
+        return ;
     }
 
     /**

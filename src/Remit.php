@@ -2,6 +2,8 @@
 
 namespace Fintech\Remit;
 
+use Fintech\Remit\Vendors\CityBankApi;
+
 class Remit
 {
     /**
