@@ -16,7 +16,7 @@ class AssignVendorController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function available(string $id)
+    public function available(string $id): \Illuminate\Http\JsonResponse|\Fintech\Remit\Http\Resources\AssignableVendorCollection
     {
         try {
 
@@ -28,9 +28,11 @@ class AssignVendorController extends Controller
 
             $serviceVendors = \Fintech\Business\Facades\Business::serviceVendor()->list([
                 'service_id_array' => [$order->service_id],
+                'enabled' => true,
                 'paginate' => false,
             ]);
-            dd($serviceVendors);
+
+            return new \Fintech\Remit\Http\Resources\AssignableVendorCollection($serviceVendors);
 
         } catch (ModelNotFoundException $exception) {
 
