@@ -5,12 +5,14 @@ namespace Fintech\Remit\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Exception;
 use Fintech\Core\Traits\ApiResponseTrait;
+use Fintech\Remit\Contracts\OrderQuotation;
 use Fintech\Remit\Http\Requests\AssignableVendorInfoRequest;
 use Fintech\Remit\Http\Resources\AssignableVendorCollection;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 
 class AssignVendorController extends Controller
 {
@@ -24,7 +26,7 @@ class AssignVendorController extends Controller
         try {
             $order = Transaction::order()->find($id);
 
-            if (! $order) {
+            if (!$order) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
             }
 
@@ -51,20 +53,34 @@ class AssignVendorController extends Controller
      */
     public function vendor(AssignableVendorInfoRequest $request): JsonResponse
     {
-        try {
-            $order = Transaction::order()->find($request->input('order_id'));
+        $order_id = $request->input('order_id');
 
-            if (! $order) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $request->input('order_id'));
+        $service_vendor_slug = $request->input('vendor_slug');
+
+        try {
+            $order = Transaction::order()->find($order_id);
+
+            if (!$order) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $order_id);
             }
 
             $availableVendors = config('fintech.remit.providers');
 
-            if (! array_key_exists($request->input('vendor_slug'), $availableVendors)) {
+            if (!isset($availableVendors[$service_vendor_slug])) {
                 throw new \ErrorException('Service Vendor is not available on the configuration.');
             }
 
-            $jsonResponse = [];
+            $vendor = $availableVendors[$service_vendor_slug];
+
+            $driverClass = $vendor['driver'];
+
+            $instance = App::make($driverClass);
+
+            if (!$instance instanceof OrderQuotation) {
+                throw new \ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
+            }
+
+            $jsonResponse = $instance->requestQuotation($order);
 
             return $this->success($jsonResponse);
 
