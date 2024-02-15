@@ -13,12 +13,12 @@ class BankTransferVendorSeeder extends Seeder
     public function run(): void
     {
         if (Core::packageExists('Business')) {
-            $image_svg = __DIR__ . '/../../../resources/img/service_vendor/logo_svg/';
-            $image_png = __DIR__ . '/../../../resources/img/service_vendor/logo_png/';
+            $image_svg = __DIR__.'/../../../resources/img/service_vendor/logo_svg/';
+            $image_png = __DIR__.'/../../../resources/img/service_vendor/logo_png/';
 
             foreach ($this->data() as $entry) {
-                $entry['logo_svg'] = 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . '/' . $entry['logo_svg']));
-                $entry['logo_png'] = 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . '/' . $entry['logo_png']));
+                $entry['logo_svg'] = 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'/'.$entry['logo_svg']));
+                $entry['logo_png'] = 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'/'.$entry['logo_png']));
                 \Fintech\Business\Facades\Business::serviceVendor()->create($entry);
             }
         }
@@ -33,7 +33,7 @@ class BankTransferVendorSeeder extends Seeder
                 'service_vendor_data' => [],
                 'enabled' => false,
                 'logo_png' => 'citybank.png',
-                'logo_svg' => 'citybank.svg'
+                'logo_svg' => 'citybank.svg',
             ],
             [
                 'service_vendor_name' => 'Agrani Bank',
@@ -41,7 +41,7 @@ class BankTransferVendorSeeder extends Seeder
                 'service_vendor_data' => [],
                 'enabled' => false,
                 'logo_png' => 'agrani.png',
-                'logo_svg' => 'agrani.svg'
+                'logo_svg' => 'agrani.svg',
             ],
             [
                 'service_vendor_name' => 'EMQ',
@@ -49,7 +49,7 @@ class BankTransferVendorSeeder extends Seeder
                 'service_vendor_data' => [],
                 'enabled' => false,
                 'logo_png' => 'emqapi.png',
-                'logo_svg' => 'emqapi.svg'
+                'logo_svg' => 'emqapi.svg',
             ],
             [
                 'service_vendor_name' => 'Transfast',
@@ -57,7 +57,7 @@ class BankTransferVendorSeeder extends Seeder
                 'service_vendor_data' => [],
                 'enabled' => false,
                 'logo_png' => 'transfast.png',
-                'logo_svg' => 'transfast.svg'
+                'logo_svg' => 'transfast.svg',
             ],
             [
                 'service_vendor_name' => 'Value You',
@@ -65,7 +65,7 @@ class BankTransferVendorSeeder extends Seeder
                 'service_vendor_data' => [],
                 'enabled' => false,
                 'logo_png' => 'valyou.png',
-                'logo_svg' => 'valyou.svg'
+                'logo_svg' => 'valyou.svg',
             ],
 
         ];

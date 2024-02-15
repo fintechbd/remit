@@ -26,7 +26,7 @@ class AssignVendorController extends Controller
         try {
             $order = Transaction::order()->find($id);
 
-            if (!$order) {
+            if (! $order) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
             }
 
@@ -60,13 +60,13 @@ class AssignVendorController extends Controller
         try {
             $order = Transaction::order()->find($order_id);
 
-            if (!$order) {
+            if (! $order) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $order_id);
             }
 
             $availableVendors = config('fintech.remit.providers');
 
-            if (!isset($availableVendors[$service_vendor_slug])) {
+            if (! isset($availableVendors[$service_vendor_slug])) {
                 throw new \ErrorException('Service Vendor is not available on the configuration.');
             }
 
@@ -76,7 +76,7 @@ class AssignVendorController extends Controller
 
             $instance = App::make($driverClass);
 
-            if (!$instance instanceof OrderQuotation) {
+            if (! $instance instanceof OrderQuotation) {
                 throw new \ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
             }
 
