@@ -5,14 +5,12 @@ namespace Fintech\Remit\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Exception;
 use Fintech\Core\Traits\ApiResponseTrait;
-use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\AssignableVendorInfoRequest;
 use Fintech\Remit\Http\Resources\AssignableVendorCollection;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class AssignVendorController extends Controller
 {
@@ -51,7 +49,7 @@ class AssignVendorController extends Controller
     /**
      * Display the specified resource.
      */
-    public function vendor(AssignableVendorInfoRequest $request):JsonResponse
+    public function vendor(AssignableVendorInfoRequest $request): JsonResponse
     {
         try {
             $order = Transaction::order()->find($request->input('order_id'));
@@ -62,13 +60,13 @@ class AssignVendorController extends Controller
 
             $availableVendors = config('fintech.remit.providers');
 
-            if (!array_key_exists($request->input('vendor_slug'), $availableVendors)) {
+            if (! array_key_exists($request->input('vendor_slug'), $availableVendors)) {
                 throw new \ErrorException('Service Vendor is not available on the configuration.');
             }
 
             $jsonResponse = [];
 
-           return  $this->success($jsonResponse);
+            return $this->success($jsonResponse);
 
         } catch (ModelNotFoundException $exception) {
 
@@ -84,13 +82,13 @@ class AssignVendorController extends Controller
     {
         return [
             'balance' => 'test',
-            'approved' => true
+            'approved' => true,
         ];
     }
 
     private function cityBankVendorData(): array
     {
-        return ;
+
     }
 
     /**
