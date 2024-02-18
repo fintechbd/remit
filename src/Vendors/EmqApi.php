@@ -8,10 +8,12 @@ use App\Services\Backend\Setting\CatalogListService;
 use App\Services\Backend\Setting\CountryService;
 use Carbon\Carbon;
 use Exception;
+use Fintech\Remit\Contracts\BankTransfer;
+use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 
-class EmqApi
+class EmqApi implements BankTransfer, OrderQuotation
 {
     const OCCUPATION = 'OCC';
 
@@ -1320,5 +1322,41 @@ class EmqApi
     }*/
 
         return $returnData;
+    }
+
+    /**
+     * Execute the transfer operation
+     */
+    public function makeTransfer(array $orderInfo = []): mixed
+    {
+        // TODO: Implement makeTransfer() method.
+    }
+
+    public function transferStatus(array $orderInfo = []): mixed
+    {
+        // TODO: Implement transferStatus() method.
+    }
+
+    public function cancelTransfer(array $orderInfo = []): mixed
+    {
+        // TODO: Implement cancelTransfer() method.
+    }
+
+    public function verifyAccount(array $accountInfo = []): mixed
+    {
+        // TODO: Implement verifyAccount() method.
+    }
+
+    public function vendorBalance(array $accountInfo = []): mixed
+    {
+        // TODO: Implement vendorBalance() method.
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Model|\MongoDB\Laravel\Eloquent\Model $order
+     */
+    public function requestQuotation($order): mixed
+    {
+        // TODO: Implement requestQuotation() method.
     }
 }
