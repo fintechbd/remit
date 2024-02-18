@@ -1353,7 +1353,7 @@ class EmqApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\MongoDB\Laravel\Eloquent\Model $order
+     * @param  \Illuminate\Database\Eloquent\Model|\MongoDB\Laravel\Eloquent\Model  $order
      */
     public function requestQuotation($order): mixed
     {

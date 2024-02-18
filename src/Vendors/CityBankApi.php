@@ -639,11 +639,12 @@ class CityBankApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\MongoDB\Laravel\Eloquent\Model $order
+     * @param  \Illuminate\Database\Eloquent\Model|\MongoDB\Laravel\Eloquent\Model  $order
+     *
      * @throws \Exception
      */
     public function requestQuotation($order): mixed
     {
-        return  $this->vendorBalance();
+        return $this->vendorBalance();
     }
 }
