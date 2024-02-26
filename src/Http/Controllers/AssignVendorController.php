@@ -3,7 +3,9 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use ErrorException;
 use Exception;
+use Fintech\Business\Facades\Business;
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Remit\Contracts\OrderQuotation;
 use Fintech\Remit\Http\Requests\AssignableVendorInfoRequest;
@@ -26,11 +28,11 @@ class AssignVendorController extends Controller
         try {
             $order = Transaction::order()->find($id);
 
-            if (! $order) {
+            if (!$order) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
             }
 
-            $serviceVendors = \Fintech\Business\Facades\Business::serviceVendor()->list([
+            $serviceVendors = Business::serviceVendor()->list([
                 'service_id_array' => [$order->service_id],
                 'enabled' => true,
                 'paginate' => false,
@@ -60,14 +62,14 @@ class AssignVendorController extends Controller
         try {
             $order = Transaction::order()->find($order_id);
 
-            if (! $order) {
+            if (!$order) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $order_id);
             }
 
             $availableVendors = config('fintech.remit.providers');
 
-            if (! isset($availableVendors[$service_vendor_slug])) {
-                throw new \ErrorException('Service Vendor is not available on the configuration.');
+            if (!isset($availableVendors[$service_vendor_slug])) {
+                throw new ErrorException('Service Vendor is not available on the configuration.');
             }
 
             $vendor = $availableVendors[$service_vendor_slug];
@@ -76,8 +78,8 @@ class AssignVendorController extends Controller
 
             $instance = App::make($driverClass);
 
-            if (! $instance instanceof OrderQuotation) {
-                throw new \ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
+            if (!$instance instanceof OrderQuotation) {
+                throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
             }
 
             $jsonResponse = $instance->requestQuotation($order);
@@ -92,19 +94,6 @@ class AssignVendorController extends Controller
 
             return $this->failed($exception->getMessage());
         }
-    }
-
-    private function defaultVendorData(): array
-    {
-        return [
-            'balance' => 'test',
-            'approved' => true,
-        ];
-    }
-
-    private function cityBankVendorData(): array
-    {
-
     }
 
     /**
@@ -129,5 +118,18 @@ class AssignVendorController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    private function defaultVendorData(): array
+    {
+        return [
+            'balance' => 'test',
+            'approved' => true,
+        ];
+    }
+
+    private function cityBankVendorData(): array
+    {
+
     }
 }

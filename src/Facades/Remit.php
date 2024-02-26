@@ -2,12 +2,15 @@
 
 namespace Fintech\Remit\Facades;
 
+use Fintech\Remit\Services\BankTransferService;
+use Fintech\Remit\Services\CashPickupService;
+use Fintech\Remit\Services\WalletTransferService;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static \Fintech\Remit\Services\BankTransferService bankTransfer()
- * @method static \Fintech\Remit\Services\CashPickupService cashPickup()
- * @method static \Fintech\Remit\Services\WalletTransferService walletTransfer()
+ * @method static BankTransferService bankTransfer()
+ * @method static CashPickupService cashPickup()
+ * @method static WalletTransferService walletTransfer()
  *
  * // Crud Service Method Point Do not Remove //
  *

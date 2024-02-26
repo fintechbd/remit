@@ -3,8 +3,8 @@
 namespace Fintech\Remit\Repositories\Eloquent;
 
 use Fintech\Remit\Interfaces\BankTransferRepository as InterfacesBankTransferRepository;
+use Fintech\Remit\Models\BankTransfer;
 use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
-use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
 /**
@@ -14,9 +14,9 @@ class BankTransferRepository extends OrderRepository implements InterfacesBankTr
 {
     public function __construct()
     {
-        $model = app(config('fintech.remit.bank_transfer_model', \Fintech\Remit\Models\BankTransfer::class));
+        $model = app(config('fintech.remit.bank_transfer_model', BankTransfer::class));
 
-        if (! $model instanceof Model) {
+        if (!$model instanceof Model) {
             throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
         }
 

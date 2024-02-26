@@ -4,6 +4,7 @@ namespace Fintech\Remit\Repositories\Mongodb;
 
 use Fintech\Core\Repositories\MongodbRepository;
 use Fintech\Remit\Interfaces\BankTransferRepository as InterfacesBankTransferRepository;
+use Fintech\Remit\Models\BankTransfer;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use InvalidArgumentException;
@@ -16,9 +17,9 @@ class BankTransferRepository extends MongodbRepository implements InterfacesBank
 {
     public function __construct()
     {
-        $model = app(config('fintech.remit.bank_transfer_model', \Fintech\Remit\Models\BankTransfer::class));
+        $model = app(config('fintech.remit.bank_transfer_model', BankTransfer::class));
 
-        if (! $model instanceof Model) {
+        if (!$model instanceof Model) {
             throw new InvalidArgumentException("Mongodb repository require model class to be `MongoDB\Laravel\Eloquent\Model` instance.");
         }
 
@@ -36,7 +37,7 @@ class BankTransferRepository extends MongodbRepository implements InterfacesBank
         $query = $this->model->newQuery();
 
         //Searching
-        if (isset($filters['search']) && ! empty($filters['search'])) {
+        if (isset($filters['search']) && !empty($filters['search'])) {
             if (is_numeric($filters['search'])) {
                 $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
             } else {
@@ -46,7 +47,7 @@ class BankTransferRepository extends MongodbRepository implements InterfacesBank
         }
 
         //Display Trashed
-        if (isset($filters['trashed']) && ! empty($filters['trashed'])) {
+        if (isset($filters['trashed']) && !empty($filters['trashed'])) {
             $query->onlyTrashed();
         }
 

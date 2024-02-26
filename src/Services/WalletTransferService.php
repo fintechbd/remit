@@ -5,8 +5,8 @@ namespace Fintech\Remit\Services;
 use Fintech\Remit\Interfaces\WalletTransferRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Contracts\Pagination\Paginator;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * Class WalletTransferService
@@ -23,23 +23,12 @@ class WalletTransferService
         $this->walletTransferRepository = $walletTransferRepository;
     }
 
-    public function list(array $filters = []): Collection|Paginator
-    {
-        return $this->walletTransferRepository->list($filters);
-
-    }
-
-    public function create(array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
-    {
-        return $this->walletTransferRepository->create($inputs);
-    }
-
-    public function find($id, bool $onlyTrashed = false): Model|\MongoDB\Laravel\Eloquent\Model|null
+    public function find($id, bool $onlyTrashed = false): Model|Model|null
     {
         return $this->walletTransferRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
+    public function update($id, array $inputs = []): Model|Model|null
     {
         return $this->walletTransferRepository->update($id, $inputs);
     }
@@ -59,9 +48,20 @@ class WalletTransferService
         return $this->walletTransferRepository->list($filters);
     }
 
-    public function import(array $filters): Model|\MongoDB\Laravel\Eloquent\Model|null
+    public function list(array $filters = []): Collection|Paginator
+    {
+        return $this->walletTransferRepository->list($filters);
+
+    }
+
+    public function import(array $filters): Model|Model|null
     {
         return $this->walletTransferRepository->create($filters);
+    }
+
+    public function create(array $inputs = []): Model|Model|null
+    {
+        return $this->walletTransferRepository->create($inputs);
     }
 
     /**
@@ -93,7 +93,7 @@ class WalletTransferService
         $data->order_detail_cause_name = 'cash_withdraw';
         $data->order_detail_number = $data->order_data['purchase_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
-        $data->notes = 'Wallet Transfer Payment Send to '.$master_user_name;
+        $data->notes = 'Wallet Transfer Payment Send to ' . $master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -104,7 +104,7 @@ class WalletTransferService
         $orderDetailStoreForMaster->order_detail_amount = $amount;
         $orderDetailStoreForMaster->converted_amount = $converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Wallet Transfer Payment Receive From'.$user_name;
+        $orderDetailStoreForMaster->notes = 'Wallet Transfer Payment Receive From' . $user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -112,7 +112,7 @@ class WalletTransferService
         $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $data->notes = 'Wallet Transfer Charge Send to '.$master_user_name;
+        $data->notes = 'Wallet Transfer Charge Send to ' . $master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
@@ -122,7 +122,7 @@ class WalletTransferService
         $orderDetailStoreForChargeForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Wallet Transfer Charge Receive from '.$user_name;
+        $orderDetailStoreForChargeForMaster->notes = 'Wallet Transfer Charge Receive from ' . $user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
@@ -130,7 +130,7 @@ class WalletTransferService
         $data->amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $data->order_detail_cause_name = 'discount';
-        $data->notes = 'Wallet Transfer Discount form '.$master_user_name;
+        $data->notes = 'Wallet Transfer Discount form ' . $master_user_name;
         $data->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         //$updateData['order_data']['previous_amount'] = 0;
@@ -141,7 +141,7 @@ class WalletTransferService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Wallet Transfer Discount to '.$user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Wallet Transfer Discount to ' . $user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
@@ -190,7 +190,7 @@ class WalletTransferService
         $data->order_detail_cause_name = 'cash_withdraw';
         $data->order_detail_number = $data->order_data['accepted_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
-        $data->notes = 'Wallet Transfer Refund From '.$master_user_name;
+        $data->notes = 'Wallet Transfer Refund From ' . $master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -203,7 +203,7 @@ class WalletTransferService
         $orderDetailStoreForMaster->order_detail_amount = -$amount;
         $orderDetailStoreForMaster->converted_amount = -$converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Wallet Transfer Send to '.$user_name;
+        $orderDetailStoreForMaster->notes = 'Wallet Transfer Send to ' . $user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -211,7 +211,7 @@ class WalletTransferService
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $data->notes = 'Wallet Transfer Charge Receive from '.$master_user_name;
+        $data->notes = 'Wallet Transfer Charge Receive from ' . $master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
@@ -221,7 +221,7 @@ class WalletTransferService
         $orderDetailStoreForChargeForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Wallet Transfer Charge Send to '.$user_name;
+        $orderDetailStoreForChargeForMaster->notes = 'Wallet Transfer Charge Send to ' . $user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
@@ -229,7 +229,7 @@ class WalletTransferService
         $data->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $data->order_detail_cause_name = 'discount';
-        $data->notes = 'Wallet Transfer Discount form '.$master_user_name;
+        $data->notes = 'Wallet Transfer Discount form ' . $master_user_name;
         $data->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         $updateData['order_data']['previous_amount'] = 0;
@@ -240,7 +240,7 @@ class WalletTransferService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Wallet Transfer Discount to '.$user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Wallet Transfer Discount to ' . $user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 

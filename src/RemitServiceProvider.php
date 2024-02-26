@@ -17,7 +17,7 @@ class RemitServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../config/remit.php', 'fintech.remit'
+            __DIR__ . '/../config/remit.php', 'fintech.remit'
         );
 
         $this->app->register(RouteServiceProvider::class);
@@ -31,21 +31,21 @@ class RemitServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishes([
-            __DIR__.'/../config/remit.php' => config_path('fintech/remit.php'),
+            __DIR__ . '/../config/remit.php' => config_path('fintech/remit.php'),
         ]);
 
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
-        $this->loadTranslationsFrom(__DIR__.'/../lang', 'remit');
+        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'remit');
 
         $this->publishes([
-            __DIR__.'/../lang' => $this->app->langPath('vendor/remit'),
+            __DIR__ . '/../lang' => $this->app->langPath('vendor/remit'),
         ]);
 
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'remit');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'remit');
 
         $this->publishes([
-            __DIR__.'/../resources/views' => resource_path('views/vendor/remit'),
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/remit'),
         ]);
 
         if ($this->app->runningInConsole()) {

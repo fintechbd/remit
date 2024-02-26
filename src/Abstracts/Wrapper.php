@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Support\Arr;
+use JsonException;
 
 abstract class Wrapper implements Arrayable, ArrayAccess, Jsonable
 {
@@ -30,9 +31,25 @@ abstract class Wrapper implements Arrayable, ArrayAccess, Jsonable
         return $this->toJson();
     }
 
+    public function toJson($options = 0): bool|string
+    {
+        $json = json_encode($this->attributes, $options);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new JsonException(json_last_error_msg());
+        }
+
+        return $json;
+    }
+
     public function __isset($name)
     {
         return $this->offsetExists($name);
+    }
+
+    public function offsetExists($offset): bool
+    {
+        return isset($this->attributes[$offset]) || isset($this->extra[$offset]);
     }
 
     public function __get($name)
@@ -43,16 +60,6 @@ abstract class Wrapper implements Arrayable, ArrayAccess, Jsonable
     public function __set($name, $value)
     {
         $this->offsetSet($name, $value);
-    }
-
-    public function __unset($name)
-    {
-        $this->offsetUnset($name);
-    }
-
-    public function offsetExists($offset): bool
-    {
-        return isset($this->attributes[$offset]) || isset($this->extra[$offset]);
     }
 
     public function offsetGet($offset)
@@ -73,38 +80,6 @@ abstract class Wrapper implements Arrayable, ArrayAccess, Jsonable
             : $this->extra[$offset] = $value;
 
         $this->resolveCasts();
-    }
-
-    public function offsetUnset($offset): void
-    {
-        if (array_key_exists($offset, $this->attributes)) {
-            unset($this->attributes[$offset]);
-        }
-
-        if (array_key_exists($offset, $this->extra)) {
-            unset($this->extra[$offset]);
-        }
-    }
-
-    public function toRaw()
-    {
-        return $this->raw;
-    }
-
-    public function toArray(): array
-    {
-        return array_merge($this->attributes, $this->extra);
-    }
-
-    public function toJson($options = 0): bool|string
-    {
-        $json = json_encode($this->attributes, $options);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \JsonException(json_last_error_msg());
-        }
-
-        return $json;
     }
 
     public function resolveCasts(): void
@@ -135,15 +110,15 @@ abstract class Wrapper implements Arrayable, ArrayAccess, Jsonable
                     return $value == 'true';
                 }
 
-                return (bool) $value;
+                return (bool)$value;
 
             case 'float' :
             case 'double' :
             case 'decimal' :
-                return (float) $value;
+                return (float)$value;
 
             case 'integer' :
-                return (int) $value;
+                return (int)$value;
 
             case 'array' :
                 return Arr::wrap($value);
@@ -152,14 +127,40 @@ abstract class Wrapper implements Arrayable, ArrayAccess, Jsonable
             case 'date':
                 return Carbon::parse($value);
 
-                //            case 'money' :
-                //                return Money::parse($value);
+            //            case 'money' :
+            //                return Money::parse($value);
 
             case 'string' :
-                return (string) $value;
+                return (string)$value;
 
             default:
                 return $value;
         }
+    }
+
+    public function __unset($name)
+    {
+        $this->offsetUnset($name);
+    }
+
+    public function offsetUnset($offset): void
+    {
+        if (array_key_exists($offset, $this->attributes)) {
+            unset($this->attributes[$offset]);
+        }
+
+        if (array_key_exists($offset, $this->extra)) {
+            unset($this->extra[$offset]);
+        }
+    }
+
+    public function toRaw()
+    {
+        return $this->raw;
+    }
+
+    public function toArray(): array
+    {
+        return array_merge($this->attributes, $this->extra);
     }
 }

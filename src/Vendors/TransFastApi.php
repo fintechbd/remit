@@ -2,28 +2,25 @@
 
 namespace Fintech\Remit\Vendors;
 
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 class TransFastApi
 {
+    protected $payment_mode;
+    protected $account_type;
     /**
      * TransFast API configuration.
      *
      * @var array
      */
     private $config;
-
     /**
      * TransFast API Url.
      *
      * @var string
      */
     private $apiUrl;
-
-    protected $payment_mode;
-
-    protected $account_type;
-
     /**
      * @var string
      */
@@ -37,11 +34,11 @@ class TransFastApi
         $this->config = config('trans-fast');
         if ($this->config['mode'] === 'sandbox') {
             $this->status = 'sandbox';
-            $this->apiUrl = 'https://'.$this->config[$this->status]['app_host'];
+            $this->apiUrl = 'https://' . $this->config[$this->status]['app_host'];
 
         } else {
             $this->status = 'live';
-            $this->apiUrl = 'https://'.$this->config[$this->status]['app_host'];
+            $this->apiUrl = 'https://' . $this->config[$this->status]['app_host'];
         }
 
         $this->payment_mode = 'C'; //C = Bank Deposit, 2 = Cash Pick Up, G = Mobile Cash, U = Cash Card
@@ -49,103 +46,11 @@ class TransFastApi
     }
 
     /**
-     * Base function that is responsible for interacting directly with the transpay api to obtain data
-     *
-     * @param  array  $params
-     * @return array
-     *
-     * @throws \Exception
-     */
-    public function getData($url, $params = [])
-    {
-        $apiUrl = $this->apiUrl.$url;
-        $apiUrl .= http_build_query($params);
-        Log::info($apiUrl);
-
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $apiUrl);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Credentials '.$this->config[$this->status]['api_token']]
-        );
-
-        $response = curl_exec($curl);
-        $info = curl_getinfo($curl);
-        $error = curl_error($curl);
-
-        if ($response === false) {
-            Log::info($info);
-            Log::info($error);
-            throw new \Exception(curl_error($curl), curl_errno($curl));
-        }
-
-        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        curl_close($curl);
-        Log::info(json_decode($response, true));
-
-        return [
-            'status' => $status,
-            'response' => json_decode($response, true),
-        ];
-
-    }
-
-    /**
-     * Base function that is responsible for interacting directly with the trans fast api to send data
-     *
-     * @param  string  $method
-     * @return array
-     *
-     * @throws \Exception
-     */
-    public function putPostData($url, $dataArray, $method = 'POST')
-    {
-        $apiUrl = $this->apiUrl.$url;
-        Log::info($apiUrl);
-        $jsonArray = json_encode($dataArray);
-        Log::info(json_decode($jsonArray, true));
-
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $apiUrl);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($curl, CURLOPT_POST, count($dataArray));
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonArray);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_VERBOSE, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Credentials '.$this->config[$this->status]['api_token']]
-        );
-
-        $response = curl_exec($curl);
-        $info = curl_getinfo($curl);
-        $error = curl_error($curl);
-
-        if ($response === false) {
-            Log::info($info);
-            Log::info($error);
-            throw new \Exception(curl_error($curl), curl_errno($curl));
-        }
-
-        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        curl_close($curl);
-
-        Log::info(json_decode($response, true));
-
-        return [
-            'status' => $status,
-            'response' => json_decode($response, true),
-        ];
-    }
-
-    /**
      * Get the available countries
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCountries()
     {
@@ -156,11 +61,55 @@ class TransFastApi
     }
 
     /**
+     * Base function that is responsible for interacting directly with the transpay api to obtain data
+     *
+     * @param array $params
+     * @return array
+     *
+     * @throws Exception
+     */
+    public function getData($url, $params = [])
+    {
+        $apiUrl = $this->apiUrl . $url;
+        $apiUrl .= http_build_query($params);
+        Log::info($apiUrl);
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $apiUrl);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Credentials ' . $this->config[$this->status]['api_token']]
+        );
+
+        $response = curl_exec($curl);
+        $info = curl_getinfo($curl);
+        $error = curl_error($curl);
+
+        if ($response === false) {
+            Log::info($info);
+            Log::info($error);
+            throw new Exception(curl_error($curl), curl_errno($curl));
+        }
+
+        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+        Log::info(json_decode($response, true));
+
+        return [
+            'status' => $status,
+            'response' => json_decode($response, true),
+        ];
+
+    }
+
+    /**
      * Get the states for a specific country
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getStates($country)
     {
@@ -176,7 +125,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCities($country, $state)
     {
@@ -192,7 +141,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTowns($country, $state, $city)
     {
@@ -222,7 +171,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getBanksBranch($bank, $state, $city)
     {
@@ -238,7 +187,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getBranchPayers($country, $state, $city, $receiveCurrencyIsoCode, $bank, $paymentMode, $sourceCurrencyIsoCode)
     {
@@ -257,7 +206,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getSenderOccupation()
     {
@@ -272,7 +221,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getRequiredFields()
     {
@@ -290,7 +239,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCurrencies($country, $state, $city, $paymentMode)
     {
@@ -310,7 +259,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getPaymentModes($country, $state, $city)
     {
@@ -326,7 +275,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getPayoutLimits($country, $city, $paymentMode, $receiveCurrencyIsoCode, $sourceCurrencyIsoCode)
     {
@@ -343,7 +292,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getNationality($country)
     {
@@ -359,7 +308,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getSourceOfFunds()
     {
@@ -374,7 +323,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getReceiversTypeOfId($country)
     {
@@ -390,7 +339,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getSendersTypeOfId($country)
     {
@@ -409,7 +358,7 @@ class TransFastApi
      * @param  $country
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCashPickupCountry()
     {
@@ -425,7 +374,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getReceiveCountries()
     {
@@ -445,7 +394,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTransactionInfo($inputData)
     {
@@ -485,7 +434,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getBankDetailByRoutingNo($country, $routingNumber)
     {
@@ -501,7 +450,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getByReferenceNumber($referenceNumber)
     {
@@ -518,7 +467,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTransactionStatus($tfpin)
     {
@@ -531,10 +480,10 @@ class TransFastApi
     /**
      * Get the getCountryRates by source currency iso code and receive country iso code
      *
-     * @param  string  $feeProduct
+     * @param string $feeProduct
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCountryRates($sourceCurrencyIsoCode, $receiveCountryIsoCode, $feeProduct = '')
     {
@@ -550,7 +499,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getTransactionList($startDate, $endDate)
     {
@@ -569,7 +518,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getSenderBySenderID($senderId)
     {
@@ -582,10 +531,10 @@ class TransFastApi
     /**
      * Returns a collection of commissions by country based on filter context and pagination parameters.
      *
-     * @param  string  $feeProduct
+     * @param string $feeProduct
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCommissionByCountry($sourceCurrencyIsoCode, $receiveCountryIsoCode, $feeProduct = '')
     {
@@ -599,10 +548,10 @@ class TransFastApi
     /**
      * Retrieve a catalog of complaint types that should be used when creating a complaint
      *
-     * @param  $onlyForCustomerCare  -- i.e. true or false
+     * @param  $onlyForCustomerCare -- i.e. true or false
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getComplaintType($onlyForCustomerCare)
     {
@@ -617,7 +566,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCancelReasons()
     {
@@ -631,7 +580,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getFormOfPayments()
     {
@@ -645,7 +594,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getRemittancePurposes($country)
     {
@@ -658,10 +607,10 @@ class TransFastApi
     /**
      * Return a list of generated TfPins
      *
-     * @param  string  $generatedUnused
+     * @param string $generatedUnused
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getGeneratedTransFastPins($country, $payerId, $numberOfPins, $generatedUnused = '')
     {
@@ -676,7 +625,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getAccountingBalance($currencyIsoCode)
     {
@@ -691,7 +640,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getAccountType($countryIsoCode)
     {
@@ -707,7 +656,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function putReleaseTransaction($transFastPin)
     {
@@ -718,11 +667,59 @@ class TransFastApi
     }
 
     /**
+     * Base function that is responsible for interacting directly with the trans fast api to send data
+     *
+     * @param string $method
+     * @return array
+     *
+     * @throws Exception
+     */
+    public function putPostData($url, $dataArray, $method = 'POST')
+    {
+        $apiUrl = $this->apiUrl . $url;
+        Log::info($apiUrl);
+        $jsonArray = json_encode($dataArray);
+        Log::info(json_decode($jsonArray, true));
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $apiUrl);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
+        curl_setopt($curl, CURLOPT_POST, count($dataArray));
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonArray);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_VERBOSE, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Credentials ' . $this->config[$this->status]['api_token']]
+        );
+
+        $response = curl_exec($curl);
+        $info = curl_getinfo($curl);
+        $error = curl_error($curl);
+
+        if ($response === false) {
+            Log::info($info);
+            Log::info($error);
+            throw new Exception(curl_error($curl), curl_errno($curl));
+        }
+
+        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+
+        Log::info(json_decode($response, true));
+
+        return [
+            'status' => $status,
+            'response' => json_decode($response, true),
+        ];
+    }
+
+    /**
      * Cancel transaction given a TfPin (transaction number) and reason code (reason for cancellation).
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function putCancelTransaction($transFastPin, $reasonId)
     {
@@ -738,12 +735,13 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function putModifySenderID(
         $senderId, $name, $address, $phoneHome, $phoneWork, $isIndividual, $countryISO, $phoneMobile, $email, $stateId,
         $cityId, $typeOfId, $idNumber, $idExpiryDate, $dateOfBirth, $nationalityIsoCode, $senderOccupation
-    ) {
+    )
+    {
         $url = 'transaction/senderinfo';
         $params['SenderId'] = $senderId;
         $params['Name'] = $name;
@@ -773,7 +771,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function putReadCustomerCareComplaintOrPetition($transFastPin, $startDate, $endDate, $isReadAll = 'true')
     {
@@ -792,7 +790,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function postCustomerCareComplaintOrPetition($transFastPin, $petitionType, $message)
     {
@@ -810,12 +808,13 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function postCreateSenderID(
         $name, $address, $phoneHome, $phoneWork, $isIndividual, $countryISO, $phoneMobile, $email, $stateId,
         $cityId, $typeOfId, $idNumber, $idExpiryDate, $dateOfBirth, $nationalityIsoCode, $senderOccupation
-    ) {
+    )
+    {
         $url = 'transaction/sender';
         $params['Name'] = $name;
         //$params['NameOtherLanguage'] = $nameOtherLanguage;
@@ -846,7 +845,7 @@ class TransFastApi
      *
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function postCreateTransaction($data)
     {
@@ -966,7 +965,7 @@ class TransFastApi
         $params['Compliance']['TypeOfId'] = ((isset($data->trans_fast_sender_id_type_id) ? $data->trans_fast_sender_id_type_id : null));
         $params['Compliance']['IdNumber'] = ((isset($data->sender_id_number) ? $data->sender_id_number : null));
         $params['Compliance']['RemittanceReasonId'] = 'A';
-        $params['Compliance']['ReceiverFullName'] = ((isset($data->receiver_first_name) ? $data->receiver_first_name : null).(isset($data->receiver_middle_name) ? ' '.$data->receiver_middle_name : null).(isset($data->receiver_last_name) ? ' '.$data->receiver_last_name : null));
+        $params['Compliance']['ReceiverFullName'] = ((isset($data->receiver_first_name) ? $data->receiver_first_name : null) . (isset($data->receiver_middle_name) ? ' ' . $data->receiver_middle_name : null) . (isset($data->receiver_last_name) ? ' ' . $data->receiver_last_name : null));
         $params['Compliance']['SenderFullName'] = ((isset($data->sender_first_name) ? $data->sender_first_name : null));
 
         //dd($params);
