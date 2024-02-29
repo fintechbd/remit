@@ -14,12 +14,12 @@ class BankTransferVendorSeeder extends Seeder
     public function run(): void
     {
         if (Core::packageExists('Business')) {
-            $image_svg = __DIR__ . '/../../../resources/img/service_vendor/logo_svg/';
-            $image_png = __DIR__ . '/../../../resources/img/service_vendor/logo_png/';
+            $image_svg = __DIR__.'/../../../resources/img/service_vendor/logo_svg/';
+            $image_png = __DIR__.'/../../../resources/img/service_vendor/logo_png/';
 
             foreach ($this->data() as $entry) {
-                $entry['logo_svg'] = 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($image_svg . '/' . $entry['logo_svg']));
-                $entry['logo_png'] = 'data:image/png;base64,' . base64_encode(file_get_contents($image_png . '/' . $entry['logo_png']));
+                $entry['logo_svg'] = 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'/'.$entry['logo_svg']));
+                $entry['logo_png'] = 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'/'.$entry['logo_png']));
                 Business::serviceVendor()->create($entry);
             }
         }

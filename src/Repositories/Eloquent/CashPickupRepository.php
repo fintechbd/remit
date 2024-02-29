@@ -19,7 +19,7 @@ class CashPickupRepository extends OrderRepository implements InterfacesCashPick
     {
         $model = app(config('fintech.remit.cash_pickup_model', CashPickup::class));
 
-        if (!$model instanceof Model) {
+        if (! $model instanceof Model) {
             throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
         }
 
