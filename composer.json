@@ -62,6 +62,9 @@
     "extra": {
         "laravel": {
             "providers": [
+                "Fintech\\Remit\\EventServiceProvider",
+                "Fintech\\Remit\\RepositoryServiceProvider",
+                "Fintech\\Remit\\RouteServiceProvider",
                 "Fintech\\Remit\\RemitServiceProvider"
             ],
             "aliases": {

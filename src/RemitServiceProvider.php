@@ -19,10 +19,6 @@ class RemitServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__.'/../config/remit.php', 'fintech.remit'
         );
-
-        $this->app->register(RouteServiceProvider::class);
-        $this->app->register(RepositoryServiceProvider::class);
-        $this->app->register(EventServiceProvider::class);
     }
 
     /**
