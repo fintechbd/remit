@@ -23,12 +23,12 @@ class WalletTransferService
         $this->walletTransferRepository = $walletTransferRepository;
     }
 
-    public function find($id, bool $onlyTrashed = false): Model|Model|null
+    public function find($id, bool $onlyTrashed = false): Model|null
     {
         return $this->walletTransferRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): Model|Model|null
+    public function update($id, array $inputs = []): Model|null
     {
         return $this->walletTransferRepository->update($id, $inputs);
     }
@@ -54,12 +54,12 @@ class WalletTransferService
 
     }
 
-    public function import(array $filters): Model|Model|null
+    public function import(array $filters): Model|null
     {
         return $this->walletTransferRepository->create($filters);
     }
 
-    public function create(array $inputs = []): Model|Model|null
+    public function create(array $inputs = []): Model|null
     {
         return $this->walletTransferRepository->create($inputs);
     }

@@ -23,12 +23,12 @@ class CashPickupService
         $this->cashPickupRepository = $cashPickupRepository;
     }
 
-    public function find($id, bool $onlyTrashed = false): Model|Model|null
+    public function find($id, bool $onlyTrashed = false): Model|null
     {
         return $this->cashPickupRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): Model|Model|null
+    public function update($id, array $inputs = []): Model|null
     {
         return $this->cashPickupRepository->update($id, $inputs);
     }
@@ -54,12 +54,12 @@ class CashPickupService
 
     }
 
-    public function import(array $filters): Model|Model|null
+    public function import(array $filters): Model|null
     {
         return $this->cashPickupRepository->create($filters);
     }
 
-    public function create(array $inputs = []): Model|Model|null
+    public function create(array $inputs = []): Model|null
     {
         return $this->cashPickupRepository->create($inputs);
     }
