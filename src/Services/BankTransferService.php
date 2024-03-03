@@ -23,12 +23,12 @@ class BankTransferService
         $this->bankTransferRepository = $bankTransferRepository;
     }
 
-    public function find($id, bool $onlyTrashed = false): Model|null
+    public function find($id, bool $onlyTrashed = false): ?Model
     {
         return $this->bankTransferRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): Model|null
+    public function update($id, array $inputs = []): ?Model
     {
         return $this->bankTransferRepository->update($id, $inputs);
     }
@@ -60,12 +60,12 @@ class BankTransferService
 
     }
 
-    public function import(array $filters): Model|null
+    public function import(array $filters): ?Model
     {
         return $this->bankTransferRepository->create($filters);
     }
 
-    public function create(array $inputs = []): Model|null
+    public function create(array $inputs = []): ?Model
     {
         return $this->bankTransferRepository->create($inputs);
     }
