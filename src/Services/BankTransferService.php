@@ -2,11 +2,11 @@
 
 namespace Fintech\Remit\Services;
 
+use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Interfaces\BankTransferRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Collection;
-use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * Class BankTransferService
@@ -23,12 +23,12 @@ class BankTransferService
         $this->bankTransferRepository = $bankTransferRepository;
     }
 
-    public function find($id, bool $onlyTrashed = false): ?Model
+    public function find($id, bool $onlyTrashed = false): ?BaseModel
     {
         return $this->bankTransferRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): ?Model
+    public function update($id, array $inputs = []): ?BaseModel
     {
         return $this->bankTransferRepository->update($id, $inputs);
     }
@@ -60,12 +60,12 @@ class BankTransferService
 
     }
 
-    public function import(array $filters): ?Model
+    public function import(array $filters): ?BaseModel
     {
         return $this->bankTransferRepository->create($filters);
     }
 
-    public function create(array $inputs = []): ?Model
+    public function create(array $inputs = []): ?BaseModel
     {
         return $this->bankTransferRepository->create($inputs);
     }

@@ -2,11 +2,11 @@
 
 namespace Fintech\Remit\Services;
 
+use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Interfaces\WalletTransferRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Collection;
-use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * Class WalletTransferService
@@ -23,12 +23,12 @@ class WalletTransferService
         $this->walletTransferRepository = $walletTransferRepository;
     }
 
-    public function find($id, bool $onlyTrashed = false): ?Model
+    public function find($id, bool $onlyTrashed = false): ?BaseModel
     {
         return $this->walletTransferRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): ?Model
+    public function update($id, array $inputs = []): ?BaseModel
     {
         return $this->walletTransferRepository->update($id, $inputs);
     }
@@ -54,12 +54,12 @@ class WalletTransferService
 
     }
 
-    public function import(array $filters): ?Model
+    public function import(array $filters): ?BaseModel
     {
         return $this->walletTransferRepository->create($filters);
     }
 
-    public function create(array $inputs = []): ?Model
+    public function create(array $inputs = []): ?BaseModel
     {
         return $this->walletTransferRepository->create($inputs);
     }

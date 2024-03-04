@@ -2,11 +2,11 @@
 
 namespace Fintech\Remit\Services;
 
+use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Interfaces\CashPickupRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Collection;
-use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * Class CashPickupService
@@ -23,12 +23,12 @@ class CashPickupService
         $this->cashPickupRepository = $cashPickupRepository;
     }
 
-    public function find($id, bool $onlyTrashed = false): ?Model
+    public function find($id, bool $onlyTrashed = false): ?BaseModel
     {
         return $this->cashPickupRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): ?Model
+    public function update($id, array $inputs = []): ?BaseModel
     {
         return $this->cashPickupRepository->update($id, $inputs);
     }
@@ -54,12 +54,12 @@ class CashPickupService
 
     }
 
-    public function import(array $filters): ?Model
+    public function import(array $filters): ?BaseModel
     {
         return $this->cashPickupRepository->create($filters);
     }
 
-    public function create(array $inputs = []): ?Model
+    public function create(array $inputs = []): ?BaseModel
     {
         return $this->cashPickupRepository->create($inputs);
     }
