@@ -51,11 +51,10 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      */
     public function fetchBalance(string $currency): SimpleXMLElement
     {
-        $xmlString = '
-            <ns2:userID>'.$this->config[$this->status]['username'].'</ns2:userID>
-            <ns2:password>'.$this->config[$this->status]['password'].'</ns2:password>
-            <ns2: currency>'.$currency.'</ns2: currency>
-        ';
+        $xmlString = "
+            <ns2:userID>{$this->config[$this->status]['username']}</ns2:userID>
+            <ns2:password>{$this->config[$this->status]['password']}</ns2:password>
+            <ns2:currency>{$currency}</ns2:currency>";
         $soapMethod = 'fetchBalance';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
@@ -301,16 +300,15 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
 
     public function xmlGenerate($string, $method): string
     {
-        return '<?xml version="1.0" encoding="utf-8"?>
-            <soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope" xmlns:ser="http://service.ws.mt.ibbl" xmlns:xsd="http://bean.ws.mt.ibbl/xsd">
-                <soapenv:Header/>
-                <soapenv:Body>
-                    <ns2:'.$method.' xmlns:ns2="http://service.ws.mt.ibbl">
-                        '.$string.'
-                    </ns2:'.$method.'>
-                </soapenv:Body>
-            </soapenv:Envelope>
-        ';
+        return <<<XML
+<?xml version="1.0" encoding="utf-8"?>
+    <soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope" xmlns:ser="http://service.ws.mt.ibbl" xmlns:xsd="http://bean.ws.mt.ibbl/xsd">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <ns2:{$method} xmlns:ns2="http://service.ws.mt.ibbl">{$string}</ns2:{$method}>
+        </soapenv:Body>
+    </soapenv:Envelope>
+XML;
     }
 
     /**
