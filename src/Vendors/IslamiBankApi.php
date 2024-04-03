@@ -302,12 +302,12 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     public function xmlGenerate($string, $method): string
     {
         return '<?xml version="1.0" encoding="utf-8"?>
-            <soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
+            <soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope" xmlns:ser="http://service.ws.mt.ibbl" xmlns:xsd="http://bean.ws.mt.ibbl/xsd">
                 <soapenv:Header/>
                 <soapenv:Body>
-                    <urn:'.$method.' xmlns:ns2="http://service.ws.mt.ibbl">
+                    <ns2:'.$method.' xmlns:ns2="http://service.ws.mt.ibbl">
                         '.$string.'
-                    </urn:'.$method.'>
+                    </ns2:'.$method.'>
                 </soapenv:Body>
             </soapenv:Envelope>
         ';
