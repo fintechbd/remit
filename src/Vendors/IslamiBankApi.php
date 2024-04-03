@@ -498,4 +498,34 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
             '68' => 'MNSBA(NRB Savings Bond)',
         ];
     }
+
+    public function makeTransfer(array $orderInfo): mixed
+    {
+        // TODO: Implement makeTransfer() method.
+    }
+
+    public function transferStatus(array $orderInfo): mixed
+    {
+        return $this->fetchRemittanceStatus($orderInfo);
+    }
+
+    public function cancelTransfer(array $orderInfo): mixed
+    {
+        // TODO: Implement cancelTransfer() method.
+    }
+
+    public function verifyAccount(array $accountInfo): mixed
+    {
+        $this->validateBeneficiaryWallet($accountInfo);
+    }
+
+    public function vendorBalance(array $accountInfo): mixed
+    {
+        return $this->fetchBalance([]);
+    }
+
+    public function requestQuotation($order): mixed
+    {
+        // TODO: Implement requestQuotation() method.
+    }
 }
