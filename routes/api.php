@@ -21,17 +21,14 @@ use Illuminate\Support\Facades\Route;
 */
 if (Config::get('fintech.remit.enabled')) {
     Route::prefix('remit')->name('remit.')
-        ->middleware(config('fintech.auth.middleware'))
-        ->group(function () {
+        ->middleware(config('fintech.auth.middleware'))->group(function () {
             if (Core::packageExists('Transaction')) {
-                Route::get('assignable-vendors/{order_id}',
-                    [AssignVendorController::class, 'available'])
+                Route::get('assignable-vendors/{order_id}', [AssignVendorController::class, 'available'])
                     ->name('assignable-vendors.available');
             }
             Route::apiResource('bank-transfers', BankTransferController::class)->except('update', 'destroy');
             Route::apiResource('cash-pickups', CashPickupController::class)->except('update', 'destroy');
             Route::apiResource('wallet-transfers', WalletTransferController::class)->except('update', 'destroy');
-
             Route::post('wallet-verification', WalletVerificationController::class)->name('wallet-verification');
 
             //DO NOT REMOVE THIS LINE//
