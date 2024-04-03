@@ -289,7 +289,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
             throw new Exception(curl_error($ch), curl_errno($ch));
         }
         curl_close($ch);
-        Log::info("Raw Response<br>". $response);
+        Log::info('Raw Response<br>'.$response);
         $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
         $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
         $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
