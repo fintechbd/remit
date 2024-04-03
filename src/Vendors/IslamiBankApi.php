@@ -652,6 +652,9 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     }
 
     /**
+     * Response Code List
+     * These codes will return in all operations.
+     *
      * @param int $code
      * @return string[]
      */
@@ -733,6 +736,41 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
             7003 => 'USER IS BLOCKED',
             7004 => 'USER IS INACTIVE',
             7005 => 'USER IS DEAD (PERMANENTLY BLOCKED)',
+        ];
+    }
+
+    /**
+     * Response Status Code List
+     * These codes will return in only Fetch Remittance Status (fetchWSMessageStatus) operation.
+     *
+     * @param int $code
+     * @return string[]
+     */
+    private function __responseStatusCodeList(int $code): array
+    {
+        return [
+            01 => 'REMITTANCE ISSUED',
+            02 => 'REMITTANCE TRANSFERRED/AUTHORIZED BY EXCHANGE HOUSE',
+            03 => 'REMITTANCE READY FOR PAYMENT',
+            04 => 'REMITTANCE UNDER PROCESS',
+            05 => 'REMITTANCE STOPPED',
+            06 => 'REMITTANCE STOPPED BY EXCHANGE HOUSE',
+            07 => 'REMITTANCE PAID08 REMITTANCE AMENDED',
+            11 => 'REMITTANCE CANCELLED',
+            17 => 'REMITTANCE REVERSED',
+            20 => 'REMITTANCE CANCEL REQUEST',
+            30 => 'REMITTANCE AMENDMENT REQUEST',
+            70 => 'REMITTANCE CBS UNDER PROCESS',
+            73 => 'REMITTANCE CBS AUTHORIZED',
+            74 => 'REMITTANCE CBS PENDING',
+            77 => 'REMITTANCE CBS NRT ACCOUNT DEBITED',
+            78 => 'REMITTANCE CBS READY FOR PAYMENT',
+            79 => 'REMITTANCE CBS CREDITED TO ACCOUNT',
+            80 => 'REMITTANCE CBS UNKNOWN STATE',
+            82 => 'CBS ACC PAYEE TITLE AND ACCOUNT NO DIFFER',
+            83 => 'CBS EFT INVALID ACCOUNT',
+            84 => 'CBS EFT SENT TO THIRD BANK',
+            99 => 'REMITTANCE INVALID STATUS',
         ];
     }
 }
