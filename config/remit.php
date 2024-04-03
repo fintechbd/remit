@@ -154,12 +154,12 @@ return [
             'live' => [
                 'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
                 'username' => '7106UAT',
-                'password' => '7106@Pass'
+                'password' => '7106@Pass',
             ],
             'sandbox' => [
                 'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
                 'username' => 'clavistestws',
-                'password' => ''
+                'password' => '',
             ],
         ],
     ],

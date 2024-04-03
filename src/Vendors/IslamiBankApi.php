@@ -6,7 +6,6 @@ use Exception;
 use Fintech\Remit\Contracts\BankTransfer;
 use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Facades\Log;
-use MongoDB\Laravel\Eloquent\Model;
 use SimpleXMLElement;
 
 class IslamiBankApi implements BankTransfer, OrderQuotation
@@ -48,19 +47,18 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Fetch Exchange House NRT/NRD account balance (fetchBalance)
      * Parameters: userID, password, currency
      *
-     * @param string $currency
-     * @return SimpleXMLElement
      * @throws Exception
      */
     public function fetchBalance(string $currency): SimpleXMLElement
     {
-        $xmlString = "
-            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
-            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
-            <ns2: currency>" . $currency . "</ns2: currency>
-        ";
+        $xmlString = '
+            <ns2:userID>'.$this->config[$this->status]['username'].'</ns2:userID>
+            <ns2:password>'.$this->config[$this->status]['password'].'</ns2:password>
+            <ns2: currency>'.$currency.'</ns2: currency>
+        ';
         $soapMethod = 'fetchBalance';
         $response = $this->connectionCheck($xmlString, $soapMethod);
+
         return $response->fetchBalanceResponse->Response;
     }
 
@@ -68,21 +66,20 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Fetch Account Details (fetchAccountDetail)
      * Parameters: userID, password, account_number, account_type, branch_code
      *
-     * @param array $data
-     * @return SimpleXMLElement
      * @throws Exception
      */
     public function fetchAccountDetail(array $data): SimpleXMLElement
     {
-        $xmlString = "
-            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
-            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
-        ";
-        $xmlString .= "<ns2:accNo>" . ($data['account_number'] ?? null) . "</ns2:accNo>";
-        $xmlString .= "<ns2:accType>" . ($data['account_type'] ?? null) . "</ns2:accType>";
-        $xmlString .= "<ns2:branchCode>" . ($data['branch_code'] ?? null) . "</ns2:branchCode>";
+        $xmlString = '
+            <ns2:userID>'.$this->config[$this->status]['username'].'</ns2:userID>
+            <ns2:password>'.$this->config[$this->status]['password'].'</ns2:password>
+        ';
+        $xmlString .= '<ns2:accNo>'.($data['account_number'] ?? null).'</ns2:accNo>';
+        $xmlString .= '<ns2:accType>'.($data['account_type'] ?? null).'</ns2:accType>';
+        $xmlString .= '<ns2:branchCode>'.($data['branch_code'] ?? null).'</ns2:branchCode>';
         $soapMethod = 'fetchAccountDetail';
         $response = $this->connectionCheck($xmlString, $soapMethod);
+
         return $response->fetchAccountDetailResponse->Response;
     }
 
@@ -90,20 +87,19 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Fetch Remittance Status (fetchWSMessageStatus)
      * Parameters: userID, password, transaction_reference_number, secret_key
      *
-     * @param array $data
-     * @return SimpleXMLElement
      * @throws Exception
      */
     public function fetchRemittanceStatus(array $data): SimpleXMLElement
     {
-        $xmlString = "
-            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
-            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
-        ";
-        $xmlString .= "<ns2:transRefNo>" . ($data['transaction_reference_number'] ?? null) . "</ns2:transRefNo>";
-        $xmlString .= "<ns2:secretKey>" . ($data['secret_key'] ?? null) . "</ns2:secretKey>";
+        $xmlString = '
+            <ns2:userID>'.$this->config[$this->status]['username'].'</ns2:userID>
+            <ns2:password>'.$this->config[$this->status]['password'].'</ns2:password>
+        ';
+        $xmlString .= '<ns2:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ns2:transRefNo>';
+        $xmlString .= '<ns2:secretKey>'.($data['secret_key'] ?? null).'</ns2:secretKey>';
         $soapMethod = 'fetchWSMessageStatusResponse';
         $response = $this->connectionCheck($xmlString, $soapMethod);
+
         return $response->fetchAccountDetailResponse->Response;
     }
 
@@ -111,44 +107,43 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Direct Credit Remittance (directCreditWSMessage)
      * Parameters: userID, password, accNo, wsMessage
      *
-     * @param array $data
-     * @return SimpleXMLElement
      * @throws Exception
      */
     public function directCreditRemittance(array $data): SimpleXMLElement
     {
-        $xmlString = "
-            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
-            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
-        ";
-        $xmlString .= "<ns2:transRefNo>" . ($data['transaction_reference_number'] ?? null) . "</ns2:transRefNo>";
-        $xmlString .= "<ns2:wsMessage>";
-        $xmlString .= '<ns1:amount xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['amount'] ?? null) . '</ns1:amount>';
-        $xmlString .= '<ns1:isoCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['isoCode'] ?? null) . '</ns1:isoCode>';
+        $xmlString = '
+            <ns2:userID>'.$this->config[$this->status]['username'].'</ns2:userID>
+            <ns2:password>'.$this->config[$this->status]['password'].'</ns2:password>
+        ';
+        $xmlString .= '<ns2:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ns2:transRefNo>';
+        $xmlString .= '<ns2:wsMessage>';
+        $xmlString .= '<ns1:amount xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['amount'] ?? null).'</ns1:amount>';
+        $xmlString .= '<ns1:isoCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['isoCode'] ?? null).'</ns1:isoCode>';
 
-        $xmlString .= '<ns1:beneficiaryAccNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryAccNo'] ?? null) . '</ns1:beneficiaryAccNo>';
-        $xmlString .= '<ns1:beneficiaryAccType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryAccType'] ?? null) . '</ns1:beneficiaryAccType>';
+        $xmlString .= '<ns1:beneficiaryAccNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryAccNo'] ?? null).'</ns1:beneficiaryAccNo>';
+        $xmlString .= '<ns1:beneficiaryAccType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryAccType'] ?? null).'</ns1:beneficiaryAccType>';
 
-        $xmlString .= '<ns1:beneficiaryAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryAddress'] ?? null) . '</ns1:beneficiaryAddress>';
-        $xmlString .= '<ns1:beneficiaryBankCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBankCode'] ?? null) . '</ns1:beneficiaryBankCode>';
-        $xmlString .= '<ns1:beneficiaryBankName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBankName'] ?? null) . '</ns1:beneficiaryBankName>';
-        $xmlString .= '<ns1:beneficiaryBranchCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBranchCode'] ?? null) . '</ns1:beneficiaryBranchCode>';
-        $xmlString .= '<ns1:beneficiaryBranchName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBranchName'] ?? null) . '</ns1:beneficiaryBranchName>';
-        $xmlString .= '<ns1:beneficiaryName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryName'] ?? null) . '</ns1:beneficiaryName>';
-        $xmlString .= '<ns1:beneficiaryPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryPhoneNo'] ?? null) . '</ns1:beneficiaryPhoneNo>';
-        $xmlString .= '<ns1:issueDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['issueDate'] ?? null) . '</ns1:issueDate>';
-        $xmlString .= '<ns1:note xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['note'] ?? null) . '</ns1:note>';
-        $xmlString .= '<ns1:paymentType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['paymentType'] ?? null) . '</ns1:paymentType>';
-        $xmlString .= '<ns1:remitterAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterAddress'] ?? null) . '</ns1:remitterAddress>';
-        $xmlString .= '<ns1:remitterIdentificationNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterIdentificationNo'] ?? null) . '</ns1:remitterIdentificationNo>';
-        $xmlString .= '<ns1:remitterName xmlns:ns1="http://bean.ws.mt.ibbl/xsd"' . ($data['remitterName'] ?? null) . '</ns1:remitterName>';
-        $xmlString .= '<ns1:remitterPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterPhoneNo'] ?? null) . '</ns1:remitterPhoneNo>';
-        $xmlString .= '<ns1:secretKey xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['secretKey'] ?? null) . '</ns1:secretKey>';
-        $xmlString .= '<ns1:transReferenceNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['transReferenceNo'] ?? null) . '</ns1:transReferenceNo>';
-        $xmlString .= '<ns1: remittancePurpose xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remittancePurpose'] ?? null) . '</ns1: remittancePurpose >';
-        $xmlString .= "</ns2:wsMessage>";
+        $xmlString .= '<ns1:beneficiaryAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryAddress'] ?? null).'</ns1:beneficiaryAddress>';
+        $xmlString .= '<ns1:beneficiaryBankCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryBankCode'] ?? null).'</ns1:beneficiaryBankCode>';
+        $xmlString .= '<ns1:beneficiaryBankName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryBankName'] ?? null).'</ns1:beneficiaryBankName>';
+        $xmlString .= '<ns1:beneficiaryBranchCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryBranchCode'] ?? null).'</ns1:beneficiaryBranchCode>';
+        $xmlString .= '<ns1:beneficiaryBranchName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryBranchName'] ?? null).'</ns1:beneficiaryBranchName>';
+        $xmlString .= '<ns1:beneficiaryName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryName'] ?? null).'</ns1:beneficiaryName>';
+        $xmlString .= '<ns1:beneficiaryPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryPhoneNo'] ?? null).'</ns1:beneficiaryPhoneNo>';
+        $xmlString .= '<ns1:issueDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['issueDate'] ?? null).'</ns1:issueDate>';
+        $xmlString .= '<ns1:note xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['note'] ?? null).'</ns1:note>';
+        $xmlString .= '<ns1:paymentType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['paymentType'] ?? null).'</ns1:paymentType>';
+        $xmlString .= '<ns1:remitterAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['remitterAddress'] ?? null).'</ns1:remitterAddress>';
+        $xmlString .= '<ns1:remitterIdentificationNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['remitterIdentificationNo'] ?? null).'</ns1:remitterIdentificationNo>';
+        $xmlString .= '<ns1:remitterName xmlns:ns1="http://bean.ws.mt.ibbl/xsd"'.($data['remitterName'] ?? null).'</ns1:remitterName>';
+        $xmlString .= '<ns1:remitterPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['remitterPhoneNo'] ?? null).'</ns1:remitterPhoneNo>';
+        $xmlString .= '<ns1:secretKey xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['secretKey'] ?? null).'</ns1:secretKey>';
+        $xmlString .= '<ns1:transReferenceNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['transReferenceNo'] ?? null).'</ns1:transReferenceNo>';
+        $xmlString .= '<ns1: remittancePurpose xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['remittancePurpose'] ?? null).'</ns1: remittancePurpose >';
+        $xmlString .= '</ns2:wsMessage>';
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
+
         return $response->directCreditWSMessageResponse->Response;
     }
 
@@ -156,46 +151,45 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Import/push remittance (importWSMessage)
      * Parameters: userID, password, accNo, wsMessage
      *
-     * @param array $data
-     * @return SimpleXMLElement
      * @throws Exception
      */
     public function importOrPushRemittance(array $data): SimpleXMLElement
     {
-        $xmlString = "
-            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
-            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
-        ";
-        $xmlString .= "<ns2:transRefNo>" . ($data['transaction_reference_number'] ?? null) . "</ns2:transRefNo>";
-        $xmlString .= "<ns2:wsMessage>";
-        $xmlString .= '<ns1:amount xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['amount'] ?? null) . '</ns1:amount>';
-        $xmlString .= '<ns1:isoCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['isoCode'] ?? null) . '</ns1:isoCode>';
-        $xmlString .= '<ns1:beneficiaryAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryAddress'] ?? null) . '</ns1:beneficiaryAddress>';
-        $xmlString .= '<ns1:beneficiaryBankCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBankCode'] ?? null) . '</ns1:beneficiaryBankCode>';
-        $xmlString .= '<ns1:beneficiaryBankName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBankName'] ?? null) . '</ns1:beneficiaryBankName>';
-        $xmlString .= '<ns1:beneficiaryBranchCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBranchCode'] ?? null) . '</ns1:beneficiaryBranchCode>';
-        $xmlString .= '<ns1:beneficiaryBranchName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBranchName'] ?? null) . '</ns1:beneficiaryBranchName>';
-        $xmlString .= '<ns1:beneficiaryName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryName'] ?? null) . '</ns1:beneficiaryName>';
-        $xmlString .= '<ns1:beneficiaryPassportNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryPassportNo'] ?? null) . '</ns1:beneficiaryPassportNo>';
-        $xmlString .= '<ns1:beneficiaryPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryPhoneNo'] ?? null) . '</ns1:beneficiaryPhoneNo>';
-        $xmlString .= '<ns1:creatorID xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['creatorID'] ?? null) . '</ns1:creatorID>';
-        $xmlString .= '<ns1:exchHouseSwiftCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['exchHouseSwiftCode'] ?? null) . '</ns1:exchHouseSwiftCode>';
-        $xmlString .= '<ns1:identityDescription xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['identityDescription'] ?? null) . '</ns1:identityDescription>';
-        $xmlString .= '<ns1:identityType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['identityType'] ?? null) . '</ns1:identityType>';
-        $xmlString .= '<ns1:issueDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['issueDate'] ?? null) . '</ns1:issueDate>';
-        $xmlString .= '<ns1:note xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['note'] ?? null) . '</ns1:note>';
-        $xmlString .= '<ns1:paymentType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['paymentType'] ?? null) . '</ns1:paymentType>';
-        $xmlString .= '<ns1:remitterAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterAddress'] ?? null) . '</ns1:remitterAddress>';
-        $xmlString .= '<ns1:remitterIdentificationNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterIdentificationNo'] ?? null) . '</ns1:remitterIdentificationNo>';
-        $xmlString .= '<ns1:remitterName xmlns:ns1="http://bean.ws.mt.ibbl/xsd"' . ($data['remitterName'] ?? null) . '</ns1:remitterName>';
-        $xmlString .= '<ns1:remitterPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterPhoneNo'] ?? null) . '</ns1:remitterPhoneNo>';
-        $xmlString .= '<ns1:secretKey xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['secretKey'] ?? null) . '</ns1:secretKey>';
-        $xmlString .= '<ns1:transReferenceNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['transReferenceNo'] ?? null) . '</ns1:transReferenceNo>';
-        $xmlString .= '<ns1:transferDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['transferDate'] ?? null) . '</ns1:transferDate>';
-        $xmlString .= '<ns1: remittancePurpose xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remittancePurpose'] ?? null) . '</ns1: remittancePurpose >';
-        $xmlString .= "</ns2:wsMessage>";
+        $xmlString = '
+            <ns2:userID>'.$this->config[$this->status]['username'].'</ns2:userID>
+            <ns2:password>'.$this->config[$this->status]['password'].'</ns2:password>
+        ';
+        $xmlString .= '<ns2:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ns2:transRefNo>';
+        $xmlString .= '<ns2:wsMessage>';
+        $xmlString .= '<ns1:amount xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['amount'] ?? null).'</ns1:amount>';
+        $xmlString .= '<ns1:isoCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['isoCode'] ?? null).'</ns1:isoCode>';
+        $xmlString .= '<ns1:beneficiaryAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryAddress'] ?? null).'</ns1:beneficiaryAddress>';
+        $xmlString .= '<ns1:beneficiaryBankCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryBankCode'] ?? null).'</ns1:beneficiaryBankCode>';
+        $xmlString .= '<ns1:beneficiaryBankName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryBankName'] ?? null).'</ns1:beneficiaryBankName>';
+        $xmlString .= '<ns1:beneficiaryBranchCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryBranchCode'] ?? null).'</ns1:beneficiaryBranchCode>';
+        $xmlString .= '<ns1:beneficiaryBranchName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryBranchName'] ?? null).'</ns1:beneficiaryBranchName>';
+        $xmlString .= '<ns1:beneficiaryName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryName'] ?? null).'</ns1:beneficiaryName>';
+        $xmlString .= '<ns1:beneficiaryPassportNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryPassportNo'] ?? null).'</ns1:beneficiaryPassportNo>';
+        $xmlString .= '<ns1:beneficiaryPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryPhoneNo'] ?? null).'</ns1:beneficiaryPhoneNo>';
+        $xmlString .= '<ns1:creatorID xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['creatorID'] ?? null).'</ns1:creatorID>';
+        $xmlString .= '<ns1:exchHouseSwiftCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['exchHouseSwiftCode'] ?? null).'</ns1:exchHouseSwiftCode>';
+        $xmlString .= '<ns1:identityDescription xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['identityDescription'] ?? null).'</ns1:identityDescription>';
+        $xmlString .= '<ns1:identityType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['identityType'] ?? null).'</ns1:identityType>';
+        $xmlString .= '<ns1:issueDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['issueDate'] ?? null).'</ns1:issueDate>';
+        $xmlString .= '<ns1:note xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['note'] ?? null).'</ns1:note>';
+        $xmlString .= '<ns1:paymentType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['paymentType'] ?? null).'</ns1:paymentType>';
+        $xmlString .= '<ns1:remitterAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['remitterAddress'] ?? null).'</ns1:remitterAddress>';
+        $xmlString .= '<ns1:remitterIdentificationNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['remitterIdentificationNo'] ?? null).'</ns1:remitterIdentificationNo>';
+        $xmlString .= '<ns1:remitterName xmlns:ns1="http://bean.ws.mt.ibbl/xsd"'.($data['remitterName'] ?? null).'</ns1:remitterName>';
+        $xmlString .= '<ns1:remitterPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['remitterPhoneNo'] ?? null).'</ns1:remitterPhoneNo>';
+        $xmlString .= '<ns1:secretKey xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['secretKey'] ?? null).'</ns1:secretKey>';
+        $xmlString .= '<ns1:transReferenceNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['transReferenceNo'] ?? null).'</ns1:transReferenceNo>';
+        $xmlString .= '<ns1:transferDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['transferDate'] ?? null).'</ns1:transferDate>';
+        $xmlString .= '<ns1: remittancePurpose xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['remittancePurpose'] ?? null).'</ns1: remittancePurpose >';
+        $xmlString .= '</ns2:wsMessage>';
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
+
         return $response->directCreditWSMessageResponse->Response;
     }
 
@@ -203,46 +197,45 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Verify remittance (importWSMessage)
      * Parameters: userID, password, accNo, wsMessage
      *
-     * @param array $data
-     * @return SimpleXMLElement
      * @throws Exception
      */
     public function verifyRemittance(array $data): SimpleXMLElement
     {
-        $xmlString = "
-            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
-            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
-        ";
-        $xmlString .= "<ns2:transRefNo>" . ($data['transaction_reference_number'] ?? null) . "</ns2:transRefNo>";
-        $xmlString .= "<ns2:wsMessage>";
-        $xmlString .= '<ns1:amount xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['amount'] ?? null) . '</ns1:amount>';
-        $xmlString .= '<ns1:isoCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['isoCode'] ?? null) . '</ns1:isoCode>';
-        $xmlString .= '<ns1:beneficiaryAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryAddress'] ?? null) . '</ns1:beneficiaryAddress>';
-        $xmlString .= '<ns1:beneficiaryBankCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBankCode'] ?? null) . '</ns1:beneficiaryBankCode>';
-        $xmlString .= '<ns1:beneficiaryBankName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBankName'] ?? null) . '</ns1:beneficiaryBankName>';
-        $xmlString .= '<ns1:beneficiaryBranchCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBranchCode'] ?? null) . '</ns1:beneficiaryBranchCode>';
-        $xmlString .= '<ns1:beneficiaryBranchName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBranchName'] ?? null) . '</ns1:beneficiaryBranchName>';
-        $xmlString .= '<ns1:beneficiaryName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryName'] ?? null) . '</ns1:beneficiaryName>';
-        $xmlString .= '<ns1:beneficiaryPassportNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryPassportNo'] ?? null) . '</ns1:beneficiaryPassportNo>';
-        $xmlString .= '<ns1:beneficiaryPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryPhoneNo'] ?? null) . '</ns1:beneficiaryPhoneNo>';
-        $xmlString .= '<ns1:creatorID xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['creatorID'] ?? null) . '</ns1:creatorID>';
-        $xmlString .= '<ns1:exchHouseSwiftCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['exchHouseSwiftCode'] ?? null) . '</ns1:exchHouseSwiftCode>';
-        $xmlString .= '<ns1:identityDescription xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['identityDescription'] ?? null) . '</ns1:identityDescription>';
-        $xmlString .= '<ns1:identityType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['identityType'] ?? null) . '</ns1:identityType>';
-        $xmlString .= '<ns1:issueDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['issueDate'] ?? null) . '</ns1:issueDate>';
-        $xmlString .= '<ns1:note xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['note'] ?? null) . '</ns1:note>';
-        $xmlString .= '<ns1:paymentType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['paymentType'] ?? null) . '</ns1:paymentType>';
-        $xmlString .= '<ns1:remitterAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterAddress'] ?? null) . '</ns1:remitterAddress>';
-        $xmlString .= '<ns1:remitterIdentificationNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterIdentificationNo'] ?? null) . '</ns1:remitterIdentificationNo>';
-        $xmlString .= '<ns1:remitterName xmlns:ns1="http://bean.ws.mt.ibbl/xsd"' . ($data['remitterName'] ?? null) . '</ns1:remitterName>';
-        $xmlString .= '<ns1:remitterPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterPhoneNo'] ?? null) . '</ns1:remitterPhoneNo>';
-        $xmlString .= '<ns1:secretKey xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['secretKey'] ?? null) . '</ns1:secretKey>';
-        $xmlString .= '<ns1:transReferenceNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['transReferenceNo'] ?? null) . '</ns1:transReferenceNo>';
-        $xmlString .= '<ns1:transferDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['transferDate'] ?? null) . '</ns1:transferDate>';
-        $xmlString .= '<ns1: remittancePurpose xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remittancePurpose'] ?? null) . '</ns1: remittancePurpose >';
-        $xmlString .= "</ns2:wsMessage>";
+        $xmlString = '
+            <ns2:userID>'.$this->config[$this->status]['username'].'</ns2:userID>
+            <ns2:password>'.$this->config[$this->status]['password'].'</ns2:password>
+        ';
+        $xmlString .= '<ns2:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ns2:transRefNo>';
+        $xmlString .= '<ns2:wsMessage>';
+        $xmlString .= '<ns1:amount xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['amount'] ?? null).'</ns1:amount>';
+        $xmlString .= '<ns1:isoCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['isoCode'] ?? null).'</ns1:isoCode>';
+        $xmlString .= '<ns1:beneficiaryAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryAddress'] ?? null).'</ns1:beneficiaryAddress>';
+        $xmlString .= '<ns1:beneficiaryBankCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryBankCode'] ?? null).'</ns1:beneficiaryBankCode>';
+        $xmlString .= '<ns1:beneficiaryBankName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryBankName'] ?? null).'</ns1:beneficiaryBankName>';
+        $xmlString .= '<ns1:beneficiaryBranchCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryBranchCode'] ?? null).'</ns1:beneficiaryBranchCode>';
+        $xmlString .= '<ns1:beneficiaryBranchName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryBranchName'] ?? null).'</ns1:beneficiaryBranchName>';
+        $xmlString .= '<ns1:beneficiaryName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryName'] ?? null).'</ns1:beneficiaryName>';
+        $xmlString .= '<ns1:beneficiaryPassportNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryPassportNo'] ?? null).'</ns1:beneficiaryPassportNo>';
+        $xmlString .= '<ns1:beneficiaryPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['beneficiaryPhoneNo'] ?? null).'</ns1:beneficiaryPhoneNo>';
+        $xmlString .= '<ns1:creatorID xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['creatorID'] ?? null).'</ns1:creatorID>';
+        $xmlString .= '<ns1:exchHouseSwiftCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['exchHouseSwiftCode'] ?? null).'</ns1:exchHouseSwiftCode>';
+        $xmlString .= '<ns1:identityDescription xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['identityDescription'] ?? null).'</ns1:identityDescription>';
+        $xmlString .= '<ns1:identityType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['identityType'] ?? null).'</ns1:identityType>';
+        $xmlString .= '<ns1:issueDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['issueDate'] ?? null).'</ns1:issueDate>';
+        $xmlString .= '<ns1:note xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['note'] ?? null).'</ns1:note>';
+        $xmlString .= '<ns1:paymentType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['paymentType'] ?? null).'</ns1:paymentType>';
+        $xmlString .= '<ns1:remitterAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['remitterAddress'] ?? null).'</ns1:remitterAddress>';
+        $xmlString .= '<ns1:remitterIdentificationNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['remitterIdentificationNo'] ?? null).'</ns1:remitterIdentificationNo>';
+        $xmlString .= '<ns1:remitterName xmlns:ns1="http://bean.ws.mt.ibbl/xsd"'.($data['remitterName'] ?? null).'</ns1:remitterName>';
+        $xmlString .= '<ns1:remitterPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['remitterPhoneNo'] ?? null).'</ns1:remitterPhoneNo>';
+        $xmlString .= '<ns1:secretKey xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['secretKey'] ?? null).'</ns1:secretKey>';
+        $xmlString .= '<ns1:transReferenceNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['transReferenceNo'] ?? null).'</ns1:transReferenceNo>';
+        $xmlString .= '<ns1:transferDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['transferDate'] ?? null).'</ns1:transferDate>';
+        $xmlString .= '<ns1: remittancePurpose xmlns:ns1="http://bean.ws.mt.ibbl/xsd">'.($data['remittancePurpose'] ?? null).'</ns1: remittancePurpose >';
+        $xmlString .= '</ns2:wsMessage>';
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
+
         return $response->directCreditWSMessageResponse->Response;
     }
 
@@ -250,39 +243,34 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * ValidateBeneficiaryWallet (validateBeneficiaryWallet)
      * Parameters: userID, password, walletNo, paymentType
      *
-     * @param array $data
-     * @return SimpleXMLElement
      * @throws Exception
      */
     public function validateBeneficiaryWallet(array $data): SimpleXMLElement
     {
-        $xmlString = "
-            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
-            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
-        ";
-        $xmlString .= "<ns2:walletNo>" . ($data['account_number'] ?? null) . "</ns2:walletNo>";
-        $xmlString .= "<ns2:paymentType>" . ($data['account_type'] ?? null) . "</ns2:paymentType>";
+        $xmlString = '
+            <ns2:userID>'.$this->config[$this->status]['username'].'</ns2:userID>
+            <ns2:password>'.$this->config[$this->status]['password'].'</ns2:password>
+        ';
+        $xmlString .= '<ns2:walletNo>'.($data['account_number'] ?? null).'</ns2:walletNo>';
+        $xmlString .= '<ns2:paymentType>'.($data['account_type'] ?? null).'</ns2:paymentType>';
         $soapMethod = 'validateBeneficiaryWallet';
         $response = $this->connectionCheck($xmlString, $soapMethod);
+
         return $response->validateBeneficiaryWalletResponse->Response;
     }
 
     /**
-     * @param $xml_post_string
-     * @param $method
-     * @return SimpleXMLElement
-     *
      * @throws Exception
      */
     private function connectionCheck($xml_post_string, $method): SimpleXMLElement
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
-        Log::info($method . '<br>' . $xml_string);
+        Log::info($method.'<br>'.$xml_string);
         $headers = [
-            'Host: ' . $this->config[$this->status]['app_host'],
+            'Host: '.$this->config[$this->status]['app_host'],
             'Content-type: text/xml;charset="utf-8"',
-            'Content-length: ' . strlen($xml_string),
-            'SOAPAction: ' . $method,
+            'Content-length: '.strlen($xml_string),
+            'SOAPAction: '.$method,
         ];
 
         // PHP cURL  for connection
@@ -297,7 +285,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         // execution
         $response = curl_exec($ch);
-        Log::error($method . ' CURL reported error: ');
+        Log::error($method.' CURL reported error: ');
         if ($response === false) {
             throw new Exception(curl_error($ch), curl_errno($ch));
         }
@@ -306,25 +294,20 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
         $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
         $response = str_replace('ns:', '', $response); //dd($response);
-        Log::info($method . '<br>' . $response);
+        Log::info($method.'<br>'.$response);
 
         return simplexml_load_string($response);
     }
 
-    /**
-     * @param $string
-     * @param $method
-     * @return string
-     */
     public function xmlGenerate($string, $method): string
     {
         return '<?xml version="1.0" encoding="utf-8"?>
             <soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
                 <soapenv:Header/>
                 <soapenv:Body>
-                    <urn:' . $method . ' xmlns:ns2="http://service.ws.mt.ibbl">
-                        ' . $string . '
-                    </urn:' . $method . '>
+                    <urn:'.$method.' xmlns:ns2="http://service.ws.mt.ibbl">
+                        '.$string.'
+                    </urn:'.$method.'>
                 </soapenv:Body>
             </soapenv:Envelope>
         ';
@@ -334,7 +317,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Response Code List
      * These codes will return in all operations.
      *
-     * @param int $code
      * @return string[]
      */
     private function __responseCodeList(int $code): array
@@ -422,7 +404,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Response Status Code List
      * These codes will return in only Fetch Remittance Status (fetchWSMessageStatus) operation.
      *
-     * @param string $code
      * @return string[]
      */
     private function __responseStatusCodeList(string $code): array
@@ -457,7 +438,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     /**
      * Instrument/Payment Type Code
      *
-     * @param int $code
      * @return string[]
      */
     private function __instrumentOrPaymentTypeCode(int $code): array
@@ -476,7 +456,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     /**
      * Beneficiary Identity Type Code
      *
-     * @param int $code
      * @return string[]
      */
     private function __beneficiaryIdentityTypeCode(int $code): array
@@ -500,7 +479,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Account Type Code
      * Please send the following two digit code against the different types of account.
      *
-     * @param string $code
      * @return string[]
      */
     private function __accountTypeCode(string $code): array
