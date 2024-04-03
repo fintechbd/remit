@@ -12,14 +12,14 @@ use SimpleXMLElement;
 class IslamiBankApi implements BankTransfer, OrderQuotation
 {
     /**
-     * CityBank API configuration.
+     * IslamiBank API configuration.
      *
      * @var array
      */
     private $config;
 
     /**
-     * CityBank API Url.
+     * IslamiBank API Url.
      *
      * @var string
      */
@@ -28,7 +28,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     private $status = 'sandbox';
 
     /**
-     * CityBankApiService constructor.
+     * IslamiBankApiService constructor.
      */
     public function __construct()
     {
@@ -45,96 +45,244 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * Get transaction status service will help you to get the transaction status
+     * Fetch Exchange House NRT/NRD account balance (fetchBalance)
+     * Parameters: userID, password, currency
      *
-     * @param  $inputs_data
-     *                      reference_no like system transaction number
-     * @return mixed
-     *
+     * @param string $currency
+     * @return SimpleXMLElement
      * @throws Exception
      */
-    public function getTnxStatus($inputs_data)
+    public function fetchBalance(string $currency): SimpleXMLElement
     {
-
+        $xmlString = "
+            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
+            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
+            <ns2: currency>" . $currency . "</ns2: currency>
+        ";
+        $soapMethod = 'fetchBalance';
+        $response = $this->connectionCheck($xmlString, $soapMethod);
+        return $response->fetchBalanceResponse->Response;
     }
 
     /**
-     * bKash customer validation service will help you to validate the beneficiary bkash number before send the transaction
+     * Fetch Account Details (fetchAccountDetail)
+     * Parameters: userID, password, account_number, account_type, branch_code
      *
-     * @param  $inputData
-     *                    receiver_first_name like receiver name
-     *                    bank_account_number like receiver bkash number or wallet number
-     * @return mixed
-     *
+     * @param array $data
+     * @return SimpleXMLElement
      * @throws Exception
      */
-    public function bkashCustomerValidation($inputData)
+    public function fetchAccountDetail(array $data): SimpleXMLElement
     {
-        $doAuthenticate = $this->doAuthenticate();
-        if ($doAuthenticate != 'AUTH_FAILED' || $doAuthenticate != null) {
-            $xml_string = '
-                <bkash_customer_validation xsi:type="urn:bkash_customer_validation">
-                    <!--You may enter the following 3 items in any order-->
-                    <token xsi:type="xsd:string">'.$doAuthenticate.'</token>
-                    <fullName xsi:type="xsd:string">'.$inputData['receiver_first_name'].'</fullName>
-                    <mobileNumber xsi:type="xsd:string">'.$inputData['bank_account_number'].'</mobileNumber>
-                </bkash_customer_validation>
-            ';
-            $soapMethod = 'bkashCustomerValidation';
-            $response = $this->connectionCheck($xml_string, $soapMethod);
-            if (isset($response) && $response != false && $response != null) {
-                $returnValue = json_decode($response->bkashCustomerValidationResponse->Response, true);
-            } else {
-                $returnValue = ['message' => 'Transaction response Found', 'status' => 5000];
-            }
-        } else {
-            $returnValue = ['message' => 'AUTH_FAILED INVALID USER INFORMATION', 'status' => 103];
-        }
-
-        return $returnValue;
+        $xmlString = "
+            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
+            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
+        ";
+        $xmlString .= "<ns2:accNo>" . ($data['account_number'] ?? null) . "</ns2:accNo>";
+        $xmlString .= "<ns2:accType>" . ($data['account_type'] ?? null) . "</ns2:accType>";
+        $xmlString .= "<ns2:branchCode>" . ($data['branch_code'] ?? null) . "</ns2:branchCode>";
+        $soapMethod = 'fetchAccountDetail';
+        $response = $this->connectionCheck($xmlString, $soapMethod);
+        return $response->fetchAccountDetailResponse->Response;
     }
 
     /**
-     * Do authenticate service will provide you the access token by providing following parameter value
+     * Fetch Remittance Status (fetchWSMessageStatus)
+     * Parameters: userID, password, transaction_reference_number, secret_key
      *
-     * @return mixed
-     *
+     * @param array $data
+     * @return SimpleXMLElement
      * @throws Exception
      */
-    private function doAuthenticate()
+    public function fetchRemittanceStatus(array $data): SimpleXMLElement
     {
-        $return = 'AUTH_FAILED';
-        $xml_string = '
-            <auth_info xsi:type="urn:auth_info">
-                <username xsi:type="xsd:string">'.$this->config[$this->status]['username'].'</username>
-                <password xsi:type="xsd:string">'.$this->config[$this->status]['password'].'</password>
-                <exchange_company xsi:type="xsd:string">'.$this->config[$this->status]['exchange_company'].'</exchange_company>
-            </auth_info>
-        ';
-        $soapMethod = 'doAuthenticate';
-        $response = $this->connectionCheck($xml_string, $soapMethod);
-        $returnValue = json_decode($response->doAuthenticateResponse->Response, true);
-        if ($returnValue['message'] == 'Successful') {
-            $return = $returnValue['token'];
-        }
-
-        return $return;
+        $xmlString = "
+            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
+            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
+        ";
+        $xmlString .= "<ns2:transRefNo>" . ($data['transaction_reference_number'] ?? null) . "</ns2:transRefNo>";
+        $xmlString .= "<ns2:secretKey>" . ($data['secret_key'] ?? null) . "</ns2:secretKey>";
+        $soapMethod = 'fetchWSMessageStatusResponse';
+        $response = $this->connectionCheck($xmlString, $soapMethod);
+        return $response->fetchAccountDetailResponse->Response;
     }
 
     /**
+     * Direct Credit Remittance (directCreditWSMessage)
+     * Parameters: userID, password, accNo, wsMessage
+     *
+     * @param array $data
+     * @return SimpleXMLElement
+     * @throws Exception
+     */
+    public function directCreditRemittance(array $data): SimpleXMLElement
+    {
+        $xmlString = "
+            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
+            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
+        ";
+        $xmlString .= "<ns2:transRefNo>" . ($data['transaction_reference_number'] ?? null) . "</ns2:transRefNo>";
+        $xmlString .= "<ns2:wsMessage>";
+        $xmlString .= '<ns1:amount xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['amount'] ?? null) . '</ns1:amount>';
+        $xmlString .= '<ns1:isoCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['isoCode'] ?? null) . '</ns1:isoCode>';
+
+        $xmlString .= '<ns1:beneficiaryAccNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryAccNo'] ?? null) . '</ns1:beneficiaryAccNo>';
+        $xmlString .= '<ns1:beneficiaryAccType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryAccType'] ?? null) . '</ns1:beneficiaryAccType>';
+
+        $xmlString .= '<ns1:beneficiaryAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryAddress'] ?? null) . '</ns1:beneficiaryAddress>';
+        $xmlString .= '<ns1:beneficiaryBankCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBankCode'] ?? null) . '</ns1:beneficiaryBankCode>';
+        $xmlString .= '<ns1:beneficiaryBankName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBankName'] ?? null) . '</ns1:beneficiaryBankName>';
+        $xmlString .= '<ns1:beneficiaryBranchCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBranchCode'] ?? null) . '</ns1:beneficiaryBranchCode>';
+        $xmlString .= '<ns1:beneficiaryBranchName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBranchName'] ?? null) . '</ns1:beneficiaryBranchName>';
+        $xmlString .= '<ns1:beneficiaryName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryName'] ?? null) . '</ns1:beneficiaryName>';
+        $xmlString .= '<ns1:beneficiaryPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryPhoneNo'] ?? null) . '</ns1:beneficiaryPhoneNo>';
+        $xmlString .= '<ns1:issueDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['issueDate'] ?? null) . '</ns1:issueDate>';
+        $xmlString .= '<ns1:note xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['note'] ?? null) . '</ns1:note>';
+        $xmlString .= '<ns1:paymentType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['paymentType'] ?? null) . '</ns1:paymentType>';
+        $xmlString .= '<ns1:remitterAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterAddress'] ?? null) . '</ns1:remitterAddress>';
+        $xmlString .= '<ns1:remitterIdentificationNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterIdentificationNo'] ?? null) . '</ns1:remitterIdentificationNo>';
+        $xmlString .= '<ns1:remitterName xmlns:ns1="http://bean.ws.mt.ibbl/xsd"' . ($data['remitterName'] ?? null) . '</ns1:remitterName>';
+        $xmlString .= '<ns1:remitterPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterPhoneNo'] ?? null) . '</ns1:remitterPhoneNo>';
+        $xmlString .= '<ns1:secretKey xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['secretKey'] ?? null) . '</ns1:secretKey>';
+        $xmlString .= '<ns1:transReferenceNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['transReferenceNo'] ?? null) . '</ns1:transReferenceNo>';
+        $xmlString .= '<ns1: remittancePurpose xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remittancePurpose'] ?? null) . '</ns1: remittancePurpose >';
+        $xmlString .= "</ns2:wsMessage>";
+        $soapMethod = 'directCreditWSMessage';
+        $response = $this->connectionCheck($xmlString, $soapMethod);
+        return $response->directCreditWSMessageResponse->Response;
+    }
+
+    /**
+     * Import/push remittance (importWSMessage)
+     * Parameters: userID, password, accNo, wsMessage
+     *
+     * @param array $data
+     * @return SimpleXMLElement
+     * @throws Exception
+     */
+    public function importOrPushRemittance(array $data): SimpleXMLElement
+    {
+        $xmlString = "
+            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
+            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
+        ";
+        $xmlString .= "<ns2:transRefNo>" . ($data['transaction_reference_number'] ?? null) . "</ns2:transRefNo>";
+        $xmlString .= "<ns2:wsMessage>";
+        $xmlString .= '<ns1:amount xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['amount'] ?? null) . '</ns1:amount>';
+        $xmlString .= '<ns1:isoCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['isoCode'] ?? null) . '</ns1:isoCode>';
+        $xmlString .= '<ns1:beneficiaryAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryAddress'] ?? null) . '</ns1:beneficiaryAddress>';
+        $xmlString .= '<ns1:beneficiaryBankCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBankCode'] ?? null) . '</ns1:beneficiaryBankCode>';
+        $xmlString .= '<ns1:beneficiaryBankName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBankName'] ?? null) . '</ns1:beneficiaryBankName>';
+        $xmlString .= '<ns1:beneficiaryBranchCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBranchCode'] ?? null) . '</ns1:beneficiaryBranchCode>';
+        $xmlString .= '<ns1:beneficiaryBranchName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBranchName'] ?? null) . '</ns1:beneficiaryBranchName>';
+        $xmlString .= '<ns1:beneficiaryName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryName'] ?? null) . '</ns1:beneficiaryName>';
+        $xmlString .= '<ns1:beneficiaryPassportNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryPassportNo'] ?? null) . '</ns1:beneficiaryPassportNo>';
+        $xmlString .= '<ns1:beneficiaryPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryPhoneNo'] ?? null) . '</ns1:beneficiaryPhoneNo>';
+        $xmlString .= '<ns1:creatorID xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['creatorID'] ?? null) . '</ns1:creatorID>';
+        $xmlString .= '<ns1:exchHouseSwiftCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['exchHouseSwiftCode'] ?? null) . '</ns1:exchHouseSwiftCode>';
+        $xmlString .= '<ns1:identityDescription xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['identityDescription'] ?? null) . '</ns1:identityDescription>';
+        $xmlString .= '<ns1:identityType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['identityType'] ?? null) . '</ns1:identityType>';
+        $xmlString .= '<ns1:issueDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['issueDate'] ?? null) . '</ns1:issueDate>';
+        $xmlString .= '<ns1:note xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['note'] ?? null) . '</ns1:note>';
+        $xmlString .= '<ns1:paymentType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['paymentType'] ?? null) . '</ns1:paymentType>';
+        $xmlString .= '<ns1:remitterAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterAddress'] ?? null) . '</ns1:remitterAddress>';
+        $xmlString .= '<ns1:remitterIdentificationNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterIdentificationNo'] ?? null) . '</ns1:remitterIdentificationNo>';
+        $xmlString .= '<ns1:remitterName xmlns:ns1="http://bean.ws.mt.ibbl/xsd"' . ($data['remitterName'] ?? null) . '</ns1:remitterName>';
+        $xmlString .= '<ns1:remitterPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterPhoneNo'] ?? null) . '</ns1:remitterPhoneNo>';
+        $xmlString .= '<ns1:secretKey xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['secretKey'] ?? null) . '</ns1:secretKey>';
+        $xmlString .= '<ns1:transReferenceNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['transReferenceNo'] ?? null) . '</ns1:transReferenceNo>';
+        $xmlString .= '<ns1:transferDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['transferDate'] ?? null) . '</ns1:transferDate>';
+        $xmlString .= '<ns1: remittancePurpose xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remittancePurpose'] ?? null) . '</ns1: remittancePurpose >';
+        $xmlString .= "</ns2:wsMessage>";
+        $soapMethod = 'directCreditWSMessage';
+        $response = $this->connectionCheck($xmlString, $soapMethod);
+        return $response->directCreditWSMessageResponse->Response;
+    }
+
+    /**
+     * Verify remittance (importWSMessage)
+     * Parameters: userID, password, accNo, wsMessage
+     *
+     * @param array $data
+     * @return SimpleXMLElement
+     * @throws Exception
+     */
+    public function verifyRemittance(array $data): SimpleXMLElement
+    {
+        $xmlString = "
+            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
+            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
+        ";
+        $xmlString .= "<ns2:transRefNo>" . ($data['transaction_reference_number'] ?? null) . "</ns2:transRefNo>";
+        $xmlString .= "<ns2:wsMessage>";
+        $xmlString .= '<ns1:amount xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['amount'] ?? null) . '</ns1:amount>';
+        $xmlString .= '<ns1:isoCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['isoCode'] ?? null) . '</ns1:isoCode>';
+        $xmlString .= '<ns1:beneficiaryAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryAddress'] ?? null) . '</ns1:beneficiaryAddress>';
+        $xmlString .= '<ns1:beneficiaryBankCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBankCode'] ?? null) . '</ns1:beneficiaryBankCode>';
+        $xmlString .= '<ns1:beneficiaryBankName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBankName'] ?? null) . '</ns1:beneficiaryBankName>';
+        $xmlString .= '<ns1:beneficiaryBranchCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBranchCode'] ?? null) . '</ns1:beneficiaryBranchCode>';
+        $xmlString .= '<ns1:beneficiaryBranchName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryBranchName'] ?? null) . '</ns1:beneficiaryBranchName>';
+        $xmlString .= '<ns1:beneficiaryName xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryName'] ?? null) . '</ns1:beneficiaryName>';
+        $xmlString .= '<ns1:beneficiaryPassportNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryPassportNo'] ?? null) . '</ns1:beneficiaryPassportNo>';
+        $xmlString .= '<ns1:beneficiaryPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['beneficiaryPhoneNo'] ?? null) . '</ns1:beneficiaryPhoneNo>';
+        $xmlString .= '<ns1:creatorID xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['creatorID'] ?? null) . '</ns1:creatorID>';
+        $xmlString .= '<ns1:exchHouseSwiftCode xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['exchHouseSwiftCode'] ?? null) . '</ns1:exchHouseSwiftCode>';
+        $xmlString .= '<ns1:identityDescription xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['identityDescription'] ?? null) . '</ns1:identityDescription>';
+        $xmlString .= '<ns1:identityType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['identityType'] ?? null) . '</ns1:identityType>';
+        $xmlString .= '<ns1:issueDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['issueDate'] ?? null) . '</ns1:issueDate>';
+        $xmlString .= '<ns1:note xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['note'] ?? null) . '</ns1:note>';
+        $xmlString .= '<ns1:paymentType xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['paymentType'] ?? null) . '</ns1:paymentType>';
+        $xmlString .= '<ns1:remitterAddress xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterAddress'] ?? null) . '</ns1:remitterAddress>';
+        $xmlString .= '<ns1:remitterIdentificationNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterIdentificationNo'] ?? null) . '</ns1:remitterIdentificationNo>';
+        $xmlString .= '<ns1:remitterName xmlns:ns1="http://bean.ws.mt.ibbl/xsd"' . ($data['remitterName'] ?? null) . '</ns1:remitterName>';
+        $xmlString .= '<ns1:remitterPhoneNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remitterPhoneNo'] ?? null) . '</ns1:remitterPhoneNo>';
+        $xmlString .= '<ns1:secretKey xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['secretKey'] ?? null) . '</ns1:secretKey>';
+        $xmlString .= '<ns1:transReferenceNo xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['transReferenceNo'] ?? null) . '</ns1:transReferenceNo>';
+        $xmlString .= '<ns1:transferDate xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['transferDate'] ?? null) . '</ns1:transferDate>';
+        $xmlString .= '<ns1: remittancePurpose xmlns:ns1="http://bean.ws.mt.ibbl/xsd">' . ($data['remittancePurpose'] ?? null) . '</ns1: remittancePurpose >';
+        $xmlString .= "</ns2:wsMessage>";
+        $soapMethod = 'directCreditWSMessage';
+        $response = $this->connectionCheck($xmlString, $soapMethod);
+        return $response->directCreditWSMessageResponse->Response;
+    }
+
+    /**
+     * ValidateBeneficiaryWallet (validateBeneficiaryWallet)
+     * Parameters: userID, password, walletNo, paymentType
+     *
+     * @param array $data
+     * @return SimpleXMLElement
+     * @throws Exception
+     */
+    public function validateBeneficiaryWallet(array $data): SimpleXMLElement
+    {
+        $xmlString = "
+            <ns2:userID>" . $this->config[$this->status]['username'] . "</ns2:userID>
+            <ns2:password>" . $this->config[$this->status]['password'] . "</ns2:password>
+        ";
+        $xmlString .= "<ns2:walletNo>" . ($data['account_number'] ?? null) . "</ns2:walletNo>";
+        $xmlString .= "<ns2:paymentType>" . ($data['account_type'] ?? null) . "</ns2:paymentType>";
+        $soapMethod = 'validateBeneficiaryWallet';
+        $response = $this->connectionCheck($xmlString, $soapMethod);
+        return $response->validateBeneficiaryWalletResponse->Response;
+    }
+
+    /**
+     * @param $xml_post_string
+     * @param $method
      * @return SimpleXMLElement
      *
      * @throws Exception
      */
-    private function connectionCheck($xml_post_string, $method)
+    private function connectionCheck($xml_post_string, $method): SimpleXMLElement
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
-        Log::info($method.'<br>'.$xml_string);
+        Log::info($method . '<br>' . $xml_string);
         $headers = [
-            'Host: '.$this->config[$this->status]['app_host'],
+            'Host: ' . $this->config[$this->status]['app_host'],
             'Content-type: text/xml;charset="utf-8"',
-            'Content-length: '.strlen($xml_string),
-            'SOAPAction: '.$method,
+            'Content-length: ' . strlen($xml_string),
+            'SOAPAction: ' . $method,
         ];
 
         // PHP cURL  for connection
@@ -149,506 +297,37 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         // execution
         $response = curl_exec($ch);
-        Log::error($method.' CURL reported error: ');
+        Log::error($method . ' CURL reported error: ');
         if ($response === false) {
             throw new Exception(curl_error($ch), curl_errno($ch));
         }
         curl_close($ch);
         $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
         $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
-        $response = str_replace('xmlns:ns1="urn:dynamicapi"', '', $response2);
-        $response = str_replace('ns1:', '', $response); //dd($response);
-        Log::info($method.'<br>'.$response);
+        $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
+        $response = str_replace('ns:', '', $response); //dd($response);
+        Log::info($method . '<br>' . $response);
 
         return simplexml_load_string($response);
     }
 
     /**
+     * @param $string
+     * @param $method
      * @return string
      */
-    public function xmlGenerate($string, $method)
+    public function xmlGenerate($string, $method): string
     {
-        $xml_string = '<?xml version="1.0" encoding="utf-8"?>
-            <soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:dynamicapi">
+        return '<?xml version="1.0" encoding="utf-8"?>
+            <soapenv:Envelope xmlns:soapenv="http://www.w3.org/2003/05/soap-envelope">
                 <soapenv:Header/>
                 <soapenv:Body>
-                    <urn:'.$method.' soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
-                        '.$string.'
-                    </urn:'.$method.'>
+                    <urn:' . $method . ' xmlns:ns2="http://service.ws.mt.ibbl">
+                        ' . $string . '
+                    </urn:' . $method . '>
                 </soapenv:Body>
             </soapenv:Envelope>
         ';
-
-        return $xml_string;
-    }
-
-    /**
-     * bKash customer validation service will help you to validate the beneficiary bkash number before send the transaction
-     *
-     * @param  $inputData
-     *                    bank_account_number like receiver bkash number or wallet number
-     * @return mixed
-     *
-     * @throws Exception
-     */
-    public function bkashValidation($inputData)
-    {
-        $doAuthenticate = $this->doAuthenticate();
-        if ($doAuthenticate != 'AUTH_FAILED' || $doAuthenticate != null) {
-            $xml_string = '
-                <bkash_customer_details xsi:type="urn:bkash_customer_validation">
-                    <!--You may enter the following 3 items in any order-->
-                    <token xsi:type="xsd:string">'.$doAuthenticate.'</token>
-                    <mobileNumber xsi:type="xsd:string">'.$inputData['bank_account_number'].'</mobileNumber>
-                </bkash_customer_details>
-            ';
-            $soapMethod = 'getBkashCustomerDetails';
-            $response = $this->connectionCheck($xml_string, $soapMethod);
-            if (isset($response) && $response != false && $response != null) {
-                $returnValue = json_decode($response->getBkashCustomerDetailsResponse->Response, true);
-            } else {
-                $returnValue = ['message' => 'Transaction response Found', 'status' => 5000];
-            }
-        } else {
-            $returnValue = ['message' => 'AUTH_FAILED INVALID USER INFORMATION', 'status' => 103];
-        }
-
-        return $returnValue;
-    }
-
-    /**
-     * This service call will provide you the bkash transaction status.
-     *
-     * @param  $inputData
-     *                    reference_no like system transaction number
-     * @return mixed
-     *
-     * @throws Exception
-     */
-    public function getBkashTnxStatus($inputData)
-    {
-        $doAuthenticate = $this->doAuthenticate();
-        if ($doAuthenticate != 'AUTH_FAILED' || $doAuthenticate != null) {
-            $xml_string = '
-                <bkash_transfer_status xsi:type="urn:bkash_transfer_status">
-                    <!--You may enter the following 2 items in any order-->
-                    <token xsi:type="xsd:string">'.$doAuthenticate.'</token>
-                    <reference_no xsi:type="xsd:string">'.$inputData['reference_no'].'</reference_no>
-                </bkash_transfer_status>
-            ';
-            $soapMethod = 'getBkashTransferStatus';
-            $response = $this->connectionCheck($xml_string, $soapMethod);
-            if (isset($response) && $response != false && $response != null) {
-                $returnValue = json_decode($response->getBkashTransferStatusResponse->Response, true);
-            } else {
-                $returnValue = ['message' => 'Transaction response Found', 'status' => 5000];
-            }
-        } else {
-            $returnValue = ['message' => 'AUTH_FAILED INVALID USER INFORMATION', 'status' => 103];
-        }
-
-        return $returnValue;
-    }
-
-    /**
-     * @return object
-     *
-     * @throws Exception
-     */
-    public function topUp($input)
-    {
-        if ($input->service_id == 15) {
-            $returnValue = $this->doBkashTransfer($input->transaction_json_data);
-        } elseif ($input->service_id == 36) {
-            $returnValue = $this->doNagadTransfer($input->transaction_json_data);
-        } else {
-            $returnValue = $this->doTransfer($input->transaction_json_data);
-        }
-
-        return (object) $returnValue;
-    }
-
-    /**
-     * Do bKash transfer service will help you to send a bkash transaction
-     *
-     * @param  $input_data
-     * @return mixed
-     *
-     * @throws Exception
-     */
-    public function doBkashTransfer($inputData)
-    {
-        $doAuthenticate = $this->doAuthenticate();
-        if ($doAuthenticate != 'AUTH_FAILED' || $doAuthenticate != null) {
-            $xml_string = '
-                <do_bkash_transfer xsi:type="urn:do_bkash_transfer">
-                    <!--You may enter the following 18 items in any order-->
-                    <token xsi:type="xsd:string">'.$doAuthenticate.'</token>
-                    <amount_in_bdt xsi:type="xsd:string">'.$inputData->transfer_amount.'</amount_in_bdt>
-                    <reference_no xsi:type="xsd:string">'.$inputData->reference_no.'</reference_no>
-                    <remitter_name xsi:type="xsd:string">'.$inputData->sender_first_name.'</remitter_name>
-                    <remitter_dob xsi:type="xsd:string">'.$inputData->sender_date_of_birth.'</remitter_dob>
-                    <!--Optional:-->
-                    <remitter_iqama_no xsi:type="xsd:string"/>
-                    <remitter_id_passport_no xsi:type="xsd:string">'.$inputData->sender_id_number.'</remitter_id_passport_no>
-                    <!--Optional:-->
-                    <remitter_address xsi:type="xsd:string">'.$inputData->sender_address.'</remitter_address>
-                    <remitter_mobile_no xsi:type="xsd:string">'.$inputData->sender_mobile.'</remitter_mobile_no>
-                    <issuing_country xsi:type="xsd:string">'.$inputData->sender_id_issue_country.'</issuing_country>
-            ';
-            if (isset($inputData->wallet_account_actual_name) && $inputData->wallet_account_actual_name != '') {
-                $xml_string .= '
-                    <beneficiary_name xsi:type="xsd:string">'.(isset($inputData->wallet_account_actual_name) ? $inputData->wallet_account_actual_name : null).'</beneficiary_name>
-            ';
-            } else {
-                $xml_string .= '
-                    <beneficiary_name xsi:type="xsd:string">'.((isset($inputData->receiver_first_name) ? $inputData->receiver_first_name : null).(isset($inputData->receiver_middle_name) ? ' '.$inputData->receiver_middle_name : null).(isset($inputData->receiver_last_name) ? ' '.$inputData->receiver_last_name : null)).'</beneficiary_name>
-            ';
-            }
-            $xml_string .= '
-                    <beneficiary_city xsi:type="xsd:string">'.(isset($inputData->receiver_city) ? $inputData->receiver_city : 'Dhaka').'</beneficiary_city>
-                    <!--Optional:-->
-                    <beneficiary_id_no xsi:type="xsd:string"></beneficiary_id_no>
-                    <!--Optional:-->
-                    <beneficiary_id_type xsi:type="xsd:string"></beneficiary_id_type>
-                    <purpose_of_payment xsi:type="xsd:string">'.$inputData->purpose_of_remittance.'</purpose_of_payment>
-                    <beneficiary_mobile_phone_no xsi:type="xsd:string">'.$inputData->bank_account_number.'</beneficiary_mobile_phone_no>
-                    <!--Optional:-->
-                    <beneficiary_address xsi:type="xsd:string">'.$inputData->receiver_address.'</beneficiary_address>
-                    <issue_date xsi:type="xsd:string">'.date('Y-m-d', strtotime($inputData->created_date)).'</issue_date>
-                </do_bkash_transfer>
-            ';
-            $soapMethod = 'doBkashTransfer';
-            $response = $this->connectionCheck($xml_string, $soapMethod);
-            if (isset($response) && $response != false && $response != null) {
-                $returnValue = json_decode($response->doBkashTransferResponse->Response, true);
-            } else {
-                $returnValue = ['message' => 'Transaction response Found', 'status' => 5000];
-            }
-        } else {
-            $returnValue = ['message' => 'AUTH_FAILED INVALID USER INFORMATION', 'status' => 103];
-        }
-
-        return $returnValue;
-    }
-
-    /**
-     * Do nagad transfer service will help you to send a nagad transaction
-     *
-     * @param  $input_data
-     * @return mixed
-     *
-     * @throws Exception
-     */
-    public function doNagadTransfer($inputData)
-    {
-        $doAuthenticate = $this->doAuthenticate();
-        if ($doAuthenticate != 'AUTH_FAILED' || $doAuthenticate != null) {
-            $xml_string = '
-                <remitter_iqama_no xsi:type="urn:nagad_remit_transfer">
-                    <!--You may enter the following 18 items in any order-->
-                    <token xsi:type="xsd:string">'.$doAuthenticate.'</token>
-                    <amount_in_bdt xsi:type="xsd:string">'.$inputData->transfer_amount.'</amount_in_bdt>
-                    <reference_no xsi:type="xsd:string">'.$inputData->reference_no.'</reference_no>
-                    <remitter_name xsi:type="xsd:string">'.$inputData->sender_first_name.'</remitter_name>
-                    <remitter_dob xsi:type="xsd:string">'.$inputData->sender_date_of_birth.'</remitter_dob>
-                    <!--Optional:-->
-                    <remitter_iqama_no xsi:type="xsd:string"/></remitter_iqama_no>
-                    <remitter_id_passport_no xsi:type="xsd:string">'.$inputData->sender_id_number.'</remitter_id_passport_no>
-                    <!--Optional:-->
-                    <remitter_address xsi:type="xsd:string">'.$inputData->sender_address.'</remitter_address>
-                    <remitter_mobile_no xsi:type="xsd:string">'.$inputData->sender_mobile.'</remitter_mobile_no>
-                    <issuing_country xsi:type="xsd:string">'.$inputData->sender_id_issue_country.'</issuing_country>
-            ';
-            if (isset($inputData->wallet_account_actual_name) && $inputData->wallet_account_actual_name != '') {
-                $xml_string .= '
-                    <beneficiary_name xsi:type="xsd:string">'.(isset($inputData->wallet_account_actual_name) ? $inputData->wallet_account_actual_name : null).'</beneficiary_name>
-            ';
-            } else {
-                $xml_string .= '
-                    <beneficiary_name xsi:type="xsd:string">'.((isset($inputData->receiver_first_name) ? $inputData->receiver_first_name : null).(isset($inputData->receiver_middle_name) ? ' '.$inputData->receiver_middle_name : null).(isset($inputData->receiver_last_name) ? ' '.$inputData->receiver_last_name : null)).'</beneficiary_name>
-            ';
-            }
-            $xml_string .= '
-                    <beneficiary_city xsi:type="xsd:string">'.(isset($inputData->receiver_city) ? $inputData->receiver_city : 'Dhaka').'</beneficiary_city>
-                    <!--Optional:-->
-                    <beneficiary_id_no xsi:type="xsd:string"></beneficiary_id_no>
-                    <!--Optional:-->
-                    <beneficiary_id_type xsi:type="xsd:string"></beneficiary_id_type>
-                    <purpose_of_payment xsi:type="xsd:string">'.$inputData->purpose_of_remittance.'</purpose_of_payment>
-                    <beneficiary_mobile_phone_no xsi:type="xsd:string">'.$inputData->bank_account_number.'</beneficiary_mobile_phone_no>
-                    <!--Optional:-->
-                    <beneficiary_address xsi:type="xsd:string">'.$inputData->receiver_address.'</beneficiary_address>
-                    <issue_date xsi:type="xsd:string">'.date('Y-m-d', strtotime($inputData->created_date)).'</issue_date>
-                    <transaction_type xsi:type="xsd:string"></transaction_type>
-                </do_bkash_transfer>
-            ';
-            $soapMethod = 'doNagadTransfer';
-            $response = $this->connectionCheck($xml_string, $soapMethod);
-            if (isset($response) && $response != false && $response != null) {
-                $returnValue = json_decode($response->doNagadTransferResponse->Response, true);
-            } else {
-                $returnValue = ['message' => 'Transaction response Found', 'status' => 5000];
-            }
-        } else {
-            $returnValue = ['message' => 'AUTH_FAILED INVALID USER INFORMATION', 'status' => 103];
-        }
-
-        return $returnValue;
-    }
-
-    /**
-     * nagad customer validation service will help you to validate the beneficiary nagad number before send the transaction
-     *
-     * @param  $inputData
-     *                    receiver_first_name like receiver name
-     *                    bank_account_number like receiver nagad number or wallet number
-     * @return mixed
-     *
-     * @throws Exception
-     */
-    public function nagadCustomerValidation($inputData)
-    {
-        $doAuthenticate = $this->doAuthenticate();
-        if ($doAuthenticate != 'AUTH_FAILED' || $doAuthenticate != null) {
-            $xml_string = '
-                <nagad_remitter_validation xsi:type="urn:nagad_remitter_validation">
-                    <!--You may enter the following 4 items in any order-->
-                    <token xsi:type="xsd:string">'.$doAuthenticate.'</token>
-                    <amount xsi:type="xsd:string">50</amount>
-                    <beneficiaryMobileNumber xsi:type="xsd:string">'.$inputData['bank_account_number'].'</beneficiaryMobileNumber>
-                    <payMode xsi:type="xsd:string">N</payMode>
-                </nagad_remitter_validation>
-            ';
-            $soapMethod = 'nagadCustomerValidation';
-            $response = $this->connectionCheck($xml_string, $soapMethod);
-            if (isset($response) && $response != false && $response != null) {
-                $returnValue = json_decode($response->nagadCustomerValidationResponse->Response, true);
-            } else {
-                $returnValue = ['message' => 'Transaction response Found', 'status' => 5000];
-            }
-        } else {
-            $returnValue = ['message' => 'AUTH_FAILED INVALID USER INFORMATION', 'status' => 103];
-        }
-
-        return $returnValue;
-    }
-
-    /**
-     * This service call will provide you the nagad transaction status.
-     *
-     * @param  $inputData
-     *                    txnNo like system transaction number
-     * @return mixed
-     *
-     * @throws Exception
-     */
-    public function getNagadTnxStatus($inputData)
-    {
-        $doAuthenticate = $this->doAuthenticate();
-        if ($doAuthenticate != 'AUTH_FAILED' || $doAuthenticate != null) {
-            $xml_string = '
-                <nagad_remit_transfer_status xsi:type="urn:nagad_remit_transfer_status">
-                    <!--You may enter the following 2 items in any order-->
-                    <token xsi:type="xsd:string">'.$doAuthenticate.'</token>
-                    <txnNo xsi:type="xsd:string">'.$inputData['reference_no'].'</txnNo>
-                </nagad_remit_transfer_status>
-            ';
-            $soapMethod = 'getNagadTransferStatus';
-            $response = $this->connectionCheck($xml_string, $soapMethod);
-            if (isset($response) && $response != false && $response != null) {
-                $returnValue = json_decode($response->getNagadTransferStatusRespons->Response, true);
-            } else {
-                $returnValue = ['message' => 'Transaction response Found', 'status' => 5000];
-            }
-        } else {
-            $returnValue = ['message' => 'AUTH_FAILED INVALID USER INFORMATION', 'status' => 103];
-        }
-
-        return $returnValue;
-    }
-
-    /**
-     * Execute the transfer operation
-     */
-    public function makeTransfer(array $orderInfo = []): mixed
-    {
-        $doAuthenticate = $this->doAuthenticate();
-        if ($doAuthenticate != 'AUTH_FAILED' || $doAuthenticate != null) {
-            if ($inputData->bank_id == 17) {
-                $mode_of_payment = 'CBL Account';
-            } else {
-                $mode_of_payment = 'Other Bank';
-            }
-            if ($inputData->recipient_type_name == 'Cash') {
-                $mode_of_payment = 'Cash';
-            }
-            if ($inputData->recipient_type_name == 'Cash Pickup') {
-                $mode_of_payment = 'Cash';
-            }
-            $xml_string = '
-                <Transaction xsi:type="urn:Transaction">
-                    <token xsi:type="xsd:string">'.$doAuthenticate.'</token>
-                    <reference_no xsi:type="xsd:string">'.$inputData->reference_no.'</reference_no>
-                    <remitter_name xsi:type="xsd:string">'.$inputData->sender_first_name.'</remitter_name>
-                    <remitter_code xsi:type="xsd:string">'.$inputData->sender_mobile.'</remitter_code>
-                    <remitter_iqama_no xsi:type="xsd:string"></remitter_iqama_no>
-                    <remitter_id_passport_no xsi:type="xsd:string">'.$inputData->sender_id_number.'</remitter_id_passport_no>
-                    <issuing_country xsi:type="xsd:string">'.$inputData->sender_id_issue_country.'</issuing_country>
-                    <beneficiary_name xsi:type="xsd:string">'.((isset($inputData->receiver_first_name) ? $inputData->receiver_first_name : null).(isset($inputData->receiver_middle_name) ? ' '.$inputData->receiver_middle_name : null).(isset($inputData->receiver_last_name) ? ' '.$inputData->receiver_last_name : null)).'</beneficiary_name>
-            ';
-            if ($mode_of_payment != 'Cash') {
-                $xml_string .= '
-                        <beneficiary_account_no xsi:type="xsd:string">'.$inputData->bank_account_number.'</beneficiary_account_no>
-                        <beneficiary_bank_account_type xsi:type="xsd:string">Savings</beneficiary_bank_account_type>
-                        <beneficiary_bank_name xsi:type="xsd:string">'.$inputData->bank_name.'</beneficiary_bank_name>
-                        <beneficiary_bank_branch_name xsi:type="xsd:string">'.$inputData->bank_branch_name.'</beneficiary_bank_branch_name>
-                        <branch_routing_number xsi:type="xsd:string">'.(isset($inputData->location_routing_id[1]->bank_branch_location_field_value) ? $inputData->location_routing_id[1]->bank_branch_location_field_value : null).'</branch_routing_number>
-                ';
-            }
-            $xml_string .= '
-                    <amount_in_taka xsi:type="xsd:string">'.$inputData->transfer_amount.'</amount_in_taka>
-                    <purpose_of_payment xsi:type="xsd:string">'.$inputData->purpose_of_remittance.'</purpose_of_payment>
-                    <beneficiary_mobile_phone_no xsi:type="xsd:string">'.$inputData->receiver_contact_number.'</beneficiary_mobile_phone_no>
-                    <beneficiary_id_type xsi:type="xsd:string"></beneficiary_id_type>
-                    <pin_no xsi:type="xsd:string"></pin_no>
-                    <remitter_address xsi:type="xsd:string">'.$inputData->sender_address.'</remitter_address>
-                    <remitter_mobile_no xsi:type="xsd:string">'.$inputData->sender_mobile.'</remitter_mobile_no>
-                    <beneficiary_address xsi:type="xsd:string">'.$inputData->receiver_address.'</beneficiary_address>
-                    <beneficiary_id_no xsi:type="xsd:string"></beneficiary_id_no>
-                    <special_instruction xsi:type="xsd:string">NA</special_instruction>
-                    <mode_of_payment xsi:type="xsd:string">'.$mode_of_payment.'</mode_of_payment>
-                    <issue_date xsi:type="xsd:string">'.date('Y-m-d', strtotime($inputData->created_date)).'</issue_date>
-                    <!--Optional:-->
-                    <custom_field_name_1 xsi:type="xsd:string">?</custom_field_name_1>
-                    <custom_field_value_1 xsi:type="xsd:string">?</custom_field_value_1>
-                    <custom_field_name_2 xsi:type="xsd:string">?</custom_field_name_2>
-                    <custom_field_value_2 xsi:type="xsd:string">?</custom_field_value_2>
-                    <custom_field_name_3 xsi:type="xsd:string">?</custom_field_name_3>
-                    <custom_field_value_3 xsi:type="xsd:string">?</custom_field_value_3>
-                    <custom_field_name_4 xsi:type="xsd:string">?</custom_field_name_4>
-                    <custom_field_value_4 xsi:type="xsd:string">?</custom_field_value_4>
-                    <custom_field_name_5 xsi:type="xsd:string">?</custom_field_name_5>
-                    <custom_field_value_5 xsi:type="xsd:string">?</custom_field_value_5>
-                    <custom_field_name_6 xsi:type="xsd:string">?</custom_field_name_6>
-                    <custom_field_value_6 xsi:type="xsd:string">?</custom_field_value_6>
-                    <custom_field_name_7 xsi:type="xsd:string">?</custom_field_name_7>
-                    <custom_field_value_7 xsi:type="xsd:string">?</custom_field_value_7>
-                    <custom_field_name_8 xsi:type="xsd:string">?</custom_field_name_8>
-                    <custom_field_value_8 xsi:type="xsd:string">?</custom_field_value_8>
-                    <custom_field_name_9 xsi:type="xsd:string">?</custom_field_name_9>
-                    <custom_field_value_9 xsi:type="xsd:string">?</custom_field_value_9>
-                    <custom_field_name_10 xsi:type="xsd:string">?</custom_field_name_10>
-                    <custom_field_value_10 xsi:type="xsd:string">?</custom_field_value_10>
-                </Transaction>
-            ';
-            $soapMethod = 'doTransfer';
-            $response = $this->connectionCheck($xml_string, $soapMethod);
-            if (isset($response) && $response != false && $response != null) {
-                $returnValue = json_decode($response->doTransferResponse->Response, true);
-            } else {
-                $returnValue = ['message' => 'Transaction response Found', 'status' => 5000];
-            }
-        } else {
-            $returnValue = ['message' => 'AUTH_FAILED INVALID USER INFORMATION', 'status' => 103];
-        }
-
-        return $returnValue;
-    }
-
-    public function transferStatus(array $orderInfo = []): mixed
-    {
-        $doAuthenticate = $this->doAuthenticate();
-        if ($doAuthenticate != 'AUTH_FAILED' || $doAuthenticate != null) {
-            $xml_string = '
-                <transaction_status xsi:type="urn:transaction_status">
-                    <!--You may enter the following 2 items in any order-->
-                    <token xsi:type="xsd:string">'.$doAuthenticate.'</token>
-                    <reference_no xsi:type="xsd:string">'.$inputs_data['reference_no'].'</reference_no>
-                </transaction_status>
-            ';
-            $soapMethod = 'getTnxStatus';
-            $response = $this->connectionCheck($xml_string, $soapMethod);
-            if (isset($response) && $response != false && $response != null) {
-                $returnValue = json_decode($response->getTnxStatusResponse->Response, true);
-            } else {
-                $returnValue = ['message' => 'Transaction response Found', 'status' => 5000];
-            }
-        } else {
-            $returnValue = ['message' => 'AUTH_FAILED INVALID USER INFORMATION', 'status' => 103];
-        }
-
-        return $returnValue;
-    }
-
-    /**
-     * Do amendment or cancel service will help you to send the transaction cancel/amendment request
-     * reference_no like system transaction number, amend_query like cancel/amendment
-     *
-     * @throws Exception
-     */
-    public function cancelTransfer(array $orderInfo = []): mixed
-    {
-        $doAuthenticate = $this->doAuthenticate();
-        if ($doAuthenticate != 'AUTH_FAILED' || $doAuthenticate != null) {
-            $xml_string = '
-                <txn_amend_cancel xsi:type="urn:txn_amend_cancel">
-                    <!--You may enter the following 3 items in any order-->
-                    <token xsi:type="xsd:string">'.$doAuthenticate.'</token>
-                    <reference_no xsi:type="xsd:string">'.$inputData['reference_no'].'</reference_no>
-                    <amend_query xsi:type="xsd:string">'.$inputData['amend_query'].'</amend_query>
-                </txn_amend_cancel>
-            ';
-            $soapMethod = 'doAmendmentOrCancel';
-            $response = $this->connectionCheck($xml_string, $soapMethod);
-            if (isset($response) && $response != false && $response != null) {
-                $returnValue = json_decode($response->doAmendmentOrCancelResponse->Response, true);
-            } else {
-                $returnValue = ['message' => 'Transaction response Found', 'status' => 5000];
-            }
-        } else {
-            $returnValue = ['message' => 'AUTH_FAILED INVALID USER INFORMATION', 'status' => 103];
-        }
-
-        return $returnValue;
-    }
-
-    public function verifyAccount(array $accountInfo = []): mixed
-    {
-        // TODO: Implement verifyAccount() method.
-    }
-
-    /**
-     * @param  \Illuminate\Database\Eloquent\Model|Model  $order
-     *
-     * @throws Exception
-     */
-    public function requestQuotation($order): mixed
-    {
-        return $this->vendorBalance();
-    }
-
-    public function vendorBalance(array $accountInfo = []): mixed
-    {
-        $doAuthenticate = $this->doAuthenticate();
-        if ($doAuthenticate != 'AUTH_FAILED' || $doAuthenticate != null) {
-            $xml_string = '
-                <get_balance xsi:type="urn:get_balance">
-                    <token xsi:type="xsd:string">'.$doAuthenticate.'</token>
-                </get_balance>
-            ';
-            $soapMethod = 'getBalance';
-            $response = $this->connectionCheck($xml_string, $soapMethod);
-            if (isset($response) && $response != false && $response != null) {
-                $returnValue = json_decode($response->getBalanceResponse->Response, true);
-            } else {
-                $returnValue = ['message' => 'Transaction response Found', 'status' => 5000];
-            }
-        } else {
-            $returnValue = ['message' => 'AUTH_FAILED INVALID USER INFORMATION', 'status' => 103];
-        }
-
-        return $returnValue;
     }
 
     /**
@@ -743,34 +422,102 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Response Status Code List
      * These codes will return in only Fetch Remittance Status (fetchWSMessageStatus) operation.
      *
+     * @param string $code
+     * @return string[]
+     */
+    private function __responseStatusCodeList(string $code): array
+    {
+        return [
+            '01' => 'REMITTANCE ISSUED',
+            '02' => 'REMITTANCE TRANSFERRED/AUTHORIZED BY EXCHANGE HOUSE',
+            '03' => 'REMITTANCE READY FOR PAYMENT',
+            '04' => 'REMITTANCE UNDER PROCESS',
+            '05' => 'REMITTANCE STOPPED',
+            '06' => 'REMITTANCE STOPPED BY EXCHANGE HOUSE',
+            '07' => 'REMITTANCE PAID',
+            '08' => 'REMITTANCE AMENDED',
+            '11' => 'REMITTANCE CANCELLED',
+            '17' => 'REMITTANCE REVERSED',
+            '20' => 'REMITTANCE CANCEL REQUEST',
+            '30' => 'REMITTANCE AMENDMENT REQUEST',
+            '70' => 'REMITTANCE CBS UNDER PROCESS',
+            '73' => 'REMITTANCE CBS AUTHORIZED',
+            '74' => 'REMITTANCE CBS PENDING',
+            '77' => 'REMITTANCE CBS NRT ACCOUNT DEBITED',
+            '78' => 'REMITTANCE CBS READY FOR PAYMENT',
+            '79' => 'REMITTANCE CBS CREDITED TO ACCOUNT',
+            '80' => 'REMITTANCE CBS UNKNOWN STATE',
+            '82' => 'CBS ACC PAYEE TITLE AND ACCOUNT NO DIFFER',
+            '83' => 'CBS EFT INVALID ACCOUNT',
+            '84' => 'CBS EFT SENT TO THIRD BANK',
+            '99' => 'REMITTANCE INVALID STATUS',
+        ];
+    }
+
+    /**
+     * Instrument/Payment Type Code
+     *
      * @param int $code
      * @return string[]
      */
-    private function __responseStatusCodeList(int $code): array
+    private function __instrumentOrPaymentTypeCode(int $code): array
     {
         return [
-            01 => 'REMITTANCE ISSUED',
-            02 => 'REMITTANCE TRANSFERRED/AUTHORIZED BY EXCHANGE HOUSE',
-            03 => 'REMITTANCE READY FOR PAYMENT',
-            04 => 'REMITTANCE UNDER PROCESS',
-            05 => 'REMITTANCE STOPPED',
-            06 => 'REMITTANCE STOPPED BY EXCHANGE HOUSE',
-            07 => 'REMITTANCE PAID08 REMITTANCE AMENDED',
-            11 => 'REMITTANCE CANCELLED',
-            17 => 'REMITTANCE REVERSED',
-            20 => 'REMITTANCE CANCEL REQUEST',
-            30 => 'REMITTANCE AMENDMENT REQUEST',
-            70 => 'REMITTANCE CBS UNDER PROCESS',
-            73 => 'REMITTANCE CBS AUTHORIZED',
-            74 => 'REMITTANCE CBS PENDING',
-            77 => 'REMITTANCE CBS NRT ACCOUNT DEBITED',
-            78 => 'REMITTANCE CBS READY FOR PAYMENT',
-            79 => 'REMITTANCE CBS CREDITED TO ACCOUNT',
-            80 => 'REMITTANCE CBS UNKNOWN STATE',
-            82 => 'CBS ACC PAYEE TITLE AND ACCOUNT NO DIFFER',
-            83 => 'CBS EFT INVALID ACCOUNT',
-            84 => 'CBS EFT SENT TO THIRD BANK',
-            99 => 'REMITTANCE INVALID STATUS',
+            1 => 'Instant Cash / Spot Cash/COC',
+            2 => 'IBBL Account Payee',
+            3 => 'Other Bank (BEFTN)',
+            4 => 'Remittance Card5 Mobile Banking (mCash)',
+            6 => 'New IBBL Account Open',
+            7 => 'Mobile Banking(bKash)',
+            8 => 'Mobile Banking (Nagad)',
+        ];
+    }
+
+    /**
+     * Beneficiary Identity Type Code
+     *
+     * @param int $code
+     * @return string[]
+     */
+    private function __beneficiaryIdentityTypeCode(int $code): array
+    {
+        return [
+            1 => 'Passport',
+            2 => 'Cheque',
+            3 => 'Photo',
+            4 => 'Finger Print',
+            5 => 'Introducer',
+            6 => 'Driving License',
+            7 => 'Other',
+            8 => 'Remittance Card',
+            9 => 'National ID Card',
+            10 => 'Birth Certificate',
+            11 => 'Student ID Card',
+        ];
+    }
+
+    /**
+     * Account Type Code
+     * Please send the following two digit code against the different types of account.
+     *
+     * @param string $code
+     * @return string[]
+     */
+    private function __accountTypeCode(string $code): array
+    {
+        return [
+            '01' => 'AWCA (Current)',
+            '02' => 'MSA (Savings)',
+            '03' => 'MSSA (Scheme)',
+            '05' => 'MTDRA(Term Deposit)',
+            '06' => 'MMSA (Mohr)',
+            '07' => 'MHSA (Hajj)',
+            '09' => 'SND(Short Notice Deposit)',
+            '10' => 'MSA-STAFF',
+            '11' => 'FCA (FC Current)',
+            '12' => 'MFCA (FC Savings)',
+            '67' => 'SMSA(Student Savings)',
+            '68' => 'MNSBA(NRB Savings Bond)',
         ];
     }
 }
