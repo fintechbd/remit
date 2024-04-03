@@ -153,13 +153,13 @@ return [
             'driver' => Fintech\Remit\Vendors\IslamiBankApi::class,
             'live' => [
                 'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
-                'username' => '7106UAT',
-                'password' => '7106@Pass',
+                'username' => 'clavistestws',
+                'password' => 'Clavis@01',
             ],
             'sandbox' => [
                 'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
                 'username' => 'clavistestws',
-                'password' => '',
+                'password' => 'Clavis@01',
             ],
         ],
     ],
