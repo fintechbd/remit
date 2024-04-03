@@ -148,6 +148,20 @@ return [
                 'excode' => '7086',
             ],
         ],
+        'islamibank' => [
+            'mode' => 'sandbox',
+            'driver' => Fintech\Remit\Vendors\IslamiBankApi::class,
+            'live' => [
+                'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
+                'username' => '7106UAT',
+                'password' => '7106@Pass'
+            ],
+            'sandbox' => [
+                'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
+                'username' => 'clavistestws',
+                'password' => ''
+            ],
+        ],
     ],
     /*
     |--------------------------------------------------------------------------
