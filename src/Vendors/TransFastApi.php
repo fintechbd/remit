@@ -35,14 +35,15 @@ class TransFastApi
      */
     public function __construct()
     {
-        $this->config = config('trans-fast');
+        $this->config = config('fintech.remit.providers.transfast');
+
         if ($this->config['mode'] === 'sandbox') {
+            $this->apiUrl = $this->config[$this->status]['endpoint'];
             $this->status = 'sandbox';
-            $this->apiUrl = 'https://'.$this->config[$this->status]['app_host'];
 
         } else {
+            $this->apiUrl = $this->config[$this->status]['endpoint'];
             $this->status = 'live';
-            $this->apiUrl = 'https://'.$this->config[$this->status]['app_host'];
         }
 
         $this->payment_mode = 'C'; //C = Bank Deposit, 2 = Cash Pick Up, G = Mobile Cash, U = Cash Card
@@ -84,7 +85,7 @@ class TransFastApi
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Authorization: Credentials '.$this->config[$this->status]['api_token']]
+            'Authorization: Credentials '.$this->config[$this->status]['token']]
         );
 
         $response = curl_exec($curl);
@@ -160,6 +161,7 @@ class TransFastApi
      * Get the available banks for a country
      *
      * @return array
+     * @throws Exception
      */
     public function getBanks($country)
     {
@@ -694,7 +696,7 @@ class TransFastApi
         curl_setopt($curl, CURLOPT_VERBOSE, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Authorization: Credentials '.$this->config[$this->status]['api_token']]
+            'Authorization: Credentials '.$this->config[$this->status]['token']]
         );
 
         $response = curl_exec($curl);

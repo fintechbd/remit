@@ -120,16 +120,12 @@ return [
             'mode' => 'sandbox',
             'driver' => Fintech\Remit\Vendors\TransFastApi::class,
             'live' => [
-                'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => '7106UAT',
-                'password' => '7106@Pass',
-                'excode' => '7106',
+                'endpoint' => 'https://send.transfast.ws/api/',
+                'token' => env('PACKAGE_REMIT_TRANS_FAST_TOKEN')
             ],
             'sandbox' => [
-                'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => '7086UAT',
-                'password' => '7086@Pass',
-                'excode' => '7086',
+                'endpoint' => 'https://demo-api.transfast.net/api/',
+                'token' => env('PACKAGE_REMIT_TRANS_FAST_TOKEN')
             ],
         ],
         'valyou' => [
