@@ -161,6 +161,7 @@ class TransFastApi
      * Get the available banks for a country
      *
      * @return array
+     *
      * @throws Exception
      */
     public function getBanks($country)

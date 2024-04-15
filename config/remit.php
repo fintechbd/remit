@@ -121,11 +121,11 @@ return [
             'driver' => Fintech\Remit\Vendors\TransFastApi::class,
             'live' => [
                 'endpoint' => 'https://send.transfast.ws/api/',
-                'token' => env('PACKAGE_REMIT_TRANS_FAST_TOKEN')
+                'token' => env('PACKAGE_REMIT_TRANS_FAST_TOKEN'),
             ],
             'sandbox' => [
                 'endpoint' => 'https://demo-api.transfast.net/api/',
-                'token' => env('PACKAGE_REMIT_TRANS_FAST_TOKEN')
+                'token' => env('PACKAGE_REMIT_TRANS_FAST_TOKEN'),
             ],
         ],
         'valyou' => [
