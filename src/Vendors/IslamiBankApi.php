@@ -289,12 +289,12 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
             throw new Exception(curl_error($ch), curl_errno($ch));
         }
         curl_close($ch);
-        Log::info('Raw Response' . PHP_EOL . $response);
-//        $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
-//        $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
-//        $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
-//        $response = str_replace('ns:', '', $response); //dd($response);
-//        Log::info($method . '<br>' . $response);
+        Log::info('Raw Response'.PHP_EOL.$response);
+        //        $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
+        //        $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
+        //        $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
+        //        $response = str_replace('ns:', '', $response); //dd($response);
+        //        Log::info($method . '<br>' . $response);
 
         return simplexml_load_string($response);
     }
