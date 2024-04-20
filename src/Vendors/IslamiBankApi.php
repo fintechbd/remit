@@ -261,7 +261,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     /**
      * @throws Exception
      */
-    private function connectionCheck($xml_post_string, $method): SimpleXMLElement
+    private function connectionCheck($xml_post_string, $method)
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
         Log::info($method.'<br>'.$xml_string);
