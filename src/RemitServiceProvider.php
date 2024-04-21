@@ -2,6 +2,7 @@
 
 namespace Fintech\Remit;
 
+use Fintech\Core\Traits\RegisterPackageTrait;
 use Fintech\Remit\Commands\AgraniInstallCommand;
 use Fintech\Remit\Commands\InstallCommand;
 use Fintech\Remit\Commands\RemitCommand;
@@ -9,6 +10,8 @@ use Illuminate\Support\ServiceProvider;
 
 class RemitServiceProvider extends ServiceProvider
 {
+    use RegisterPackageTrait;
+
     /**
      * Register any application services.
      *
@@ -16,6 +19,8 @@ class RemitServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->packageCode = 'remit';
+
         $this->mergeConfigFrom(
             __DIR__.'/../config/remit.php', 'fintech.remit'
         );
@@ -29,6 +34,8 @@ class RemitServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->injectOnConfig();
+
         $this->publishes([
             __DIR__.'/../config/remit.php' => config_path('fintech/remit.php'),
         ]);
