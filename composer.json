@@ -21,6 +21,7 @@
         "ext-dom": "*",
         "ext-simplexml": "*",
         "fintech/core": "*",
+        "fintech/transaction": "*",
         "illuminate/contracts": "^10.0",
         "owen-it/laravel-auditing": "^13.5"
     },
