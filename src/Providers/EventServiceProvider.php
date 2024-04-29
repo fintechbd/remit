@@ -1,6 +1,6 @@
 <?php
 
-namespace Fintech\Remit;
+namespace Fintech\Remit\Providers;
 
 use Fintech\Remit\Events\RemitTransferFailed;
 use Fintech\Remit\Events\RemitTransferRejected;

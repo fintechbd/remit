@@ -1,6 +1,6 @@
 <?php
 
-namespace Fintech\Remit;
+namespace Fintech\Remit\Providers;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\Facades\Config;
