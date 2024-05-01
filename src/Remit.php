@@ -2,30 +2,34 @@
 
 namespace Fintech\Remit;
 
+use Fintech\Remit\Services\BankTransferService;
+use Fintech\Remit\Services\CashPickupService;
+use Fintech\Remit\Services\WalletTransferService;
+
 class Remit
 {
     /**
-     * @return \Fintech\Remit\Services\BankTransferService
+     * @return BankTransferService
      */
     public function bankTransfer()
     {
-        return app(\Fintech\Remit\Services\BankTransferService::class);
+        return app(BankTransferService::class);
     }
 
     /**
-     * @return \Fintech\Remit\Services\CashPickupService
+     * @return CashPickupService
      */
     public function cashPickup()
     {
-        return app(\Fintech\Remit\Services\CashPickupService::class);
+        return app(CashPickupService::class);
     }
 
     /**
-     * @return \Fintech\Remit\Services\WalletTransferService
+     * @return WalletTransferService
      */
     public function walletTransfer()
     {
-        return app(\Fintech\Remit\Services\WalletTransferService::class);
+        return app(WalletTransferService::class);
     }
 
     //** Crud Service Method Point Do not Remove **//

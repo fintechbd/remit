@@ -3,6 +3,7 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
+use Fintech\Auth\Facades\Auth;
 use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Auth\RiskProfile;
@@ -82,7 +83,7 @@ class WalletTransferController extends Controller
             $depositor = $request->user('sanctum');
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
 
-                $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+                $depositAccount = Transaction::userAccount()->list([
                     'user_id' => $user_id ?? $depositor->getKey(),
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
                 ])->first();
@@ -91,7 +92,7 @@ class WalletTransferController extends Controller
                     throw new Exception("User don't have account deposit balance");
                 }
 
-                $masterUser = \Fintech\Auth\Facades\Auth::user()->list([
+                $masterUser = Auth::user()->list([
                     'role_name' => SystemRole::MasterUser->value,
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
                 ])->first();
@@ -138,7 +139,7 @@ class WalletTransferController extends Controller
                 $order_data['user_name'] = $walletTransfer->user->name;
                 $walletTransfer->order_data = $order_data;
                 $userUpdatedBalance = Remit::walletTransfer()->debitTransaction($walletTransfer);
-                $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+                $depositedAccount = Transaction::userAccount()->list([
                     'user_id' => $depositor->getKey(),
                     'country_id' => $walletTransfer->source_country_id,
                 ])->first();
@@ -181,36 +182,6 @@ class WalletTransferController extends Controller
 
     /**
      * @lrd:start
-     * Return a specified *WalletTransfer* resource found by id.
-     *
-     * @lrd:end
-     *
-     * @throws ModelNotFoundException
-     */
-    public function show(string|int $id): WalletTransferResource|JsonResponse
-    {
-        try {
-
-            $walletTransfer = Remit::walletTransfer()->find($id);
-
-            if (! $walletTransfer) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
-            }
-
-            return new WalletTransferResource($walletTransfer);
-
-        } catch (ModelNotFoundException $exception) {
-
-            return $this->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
-
-            return $this->failed($exception->getMessage());
-        }
-    }
-
-    /**
-     * @lrd:start
      * Update a specified *WalletTransfer* resource using id.
      *
      * @lrd:end
@@ -236,6 +207,36 @@ class WalletTransferController extends Controller
             }
 
             return $this->updated(__('core::messages.resource.updated', ['model' => 'Wallet Transfer']));
+
+        } catch (ModelNotFoundException $exception) {
+
+            return $this->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return $this->failed($exception->getMessage());
+        }
+    }
+
+    /**
+     * @lrd:start
+     * Return a specified *WalletTransfer* resource found by id.
+     *
+     * @lrd:end
+     *
+     * @throws ModelNotFoundException
+     */
+    public function show(string|int $id): WalletTransferResource|JsonResponse
+    {
+        try {
+
+            $walletTransfer = Remit::walletTransfer()->find($id);
+
+            if (! $walletTransfer) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
+            }
+
+            return new WalletTransferResource($walletTransfer);
 
         } catch (ModelNotFoundException $exception) {
 

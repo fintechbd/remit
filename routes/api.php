@@ -1,5 +1,11 @@
 <?php
 
+use Fintech\Core\Facades\Core;
+use Fintech\Remit\Http\Controllers\AssignVendorController;
+use Fintech\Remit\Http\Controllers\BankTransferController;
+use Fintech\Remit\Http\Controllers\CashPickupController;
+use Fintech\Remit\Http\Controllers\WalletTransferController;
+use Fintech\Remit\Http\Controllers\WalletVerificationController;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 
@@ -15,19 +21,15 @@ use Illuminate\Support\Facades\Route;
 */
 if (Config::get('fintech.remit.enabled')) {
     Route::prefix('remit')->name('remit.')
-        ->middleware(config('fintech.auth.middleware'))
-        ->group(function () {
-
-            Route::apiResource('bank-transfers', \Fintech\Remit\Http\Controllers\BankTransferController::class)->except('update', 'destroy');
-            //Route::post('bank-transfers/{bank_transfer}/restore', [\Fintech\Remit\Http\Controllers\BankTransferController::class, 'restore'])->name('bank-transfers.restore');
-
-            Route::apiResource('cash-pickups', \Fintech\Remit\Http\Controllers\CashPickupController::class)->except('update', 'destroy');
-            //Route::post('cash-pickups/{cash_pickup}/restore', [\Fintech\Remit\Http\Controllers\CashPickupController::class, 'restore'])->name('cash-pickups.restore');
-
-            Route::apiResource('wallet-transfers', \Fintech\Remit\Http\Controllers\WalletTransferController::class)->except('update', 'destroy');
-            //Route::post('wallet-transfers/{wallet_transfer}/restore', [\Fintech\Remit\Http\Controllers\WalletTransferController::class, 'restore'])->name('wallet-transfers.restore');
-
-            Route::post('wallet-verification', \Fintech\Remit\Http\Controllers\WalletVerificationController::class)->name('wallet-verification');
+        ->middleware(config('fintech.auth.middleware'))->group(function () {
+            if (Core::packageExists('Transaction')) {
+                Route::get('assignable-vendors/{order_id}', [AssignVendorController::class, 'available'])
+                    ->name('assignable-vendors.available');
+            }
+            Route::apiResource('bank-transfers', BankTransferController::class)->except('update', 'destroy');
+            Route::apiResource('cash-pickups', CashPickupController::class)->except('update', 'destroy');
+            Route::apiResource('wallet-transfers', WalletTransferController::class)->except('update', 'destroy');
+            Route::post('wallet-verification', WalletVerificationController::class)->name('wallet-verification');
 
             //DO NOT REMOVE THIS LINE//
         });

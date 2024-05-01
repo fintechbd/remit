@@ -3,11 +3,11 @@
 namespace Fintech\Remit\Repositories\Eloquent;
 
 use Fintech\Remit\Interfaces\CashPickupRepository as InterfacesCashPickupRepository;
+use Fintech\Remit\Models\CashPickup;
 use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
 /**
@@ -17,7 +17,7 @@ class CashPickupRepository extends OrderRepository implements InterfacesCashPick
 {
     public function __construct()
     {
-        $model = app(config('fintech.remit.cash_pickup_model', \Fintech\Remit\Models\CashPickup::class));
+        $model = app(config('fintech.remit.cash_pickup_model', CashPickup::class));
 
         if (! $model instanceof Model) {
             throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");

@@ -2,26 +2,12 @@
 
 namespace Fintech\Remit\Vendors;
 
+use Exception;
 use Illuminate\Support\Facades\Log;
+use SimpleXMLElement;
 
 class ValYouApi
 {
-    /**
-     * ValYou API configuration.
-     *
-     * @var array
-     */
-    private $config;
-
-    /**
-     * ValYou API Url.
-     *
-     * @var string
-     */
-    private $apiUrl;
-
-    private $status = 'sandbox';
-
     /**
      * @var string
      */
@@ -53,6 +39,22 @@ class ValYouApi
     protected $calculated_by_sending_payout_currency;
 
     /**
+     * ValYou API configuration.
+     *
+     * @var array
+     */
+    private $config;
+
+    /**
+     * ValYou API Url.
+     *
+     * @var string
+     */
+    private $apiUrl;
+
+    private $status = 'sandbox';
+
+    /**
      * ValYouApiService constructor.
      */
     public function __construct()
@@ -80,7 +82,7 @@ class ValYouApi
      *
      * @return mixed
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getEcho()
     {
@@ -100,6 +102,65 @@ class ValYouApi
     }
 
     /**
+     * @return string
+     */
+    public function xmlGenerate($string, $method)
+    {
+        $xml_string = '<?xml version="1.0" encoding="utf-8"?>
+            <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+                <soap:Body>
+                    <'.$method.' xmlns="WebServices">
+                        '.$string.'
+                    </'.$method.'>
+                </soap:Body>
+            </soap:Envelope>
+        ';
+
+        return $xml_string;
+    }
+
+    /**
+     * @return SimpleXMLElement
+     *
+     * @throws Exception
+     */
+    public function connectionCheck($xml_post_string, $method)
+    {
+        $headers = [
+            'Host: '.$this->config[$this->status]['app_host'],
+            'Content-type: text/xml;charset="utf-8"',
+            'Content-length: '.strlen($xml_post_string),
+            'SOAPAction: WebServices/'.$method,
+        ];
+
+        // PHP cURL  for connection
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_URL, $this->apiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_post_string); // the SOAP request
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        // execution
+        $response = curl_exec($ch);
+        if ($response === false) {
+            throw new Exception(curl_error($ch), curl_errno($ch));
+            $response .= "\nError occoured when connecting to the SMS SOAP Server!";
+            $response .= "\nSoap Exception: ".$exception;
+            $response .= "\nSOAP Fault: (faultcode: {curl_errno($ch)}, faultstring: {curl_error($ch)})";
+            Log::error('CURL reported error: ', $response);
+        }
+        curl_close($ch);
+        $response1 = str_replace('<soap:Body>', '', $response);
+        $response2 = str_replace('</soap:Body>', '', $response1);
+        $response = str_replace('xmlns="WebServices"', '', $response2);
+
+        return simplexml_load_string($response);
+    }
+
+    /**
      * Call this method to Get the Static Data like Countries, list Payment Mode, Get Payout Agent List
      *
      * @param  $input_data
@@ -110,7 +171,7 @@ class ValYouApi
      *                     ADDITIONAL_FIELD2: Payment Mode (C: cash pickup | B: Account Deposit| H: Home Delivery)
      * @return mixed
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCatalogue($input_data)
     {
@@ -144,7 +205,7 @@ class ValYouApi
      *
      * @return mixed
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function getAgentList($input_data)
     {
@@ -186,7 +247,7 @@ class ValYouApi
      *                     LOCATION_ID (location_id), TRANSFERAMOUNT (transfer_amount), PAYOUT_COUNTRY (payout_country)
      * @return mixed
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function exRate($input_data)
     {
@@ -227,6 +288,220 @@ class ValYouApi
     }
 
     /**
+     * This method is used the check current status of transaction by PINNO or by Agent TXN ID.
+     *
+     * @param  $input_data
+     *                     PINNO (PINNO), AGENT_TXNID (AGENT_TXNID)
+     * @return mixed
+     *
+     * @throws Exception
+     */
+    public function queryTxnStatus($input_data)
+    {
+        $PINNO = $input_data['PINNO'];
+        $AGENT_TXNID = $input_data['AGENT_TXNID'];
+        $signature = $this->agent_code.$this->ClientId.$PINNO.$this->agent_session_id.$AGENT_TXNID.$this->ClientPass;
+        $hash_signature = hash('sha256', $signature);
+        $xml_string = '
+            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
+            <USER_ID>'.$this->ClientId.'</USER_ID>
+            <PINNO>'.$PINNO.'</PINNO>
+            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
+            <AGENT_TXNID>'.$AGENT_TXNID.'</AGENT_TXNID>
+            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+        ';
+        $soapMethod = 'QueryTXNStatus';
+        $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->QueryTXNStatusResponse->QueryTXNStatusResult), true));
+
+        return json_decode(json_encode($response->QueryTXNStatusResponse->QueryTXNStatusResult), true);
+    }
+
+    /**
+     * Call this method to view send/paid and the status of Transaction report.
+     *
+     * @param  $input_data
+     *                     REPORT_TYPE ($input_data['report_type']) data are
+     *                     A: List ALL TXN by SENT Date wise (including Cancel, PAID, UN-Paid TXN)
+     *                     S: List ALL TXN by SENT Date wise exclude CANCEL TXN and included PAID, UN-PAID
+     *                     P: List all Paid TXN by PAID Date wise
+     *                     C: List all Cancelled TXN by Cancel Date wise
+     *                     U: List all the TXN Sent Date wise with UN-PAID TXN only
+     *                     FROM_DATE ($input_data['from_date']), TO_DATE ($input_data['to_date'])
+     * @return mixed
+     *
+     * @throws Exception
+     */
+    public function reconcileReport($input_data)
+    {
+        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
+            $input_data['report_type'].$input_data['from_date'].'00:00:00'.$input_data['to_date'].'23:59:59'.
+            $this->ClientPass;
+        $hash_signature = hash('sha256', $signature);
+        $xml_string = '
+            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
+            <USER_ID>'.$this->ClientId.'</USER_ID>
+            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
+            <REPORT_TYPE>'.$input_data['report_type'].'</REPORT_TYPE>
+            <FROM_DATE>'.$input_data['from_date'].'</FROM_DATE>
+            <FROM_DATE_TIME>00:00:00</FROM_DATE_TIME>
+            <TO_DATE>'.$input_data['to_date'].'</TO_DATE>
+            <TO_DATE_TIME>23:59:59</TO_DATE_TIME>
+            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+        ';
+        $soapMethod = 'ReconcileReport';
+        $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->ReconcileReportResponse->ReconcileReportResult), true));
+
+        return json_decode(json_encode($response->ReconcileReportResponse->ReconcileReportResult), true);
+    }
+
+    /**
+     * Call this method to view send/paid and the status of Transaction report.
+     *
+     * @return mixed
+     *
+     * @throws Exception
+     */
+    public function reconcileReportV2($input_data)
+    {
+        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
+            $input_data['report_type'].$input_data['from_date'].'00:00:00'.$input_data['to_date'].'23:59:59'.
+            $this->ClientPass;
+        $hash_signature = hash('sha256', $signature);
+        $xml_string = '
+            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
+            <USER_ID>'.$this->ClientId.'</USER_ID>
+            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
+            <REPORT_TYPE>'.$input_data['report_type'].'</REPORT_TYPE>
+            <FROM_DATE>'.$input_data['from_date'].'</FROM_DATE>
+            <FROM_DATE_TIME>00:00:00</FROM_DATE_TIME>
+            <TO_DATE>'.$input_data['to_date'].'</TO_DATE>
+            <TO_DATE_TIME>23:59:59</TO_DATE_TIME>
+            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+        ';
+        $soapMethod = 'ReconcileReportV2';
+        $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->ReconcileReportV2Response->ReconcileReportV2Result), true));
+
+        return json_decode(json_encode($response->ReconcileReportV2Response->ReconcileReportV2Result), true);
+    }
+
+    /**
+     * @param  $input_data
+     *                     PAYOUT_COUNTRY ($input_data['country_name'])
+     * @return mixed
+     *
+     * @throws Exception
+     */
+    public function getCountryWiseRate($input_data)
+    {
+        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.$input_data['country_name'].$this->ClientPass;
+        $hash_signature = hash('sha256', $signature);
+        $xml_string = '
+            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
+            <USER_ID>'.$this->ClientId.'</USER_ID>
+            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
+            <PAYOUT_COUNTRY>'.$input_data['country_name'].'</PAYOUT_COUNTRY>
+            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+        ';
+        $soapMethod = 'GetCountryWiseRate';
+        $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->GetCountryWiseRateResponse->GetCountryWiseRateResult), true));
+
+        return json_decode(json_encode($response->GetCountryWiseRateResponse->GetCountryWiseRateResult), true);
+    }
+
+    /**
+     * Call this method to check the validation of the account.
+     *
+     * @return mixed
+     *
+     * @throws Exception
+     */
+    public function accountValidate($input_data)
+    {
+        $location_id = $input_data['location_id'];
+        $account = $input_data['account'];
+        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.$location_id.$account.$this->ClientPass;
+        $hash_signature = hash('sha256', $signature);
+        $xml_string = '
+            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
+            <USER_ID>'.$this->ClientId.'</USER_ID>
+            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
+            <LOCATION_ID>'.$location_id.'</LOCATION_ID>
+            <ACCOUNT_NO>'.$account.'</ACCOUNT_NO>
+            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+        ';
+        $soapMethod = 'AccountValidate';
+        $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->AccountValidateResponse->AccountValidateResult), true));
+
+        return json_decode(json_encode($response->AccountValidateResponse->AccountValidateResult), true);
+    }
+
+    /**
+     * Call this method to get the notification of the amended transaction.
+     *
+     * @param  $input_data
+     *                     SHOW_INCREMENTAL ($input_data['show_incremental']) data are
+     *                     "Y" = List report incremental basis
+     *                     "N" = List report within date range
+     *                     If "y" then FROM_DATE and TO_DATE not required
+     * @return mixed
+     *
+     * @throws Exception
+     */
+    public function notificationStatus($input_data)
+    {
+        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
+            $input_data['from_date'].$input_data['to_date'].$input_data['show_incremental'].
+            $this->ClientPass;
+        $hash_signature = hash('sha256', $signature);
+        $xml_string = '
+            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
+            <USER_ID>'.$this->ClientId.'</USER_ID>
+            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
+            <FROM_DATE>'.$input_data['from_date'].'</FROM_DATE>
+            <TO_DATE>'.$input_data['to_date'].'</TO_DATE>
+            <SHOW_INCREMENTAL>'.$input_data['show_incremental'].'</SHOW_INCREMENTAL>
+            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+        ';
+        $soapMethod = 'NotificationStatus';
+        $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
+        $response = $this->connectionCheck($xml_post_string, $soapMethod);
+        Log::info(json_decode(json_encode($response->NotificationStatusResponse->NotificationStatusResult), true));
+
+        return json_decode(json_encode($response->NotificationStatusResponse->NotificationStatusResult), true);
+    }
+
+    /**
+     * @return object
+     *
+     * @throws Exception
+     */
+    public function topUp($input)
+    {
+        $sendTransfer = $this->sendTransaction($input);
+        if ($sendTransfer['CODE'] == 0) {
+            $sendTransfer['status_code'] = 200;
+            $authorizedConfirmed = $this->authorizedConfirmed($sendTransfer);
+        } else {
+            $authorizedConfirmed = [
+                'MESSAGE' => 'Transaction Error',
+                'CODE' => '3007',
+            ];
+        }
+
+        return (object) array_merge($sendTransfer, $authorizedConfirmed);
+    }
+
+    /**
      * After Successful calling GetExRate method, call this function to send transaction.
      * While sending Transaction if Customer already exists, it will update the existing Customer.
      * If theCustomer is new, the SendTransaction method Auto-creates new Customer based on Sender_ID_Type and
@@ -236,7 +511,7 @@ class ValYouApi
      *
      * @return mixed
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function sendTransaction($input_data)
     {
@@ -367,7 +642,7 @@ class ValYouApi
      *
      * @return mixed
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function authorizedConfirmed($input_data)
     {
@@ -387,278 +662,5 @@ class ValYouApi
         Log::info(json_decode(json_encode($response->Authorized_ConfirmedResponse->Authorized_ConfirmedResult), true));
 
         return json_decode(json_encode($response->Authorized_ConfirmedResponse->Authorized_ConfirmedResult), true);
-    }
-
-    /**
-     * This method is used the check current status of transaction by PINNO or by Agent TXN ID.
-     *
-     * @param  $input_data
-     *                     PINNO (PINNO), AGENT_TXNID (AGENT_TXNID)
-     * @return mixed
-     *
-     * @throws \Exception
-     */
-    public function queryTxnStatus($input_data)
-    {
-        $PINNO = $input_data['PINNO'];
-        $AGENT_TXNID = $input_data['AGENT_TXNID'];
-        $signature = $this->agent_code.$this->ClientId.$PINNO.$this->agent_session_id.$AGENT_TXNID.$this->ClientPass;
-        $hash_signature = hash('sha256', $signature);
-        $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <PINNO>'.$PINNO.'</PINNO>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <AGENT_TXNID>'.$AGENT_TXNID.'</AGENT_TXNID>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
-        ';
-        $soapMethod = 'QueryTXNStatus';
-        $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string, $soapMethod);
-        Log::info(json_decode(json_encode($response->QueryTXNStatusResponse->QueryTXNStatusResult), true));
-
-        return json_decode(json_encode($response->QueryTXNStatusResponse->QueryTXNStatusResult), true);
-    }
-
-    /**
-     * Call this method to view send/paid and the status of Transaction report.
-     *
-     * @param  $input_data
-     *                     REPORT_TYPE ($input_data['report_type']) data are
-     *                     A: List ALL TXN by SENT Date wise (including Cancel, PAID, UN-Paid TXN)
-     *                     S: List ALL TXN by SENT Date wise exclude CANCEL TXN and included PAID, UN-PAID
-     *                     P: List all Paid TXN by PAID Date wise
-     *                     C: List all Cancelled TXN by Cancel Date wise
-     *                     U: List all the TXN Sent Date wise with UN-PAID TXN only
-     *                     FROM_DATE ($input_data['from_date']), TO_DATE ($input_data['to_date'])
-     * @return mixed
-     *
-     * @throws \Exception
-     */
-    public function reconcileReport($input_data)
-    {
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
-            $input_data['report_type'].$input_data['from_date'].'00:00:00'.$input_data['to_date'].'23:59:59'.
-            $this->ClientPass;
-        $hash_signature = hash('sha256', $signature);
-        $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <REPORT_TYPE>'.$input_data['report_type'].'</REPORT_TYPE>
-            <FROM_DATE>'.$input_data['from_date'].'</FROM_DATE>
-            <FROM_DATE_TIME>00:00:00</FROM_DATE_TIME>
-            <TO_DATE>'.$input_data['to_date'].'</TO_DATE>
-            <TO_DATE_TIME>23:59:59</TO_DATE_TIME>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
-        ';
-        $soapMethod = 'ReconcileReport';
-        $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string, $soapMethod);
-        Log::info(json_decode(json_encode($response->ReconcileReportResponse->ReconcileReportResult), true));
-
-        return json_decode(json_encode($response->ReconcileReportResponse->ReconcileReportResult), true);
-    }
-
-    /**
-     * Call this method to view send/paid and the status of Transaction report.
-     *
-     * @return mixed
-     *
-     * @throws \Exception
-     */
-    public function reconcileReportV2($input_data)
-    {
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
-            $input_data['report_type'].$input_data['from_date'].'00:00:00'.$input_data['to_date'].'23:59:59'.
-            $this->ClientPass;
-        $hash_signature = hash('sha256', $signature);
-        $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <REPORT_TYPE>'.$input_data['report_type'].'</REPORT_TYPE>
-            <FROM_DATE>'.$input_data['from_date'].'</FROM_DATE>
-            <FROM_DATE_TIME>00:00:00</FROM_DATE_TIME>
-            <TO_DATE>'.$input_data['to_date'].'</TO_DATE>
-            <TO_DATE_TIME>23:59:59</TO_DATE_TIME>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
-        ';
-        $soapMethod = 'ReconcileReportV2';
-        $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string, $soapMethod);
-        Log::info(json_decode(json_encode($response->ReconcileReportV2Response->ReconcileReportV2Result), true));
-
-        return json_decode(json_encode($response->ReconcileReportV2Response->ReconcileReportV2Result), true);
-    }
-
-    /**
-     * @param  $input_data
-     *                     PAYOUT_COUNTRY ($input_data['country_name'])
-     * @return mixed
-     *
-     * @throws \Exception
-     */
-    public function getCountryWiseRate($input_data)
-    {
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.$input_data['country_name'].$this->ClientPass;
-        $hash_signature = hash('sha256', $signature);
-        $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <PAYOUT_COUNTRY>'.$input_data['country_name'].'</PAYOUT_COUNTRY>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
-        ';
-        $soapMethod = 'GetCountryWiseRate';
-        $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string, $soapMethod);
-        Log::info(json_decode(json_encode($response->GetCountryWiseRateResponse->GetCountryWiseRateResult), true));
-
-        return json_decode(json_encode($response->GetCountryWiseRateResponse->GetCountryWiseRateResult), true);
-    }
-
-    /**
-     * Call this method to check the validation of the account.
-     *
-     * @return mixed
-     *
-     * @throws \Exception
-     */
-    public function accountValidate($input_data)
-    {
-        $location_id = $input_data['location_id'];
-        $account = $input_data['account'];
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.$location_id.$account.$this->ClientPass;
-        $hash_signature = hash('sha256', $signature);
-        $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <LOCATION_ID>'.$location_id.'</LOCATION_ID>
-            <ACCOUNT_NO>'.$account.'</ACCOUNT_NO>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
-        ';
-        $soapMethod = 'AccountValidate';
-        $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string, $soapMethod);
-        Log::info(json_decode(json_encode($response->AccountValidateResponse->AccountValidateResult), true));
-
-        return json_decode(json_encode($response->AccountValidateResponse->AccountValidateResult), true);
-    }
-
-    /**
-     * Call this method to get the notification of the amended transaction.
-     *
-     * @param  $input_data
-     *                     SHOW_INCREMENTAL ($input_data['show_incremental']) data are
-     *                     "Y" = List report incremental basis
-     *                     "N" = List report within date range
-     *                     If "y" then FROM_DATE and TO_DATE not required
-     * @return mixed
-     *
-     * @throws \Exception
-     */
-    public function notificationStatus($input_data)
-    {
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
-            $input_data['from_date'].$input_data['to_date'].$input_data['show_incremental'].
-            $this->ClientPass;
-        $hash_signature = hash('sha256', $signature);
-        $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <FROM_DATE>'.$input_data['from_date'].'</FROM_DATE>
-            <TO_DATE>'.$input_data['to_date'].'</TO_DATE>
-            <SHOW_INCREMENTAL>'.$input_data['show_incremental'].'</SHOW_INCREMENTAL>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
-        ';
-        $soapMethod = 'NotificationStatus';
-        $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
-        $response = $this->connectionCheck($xml_post_string, $soapMethod);
-        Log::info(json_decode(json_encode($response->NotificationStatusResponse->NotificationStatusResult), true));
-
-        return json_decode(json_encode($response->NotificationStatusResponse->NotificationStatusResult), true);
-    }
-
-    /**
-     * @return \SimpleXMLElement
-     *
-     * @throws \Exception
-     */
-    public function connectionCheck($xml_post_string, $method)
-    {
-        $headers = [
-            'Host: '.$this->config[$this->status]['app_host'],
-            'Content-type: text/xml;charset="utf-8"',
-            'Content-length: '.strlen($xml_post_string),
-            'SOAPAction: WebServices/'.$method,
-        ];
-
-        // PHP cURL  for connection
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_URL, $this->apiUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_post_string); // the SOAP request
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        // execution
-        $response = curl_exec($ch);
-        if ($response === false) {
-            throw new \Exception(curl_error($ch), curl_errno($ch));
-            $response .= "\nError occoured when connecting to the SMS SOAP Server!";
-            $response .= "\nSoap Exception: ".$exception;
-            $response .= "\nSOAP Fault: (faultcode: {curl_errno($ch)}, faultstring: {curl_error($ch)})";
-            Log::error('CURL reported error: ', $response);
-        }
-        curl_close($ch);
-        $response1 = str_replace('<soap:Body>', '', $response);
-        $response2 = str_replace('</soap:Body>', '', $response1);
-        $response = str_replace('xmlns="WebServices"', '', $response2);
-
-        return simplexml_load_string($response);
-    }
-
-    /**
-     * @return string
-     */
-    public function xmlGenerate($string, $method)
-    {
-        $xml_string = '<?xml version="1.0" encoding="utf-8"?>
-            <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-                <soap:Body>
-                    <'.$method.' xmlns="WebServices">
-                        '.$string.'
-                    </'.$method.'>
-                </soap:Body>
-            </soap:Envelope>
-        ';
-
-        return $xml_string;
-    }
-
-    /**
-     * @return object
-     *
-     * @throws \Exception
-     */
-    public function topUp($input)
-    {
-        $sendTransfer = $this->sendTransaction($input);
-        if ($sendTransfer['CODE'] == 0) {
-            $sendTransfer['status_code'] = 200;
-            $authorizedConfirmed = $this->authorizedConfirmed($sendTransfer);
-        } else {
-            $authorizedConfirmed = [
-                'MESSAGE' => 'Transaction Error',
-                'CODE' => '3007',
-            ];
-        }
-
-        return (object) array_merge($sendTransfer, $authorizedConfirmed);
     }
 }

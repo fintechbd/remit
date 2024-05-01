@@ -1,6 +1,6 @@
 <?php
 
-namespace Fintech\Remit;
+namespace Fintech\Remit\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -26,7 +26,7 @@ class RouteServiceProvider extends ServiceProvider
             Route::prefix("{$root_prefix}api")
                 ->middleware('api')
                 ->namespace($this->namespace)
-                ->group(__DIR__.'/../routes/api.php');
+                ->group(__DIR__.'/../../routes/api.php');
         });
     }
 

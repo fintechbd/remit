@@ -8,10 +8,14 @@ use App\Services\Backend\Setting\CatalogListService;
 use App\Services\Backend\Setting\CountryService;
 use Carbon\Carbon;
 use Exception;
+use Fintech\Remit\Contracts\BankTransfer;
+use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+use MongoDB\Laravel\Eloquent\Model;
+use stdClass;
 
-class EmqApi
+class EmqApi implements BankTransfer, OrderQuotation
 {
     const OCCUPATION = 'OCC';
 
@@ -80,15 +84,26 @@ class EmqApi
     }
 
     /**
+     * Encode Auth info to base64 and store on $basicAuthHash
+     *
+     * @return void
+     */
+    protected function encodeCredential()
+    {
+        $asciString = mb_convert_encoding($this->config[$this->status]['username'].':'.$this->config[$this->status]['password'], 'ASCII');
+        $this->basicAuthHash = base64_encode($asciString);
+    }
+
+    /**
      * EMQ Transfer TopUp
      *
-     * @return \stdClass
+     * @return stdClass
      *
      * @throws Exception
      */
     public function topUp($data)
     {
-        $returnData = new \stdClass();
+        $returnData = new stdClass();
 
         $reference = $data->reference_no;
 
@@ -165,13 +180,257 @@ class EmqApi
     }
 
     /**
+     * Create bank transfers to for All
+     *
+     * @return array
+     *
+     * @throws Exception
+     */
+    public function postCreateTransaction($data)
+    {
+        $reference = $data->reference_no;
+
+        $transactionTypes = ['Bank' => 'bank_account', 'Cash Pickup' => 'cash_pickup', 'Cash' => 'cash_pickup', 'Wallet' => 'ewallet'];
+
+        $sender_last_name = isset($data->sender_last_name) ? $data->sender_last_name : '';
+        $sender_first_name = isset($data->sender_first_name) ? $data->sender_first_name : '';
+
+        $full_name = $sender_first_name;
+        if (strlen($sender_last_name) > 0) {
+            $full_name .= (' '.$sender_last_name);
+        }
+
+        $nameArray = preg_split("/\s+(?=\S*+$)/", $full_name);
+
+        if (count($nameArray) > 1) {
+            $sender_first_name = $nameArray[0];
+            $sender_last_name = $nameArray[1];
+        } else {
+            $sender_last_name = $sender_first_name;
+        }
+
+        $transferInfo['destination_amount']['currency'] = isset($data->transfer_currency) ? $data->transfer_currency : null;
+        $transferInfo['destination_amount']['units'] = isset($data->transfer_amount) ? (string) round($data->transfer_amount, 2) : null; //TODO with charge or without charge
+        //TODO FOR PHL
+        $transferInfo['destination']['country'] = isset($data->emq_receiver_country_iso_code) ? $data->emq_receiver_country_iso_code : null;
+        if (in_array($transferInfo['destination']['country'], ['PHL', 'IDN'])) {
+            $transferInfo['destination_amount']['units'] = isset($data->transfer_amount) ? (string) floor($data->transfer_amount) : null; //TODO with charge or without charge
+        }
+
+        //$transferInfo["source_amount"]["currency"] = isset($data->sender_currency) ? $data->sender_currency : null;
+        //$transferInfo["source_amount"]["units"] = isset($data->sender_amount) ? (string)round($data->sender_amount) : null; //TODO with charge or without charge
+
+        $transferInfo['compliance']['source_of_funds'] = isset($data->emq_sender_source_of_fund_id) ? (string) $data->emq_sender_source_of_fund_id : null;
+        $transferInfo['compliance']['remittance_purpose'] = isset($data->emq_purpose_of_remittance) ? $data->emq_purpose_of_remittance : null;
+
+        $transferInfo['compliance']['relationship']['code'] = isset($data->emq_sender_beneficiary_relationship_code) ? $data->emq_sender_beneficiary_relationship_code : null;
+        if ($transferInfo['compliance']['relationship']['code'] == '99' || $transferInfo['compliance']['relationship']['code'] == null) {
+            $transferInfo['compliance']['relationship']['code'] = '99';
+            $transferInfo['compliance']['relationship']['relation'] = isset($data->sender_beneficiary_relationship) ? ucwords(strtolower($data->sender_beneficiary_relationship)) : 'Others';
+        }
+
+        //Source
+        $transferInfo['source']['type'] = 'partner';
+        $transferInfo['source']['gender'] = isset($data->sender_gender) ? strtoupper(substr($data->sender_gender, 0, 1)) : 'M';
+        $transferInfo['source']['country'] = isset($data->emq_sender_country_iso3_code) ? $data->emq_sender_country_iso3_code : null;
+
+        $transferInfo['source']['segment'] = isset($data->emq_sender_segment) ? $data->emq_sender_segment : 'individual';
+        $transferInfo['source']['legal_name_first'] = $sender_first_name;
+        $transferInfo['source']['legal_name_last'] = $sender_last_name;
+
+        $transferInfo['source']['mobile_number'] = isset($data->sender_mobile) ? ('+'.$data->sender_mobile) : null;
+
+        $transferInfo['source']['date_of_birth'] = isset($data->sender_date_of_birth) ? Carbon::parse($data->sender_date_of_birth)->format('Y-m-d') : null;
+
+        $transferInfo['source']['nationality'] = isset($data->emq_sender_nationality) ? $data->emq_sender_nationality : null;
+
+        //$transferInfo['source']["id_type"] = isset($data->emq_sender_id_type) ? strtolower($data->emq_sender_id_type) : null;
+        $transferInfo['source']['id_type'] = 'passport'; //national
+        $transferInfo['source']['id_country'] = isset($data->emq_sender_id_issue_country) ? $data->emq_sender_id_issue_country : null;
+        $transferInfo['source']['id_number'] = isset($data->sender_id_number) ? $data->sender_id_number : null;
+        $transferInfo['source']['id_expiration'] = isset($data->sender_expire_date) ? Carbon::parse($data->sender_expire_date)->format('Y-m-d') : null;
+
+        $transferInfo['source']['address_city'] = isset($data->sender_city) ? $data->sender_city : null;
+        $transferInfo['source']['address_line'] = isset($data->sender_address) ? $data->sender_address : null;
+        $transferInfo['source']['address_zip'] = isset($data->sender_zipcode) ? $data->sender_zipcode : null;
+        $transferInfo['source']['address_country'] = isset($data->emq_sender_country_iso3_code) ? $data->emq_sender_country_iso3_code : null;
+
+        //Destination
+        $transferInfo['destination']['type'] = isset($data->recipient_type_name)
+            ? (isset($transactionTypes[$data->recipient_type_name])
+                ? $transactionTypes[$data->recipient_type_name] : 'bank_account')
+            : null;
+        $transferInfo['destination']['country'] = isset($data->emq_receiver_country_iso_code) ? $data->emq_receiver_country_iso_code : null;
+        $transferInfo['destination']['legal_name_first'] = isset($data->receiver_first_name) ? $data->receiver_first_name : null;
+        $transferInfo['destination']['legal_name_last'] = isset($data->receiver_last_name) ? $data->receiver_last_name : null;
+        $transferInfo['destination']['mobile_number'] = isset($data->receiver_contact_number) ? ('+'.$data->receiver_contact_number) : null;
+
+        $transferInfo['destination']['address_line'] = isset($data->receiver_address) ? $data->receiver_address : null;
+        $transferInfo['destination']['address_city'] = isset($data->receiver_city) ? $data->receiver_city : null;
+
+        //type bank account
+        if ($transferInfo['destination']['type'] === 'bank_account') {
+
+            if ($transferInfo['destination']['country'] !== 'CHN') {
+                $transferInfo['destination']['bank'] = isset($data->emq_bank_id) ? $data->emq_bank_id : null;
+            }
+            //remove china bank address info
+            if ($transferInfo['destination']['country'] == 'CHN') {
+                unset($transferInfo['destination']['address_line']);
+                unset($transferInfo['destination']['address_city']);
+            }
+
+            //remove malaysia bank address info
+            if ($transferInfo['destination']['country'] == 'MYS') {
+                unset($transferInfo['destination']['mobile_number']);
+                unset($transferInfo['destination']['address_city']);
+            }
+
+            //indonesia
+            if ($transferInfo['destination']['country'] == 'IDN') {
+                $transferInfo['destination']['address_state'] = isset($data->receiver_province) ? $data->receiver_province : 'Jawa Barat';
+                $transferInfo['destination']['address_state_code'] = isset($data->emq_receiver_province_code) ? $data->emq_receiver_province_code : '01';
+                $transferInfo['destination']['address_city'] = isset($data->emq_receiver_city) ? $data->emq_receiver_city : 'BANDUNG';
+                $transferInfo['destination']['address_city_code'] = isset($data->emq_receiver_city_code) ? $data->emq_receiver_city_code : '0191';
+                $transferInfo['destination']['id_number'] = isset($data->receiver_id_number) ? $data->receiver_id_number : null;
+            }
+
+            $transferInfo['destination']['account_number'] = isset($data->bank_account_number) ? $data->bank_account_number : null;
+            //branch
+            if ($transferInfo['destination']['country'] === 'IND') { //India //99
+                //$transferInfo["destination"]["branch"] = isset($data->emq_bank_branch_id) ? $data->emq_bank_branch_id : null;
+                //$transferInfo["destination"]["branch"] = str_replace((isset($data->emq_bank_id) ? $data->emq_bank_id : null), '', (isset($data->location_routing_id[1]->bank_branch_location_field_value) ? $data->location_routing_id[1]->bank_branch_location_field_value : null));
+                $transferInfo['destination']['branch'] = substr((isset($data->location_routing_id[1]->bank_branch_location_field_value) ? $data->location_routing_id[1]->bank_branch_location_field_value : null), -6);
+
+            } elseif ($transferInfo['destination']['country'] === 'JPN') {
+                $transferInfo['destination']['branch'] = isset($data->emq_bank_branch_id) ? $data->emq_bank_branch_id : null;
+            }
+
+            //swift //SPEA Country TODO Feature Work
+            /*if ($transferInfo["destination"]["country"] === '') :
+                $transferInfo["destination"]["swift_code"] = isset($data->emq_bank_swift_code) ? $data->emq_bank_swift_code : null;
+                $transferInfo["destination"]["iban"] = isset($data->emq_bank_iban_code) ? $data->emq_bank_iban_code : null;
+            endif;*/
+        }
+
+        //type ewallet
+        if ($transferInfo['destination']['type'] === 'ewallet') {
+            if (in_array($transferInfo['destination']['country'], $this->config['ewallet_allow_country'])) {
+                $transferInfo['destination']['segment'] = isset($data->emq_sender_segment) ? $data->emq_sender_segment : 'individual';
+
+                if ($transferInfo['destination']['country'] === 'PHL') {
+                    $transferInfo['destination']['ewallet_id'] = isset($data->bank_account_number)
+                        ? preg_replace('/^(63)(.+)/u', '$2', $data->bank_account_number, 1)
+                        : null;
+                } else {
+                    $transferInfo['destination']['ewallet_id'] = isset($data->bank_account_number) ? $data->bank_account_number : null;
+                }
+
+                if (count($this->config['partners'][$transferInfo['destination']['country']]['ewallet']) > 0) {
+                    $transferInfo['destination']['partner'] = isset($data->emq_ewallet_partner)
+                        ? $data->emq_ewallet_partner
+                        : $this->config['partners'][$transferInfo['destination']['country']]['ewallet'][0];
+                }
+            }
+        }
+
+        //type cash_pickup
+        if ($transferInfo['destination']['type'] === 'cash_pickup') {
+            $transferInfo['destination']['partner'] = isset($data->emq_cash_pickup_partner) ? $data->emq_cash_pickup_partner : null;
+        }
+
+        /*        //verify recipient
+                $recipientConfirm = $this->verifyRecipient($transferInfo["destination"]);
+
+                if ($recipientConfirm['status'] === 200 && $recipientConfirm['response']['result'] === 'ok') {*/
+
+        $returnData = $this->putPostData("/transfers/{$reference}", $transferInfo, 'PUT');
+
+        /*        } else {
+        $returnData = $recipientConfirm;
+    }*/
+
+        return $returnData;
+    }
+
+    /**
+     * Base function that is responsible for interacting directly with the nium api to send data
+     *
+     * @return array
+     *
+     * @throws Exception
+     */
+    public function putPostData(string $url, array $dataArray, string $method = 'POST')
+    {
+        $apiUrl = $this->apiUrl.$url;
+        Log::info($apiUrl);
+        $jsonArray = json_encode($dataArray);
+        Log::info(json_decode($jsonArray, true));
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $apiUrl);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
+        curl_setopt($curl, CURLOPT_POST, count($dataArray));
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonArray);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_VERBOSE, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, [
+            'cache-control: no-cache',
+            'Content-Type: application/json',
+            'Accepts: application/json',
+            'Authorization: Basic '.$this->getBasicAuthHash(),
+        ]
+        );
+
+        $response = curl_exec($curl);
+        $info = curl_getinfo($curl);
+        $error = curl_error($curl);
+
+        if ($response == false) {
+            Log::info($info);
+            Log::info($error);
+            throw new Exception(curl_error($curl), curl_errno($curl));
+        }
+
+        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+
+        Log::info(json_decode($response, true));
+
+        return [
+            'status' => $status,
+            'response' => json_decode($response, true),
+        ];
+    }
+
+    /**
+     * Return encode auth header value
+     *
+     * @return string|null
+     */
+    public function getBasicAuthHash()
+    {
+        return $this->basicAuthHash;
+    }
+
+    /**
+     * @return array
+     *
+     * @throws Exception
+     */
+    public function postTransactionConfirm(string $reference)
+    {
+        return $this->putPostData("/transfers/{$reference}/confirm", [], 'POST');
+    }
+
+    /**
      * Render Emq Response to pointed StdClass
      *
      * @param  array  $response  emq response
-     * @param  \stdClass  $returnData  class that will get rendered response
+     * @param  stdClass  $returnData  class that will get rendered response
      * @return void
      */
-    public function renderApiResponse(array $response, \stdClass &$returnData)
+    public function renderApiResponse(array $response, stdClass &$returnData)
     {
         $returnData->init_time = isset($response['created']) ? $response['created'] : date('Y-m-d H:i:s P');
         $returnData->recharge_time = isset($response['created']) ? $response['created'] : date('Y-m-d H:i:s P');
@@ -339,17 +598,6 @@ class EmqApi
     }
 
     /**
-     * Encode Auth info to base64 and store on $basicAuthHash
-     *
-     * @return void
-     */
-    protected function encodeCredential()
-    {
-        $asciString = mb_convert_encoding($this->config[$this->status]['username'].':'.$this->config[$this->status]['password'], 'ASCII');
-        $this->basicAuthHash = base64_encode($asciString);
-    }
-
-    /**
      * Convert Country full into ISO 3 value
      *
      * @param  string|null  $country  country full name
@@ -393,6 +641,8 @@ class EmqApi
 
     }
 
+    /******************************************* Support *******************************************/
+
     /**
      * Return Username from config
      *
@@ -412,68 +662,6 @@ class EmqApi
     {
         return $this->config[$this->status]['password'];
     }
-
-    /**
-     * Base function that is responsible for interacting directly with the nium api to send data
-     *
-     * @return array
-     *
-     * @throws Exception
-     */
-    public function putPostData(string $url, array $dataArray, string $method = 'POST')
-    {
-        $apiUrl = $this->apiUrl.$url;
-        Log::info($apiUrl);
-        $jsonArray = json_encode($dataArray);
-        Log::info(json_decode($jsonArray, true));
-
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $apiUrl);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($curl, CURLOPT_POST, count($dataArray));
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonArray);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_VERBOSE, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, [
-            'cache-control: no-cache',
-            'Content-Type: application/json',
-            'Accepts: application/json',
-            'Authorization: Basic '.$this->getBasicAuthHash(),
-        ]
-        );
-
-        $response = curl_exec($curl);
-        $info = curl_getinfo($curl);
-        $error = curl_error($curl);
-
-        if ($response == false) {
-            Log::info($info);
-            Log::info($error);
-            throw new Exception(curl_error($curl), curl_errno($curl));
-        }
-
-        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        curl_close($curl);
-
-        Log::info(json_decode($response, true));
-
-        return [
-            'status' => $status,
-            'response' => json_decode($response, true),
-        ];
-    }
-
-    /**
-     * Return encode auth header value
-     *
-     * @return string|null
-     */
-    public function getBasicAuthHash()
-    {
-        return $this->basicAuthHash;
-    }
-
-    /******************************************* Support *******************************************/
 
     /**
      * Retrieve a quote of current rate.
@@ -548,6 +736,7 @@ class EmqApi
         ];
 
     }
+    /******************************************* Auth *******************************************/
 
     /**
      * Retrieve current balances
@@ -576,11 +765,7 @@ class EmqApi
         }
     }
 
-    protected function getBalanceFromCurrency(string $currency, $response)
-    {
-
-    }
-    /******************************************* Auth *******************************************/
+    /******************************************* Quota *******************************************/
 
     /**
      * Retrieve a daily statement for a given day.
@@ -596,7 +781,7 @@ class EmqApi
 
     }
 
-    /******************************************* Quota *******************************************/
+    /******************************************* Balance *******************************************/
 
     /**
      * Retrieve a monthly statement up to a given day.
@@ -612,7 +797,7 @@ class EmqApi
 
     }
 
-    /******************************************* Balance *******************************************/
+    /******************************************* Report *******************************************/
 
     /**
      * Retrieve the settlement report for a given date and a given destination country
@@ -628,8 +813,6 @@ class EmqApi
         return $this->getData("/settlements/{$param['source_country']}/{$param['dest_country']}/{$param['date']}");
 
     }
-
-    /******************************************* Report *******************************************/
 
     /**
      * List or search senders
@@ -667,6 +850,8 @@ class EmqApi
 
     }
 
+    /******************************************* Sender *******************************************/
+
     /**
      * Retrieve a sender
      *
@@ -679,8 +864,6 @@ class EmqApi
         return $this->getData("/senders/{$senderId}");
 
     }
-
-    /******************************************* Sender *******************************************/
 
     /**
      * Update a sender
@@ -735,6 +918,8 @@ class EmqApi
 
     }
 
+    /******************************************* Recipient *******************************************/
+
     /**
      * Retrieve a recipient.
      *
@@ -747,8 +932,6 @@ class EmqApi
         return $this->getData("/senders/{$senderId}/recipients/{$recipientId}");
 
     }
-
-    /******************************************* Recipient *******************************************/
 
     /**
      * Update a recipient.
@@ -825,6 +1008,8 @@ class EmqApi
 
     }
 
+    /******************************************* Static Data *******************************************/
+
     /**
      * List currencies
      * Retrieve list of currencies to be used in creating transfer
@@ -836,8 +1021,6 @@ class EmqApi
         return $this->getData('/data/currencies');
 
     }
-
-    /******************************************* Static Data *******************************************/
 
     /**
      * List occupations
@@ -1091,6 +1274,8 @@ class EmqApi
 
     }
 
+    /*********************************** Transaction ***************************************/
+
     /**
      * List transfers, oldest first.
      *
@@ -1104,8 +1289,6 @@ class EmqApi
         return $this->getData('/transfers', $data);
 
     }
-
-    /*********************************** Transaction ***************************************/
 
     /**
      * @param  array  $reference  MCM6196575170666
@@ -1133,192 +1316,49 @@ class EmqApi
      *
      * @throws Exception
      */
-    public function postTransactionConfirm(string $reference)
-    {
-        return $this->putPostData("/transfers/{$reference}/confirm", [], 'POST');
-    }
-
-    /**
-     * @return array
-     *
-     * @throws Exception
-     */
     public function postTransactionCancel(string $reference)
     {
         return $this->putPostData("/transfers/{$reference}/cancel", [], 'POST');
     }
 
     /**
-     * Create bank transfers to for All
-     *
-     * @return array
-     *
-     * @throws Exception
+     * Execute the transfer operation
      */
-    public function postCreateTransaction($data)
+    public function makeTransfer(array $orderInfo = []): mixed
     {
-        $reference = $data->reference_no;
+        // TODO: Implement makeTransfer() method.
+    }
 
-        $transactionTypes = ['Bank' => 'bank_account', 'Cash Pickup' => 'cash_pickup', 'Cash' => 'cash_pickup', 'Wallet' => 'ewallet'];
+    public function transferStatus(array $orderInfo = []): mixed
+    {
+        // TODO: Implement transferStatus() method.
+    }
 
-        $sender_last_name = isset($data->sender_last_name) ? $data->sender_last_name : '';
-        $sender_first_name = isset($data->sender_first_name) ? $data->sender_first_name : '';
+    public function cancelTransfer(array $orderInfo = []): mixed
+    {
+        // TODO: Implement cancelTransfer() method.
+    }
 
-        $full_name = $sender_first_name;
-        if (strlen($sender_last_name) > 0) {
-            $full_name .= (' '.$sender_last_name);
-        }
+    public function verifyAccount(array $accountInfo = []): mixed
+    {
+        // TODO: Implement verifyAccount() method.
+    }
 
-        $nameArray = preg_split("/\s+(?=\S*+$)/", $full_name);
+    public function vendorBalance(array $accountInfo = []): mixed
+    {
+        // TODO: Implement vendorBalance() method.
+    }
 
-        if (count($nameArray) > 1) {
-            $sender_first_name = $nameArray[0];
-            $sender_last_name = $nameArray[1];
-        } else {
-            $sender_last_name = $sender_first_name;
-        }
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model|Model  $order
+     */
+    public function requestQuotation($order): mixed
+    {
+        // TODO: Implement requestQuotation() method.
+    }
 
-        $transferInfo['destination_amount']['currency'] = isset($data->transfer_currency) ? $data->transfer_currency : null;
-        $transferInfo['destination_amount']['units'] = isset($data->transfer_amount) ? (string) round($data->transfer_amount, 2) : null; //TODO with charge or without charge
-        //TODO FOR PHL
-        $transferInfo['destination']['country'] = isset($data->emq_receiver_country_iso_code) ? $data->emq_receiver_country_iso_code : null;
-        if (in_array($transferInfo['destination']['country'], ['PHL', 'IDN'])) {
-            $transferInfo['destination_amount']['units'] = isset($data->transfer_amount) ? (string) floor($data->transfer_amount) : null; //TODO with charge or without charge
-        }
+    protected function getBalanceFromCurrency(string $currency, $response)
+    {
 
-        //$transferInfo["source_amount"]["currency"] = isset($data->sender_currency) ? $data->sender_currency : null;
-        //$transferInfo["source_amount"]["units"] = isset($data->sender_amount) ? (string)round($data->sender_amount) : null; //TODO with charge or without charge
-
-        $transferInfo['compliance']['source_of_funds'] = isset($data->emq_sender_source_of_fund_id) ? (string) $data->emq_sender_source_of_fund_id : null;
-        $transferInfo['compliance']['remittance_purpose'] = isset($data->emq_purpose_of_remittance) ? $data->emq_purpose_of_remittance : null;
-
-        $transferInfo['compliance']['relationship']['code'] = isset($data->emq_sender_beneficiary_relationship_code) ? $data->emq_sender_beneficiary_relationship_code : null;
-        if ($transferInfo['compliance']['relationship']['code'] == '99' || $transferInfo['compliance']['relationship']['code'] == null) {
-            $transferInfo['compliance']['relationship']['code'] = '99';
-            $transferInfo['compliance']['relationship']['relation'] = isset($data->sender_beneficiary_relationship) ? ucwords(strtolower($data->sender_beneficiary_relationship)) : 'Others';
-        }
-
-        //Source
-        $transferInfo['source']['type'] = 'partner';
-        $transferInfo['source']['gender'] = isset($data->sender_gender) ? strtoupper(substr($data->sender_gender, 0, 1)) : 'M';
-        $transferInfo['source']['country'] = isset($data->emq_sender_country_iso3_code) ? $data->emq_sender_country_iso3_code : null;
-
-        $transferInfo['source']['segment'] = isset($data->emq_sender_segment) ? $data->emq_sender_segment : 'individual';
-        $transferInfo['source']['legal_name_first'] = $sender_first_name;
-        $transferInfo['source']['legal_name_last'] = $sender_last_name;
-
-        $transferInfo['source']['mobile_number'] = isset($data->sender_mobile) ? ('+'.$data->sender_mobile) : null;
-
-        $transferInfo['source']['date_of_birth'] = isset($data->sender_date_of_birth) ? Carbon::parse($data->sender_date_of_birth)->format('Y-m-d') : null;
-
-        $transferInfo['source']['nationality'] = isset($data->emq_sender_nationality) ? $data->emq_sender_nationality : null;
-
-        //$transferInfo['source']["id_type"] = isset($data->emq_sender_id_type) ? strtolower($data->emq_sender_id_type) : null;
-        $transferInfo['source']['id_type'] = 'passport'; //national
-        $transferInfo['source']['id_country'] = isset($data->emq_sender_id_issue_country) ? $data->emq_sender_id_issue_country : null;
-        $transferInfo['source']['id_number'] = isset($data->sender_id_number) ? $data->sender_id_number : null;
-        $transferInfo['source']['id_expiration'] = isset($data->sender_expire_date) ? Carbon::parse($data->sender_expire_date)->format('Y-m-d') : null;
-
-        $transferInfo['source']['address_city'] = isset($data->sender_city) ? $data->sender_city : null;
-        $transferInfo['source']['address_line'] = isset($data->sender_address) ? $data->sender_address : null;
-        $transferInfo['source']['address_zip'] = isset($data->sender_zipcode) ? $data->sender_zipcode : null;
-        $transferInfo['source']['address_country'] = isset($data->emq_sender_country_iso3_code) ? $data->emq_sender_country_iso3_code : null;
-
-        //Destination
-        $transferInfo['destination']['type'] = isset($data->recipient_type_name)
-            ? (isset($transactionTypes[$data->recipient_type_name])
-                ? $transactionTypes[$data->recipient_type_name] : 'bank_account')
-            : null;
-        $transferInfo['destination']['country'] = isset($data->emq_receiver_country_iso_code) ? $data->emq_receiver_country_iso_code : null;
-        $transferInfo['destination']['legal_name_first'] = isset($data->receiver_first_name) ? $data->receiver_first_name : null;
-        $transferInfo['destination']['legal_name_last'] = isset($data->receiver_last_name) ? $data->receiver_last_name : null;
-        $transferInfo['destination']['mobile_number'] = isset($data->receiver_contact_number) ? ('+'.$data->receiver_contact_number) : null;
-
-        $transferInfo['destination']['address_line'] = isset($data->receiver_address) ? $data->receiver_address : null;
-        $transferInfo['destination']['address_city'] = isset($data->receiver_city) ? $data->receiver_city : null;
-
-        //type bank account
-        if ($transferInfo['destination']['type'] === 'bank_account') {
-
-            if ($transferInfo['destination']['country'] !== 'CHN') {
-                $transferInfo['destination']['bank'] = isset($data->emq_bank_id) ? $data->emq_bank_id : null;
-            }
-            //remove china bank address info
-            if ($transferInfo['destination']['country'] == 'CHN') {
-                unset($transferInfo['destination']['address_line']);
-                unset($transferInfo['destination']['address_city']);
-            }
-
-            //remove malaysia bank address info
-            if ($transferInfo['destination']['country'] == 'MYS') {
-                unset($transferInfo['destination']['mobile_number']);
-                unset($transferInfo['destination']['address_city']);
-            }
-
-            //indonesia
-            if ($transferInfo['destination']['country'] == 'IDN') {
-                $transferInfo['destination']['address_state'] = isset($data->receiver_province) ? $data->receiver_province : 'Jawa Barat';
-                $transferInfo['destination']['address_state_code'] = isset($data->emq_receiver_province_code) ? $data->emq_receiver_province_code : '01';
-                $transferInfo['destination']['address_city'] = isset($data->emq_receiver_city) ? $data->emq_receiver_city : 'BANDUNG';
-                $transferInfo['destination']['address_city_code'] = isset($data->emq_receiver_city_code) ? $data->emq_receiver_city_code : '0191';
-                $transferInfo['destination']['id_number'] = isset($data->receiver_id_number) ? $data->receiver_id_number : null;
-            }
-
-            $transferInfo['destination']['account_number'] = isset($data->bank_account_number) ? $data->bank_account_number : null;
-            //branch
-            if ($transferInfo['destination']['country'] === 'IND') { //India //99
-                //$transferInfo["destination"]["branch"] = isset($data->emq_bank_branch_id) ? $data->emq_bank_branch_id : null;
-                //$transferInfo["destination"]["branch"] = str_replace((isset($data->emq_bank_id) ? $data->emq_bank_id : null), '', (isset($data->location_routing_id[1]->bank_branch_location_field_value) ? $data->location_routing_id[1]->bank_branch_location_field_value : null));
-                $transferInfo['destination']['branch'] = substr((isset($data->location_routing_id[1]->bank_branch_location_field_value) ? $data->location_routing_id[1]->bank_branch_location_field_value : null), -6);
-
-            } elseif ($transferInfo['destination']['country'] === 'JPN') {
-                $transferInfo['destination']['branch'] = isset($data->emq_bank_branch_id) ? $data->emq_bank_branch_id : null;
-            }
-
-            //swift //SPEA Country TODO Feature Work
-            /*if ($transferInfo["destination"]["country"] === '') :
-                $transferInfo["destination"]["swift_code"] = isset($data->emq_bank_swift_code) ? $data->emq_bank_swift_code : null;
-                $transferInfo["destination"]["iban"] = isset($data->emq_bank_iban_code) ? $data->emq_bank_iban_code : null;
-            endif;*/
-        }
-
-        //type ewallet
-        if ($transferInfo['destination']['type'] === 'ewallet') {
-            if (in_array($transferInfo['destination']['country'], $this->config['ewallet_allow_country'])) {
-                $transferInfo['destination']['segment'] = isset($data->emq_sender_segment) ? $data->emq_sender_segment : 'individual';
-
-                if ($transferInfo['destination']['country'] === 'PHL') {
-                    $transferInfo['destination']['ewallet_id'] = isset($data->bank_account_number)
-                        ? preg_replace('/^(63)(.+)/u', '$2', $data->bank_account_number, 1)
-                        : null;
-                } else {
-                    $transferInfo['destination']['ewallet_id'] = isset($data->bank_account_number) ? $data->bank_account_number : null;
-                }
-
-                if (count($this->config['partners'][$transferInfo['destination']['country']]['ewallet']) > 0) {
-                    $transferInfo['destination']['partner'] = isset($data->emq_ewallet_partner)
-                        ? $data->emq_ewallet_partner
-                        : $this->config['partners'][$transferInfo['destination']['country']]['ewallet'][0];
-                }
-            }
-        }
-
-        //type cash_pickup
-        if ($transferInfo['destination']['type'] === 'cash_pickup') {
-            $transferInfo['destination']['partner'] = isset($data->emq_cash_pickup_partner) ? $data->emq_cash_pickup_partner : null;
-        }
-
-        /*        //verify recipient
-                $recipientConfirm = $this->verifyRecipient($transferInfo["destination"]);
-
-                if ($recipientConfirm['status'] === 200 && $recipientConfirm['response']['result'] === 'ok') {*/
-
-        $returnData = $this->putPostData("/transfers/{$reference}", $transferInfo, 'PUT');
-
-        /*        } else {
-        $returnData = $recipientConfirm;
-    }*/
-
-        return $returnData;
     }
 }

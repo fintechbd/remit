@@ -3,6 +3,7 @@
 namespace Fintech\Remit\Commands;
 
 use Fintech\Core\Facades\Core;
+use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Console\Command;
 
 class AgraniInstallCommand extends Command
@@ -255,12 +256,12 @@ class AgraniInstallCommand extends Command
     public function addCountryCodeToCountries(): void
     {
         if (Core::packageExists('MetaData')) {
-            \Fintech\MetaData\Facades\MetaData::country()
+            MetaData::country()
                 ->list(['paginate' => false])
                 ->each(function ($country) {
                     $countryData = $country->country_data;
                     $countryData['vendor_code']['agrani_code'] = self::AGRANI_CODES[$country->iso3]['agrani_code'] ?? null;
-                    \Fintech\MetaData\Facades\MetaData::country()->update($country->getKey(), ['country_data' => $countryData]);
+                    MetaData::country()->update($country->getKey(), ['country_data' => $countryData]);
                     $this->info("Country ID: {$country->getKey()} successful.");
                 });
         }

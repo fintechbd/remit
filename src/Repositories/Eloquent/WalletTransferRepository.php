@@ -3,11 +3,11 @@
 namespace Fintech\Remit\Repositories\Eloquent;
 
 use Fintech\Remit\Interfaces\WalletTransferRepository as InterfacesWalletTransferRepository;
+use Fintech\Remit\Models\WalletTransfer;
 use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 
 /**
@@ -17,7 +17,7 @@ class WalletTransferRepository extends OrderRepository implements InterfacesWall
 {
     public function __construct()
     {
-        $model = app(config('fintech.remit.wallet_transfer_model', \Fintech\Remit\Models\WalletTransfer::class));
+        $model = app(config('fintech.remit.wallet_transfer_model', WalletTransfer::class));
 
         if (! $model instanceof Model) {
             throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");

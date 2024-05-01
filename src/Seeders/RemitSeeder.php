@@ -2,7 +2,10 @@
 
 namespace Fintech\Remit\Seeders;
 
+use Fintech\Auth\Facades\Auth;
+use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
+use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
 
 class RemitSeeder extends Seeder
@@ -21,17 +24,17 @@ class RemitSeeder extends Seeder
                     unset($entry['serviceTypeChild']);
                 }
 
-                $findServiceTypeModel = \Fintech\Business\Facades\Business::serviceType()->list(['service_type_slug' => $entry['service_type_slug']])->first();
+                $findServiceTypeModel = Business::serviceType()->list(['service_type_slug' => $entry['service_type_slug']])->first();
                 if ($findServiceTypeModel) {
-                    $serviceTypeModel = \Fintech\Business\Facades\Business::serviceType()->update($findServiceTypeModel->id, $entry);
+                    $serviceTypeModel = Business::serviceType()->update($findServiceTypeModel->id, $entry);
                 } else {
-                    $serviceTypeModel = \Fintech\Business\Facades\Business::serviceType()->create($entry);
+                    $serviceTypeModel = Business::serviceType()->create($entry);
                 }
 
                 if (! empty($serviceTypeChild)) {
                     array_walk($serviceTypeChild, function ($item) use (&$serviceTypeModel) {
-                        $item['service_type_parent_id'] = $serviceTypeModel->id;
-                        \Fintech\Business\Facades\Business::serviceType()->create($item);
+                        $item['service_type_parent_id'] = $serviceTypeModel->getKey();
+                        Business::serviceType()->create($item);
                     });
                 }
             }
@@ -41,7 +44,7 @@ class RemitSeeder extends Seeder
             foreach (array_chunk($serviceData, 200) as $block) {
                 set_time_limit(2100);
                 foreach ($block as $entry) {
-                    \Fintech\Business\Facades\Business::service()->create($entry);
+                    Business::service()->create($entry);
                 }
             }
 
@@ -49,7 +52,7 @@ class RemitSeeder extends Seeder
             foreach (array_chunk($serviceStatData, 200) as $block) {
                 set_time_limit(2100);
                 foreach ($block as $entry) {
-                    \Fintech\Business\Facades\Business::serviceStat()->customStore($entry);
+                    Business::serviceStat()->customStore($entry);
                 }
             }
         }
@@ -86,9 +89,9 @@ class RemitSeeder extends Seeder
         $image_png = __DIR__.'/../../resources/img/service/logo_png/';
 
         return [
-            ['service_type_id' => \Fintech\Business\Facades\Business::serviceType()->list(['service_type_slug' => 'bank_transfer'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'Bank Transfer', 'service_slug' => 'bank_transfer', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'bank_transfer.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'bank_transfer.png')), 'service_notification' => 'yes', 'service_delay' => 'yes', 'service_stat_policy' => 'yes', 'service_serial' => 1, 'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => '', 'account_number' => '', 'transactional_currency' => '', 'beneficiary_type_id' => 1, 'operator_short_code' => null], 'enabled' => true],
-            ['service_type_id' => \Fintech\Business\Facades\Business::serviceType()->list(['service_type_slug' => 'cash_pickup'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'Cash Pickup', 'service_slug' => 'cash_pickup', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'cash_pickup.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'cash_pickup.png')), 'service_notification' => 'yes', 'service_delay' => 'yes', 'service_stat_policy' => 'yes', 'service_serial' => 1, 'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => '', 'account_number' => '', 'transactional_currency' => '', 'beneficiary_type_id' => 3, 'operator_short_code' => null], 'enabled' => true],
-            ['service_type_id' => \Fintech\Business\Facades\Business::serviceType()->list(['service_type_slug' => 'wallet_transfer'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'Wallet Transfer', 'service_slug' => 'wallet_transfer', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'wallet_transfer.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'wallet_transfer.png')), 'service_notification' => 'yes', 'service_delay' => 'yes', 'service_stat_policy' => 'yes', 'service_serial' => 1, 'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => '', 'account_number' => '', 'transactional_currency' => '', 'beneficiary_type_id' => 5, 'operator_short_code' => null], 'enabled' => true],
+            ['service_type_id' => Business::serviceType()->list(['service_type_slug' => 'bank_transfer'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'Bank Transfer', 'service_slug' => 'bank_transfer', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'bank_transfer.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'bank_transfer.png')), 'service_notification' => 'yes', 'service_delay' => 'yes', 'service_stat_policy' => 'yes', 'service_serial' => 1, 'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => '', 'account_number' => '', 'transactional_currency' => '', 'beneficiary_type_id' => 1, 'operator_short_code' => null], 'enabled' => true],
+            ['service_type_id' => Business::serviceType()->list(['service_type_slug' => 'cash_pickup'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'Cash Pickup', 'service_slug' => 'cash_pickup', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'cash_pickup.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'cash_pickup.png')), 'service_notification' => 'yes', 'service_delay' => 'yes', 'service_stat_policy' => 'yes', 'service_serial' => 1, 'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => '', 'account_number' => '', 'transactional_currency' => '', 'beneficiary_type_id' => 3, 'operator_short_code' => null], 'enabled' => true],
+            ['service_type_id' => Business::serviceType()->list(['service_type_slug' => 'wallet_transfer'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'Wallet Transfer', 'service_slug' => 'wallet_transfer', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'wallet_transfer.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'wallet_transfer.png')), 'service_notification' => 'yes', 'service_delay' => 'yes', 'service_stat_policy' => 'yes', 'service_serial' => 1, 'service_data' => ['visible_website' => 'yes', 'visible_android_app' => 'yes', 'visible_ios_app' => 'yes', 'account_name' => '', 'account_number' => '', 'transactional_currency' => '', 'beneficiary_type_id' => 5, 'operator_short_code' => null], 'enabled' => true],
         ];
 
     }
@@ -97,11 +100,11 @@ class RemitSeeder extends Seeder
     {
         $serviceLists = $this->service();
         $serviceStats = [];
-        $roles = \Fintech\Auth\Facades\Auth::role()->list(['id_not_in_array' => [1]])->pluck('id')->toArray();
-        $source_countries = \Fintech\MetaData\Facades\MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
+        $roles = Auth::role()->list(['id_not_in_array' => [1]])->pluck('id')->toArray();
+        $source_countries = MetaData::country()->list(['is_serving' => true])->pluck('id')->toArray();
         if (! empty($roles) && ! empty($source_countries)) {
             foreach ($serviceLists as $serviceList) {
-                $service = \Fintech\Business\Facades\Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
+                $service = Business::service()->list(['service_slug' => $serviceList['service_slug']])->first();
                 $serviceStats[] = [
                     'role_id' => $roles,
                     'service_id' => $service->getKey(),

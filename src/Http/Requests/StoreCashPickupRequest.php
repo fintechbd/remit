@@ -2,6 +2,7 @@
 
 namespace Fintech\Remit\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreCashPickupRequest extends FormRequest
@@ -17,7 +18,7 @@ class StoreCashPickupRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
@@ -37,7 +38,7 @@ class StoreCashPickupRequest extends FormRequest
             'order_data.cash_id' => ['integer', 'nullable'],
             'order_data.cash_account_number' => ['string', 'nullable'],
             'order_data.fund_source' => ['string', 'nullable'],
-            'order_data.remittance_purpose' => ['string', 'nullable'],        ];
+            'order_data.remittance_purpose' => ['string', 'nullable'], ];
     }
 
     /**

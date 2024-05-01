@@ -2,9 +2,11 @@
 
 namespace Fintech\Remit\Http\Controllers;
 
+use Exception;
 use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Remit\Http\Requests\WalletVerificationRequest;
 use Fintech\Remit\Http\Resources\WalletVerificationResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
 class WalletVerificationController extends Controller
@@ -14,13 +16,13 @@ class WalletVerificationController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(WalletVerificationRequest $request): \Illuminate\Http\JsonResponse|WalletVerificationResource
+    public function __invoke(WalletVerificationRequest $request): JsonResponse|WalletVerificationResource
     {
 
         try {
 
             if (strlen($request->input('wallet_no')) < 10) {
-                throw new \Exception('Invalid Bkash Wallet Number.');
+                throw new Exception('Invalid Bkash Wallet Number.');
             }
 
             $data = [
@@ -31,7 +33,7 @@ class WalletVerificationController extends Controller
 
             return new WalletVerificationResource($data);
 
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
 
             return $this->failed($exception->getMessage());
         }

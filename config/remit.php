@@ -1,6 +1,13 @@
 <?php
 
 // config for Fintech/Remit
+use Fintech\Remit\Models\BankTransfer;
+use Fintech\Remit\Models\CashPickup;
+use Fintech\Remit\Models\WalletTransfer;
+use Fintech\Remit\Repositories\Eloquent\BankTransferRepository;
+use Fintech\Remit\Repositories\Eloquent\CashPickupRepository;
+use Fintech\Remit\Repositories\Eloquent\WalletTransferRepository;
+
 return [
 
     /*
@@ -31,7 +38,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'bank_transfer_model' => \Fintech\Remit\Models\BankTransfer::class,
+    'bank_transfer_model' => BankTransfer::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -40,7 +47,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'cash_pickup_model' => \Fintech\Remit\Models\CashPickup::class,
+    'cash_pickup_model' => CashPickup::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -49,7 +56,7 @@ return [
     |
     | This value will be used to across system where model is needed
     */
-    'wallet_transfer_model' => \Fintech\Remit\Models\WalletTransfer::class,
+    'wallet_transfer_model' => WalletTransfer::class,
 
     //** Model Config Point Do not Remove **//
 
@@ -113,16 +120,12 @@ return [
             'mode' => 'sandbox',
             'driver' => Fintech\Remit\Vendors\TransFastApi::class,
             'live' => [
-                'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => '7106UAT',
-                'password' => '7106@Pass',
-                'excode' => '7106',
+                'endpoint' => 'https://send.transfast.ws/api/',
+                'token' => env('PACKAGE_REMIT_TRANS_FAST_TOKEN'),
             ],
             'sandbox' => [
-                'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => '7086UAT',
-                'password' => '7086@Pass',
-                'excode' => '7086',
+                'endpoint' => 'https://demo-api.transfast.net/api/',
+                'token' => env('PACKAGE_REMIT_TRANS_FAST_TOKEN'),
             ],
         ],
         'valyou' => [
@@ -141,6 +144,20 @@ return [
                 'excode' => '7086',
             ],
         ],
+        'islamibank' => [
+            'mode' => 'sandbox',
+            'driver' => Fintech\Remit\Vendors\IslamiBankApi::class,
+            'live' => [
+                'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
+                'username' => 'clavistestws',
+                'password' => 'Clavis@01',
+            ],
+            'sandbox' => [
+                'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
+                'username' => 'clavistestws',
+                'password' => 'Clavis@01',
+            ],
+        ],
     ],
     /*
     |--------------------------------------------------------------------------
@@ -151,11 +168,11 @@ return [
     */
 
     'repositories' => [
-        \Fintech\Remit\Interfaces\BankTransferRepository::class => \Fintech\Remit\Repositories\Eloquent\BankTransferRepository::class,
+        \Fintech\Remit\Interfaces\BankTransferRepository::class => BankTransferRepository::class,
 
-        \Fintech\Remit\Interfaces\CashPickupRepository::class => \Fintech\Remit\Repositories\Eloquent\CashPickupRepository::class,
+        \Fintech\Remit\Interfaces\CashPickupRepository::class => CashPickupRepository::class,
 
-        \Fintech\Remit\Interfaces\WalletTransferRepository::class => \Fintech\Remit\Repositories\Eloquent\WalletTransferRepository::class,
+        \Fintech\Remit\Interfaces\WalletTransferRepository::class => WalletTransferRepository::class,
 
         //** Repository Binding Config Point Do not Remove **//
     ],

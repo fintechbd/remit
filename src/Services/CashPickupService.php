@@ -2,10 +2,10 @@
 
 namespace Fintech\Remit\Services;
 
+use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Interfaces\CashPickupRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Contracts\Pagination\Paginator;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 /**
@@ -23,23 +23,12 @@ class CashPickupService
         $this->cashPickupRepository = $cashPickupRepository;
     }
 
-    public function list(array $filters = []): Collection|Paginator
-    {
-        return $this->cashPickupRepository->list($filters);
-
-    }
-
-    public function create(array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
-    {
-        return $this->cashPickupRepository->create($inputs);
-    }
-
-    public function find($id, bool $onlyTrashed = false): Model|\MongoDB\Laravel\Eloquent\Model|null
+    public function find($id, bool $onlyTrashed = false): ?BaseModel
     {
         return $this->cashPickupRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
+    public function update($id, array $inputs = []): ?BaseModel
     {
         return $this->cashPickupRepository->update($id, $inputs);
     }
@@ -59,9 +48,20 @@ class CashPickupService
         return $this->cashPickupRepository->list($filters);
     }
 
-    public function import(array $filters): Model|\MongoDB\Laravel\Eloquent\Model|null
+    public function list(array $filters = []): Collection|Paginator
+    {
+        return $this->cashPickupRepository->list($filters);
+
+    }
+
+    public function import(array $filters): ?BaseModel
     {
         return $this->cashPickupRepository->create($filters);
+    }
+
+    public function create(array $inputs = []): ?BaseModel
+    {
+        return $this->cashPickupRepository->create($inputs);
     }
 
     /**

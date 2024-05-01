@@ -2,10 +2,10 @@
 
 namespace Fintech\Remit\Services;
 
+use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Interfaces\WalletTransferRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Contracts\Pagination\Paginator;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 /**
@@ -23,23 +23,12 @@ class WalletTransferService
         $this->walletTransferRepository = $walletTransferRepository;
     }
 
-    public function list(array $filters = []): Collection|Paginator
-    {
-        return $this->walletTransferRepository->list($filters);
-
-    }
-
-    public function create(array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
-    {
-        return $this->walletTransferRepository->create($inputs);
-    }
-
-    public function find($id, bool $onlyTrashed = false): Model|\MongoDB\Laravel\Eloquent\Model|null
+    public function find($id, bool $onlyTrashed = false): ?BaseModel
     {
         return $this->walletTransferRepository->find($id, $onlyTrashed);
     }
 
-    public function update($id, array $inputs = []): Model|\MongoDB\Laravel\Eloquent\Model|null
+    public function update($id, array $inputs = []): ?BaseModel
     {
         return $this->walletTransferRepository->update($id, $inputs);
     }
@@ -59,9 +48,20 @@ class WalletTransferService
         return $this->walletTransferRepository->list($filters);
     }
 
-    public function import(array $filters): Model|\MongoDB\Laravel\Eloquent\Model|null
+    public function list(array $filters = []): Collection|Paginator
+    {
+        return $this->walletTransferRepository->list($filters);
+
+    }
+
+    public function import(array $filters): ?BaseModel
     {
         return $this->walletTransferRepository->create($filters);
+    }
+
+    public function create(array $inputs = []): ?BaseModel
+    {
+        return $this->walletTransferRepository->create($inputs);
     }
 
     /**

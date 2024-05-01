@@ -3,6 +3,7 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
+use Fintech\Auth\Facades\Auth;
 use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Auth\RiskProfile;
@@ -80,7 +81,7 @@ class BankTransferController extends Controller
             }
             $depositor = $request->user('sanctum');
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
-                $depositAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+                $depositAccount = Transaction::userAccount()->list([
                     'user_id' => $user_id ?? $depositor->getKey(),
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
                 ])->first();
@@ -89,7 +90,7 @@ class BankTransferController extends Controller
                     throw new Exception("User don't have account deposit balance");
                 }
 
-                $masterUser = \Fintech\Auth\Facades\Auth::user()->list([
+                $masterUser = Auth::user()->list([
                     'role_name' => SystemRole::MasterUser->value,
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
                 ])->first();
@@ -135,7 +136,7 @@ class BankTransferController extends Controller
                 $order_data['user_name'] = $bankTransfer->user->name;
                 $bankTransfer->order_data = $order_data;
                 $userUpdatedBalance = Remit::bankTransfer()->debitTransaction($bankTransfer);
-                $depositedAccount = \Fintech\Transaction\Facades\Transaction::userAccount()->list([
+                $depositedAccount = Transaction::userAccount()->list([
                     'user_id' => $depositor->getKey(),
                     'country_id' => $bankTransfer->source_country_id,
                 ])->first();
@@ -181,36 +182,6 @@ class BankTransferController extends Controller
 
     /**
      * @lrd:start
-     * Return a specified *BankTransfer* resource found by id.
-     *
-     * @lrd:end
-     *
-     * @throws ModelNotFoundException
-     */
-    public function show(string|int $id): BankTransferResource|JsonResponse
-    {
-        try {
-
-            $bankTransfer = Remit::bankTransfer()->find($id);
-
-            if (! $bankTransfer) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
-            }
-
-            return new BankTransferResource($bankTransfer);
-
-        } catch (ModelNotFoundException $exception) {
-
-            return $this->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
-
-            return $this->failed($exception->getMessage());
-        }
-    }
-
-    /**
-     * @lrd:start
      * Update a specified *BankTransfer* resource using id.
      *
      * @lrd:end
@@ -233,6 +204,36 @@ class BankTransferController extends Controller
             }
 
             return $this->updated(__('core::messages.resource.updated', ['model' => 'Bank Transfer']));
+
+        } catch (ModelNotFoundException $exception) {
+
+            return $this->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return $this->failed($exception->getMessage());
+        }
+    }
+
+    /**
+     * @lrd:start
+     * Return a specified *BankTransfer* resource found by id.
+     *
+     * @lrd:end
+     *
+     * @throws ModelNotFoundException
+     */
+    public function show(string|int $id): BankTransferResource|JsonResponse
+    {
+        try {
+
+            $bankTransfer = Remit::bankTransfer()->find($id);
+
+            if (! $bankTransfer) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            }
+
+            return new BankTransferResource($bankTransfer);
 
         } catch (ModelNotFoundException $exception) {
 
@@ -282,40 +283,6 @@ class BankTransferController extends Controller
 
     /**
      * @lrd:start
-     * Restore the specified *BankTransfer* resource from trash.
-     * ** ```Soft Delete``` needs to enabled to use this feature**
-     *
-     * @lrd:end
-     */
-    public function restore(string|int $id): JsonResponse
-    {
-        try {
-
-            $bankTransfer = Remit::bankTransfer()->find($id, true);
-
-            if (! $bankTransfer) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
-            }
-
-            if (! Remit::bankTransfer()->restore($id)) {
-
-                throw (new RestoreOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
-            }
-
-            return $this->restored(__('core::messages.resource.restored', ['model' => 'Bank Transfer']));
-
-        } catch (ModelNotFoundException $exception) {
-
-            return $this->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
-
-            return $this->failed($exception->getMessage());
-        }
-    }
-
-    /**
-     * @lrd:start
      * Create an exportable list of the *BankTransfer* resource as document.
      * After export job is done system will fire  export completed event
      *
@@ -351,6 +318,106 @@ class BankTransferController extends Controller
             $bankTransferPaginate = Remit::bankTransfer()->list($inputs);
 
             return new BankTransferCollection($bankTransferPaginate);
+
+        } catch (Exception $exception) {
+
+            return $this->failed($exception->getMessage());
+        }
+    }
+
+    /**
+     * @lrd:start
+     * Assign vendor to a specified *BankTransfer* resource from systems.
+     *
+     * @lrd:end
+     */
+    public function fetchAssignableVendors(string|int $id): JsonResponse
+    {
+        try {
+
+            $bankTransfer = Remit::bankTransfer()->find($id, true);
+
+            if (! $bankTransfer) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            }
+
+            if (! Remit::bankTransfer()->restore($id)) {
+
+                throw (new RestoreOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            }
+
+            return $this->restored(__('core::messages.resource.restored', ['model' => 'Bank Transfer']));
+
+        } catch (ModelNotFoundException $exception) {
+
+            return $this->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return $this->failed($exception->getMessage());
+        }
+    }
+
+    /**
+     * @lrd:start
+     * Restore the specified *BankTransfer* resource from trash.
+     * ** ```Soft Delete``` needs to enabled to use this feature**
+     *
+     * @lrd:end
+     */
+    public function restore(string|int $id): JsonResponse
+    {
+        try {
+
+            $bankTransfer = Remit::bankTransfer()->find($id, true);
+
+            if (! $bankTransfer) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            }
+
+            if (! Remit::bankTransfer()->restore($id)) {
+
+                throw (new RestoreOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            }
+
+            return $this->restored(__('core::messages.resource.restored', ['model' => 'Bank Transfer']));
+
+        } catch (ModelNotFoundException $exception) {
+
+            return $this->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return $this->failed($exception->getMessage());
+        }
+    }
+
+    /**
+     * @lrd:start
+     * Assign vendor to a specified *BankTransfer* resource from systems.
+     *
+     * @lrd:end
+     */
+    public function assignVendor(string|int $id): JsonResponse
+    {
+        try {
+
+            $bankTransfer = Remit::bankTransfer()->find($id, true);
+
+            if (! $bankTransfer) {
+                throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            }
+
+            if (! Remit::bankTransfer()->restore($id)) {
+
+                throw (new RestoreOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
+            }
+
+            return $this->restored(__('core::messages.resource.restored', ['model' => 'Bank Transfer']));
+
+        } catch (ModelNotFoundException $exception) {
+
+            return $this->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
 

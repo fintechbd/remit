@@ -4,6 +4,7 @@ namespace Fintech\Remit\Repositories\Mongodb;
 
 use Fintech\Core\Repositories\MongodbRepository;
 use Fintech\Remit\Interfaces\WalletTransferRepository as InterfacesWalletTransferRepository;
+use Fintech\Remit\Models\WalletTransfer;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
 use InvalidArgumentException;
@@ -16,7 +17,7 @@ class WalletTransferRepository extends MongodbRepository implements InterfacesWa
 {
     public function __construct()
     {
-        $model = app(config('fintech.remit.wallet_transfer_model', \Fintech\Remit\Models\WalletTransfer::class));
+        $model = app(config('fintech.remit.wallet_transfer_model', WalletTransfer::class));
 
         if (! $model instanceof Model) {
             throw new InvalidArgumentException("Mongodb repository require model class to be `MongoDB\Laravel\Eloquent\Model` instance.");
