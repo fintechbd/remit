@@ -48,8 +48,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Fetch Exchange House NRT/NRD account balance (fetchBalance)
      * Parameters: userID, password, currency
      *
-     * @param string $currency
-     * @return array
      * @throws Exception
      */
     public function fetchBalance(string $currency): array
@@ -68,8 +66,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Fetch Account Details (fetchAccountDetail)
      * Parameters: userID, password, account_number, account_type, branch_code
      *
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function fetchAccountDetail(array $data): array
@@ -91,8 +87,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Fetch Remittance Status (fetchWSMessageStatus)
      * Parameters: userID, password, transaction_reference_number, secret_key
      *
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function fetchRemittanceStatus(array $data): array
@@ -113,8 +107,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Direct Credit Remittance (directCreditWSMessage)
      * Parameters: userID, password, accNo, wsMessage
      *
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function directCreditRemittance(array $data): array
@@ -251,8 +243,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * ValidateBeneficiaryWallet (validateBeneficiaryWallet)
      * Parameters: userID, password, walletNo, paymentType
      *
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function validateBeneficiaryWallet(array $data): array
@@ -313,11 +303,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         return Utility::parseXml($response->body());
     }
 
-    /**
-     * @param $string
-     * @param $method
-     * @return string
-     */
     public function xmlGenerate($string, $method): string
     {
         return <<<XML
@@ -519,18 +504,12 @@ XML;
         ];
     }
 
-    /**
-     * @param array $orderInfo
-     * @return array
-     */
     public function makeTransfer(array $orderInfo = []): array
     {
         return [];
     }
 
     /**
-     * @param array $orderInfo
-     * @return array
      * @throws Exception
      */
     public function transferStatus(array $orderInfo = []): array
@@ -538,18 +517,12 @@ XML;
         return $this->fetchRemittanceStatus($orderInfo);
     }
 
-    /**
-     * @param array $orderInfo
-     * @return array
-     */
     public function cancelTransfer(array $orderInfo = []): array
     {
         return [];
     }
 
     /**
-     * @param array $accountInfo
-     * @return array
      * @throws Exception
      */
     public function verifyAccount(array $accountInfo = []): array
@@ -560,8 +533,6 @@ XML;
     }
 
     /**
-     * @param array $accountInfo
-     * @return array
      * @throws Exception
      */
     public function vendorBalance(array $accountInfo = []): array
@@ -571,10 +542,6 @@ XML;
         return $this->fetchBalance($currency);
     }
 
-    /**
-     * @param $order
-     * @return array
-     */
     public function requestQuotation($order): array
     {
         return [];
