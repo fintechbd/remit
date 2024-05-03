@@ -3,6 +3,7 @@
 namespace Fintech\Remit\Vendors;
 
 use Exception;
+use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\BankTransfer;
 use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Facades\Log;
@@ -290,13 +291,8 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         }
         curl_close($ch);
         Log::info('Raw Response'.PHP_EOL.$response);
-        //        $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
-        //        $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
-        //        $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
-        //        $response = str_replace('ns:', '', $response); //dd($response);
-        //        Log::info($method . '<br>' . $response);
 
-        return simplexml_load_string($response);
+        return Utility::parseXml($response);
     }
 
     public function xmlGenerate($string, $method): string
