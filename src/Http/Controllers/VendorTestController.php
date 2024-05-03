@@ -45,6 +45,7 @@ class VendorTestController extends Controller
         $data['branch_code'] = '123';
         dump($vendor->fetchAccountDetail($data));
     }
+
     public function islamiBankFetchMobileBankingMCash(): void
     {
         $vendor = app()->make(\Fintech\Remit\Vendors\IslamiBankApi::class);
