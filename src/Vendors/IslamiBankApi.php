@@ -51,7 +51,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      *
      * @throws Exception
      */
-    public function fetchBalance(string $currency): SimpleXMLElement
+    public function fetchBalance(string $currency)
     {
         $xmlString = "
             <ser:userID>{$this->config[$this->status]['username']}</ser:userID>
