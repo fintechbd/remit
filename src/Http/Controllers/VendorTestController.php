@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Http\Controllers;
 
-use Fintech\Remit\Vendors\IslamiBankApi;
 use Illuminate\Routing\Controller;
 
 class VendorTestController extends Controller
@@ -12,6 +11,7 @@ class VendorTestController extends Controller
         $vendor = app()->make(\Fintech\Remit\Vendors\IslamiBankApi::class);
         dump($vendor->fetchBalance('BDT'));
     }
+
     public function islamiBankFetchAccountDetail(): void
     {
         $vendor = app()->make(\Fintech\Remit\Vendors\IslamiBankApi::class);
@@ -20,6 +20,7 @@ class VendorTestController extends Controller
         $data['branch_code'] = '';
         dump($vendor->fetchAccountDetail($data));
     }
+
     public function islamiBankFetchRemittanceStatus(): void
     {
         $vendor = app()->make(\Fintech\Remit\Vendors\IslamiBankApi::class);
