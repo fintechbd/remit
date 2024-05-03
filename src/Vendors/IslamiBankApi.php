@@ -60,7 +60,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $soapMethod = 'fetchBalance';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        return $response->fetchBalanceResponse->Response;
+        return $response;
     }
 
     /**
