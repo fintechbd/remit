@@ -268,38 +268,38 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         Log::info($method.'<br>'.$xml_string);
         $response = Http::soap($this->apiUrl, $method, $xml_string)->body();
         dd($response);
-//        $headers = [
-//            'Host: '.parse_url($this->apiUrl, PHP_URL_HOST),
-//            'Content-type: text/xml;charset="utf-8"',
-//            'Content-length: '.strlen($xml_string),
-//            'SOAPAction: '.$method,
-//        ];
-//
-//        // PHP cURL  for connection
-//        $ch = curl_init();
-//        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-//        curl_setopt($ch, CURLOPT_URL, $this->apiUrl);
-//        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-//        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-//        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
-//        curl_setopt($ch, CURLOPT_POST, true);
-//        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_string); // the SOAP request
-//        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-//        // execution
-//        $response = curl_exec($ch);
-//        Log::error($method.' CURL reported error: ');
-//        if ($response === false) {
-//            throw new Exception(curl_error($ch), curl_errno($ch));
-//        }
-//        curl_close($ch);
-//        Log::info('Raw Response'.PHP_EOL.$response);
-//        //        $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
-//        //        $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
-//        //        $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
-//        //        $response = str_replace('ns:', '', $response); //dd($response);
-//        //        Log::info($method . '<br>' . $response);
-//
-//        return simplexml_load_string($response);
+        //        $headers = [
+        //            'Host: '.parse_url($this->apiUrl, PHP_URL_HOST),
+        //            'Content-type: text/xml;charset="utf-8"',
+        //            'Content-length: '.strlen($xml_string),
+        //            'SOAPAction: '.$method,
+        //        ];
+        //
+        //        // PHP cURL  for connection
+        //        $ch = curl_init();
+        //        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        //        curl_setopt($ch, CURLOPT_URL, $this->apiUrl);
+        //        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        //        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+        //        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
+        //        curl_setopt($ch, CURLOPT_POST, true);
+        //        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_string); // the SOAP request
+        //        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        //        // execution
+        //        $response = curl_exec($ch);
+        //        Log::error($method.' CURL reported error: ');
+        //        if ($response === false) {
+        //            throw new Exception(curl_error($ch), curl_errno($ch));
+        //        }
+        //        curl_close($ch);
+        //        Log::info('Raw Response'.PHP_EOL.$response);
+        //        //        $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
+        //        //        $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
+        //        //        $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
+        //        //        $response = str_replace('ns:', '', $response); //dd($response);
+        //        //        Log::info($method . '<br>' . $response);
+        //
+        //        return simplexml_load_string($response);
     }
 
     public function xmlGenerate($string, $method): string
