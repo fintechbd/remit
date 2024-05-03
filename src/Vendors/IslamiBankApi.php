@@ -265,8 +265,8 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     private function connectionCheck($xml_post_string, $method)
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
-        Log::info($method.'<br>'.$xml_string);
-        Http::dd()->soap($this->apiUrl, $method, $xml_string);
+        dump($method.'<br>'.$xml_string);
+        dd(Http::soap($this->apiUrl, $method, $xml_string));
 //        $headers = [
 //            'Host: '.parse_url($this->apiUrl, PHP_URL_HOST),
 //            'Content-type: text/xml;charset="utf-8"',
