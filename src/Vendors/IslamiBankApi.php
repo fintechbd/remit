@@ -319,7 +319,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $return['origin_response'] = $response['Envelope']['Body'];
         $return['status'] = $explodeValue[0];
         $return['status_code'] = $explodeValue[$explodeValueCount];
-        //$return['message'] = $this->__responseCodeList((int)$explodeValue[$explodeValueCount]);
+        $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
 
         return $return;
     }
@@ -386,10 +386,10 @@ XML;
     /**
      * Response Code List
      * These codes will return in all operations.
-     * @param int $code
+     * @param int|string $code
      * @return string
      */
-    private function __responseCodeList(int $code): string
+    private function __responseCodeList(int|string $code): string
     {
         $return = [
             1000 => 'ERROR OTHERS',
