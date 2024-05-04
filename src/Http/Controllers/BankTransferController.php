@@ -131,6 +131,9 @@ class BankTransferController extends Controller
                     throw (new StoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'));
                 }
                 $order_data = $bankTransfer->order_data;
+                $service = Business::service()->find($inputs['service_id']);
+                $order_data['service_slug'] = $service->service_slug;
+                $order_data['service_name'] = $service->service_name;
                 $order_data['purchase_number'] = entry_number($bankTransfer->getKey(), $bankTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
                 $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
                 $order_data['user_name'] = $bankTransfer->user->name;
@@ -146,7 +149,8 @@ class BankTransferController extends Controller
                 $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
 
                 $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
-                $order_data['current_amount'] = ((float) $order_data['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
+                $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
+
                 if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'current_status' => $bankTransfer->currentStatus(),

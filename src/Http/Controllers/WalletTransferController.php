@@ -136,6 +136,9 @@ class WalletTransferController extends Controller
                 $order_data = $walletTransfer->order_data;
                 $order_data['purchase_number'] = entry_number($walletTransfer->getKey(), $walletTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
                 $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($walletTransfer);
+                $service = Business::service()->find($inputs['service_id']);
+                $order_data['service_slug'] = $service->service_slug;
+                $order_data['service_name'] = $service->service_name;
                 $order_data['user_name'] = $walletTransfer->user->name;
                 $walletTransfer->order_data = $order_data;
                 $userUpdatedBalance = Remit::walletTransfer()->debitTransaction($walletTransfer);
@@ -149,7 +152,7 @@ class WalletTransferController extends Controller
                 $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
 
                 $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
-                $order_data['current_amount'] = ((float) $order_data['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
+                $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
                 if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'current_status' => $walletTransfer->currentStatus(),
