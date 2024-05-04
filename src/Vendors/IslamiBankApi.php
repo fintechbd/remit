@@ -372,9 +372,10 @@ XML;
      * Response Code List
      * These codes will return in all operations.
      *
-     * @return string[]
+     * @param int $code
+     * @return array|string
      */
-    private function __responseCodeList(int $code): array
+    private function __responseCodeList(int $code): array|string
     {
         $return = [
             1000 => 'ERROR OTHERS',
