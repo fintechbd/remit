@@ -60,12 +60,13 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
         $explodeValue = explode('|', $response['Envelope']['Body']);
-        if($explodeValue[0] == 'FALSE'){
+        if ($explodeValue[0] == 'FALSE') {
             $return['status'] = $explodeValue[0];
             $return['status_code'] = $explodeValue[count($explodeValue)];
-        }else{
+        } else {
             $return = explode('|', $response['Envelope']['Body']);
         }
+
         return $return;
     }
 
@@ -88,12 +89,13 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
         $explodeValue = explode('|', $response['Envelope']['Body']);
-        if($explodeValue[0] == 'FALSE'){
+        if ($explodeValue[0] == 'FALSE') {
             $return['status'] = $explodeValue[0];
             $return['status_code'] = $explodeValue[count($explodeValue)];
-        }else{
+        } else {
             $return = explode('|', $response['Envelope']['Body']);
         }
+
         return $return;
     }
 
@@ -115,12 +117,13 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
         $explodeValue = explode('|', $response['Envelope']['Body']);
-        if($explodeValue[0] == 'FALSE'){
+        if ($explodeValue[0] == 'FALSE') {
             $return['status'] = $explodeValue[0];
             $return['status_code'] = $explodeValue[count($explodeValue)];
-        }else{
+        } else {
             $return = explode('|', $response['Envelope']['Body']);
         }
+
         return $return;
     }
 
@@ -166,12 +169,13 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
         $explodeValue = explode('|', $response['Envelope']['Body']);
-        if($explodeValue[0] == 'FALSE'){
+        if ($explodeValue[0] == 'FALSE') {
             $return['status'] = $explodeValue[0];
             $return['status_code'] = $explodeValue[count($explodeValue)];
-        }else{
+        } else {
             $return = explode('|', $response['Envelope']['Body']);
         }
+
         return $return;
     }
 
@@ -285,12 +289,13 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
         $explodeValue = explode('|', $response['Envelope']['Body']);
-        if($explodeValue[0] == 'FALSE'){
+        if ($explodeValue[0] == 'FALSE') {
             $return['status'] = $explodeValue[0];
             $return['status_code'] = $explodeValue[count($explodeValue)];
-        }else{
+        } else {
             $return = explode('|', $response['Envelope']['Body']);
         }
+
         return $return;
     }
 
