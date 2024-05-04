@@ -7,7 +7,6 @@ use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\BankTransfer;
 use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Facades\Http;
-use SimpleXMLElement;
 
 class IslamiBankApi implements BankTransfer, OrderQuotation
 {
@@ -48,8 +47,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Fetch Exchange House NRT/NRD account balance (fetchBalance)
      * Parameters: userID, password, currency
      *
-     * @param string $currency
-     * @return array
      * @throws Exception
      */
     public function fetchBalance(string $currency): array
@@ -79,8 +76,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Fetch Account Details (fetchAccountDetail)
      * Parameters: userID, password, account_number, account_type, branch_code
      *
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function fetchAccountDetail(array $data): array
@@ -105,7 +100,9 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         } else {
             $return['account_number'] = $explodeValue[1];
             $return['account_title'] = $explodeValue[2];
-            if($data['branch_code'] != 358) $return['account_holder_father_name'] = $explodeValue[3];
+            if ($data['branch_code'] != 358) {
+                $return['account_holder_father_name'] = $explodeValue[3];
+            }
         }
 
         return $return;
@@ -115,8 +112,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Fetch Remittance Status (fetchWSMessageStatus)
      * Parameters: userID, password, transaction_reference_number, secret_key
      *
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function fetchRemittanceStatus(array $data): array
@@ -149,8 +144,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Direct Credit Remittance (directCreditWSMessage)
      * Parameters: userID, password, accNo, wsMessage
      *
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function directCreditRemittance(array $data): array
@@ -202,8 +195,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Import/push remittance (importWSMessage)
      * Parameters: userID, password, accNo, wsMessage
      *
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function importOrPushRemittance(array $data): array
@@ -257,8 +248,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Verify remittance (importWSMessage)
      * Parameters: userID, password, accNo, wsMessage
      *
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function verifyRemittance(array $data): array
@@ -312,8 +301,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * ValidateBeneficiaryWallet (validateBeneficiaryWallet)
      * Parameters: userID, password, walletNo, paymentType
      *
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function validateBeneficiaryWallet(array $data): array
