@@ -373,9 +373,9 @@ XML;
      * These codes will return in all operations.
      *
      * @param int $code
-     * @return array|string
+     * @return string
      */
-    private function __responseCodeList(int $code): array|string
+    private function __responseCodeList(int $code): string
     {
         $return = [
             1000 => 'ERROR OTHERS',
@@ -462,11 +462,12 @@ XML;
      * Response Status Code List
      * These codes will return in only Fetch Remittance Status (fetchWSMessageStatus) operation.
      *
-     * @return string[]
+     * @param string $code
+     * @return string
      */
-    private function __responseStatusCodeList(string $code): array
+    private function __responseStatusCodeList(string $code): string
     {
-        return [
+        $return = [
             '01' => 'REMITTANCE ISSUED',
             '02' => 'REMITTANCE TRANSFERRED/AUTHORIZED BY EXCHANGE HOUSE',
             '03' => 'REMITTANCE READY FOR PAYMENT',
@@ -491,6 +492,8 @@ XML;
             '84' => 'CBS EFT SENT TO THIRD BANK',
             '99' => 'REMITTANCE INVALID STATUS',
         ];
+
+        return $return[$code];
     }
 
     /**
