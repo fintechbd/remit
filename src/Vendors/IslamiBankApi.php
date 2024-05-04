@@ -396,7 +396,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
         dump($method.'<br>'.$xml_string);
-        exit();
         $response = Http::soap($this->apiUrl, $method, $xml_string);
 
         //        $headers = [
