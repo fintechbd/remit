@@ -368,11 +368,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         return Utility::parseXml($response->body());
     }
 
-    /**
-     * @param $string
-     * @param $method
-     * @return string
-     */
     public function xmlGenerate($string, $method): string
     {
         return <<<XML
@@ -391,8 +386,6 @@ XML;
     /**
      * Response Code List
      * These codes will return in all operations.
-     * @param int|string $code
-     * @return string
      */
     private function __responseCodeList(int|string $code): string
     {
