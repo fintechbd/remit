@@ -185,24 +185,24 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $xmlString .= '<xsd:amount>'.($data['sending_amount'] ?? null).'</xsd:amount>';
         $xmlString .= '<xsd:isoCode>'.($data['sending_currency'] ?? null).'</xsd:isoCode>';
 
-        if($data['service_slug'] == 'bank_transfer'){
+        if ($data['service_slug'] == 'bank_transfer') {
             $xmlString .= '<xsd:beneficiaryAccNo>'.($data['beneficiary_data']['bank_account_number'] ?? null).'</xsd:beneficiaryAccNo>';
-            if($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited'){
+            if ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited') {
                 $xmlString .= '<xsd:beneficiaryAccType>'.($data['beneficiary_data']['beneficiaryAccType'] ?? null).'</xsd:beneficiaryAccType>';
                 $xmlString .= '<xsd:beneficiaryBranchCode>'.($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null).'</xsd:beneficiaryBranchCode>';
                 $xmlString .= '<xsd:paymentType>2</xsd:paymentType>';
-            }else{
+            } else {
                 $xmlString .= '<xsd:beneficiaryAccType>?</xsd:beneficiaryAccType>';
                 $xmlString .= '<xsd:beneficiaryBranchCode>?</xsd:beneficiaryBranchCode>';
                 $xmlString .= '<xsd:paymentType>3</xsd:paymentType>';
             }
-        }elseif($data['receiver_information']['beneficiary_type_name'] == 'cash_pickup'){
+        } elseif ($data['receiver_information']['beneficiary_type_name'] == 'cash_pickup') {
             $xmlString .= '<xsd:beneficiaryAccNo>?</xsd:beneficiaryAccNo>';
-            if($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited'){
+            if ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited') {
                 $xmlString .= '<xsd:beneficiaryAccType>?</xsd:beneficiaryAccType>';
                 $xmlString .= '<xsd:beneficiaryBranchCode>'.($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null).'</xsd:beneficiaryBranchCode>';
                 $xmlString .= '<xsd:paymentType>1</xsd:paymentType>';
-            }else{
+            } else {
                 $xmlString .= '<xsd:beneficiaryAccType>?</xsd:beneficiaryAccType>';
                 $xmlString .= '<xsd:paymentType>3</xsd:paymentType>';
             }
@@ -220,9 +220,9 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $xmlString .= '<xsd:remitterAddress>'.($data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null).'</xsd:remitterAddress>';
         $xmlString .= '<xsd:remitterCountry>'.($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null).'</xsd:remitterCountry>';
         $xmlString .= '<xsd:identityType>'.($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] ?? null).'</xsd:identityType>';
-        if($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] == 'passport'){
+        if ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] == 'passport') {
             $xmlString .= '<xsd:remitterPassportNo>'.($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null).'</xsd:remitterPassportNo>';
-        }else{
+        } else {
             $xmlString .= '<xsd:remitterIdentificationNo>'.($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null).'</xsd:remitterIdentificationNo>';
         }
         $xmlString .= '<xsd:remitterName'.($data['beneficiary_data']['sender_information']['name'] ?? null).'</xsd:remitterName>';
@@ -395,7 +395,8 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     private function connectionCheck($xml_post_string, $method): array
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
-        dump($method.'<br>'.$xml_string);exit();
+        dump($method.'<br>'.$xml_string);
+        exit();
         $response = Http::soap($this->apiUrl, $method, $xml_string);
 
         //        $headers = [
