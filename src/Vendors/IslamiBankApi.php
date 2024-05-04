@@ -371,9 +371,6 @@ XML;
     /**
      * Response Code List
      * These codes will return in all operations.
-     *
-     * @param int $code
-     * @return array|string
      */
     private function __responseCodeList(int $code): array|string
     {
