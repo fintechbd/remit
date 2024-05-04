@@ -18,5 +18,5 @@ Route::get('islami-bank-fetch-mobile-banking-m-cash', [VendorTestController::cla
 Route::get('islami-bank-fetch-remittance-status', [VendorTestController::class, 'islamiBankFetchRemittanceStatus'])
     ->name('islami-bank-fetch-remittance-status');
 
-Route::get('islami-bank-validate-beneficiary-wallet', [VendorTestController::class, 'islamiBankValidateBeneficiaryWallet'])
+Route::get('islami-bank-fetch-validate-beneficiary-wallet', [VendorTestController::class, 'islamiBankValidateBeneficiaryWallet'])
     ->name('islami-bank-fetch-validate-beneficiary-wallet');
