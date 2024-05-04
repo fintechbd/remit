@@ -44,7 +44,9 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * Fetch Exchange House NRT/NRD account balance (fetchBalance)
+     * Fetch Exchange House NRT/NRD account balance (fetchBalance).
+     * We are maintaining two types of account of exchange houses.
+     *
      * Parameters: userID, password, currency
      *
      * @throws Exception
@@ -76,6 +78,12 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
 
     /**
      * Fetch Account Details (fetchAccountDetail)
+     *
+     * Fetching account details of beneficiary (receiver) by which you will get the
+     * full digit (17 digit) account no and account title (Beneficiary Name) which
+     * is required to send when you will execute directCreditWSMessage
+     * operation.
+     *
      * Parameters: userID, password, account_number, account_type, branch_code
      *
      * @throws Exception
@@ -114,6 +122,10 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
 
     /**
      * Fetch Remittance Status (fetchWSMessageStatus)
+     *
+     * Fetch Remittance Status. You can also check the current status of your
+     * remittance whether your remittance has been paid or not.
+     *
      * Parameters: userID, password, transaction_reference_number, secret_key
      *
      * @throws Exception
@@ -148,6 +160,15 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
 
     /**
      * Direct Credit Remittance (directCreditWSMessage)
+     *
+     * Direct Credit Remittance : In case of Account payee, you can instantly credit to beneficiary account
+     * then transaction will be :
+     * Debit: Exchange House Account
+     * Credit: Beneficiary (receiver) account
+     * In case of instant cash, you can also directly debit your account and will be available for any branch payment:
+     * Debit: Exchange House Account
+     * Credit: Available for any branch payment.
+     *
      * Parameters: userID, password, accNo, wsMessage
      *
      * @throws Exception
@@ -201,6 +222,10 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
 
     /**
      * Import/push remittance (importWSMessage)
+     *
+     * Import/Push Remittance. If exchange house account has no available balance then you can use this operation.
+     * After certain time, we will pull the message and will be available for transaction.
+     *
      * Parameters: userID, password, accNo, wsMessage
      *
      * @throws Exception
@@ -310,7 +335,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * ValidateBeneficiaryWallet (validateBeneficiaryWallet)
+     * Validate information of beneficiary wallet no. (validateBeneficiaryWallet)
      * Parameters: userID, password, walletNo, paymentType
      *
      * @throws Exception
