@@ -145,8 +145,8 @@ class BankTransferController extends Controller
                 $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
                 $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
 
-                $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
-                $order_data['order_data']['current_amount'] = ((float) $order_data['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
+                $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
+                $order_data['current_amount'] = ((float) $order_data['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
                 if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'current_status' => $bankTransfer->currentStatus(),
@@ -155,7 +155,7 @@ class BankTransferController extends Controller
                 }
                 //TODO ALL Beneficiary Data with bank and branch data
                 $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
-                $order_data['order_data']['beneficiary_data'] = $beneficiaryData;
+                $order_data['beneficiary_data'] = $beneficiaryData;
 
                 Remit::bankTransfer()->update($bankTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
