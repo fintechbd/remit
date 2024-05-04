@@ -61,12 +61,14 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $explodeValue = explode('|', $response['Envelope']['Body']);
         $explodeValueCount = count($explodeValue) - 1;
         $return['origin_response'] = $response['Envelope']['Body'];
-        $return['status'] = $explodeValue[0];
-        if ($explodeValue[0] == 'FALSE') {
-            $return['status_code'] = $explodeValue[$explodeValueCount];
-            $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
-        } else {
-            $return['message'] = $explodeValue[$explodeValueCount];
+        if($explodeValueCount > 0) {
+            $return['status'] = $explodeValue[0];
+            if ($explodeValue[0] == 'FALSE') {
+                $return['status_code'] = $explodeValue[$explodeValueCount];
+                $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+            } else {
+                $return['message'] = $explodeValue[$explodeValueCount];
+            }
         }
 
         return $return;
@@ -93,15 +95,17 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $explodeValue = explode('|', $response['Envelope']['Body']);
         $explodeValueCount = count($explodeValue) - 1;
         $return['origin_response'] = $response['Envelope']['Body'];
-        $return['status'] = $explodeValue[0];
-        if ($explodeValue[0] == 'FALSE') {
-            $return['status_code'] = $explodeValue[$explodeValueCount];
-            $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
-        } else {
-            $return['account_number'] = $explodeValue[1];
-            $return['account_title'] = $explodeValue[2];
-            if ($data['branch_code'] != 358) {
-                $return['account_holder_father_name'] = $explodeValue[3];
+        if($explodeValueCount > 0) {
+            $return['status'] = $explodeValue[0];
+            if ($explodeValue[0] == 'FALSE') {
+                $return['status_code'] = $explodeValue[$explodeValueCount];
+                $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+            } else {
+                $return['account_number'] = $explodeValue[1];
+                $return['account_title'] = $explodeValue[2];
+                if ($data['branch_code'] != 358) {
+                    $return['account_holder_father_name'] = $explodeValue[3];
+                }
             }
         }
 
@@ -128,13 +132,15 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $explodeValue = explode('|', $response['Envelope']['Body']);
         $explodeValueCount = count($explodeValue) - 1;
         $return['origin_response'] = $response['Envelope']['Body'];
-        if ($explodeValue[0] == 'FALSE') {
-            $return['status'] = $explodeValue[0];
-            $return['status_code'] = $explodeValue[$explodeValueCount];
-            $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
-        } else {
-            $return['status_code'] = $explodeValue[$explodeValueCount];
-            $return['message'] = $this->__responseStatusCodeList($explodeValue[$explodeValueCount]);
+        if($explodeValueCount > 0) {
+            if ($explodeValue[0] == 'FALSE') {
+                $return['status'] = $explodeValue[0];
+                $return['status_code'] = $explodeValue[$explodeValueCount];
+                $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+            } else {
+                $return['status_code'] = $explodeValue[$explodeValueCount];
+                $return['message'] = $this->__responseStatusCodeList($explodeValue[$explodeValueCount]);
+            }
         }
 
         return $return;
@@ -184,9 +190,11 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $explodeValue = explode('|', $response['Envelope']['Body']);
         $explodeValueCount = count($explodeValue) - 1;
         $return['origin_response'] = $response['Envelope']['Body'];
-        $return['status'] = $explodeValue[0];
-        $return['status_code'] = $explodeValue[$explodeValueCount];
-        $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+        if($explodeValueCount > 0) {
+            $return['status'] = $explodeValue[0];
+            $return['status_code'] = $explodeValue[$explodeValueCount];
+            $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+        }
 
         return $return;
     }
@@ -237,9 +245,11 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $explodeValue = explode('|', $response['Envelope']['Body']);
         $explodeValueCount = count($explodeValue) - 1;
         $return['origin_response'] = $response['Envelope']['Body'];
-        $return['status'] = $explodeValue[0];
-        $return['status_code'] = $explodeValue[$explodeValueCount];
-        $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+        if($explodeValueCount > 0) {
+            $return['status'] = $explodeValue[0];
+            $return['status_code'] = $explodeValue[$explodeValueCount];
+            $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+        }
 
         return $return;
     }
@@ -290,9 +300,11 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $explodeValue = explode('|', $response['Envelope']['Body']);
         $explodeValueCount = count($explodeValue) - 1;
         $return['origin_response'] = $response['Envelope']['Body'];
-        $return['status'] = $explodeValue[0];
-        $return['status_code'] = $explodeValue[$explodeValueCount];
-        $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+        if($explodeValueCount > 0) {
+            $return['status'] = $explodeValue[0];
+            $return['status_code'] = $explodeValue[$explodeValueCount];
+            $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+        }
 
         return $return;
     }
@@ -317,9 +329,11 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $explodeValue = explode('|', $response['Envelope']['Body']);
         $explodeValueCount = count($explodeValue) - 1;
         $return['origin_response'] = $response['Envelope']['Body'];
-//        $return['status'] = $explodeValue[0];
-//        $return['status_code'] = $explodeValue[$explodeValueCount];
-//        $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+        if($explodeValueCount > 0){
+            $return['status'] = $explodeValue[0];
+            $return['status_code'] = $explodeValue[$explodeValueCount];
+            $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+        }
 
         return $return;
     }
