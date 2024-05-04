@@ -20,3 +20,6 @@ Route::get('islami-bank-fetch-remittance-status', [VendorTestController::class, 
 
 Route::get('islami-bank-fetch-validate-beneficiary-wallet', [VendorTestController::class, 'islamiBankValidateBeneficiaryWallet'])
     ->name('islami-bank-fetch-validate-beneficiary-wallet');
+
+Route::get('islami-bank-spot-cash', [VendorTestController::class, 'islamiBankSpotCash'])
+    ->name('islami-bank-spot-cash');
