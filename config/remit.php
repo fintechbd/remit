@@ -73,14 +73,14 @@ return [
             'driver' => Fintech\Remit\Vendors\AgraniBankApi::class,
             'live' => [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => '7106UAT',
-                'password' => '7106@Pass',
+                'username' => env('PACKAGE_REMIT_AGRANI_BANK_USERNAME'),
+                'password' => env('PACKAGE_REMIT_AGRANI_BANK_PASSWORD'),
                 'excode' => '7106',
             ],
             'sandbox' => [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => '7086UAT',
-                'password' => '7086@Pass',
+                'username' => env('PACKAGE_REMIT_AGRANI_BANK_USERNAME'),
+                'password' => env('PACKAGE_REMIT_AGRANI_BANK_PASSWORD'),
                 'excode' => '7086',
             ],
         ],
@@ -88,32 +88,28 @@ return [
             'mode' => 'sandbox',
             'driver' => Fintech\Remit\Vendors\CityBankApi::class,
             'live' => [
-                'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => '7106UAT',
-                'password' => '7106@Pass',
-                'excode' => '7106',
+                'endpoint' => 'http://nrbms.thecitybank.com/nrb_api_test/dynamicApi.php?wsdl',
+                'username' => env('PACKAGE_REMIT_CITY_BANK_USERNAME'),
+                'password' => env('PACKAGE_REMIT_CITY_BANK_PASSWORD')
             ],
             'sandbox' => [
-                'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => '7086UAT',
-                'password' => '7086@Pass',
-                'excode' => '7086',
+                'endpoint' => 'http://nrbms.thecitybank.com/dynamicApi.php?wsdl',
+                'username' => env('PACKAGE_REMIT_CITY_BANK_USERNAME'),
+                'password' => env('PACKAGE_REMIT_CITY_BANK_PASSWORD')
             ],
         ],
         'emqapi' => [
             'mode' => 'sandbox',
             'driver' => Fintech\Remit\Vendors\EmqApi::class,
             'live' => [
-                'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => '7106UAT',
-                'password' => '7106@Pass',
-                'excode' => '7106',
+                'endpoint' => 'https://partner.emq.com/v1',
+                'username' => env('PACKAGE_REMIT_EMQ_API_USERNAME'),
+                'password' => env('PACKAGE_REMIT_EMQ_API_PASSWORD')
             ],
             'sandbox' => [
-                'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => '7086UAT',
-                'password' => '7086@Pass',
-                'excode' => '7086',
+                'endpoint' => 'https://sandbox-partner.emq.com/v1',
+                'username' => env('PACKAGE_REMIT_EMQ_API_USERNAME'),
+                'password' => env('PACKAGE_REMIT_EMQ_API_PASSWORD')
             ],
         ],
         'transfast' => [
@@ -132,16 +128,18 @@ return [
             'mode' => 'sandbox',
             'driver' => Fintech\Remit\Vendors\ValYouApi::class,
             'live' => [
-                'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => '7106UAT',
-                'password' => '7106@Pass',
-                'excode' => '7106',
+                'endpoint' => 'http://www.prabhucashsystem.com/SendAPI/webService.asmx',
+                'username' => env('PACKAGE_REMIT_VALYOU_USERNAME'),
+                'password' => env('PACKAGE_REMIT_VALYOU_PASSWORD'),
+                'agent_code' => env('PACKAGE_REMIT_VALYOU_AGENT_CODE'),
+                'session_id' => env('PACKAGE_REMIT_VALYOU_AGENT_SESSION_ID')
             ],
             'sandbox' => [
-                'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => '7086UAT',
-                'password' => '7086@Pass',
-                'excode' => '7086',
+                'endpoint' => 'https://test.valyouremit.com/SendAPI/webService.asmx',
+                'username' => env('PACKAGE_REMIT_VALYOU_USERNAME'),
+                'password' => env('PACKAGE_REMIT_VALYOU_PASSWORD'),
+                'agent_code' => env('PACKAGE_REMIT_VALYOU_AGENT_CODE'),
+                'session_id' => env('PACKAGE_REMIT_VALYOU_AGENT_SESSION_ID')
             ],
         ],
         'islamibank' => [
@@ -149,13 +147,13 @@ return [
             'driver' => Fintech\Remit\Vendors\IslamiBankApi::class,
             'live' => [
                 'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
-                'username' => 'clavistestws',
-                'password' => 'Clavis@01',
+                'username' => env('PACKAGE_REMIT_ISLAMI_BANK_USERNAME'),
+                'password' => env('PACKAGE_REMIT_ISLAMI_BANK_PASSWORD'),
             ],
             'sandbox' => [
                 'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
-                'username' => 'clavistestws',
-                'password' => 'Clavis@01',
+                'username' => env('PACKAGE_REMIT_ISLAMI_BANK_USERNAME'),
+                'password' => env('PACKAGE_REMIT_ISLAMI_BANK_PASSWORD')
             ],
         ],
     ],
