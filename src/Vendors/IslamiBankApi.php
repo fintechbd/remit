@@ -499,11 +499,12 @@ XML;
     /**
      * Instrument/Payment Type Code
      *
-     * @return string[]
+     * @param int $code
+     * @return string
      */
-    private function __instrumentOrPaymentTypeCode(int $code): array
+    private function __instrumentOrPaymentTypeCode(int $code): string
     {
-        return [
+        $return = [
             1 => 'Instant Cash / Spot Cash/COC',
             2 => 'IBBL Account Payee',
             3 => 'Other Bank (BEFTN)',
@@ -512,16 +513,19 @@ XML;
             7 => 'Mobile Banking(bKash)',
             8 => 'Mobile Banking (Nagad)',
         ];
+
+        return $return[$code];
     }
 
     /**
      * Beneficiary Identity Type Code
      *
-     * @return string[]
+     * @param int $code
+     * @return string
      */
-    private function __beneficiaryIdentityTypeCode(int $code): array
+    private function __beneficiaryIdentityTypeCode(int $code): string
     {
-        return [
+        $return = [
             1 => 'Passport',
             2 => 'Cheque',
             3 => 'Photo',
@@ -534,6 +538,8 @@ XML;
             10 => 'Birth Certificate',
             11 => 'Student ID Card',
         ];
+
+        return $return[$code];
     }
 
     /**
