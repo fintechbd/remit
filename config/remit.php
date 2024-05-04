@@ -90,12 +90,12 @@ return [
             'live' => [
                 'endpoint' => 'http://nrbms.thecitybank.com/nrb_api_test/dynamicApi.php?wsdl',
                 'username' => env('PACKAGE_REMIT_CITY_BANK_USERNAME'),
-                'password' => env('PACKAGE_REMIT_CITY_BANK_PASSWORD')
+                'password' => env('PACKAGE_REMIT_CITY_BANK_PASSWORD'),
             ],
             'sandbox' => [
                 'endpoint' => 'http://nrbms.thecitybank.com/dynamicApi.php?wsdl',
                 'username' => env('PACKAGE_REMIT_CITY_BANK_USERNAME'),
-                'password' => env('PACKAGE_REMIT_CITY_BANK_PASSWORD')
+                'password' => env('PACKAGE_REMIT_CITY_BANK_PASSWORD'),
             ],
         ],
         'emqapi' => [
@@ -104,12 +104,12 @@ return [
             'live' => [
                 'endpoint' => 'https://partner.emq.com/v1',
                 'username' => env('PACKAGE_REMIT_EMQ_API_USERNAME'),
-                'password' => env('PACKAGE_REMIT_EMQ_API_PASSWORD')
+                'password' => env('PACKAGE_REMIT_EMQ_API_PASSWORD'),
             ],
             'sandbox' => [
                 'endpoint' => 'https://sandbox-partner.emq.com/v1',
                 'username' => env('PACKAGE_REMIT_EMQ_API_USERNAME'),
-                'password' => env('PACKAGE_REMIT_EMQ_API_PASSWORD')
+                'password' => env('PACKAGE_REMIT_EMQ_API_PASSWORD'),
             ],
         ],
         'transfast' => [
@@ -132,14 +132,14 @@ return [
                 'username' => env('PACKAGE_REMIT_VALYOU_USERNAME'),
                 'password' => env('PACKAGE_REMIT_VALYOU_PASSWORD'),
                 'agent_code' => env('PACKAGE_REMIT_VALYOU_AGENT_CODE'),
-                'session_id' => env('PACKAGE_REMIT_VALYOU_AGENT_SESSION_ID')
+                'session_id' => env('PACKAGE_REMIT_VALYOU_AGENT_SESSION_ID'),
             ],
             'sandbox' => [
                 'endpoint' => 'https://test.valyouremit.com/SendAPI/webService.asmx',
                 'username' => env('PACKAGE_REMIT_VALYOU_USERNAME'),
                 'password' => env('PACKAGE_REMIT_VALYOU_PASSWORD'),
                 'agent_code' => env('PACKAGE_REMIT_VALYOU_AGENT_CODE'),
-                'session_id' => env('PACKAGE_REMIT_VALYOU_AGENT_SESSION_ID')
+                'session_id' => env('PACKAGE_REMIT_VALYOU_AGENT_SESSION_ID'),
             ],
         ],
         'islamibank' => [
@@ -153,7 +153,7 @@ return [
             'sandbox' => [
                 'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
                 'username' => env('PACKAGE_REMIT_ISLAMI_BANK_USERNAME'),
-                'password' => env('PACKAGE_REMIT_ISLAMI_BANK_PASSWORD')
+                'password' => env('PACKAGE_REMIT_ISLAMI_BANK_PASSWORD'),
             ],
         ],
     ],
