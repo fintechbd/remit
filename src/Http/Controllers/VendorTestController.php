@@ -32,7 +32,7 @@ class VendorTestController extends Controller
     public function islamiBankValidateBeneficiaryWallet(): void
     {
         $vendor = app()->make(\Fintech\Remit\Vendors\IslamiBankApi::class);
-        $data['account_number'] = '01614747054';
+        $data['account_number'] = '016147470541';
         $data['account_type'] = '7';
         dump($vendor->validateBeneficiaryWallet($data));
     }
