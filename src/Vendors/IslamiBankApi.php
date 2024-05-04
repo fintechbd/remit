@@ -225,7 +225,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         } else {
             $xmlString .= '<xsd:remitterIdentificationNo>'.($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null).'</xsd:remitterIdentificationNo>';
         }
-        $xmlString .= '<xsd:remitterName'.($data['beneficiary_data']['sender_information']['name'] ?? null).'</xsd:remitterName>';
+        $xmlString .= '<xsd:remitterName>'.($data['beneficiary_data']['sender_information']['name'] ?? null).'</xsd:remitterName>';
         $xmlString .= '<xsd:remitterPhoneNo>'.($data['beneficiary_data']['sender_information']['mobile'] ?? null).'</xsd:remitterPhoneNo>';
         $xmlString .= '<xsd:secretKey>'.($data['beneficiary_data']['reference_no'] ?? null).'</xsd:secretKey>';
         $xmlString .= '<xsd:transReferenceNo>'.($data['beneficiary_data']['reference_no'] ?? null).'</xsd:transReferenceNo>';
