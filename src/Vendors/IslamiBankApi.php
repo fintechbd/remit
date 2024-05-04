@@ -59,7 +59,14 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $soapMethod = 'fetchBalance';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        return explode('|', $response['Envelope']['Body']);
+        $explodeValue = explode('|', $response['Envelope']['Body']);
+        if($explodeValue[0] == 'FALSE'){
+            $return['status'] = $explodeValue[0];
+            $return['status_code'] = $explodeValue[count($explodeValue)];
+        }else{
+            $return = explode('|', $response['Envelope']['Body']);
+        }
+        return $return;
     }
 
     /**
@@ -80,7 +87,14 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $soapMethod = 'fetchAccountDetail';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        return explode('|', $response['Envelope']['Body']);
+        $explodeValue = explode('|', $response['Envelope']['Body']);
+        if($explodeValue[0] == 'FALSE'){
+            $return['status'] = $explodeValue[0];
+            $return['status_code'] = $explodeValue[count($explodeValue)];
+        }else{
+            $return = explode('|', $response['Envelope']['Body']);
+        }
+        return $return;
     }
 
     /**
@@ -100,7 +114,14 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $soapMethod = 'fetchWSMessageStatusResponse';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        return explode('|', $response['Envelope']['Body']);
+        $explodeValue = explode('|', $response['Envelope']['Body']);
+        if($explodeValue[0] == 'FALSE'){
+            $return['status'] = $explodeValue[0];
+            $return['status_code'] = $explodeValue[count($explodeValue)];
+        }else{
+            $return = explode('|', $response['Envelope']['Body']);
+        }
+        return $return;
     }
 
     /**
@@ -144,7 +165,14 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        return explode('|', $response['Envelope']['Body']);
+        $explodeValue = explode('|', $response['Envelope']['Body']);
+        if($explodeValue[0] == 'FALSE'){
+            $return['status'] = $explodeValue[0];
+            $return['status_code'] = $explodeValue[count($explodeValue)];
+        }else{
+            $return = explode('|', $response['Envelope']['Body']);
+        }
+        return $return;
     }
 
     /**
@@ -256,7 +284,14 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $soapMethod = 'validateBeneficiaryWallet';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        return explode('|', $response['Envelope']['Body']);
+        $explodeValue = explode('|', $response['Envelope']['Body']);
+        if($explodeValue[0] == 'FALSE'){
+            $return['status'] = $explodeValue[0];
+            $return['status_code'] = $explodeValue[count($explodeValue)];
+        }else{
+            $return = explode('|', $response['Envelope']['Body']);
+        }
+        return $return;
     }
 
     /**
