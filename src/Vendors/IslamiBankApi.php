@@ -319,7 +319,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $return['origin_response'] = $response['Envelope']['Body'];
         $return['status'] = $explodeValue[0];
         $return['status_code'] = $explodeValue[$explodeValueCount];
-        $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+        $return['message'] = $this->__responseCodeList((int)$explodeValue[$explodeValueCount]);
 
         return $return;
     }
