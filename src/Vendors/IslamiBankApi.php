@@ -48,6 +48,8 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Fetch Exchange House NRT/NRD account balance (fetchBalance)
      * Parameters: userID, password, currency
      *
+     * @param string $currency
+     * @return array
      * @throws Exception
      */
     public function fetchBalance(string $currency): array
@@ -61,12 +63,13 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
 
         $explodeValue = explode('|', $response['Envelope']['Body']);
         $explodeValueCount = count($explodeValue) - 1;
+        $return['origin_response'] = $response['Envelope']['Body'];
+        $return['status'] = $explodeValue[0];
         if ($explodeValue[0] == 'FALSE') {
-            $return['status'] = $explodeValue[0];
             $return['status_code'] = $explodeValue[$explodeValueCount];
             $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
         } else {
-            $return = explode('|', $response['Envelope']['Body']);
+            $return['message'] = $explodeValue[$explodeValueCount];
         }
 
         return $return;
@@ -76,6 +79,8 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Fetch Account Details (fetchAccountDetail)
      * Parameters: userID, password, account_number, account_type, branch_code
      *
+     * @param array $data
+     * @return array
      * @throws Exception
      */
     public function fetchAccountDetail(array $data): array
@@ -92,12 +97,15 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
 
         $explodeValue = explode('|', $response['Envelope']['Body']);
         $explodeValueCount = count($explodeValue) - 1;
+        $return['origin_response'] = $response['Envelope']['Body'];
+        $return['status'] = $explodeValue[0];
         if ($explodeValue[0] == 'FALSE') {
-            $return['status'] = $explodeValue[0];
             $return['status_code'] = $explodeValue[$explodeValueCount];
             $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
         } else {
-            $return = explode('|', $response['Envelope']['Body']);
+            $return['account_number'] = $explodeValue[1];
+            $return['account_title'] = $explodeValue[2];
+            if($data['branch_code'] != 358) $return['account_holder_father_name'] = $explodeValue[3];
         }
 
         return $return;
@@ -107,6 +115,8 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Fetch Remittance Status (fetchWSMessageStatus)
      * Parameters: userID, password, transaction_reference_number, secret_key
      *
+     * @param array $data
+     * @return array
      * @throws Exception
      */
     public function fetchRemittanceStatus(array $data): array
@@ -122,12 +132,14 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
 
         $explodeValue = explode('|', $response['Envelope']['Body']);
         $explodeValueCount = count($explodeValue) - 1;
+        $return['origin_response'] = $response['Envelope']['Body'];
         if ($explodeValue[0] == 'FALSE') {
             $return['status'] = $explodeValue[0];
             $return['status_code'] = $explodeValue[$explodeValueCount];
             $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
         } else {
-            $return = explode('|', $response['Envelope']['Body']);
+            $return['status_code'] = $explodeValue[$explodeValueCount];
+            $return['message'] = $this->__responseStatusCodeList($explodeValue[$explodeValueCount]);
         }
 
         return $return;
@@ -137,6 +149,8 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Direct Credit Remittance (directCreditWSMessage)
      * Parameters: userID, password, accNo, wsMessage
      *
+     * @param array $data
+     * @return array
      * @throws Exception
      */
     public function directCreditRemittance(array $data): array
@@ -176,13 +190,10 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
 
         $explodeValue = explode('|', $response['Envelope']['Body']);
         $explodeValueCount = count($explodeValue) - 1;
-        if ($explodeValue[0] == 'FALSE') {
-            $return['status'] = $explodeValue[0];
-            $return['status_code'] = $explodeValue[$explodeValueCount];
-            $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
-        } else {
-            $return = explode('|', $response['Envelope']['Body']);
-        }
+        $return['origin_response'] = $response['Envelope']['Body'];
+        $return['status'] = $explodeValue[0];
+        $return['status_code'] = $explodeValue[$explodeValueCount];
+        $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
 
         return $return;
     }
@@ -191,9 +202,11 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      * Import/push remittance (importWSMessage)
      * Parameters: userID, password, accNo, wsMessage
      *
+     * @param array $data
+     * @return array
      * @throws Exception
      */
-    public function importOrPushRemittance(array $data): SimpleXMLElement
+    public function importOrPushRemittance(array $data): array
     {
         $xmlString = '
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
@@ -230,16 +243,25 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        return $response->directCreditWSMessageResponse->Response;
+        $explodeValue = explode('|', $response['Envelope']['Body']);
+        $explodeValueCount = count($explodeValue) - 1;
+        $return['origin_response'] = $response['Envelope']['Body'];
+        $return['status'] = $explodeValue[0];
+        $return['status_code'] = $explodeValue[$explodeValueCount];
+        $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+
+        return $return;
     }
 
     /**
      * Verify remittance (importWSMessage)
      * Parameters: userID, password, accNo, wsMessage
      *
+     * @param array $data
+     * @return array
      * @throws Exception
      */
-    public function verifyRemittance(array $data): SimpleXMLElement
+    public function verifyRemittance(array $data): array
     {
         $xmlString = '
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
@@ -276,13 +298,22 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        return $response->directCreditWSMessageResponse->Response;
+        $explodeValue = explode('|', $response['Envelope']['Body']);
+        $explodeValueCount = count($explodeValue) - 1;
+        $return['origin_response'] = $response['Envelope']['Body'];
+        $return['status'] = $explodeValue[0];
+        $return['status_code'] = $explodeValue[$explodeValueCount];
+        $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+
+        return $return;
     }
 
     /**
      * ValidateBeneficiaryWallet (validateBeneficiaryWallet)
      * Parameters: userID, password, walletNo, paymentType
      *
+     * @param array $data
+     * @return array
      * @throws Exception
      */
     public function validateBeneficiaryWallet(array $data): array
@@ -298,13 +329,9 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
 
         $explodeValue = explode('|', $response['Envelope']['Body']);
         $explodeValueCount = count($explodeValue) - 1;
-        if ($explodeValue[0] == 'FALSE') {
-            $return['status'] = $explodeValue[0];
-            $return['status_code'] = $explodeValue[$explodeValueCount];
-            $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
-        } else {
-            $return = explode('|', $response['Envelope']['Body']);
-        }
+        $return['status'] = $explodeValue[0];
+        $return['status_code'] = $explodeValue[$explodeValueCount];
+        $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
 
         return $return;
     }
