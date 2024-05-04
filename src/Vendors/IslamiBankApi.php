@@ -7,7 +7,6 @@ use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\BankTransfer;
 use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 
 class IslamiBankApi implements BankTransfer, OrderQuotation
@@ -17,16 +16,16 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      *
      * @var array
      */
-    private $config;
+    private mixed $config;
 
     /**
      * IslamiBank API Url.
      *
      * @var string
      */
-    private $apiUrl;
+    private mixed $apiUrl;
 
-    private $status = 'sandbox';
+    private string $status = 'sandbox';
 
     /**
      * IslamiBankApiService constructor.
@@ -51,7 +50,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      *
      * @throws Exception
      */
-    public function fetchBalance(string $currency)
+    public function fetchBalance(string $currency): array
     {
         $xmlString = "
             <ser:userID>{$this->config[$this->status]['username']}</ser:userID>
@@ -69,7 +68,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      *
      * @throws Exception
      */
-    public function fetchAccountDetail(array $data): SimpleXMLElement
+    public function fetchAccountDetail(array $data): array
     {
         $xmlString = '
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
@@ -81,7 +80,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $soapMethod = 'fetchAccountDetail';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        return $response->fetchAccountDetailResponse->Response;
+        return $response;
     }
 
     /**
@@ -90,7 +89,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      *
      * @throws Exception
      */
-    public function fetchRemittanceStatus(array $data): SimpleXMLElement
+    public function fetchRemittanceStatus(array $data): array
     {
         $xmlString = '
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
@@ -101,7 +100,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $soapMethod = 'fetchWSMessageStatusResponse';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        return $response->fetchAccountDetailResponse->Response;
+        return $response;
     }
 
     /**
@@ -110,7 +109,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      *
      * @throws Exception
      */
-    public function directCreditRemittance(array $data): SimpleXMLElement
+    public function directCreditRemittance(array $data): array
     {
         $xmlString = '
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
@@ -145,7 +144,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        return $response->directCreditWSMessageResponse->Response;
+        return $response;
     }
 
     /**
@@ -246,7 +245,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      *
      * @throws Exception
      */
-    public function validateBeneficiaryWallet(array $data): SimpleXMLElement
+    public function validateBeneficiaryWallet(array $data): array
     {
         $xmlString = '
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
@@ -257,13 +256,13 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $soapMethod = 'validateBeneficiaryWallet';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        return $response->validateBeneficiaryWalletResponse->Response;
+        return $response;
     }
 
     /**
      * @throws Exception
      */
-    private function connectionCheck($xml_post_string, $method)
+    private function connectionCheck($xml_post_string, $method): array
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
         dump($method.'<br>'.$xml_string);
@@ -483,7 +482,7 @@ XML;
 
     /**
      * Account Type Code
-     * Please send the following two digit code against the different types of account.
+     * Please send the following two-digit code against the different types of account.
      *
      * @return string[]
      */
@@ -505,7 +504,7 @@ XML;
         ];
     }
 
-    public function makeTransfer(array $orderInfo = []): mixed
+    public function makeTransfer(array $orderInfo = []): array
     {
         return [];
     }
@@ -513,12 +512,12 @@ XML;
     /**
      * @throws Exception
      */
-    public function transferStatus(array $orderInfo = []): mixed
+    public function transferStatus(array $orderInfo = []): array
     {
         return $this->fetchRemittanceStatus($orderInfo);
     }
 
-    public function cancelTransfer(array $orderInfo = []): mixed
+    public function cancelTransfer(array $orderInfo = []): array
     {
         return [];
     }
@@ -526,7 +525,7 @@ XML;
     /**
      * @throws Exception
      */
-    public function verifyAccount(array $accountInfo = []): mixed
+    public function verifyAccount(array $accountInfo = []): array
     {
         $this->validateBeneficiaryWallet($accountInfo);
 
@@ -536,14 +535,14 @@ XML;
     /**
      * @throws Exception
      */
-    public function vendorBalance(array $accountInfo = []): mixed
+    public function vendorBalance(array $accountInfo = []): array
     {
         $currency = $accountInfo['currency'] ?? 'USD';
 
         return $this->fetchBalance($currency);
     }
 
-    public function requestQuotation($order): mixed
+    public function requestQuotation($order): array
     {
         return [];
     }
