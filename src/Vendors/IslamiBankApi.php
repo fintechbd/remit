@@ -368,6 +368,11 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         return Utility::parseXml($response->body());
     }
 
+    /**
+     * @param $string
+     * @param $method
+     * @return string
+     */
     public function xmlGenerate($string, $method): string
     {
         return <<<XML
@@ -475,8 +480,6 @@ XML;
     /**
      * Response Status Code List
      * These codes will return in only Fetch Remittance Status (fetchWSMessageStatus) operation.
-     * @param string $code
-     * @return string
      */
     private function __responseStatusCodeList(string $code): string
     {
@@ -511,8 +514,6 @@ XML;
 
     /**
      * Instrument/Payment Type Code
-     * @param int $code
-     * @return string
      */
     private function __instrumentOrPaymentTypeCode(int $code): string
     {
@@ -531,8 +532,6 @@ XML;
 
     /**
      * Beneficiary Identity Type Code
-     * @param int $code
-     * @return string
      */
     private function __beneficiaryIdentityTypeCode(int $code): string
     {
