@@ -186,7 +186,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $xmlString .= '<xsd:isoCode>'.($data['sending_currency'] ?? null).'</xsd:isoCode>';
 
         if ($data['service_slug'] == 'bank_transfer') {
-            $xmlString .= '<xsd:beneficiaryAccNo>'.($data['beneficiary_data']['bank_account_number'] ?? null).'</xsd:beneficiaryAccNo>';
+            $xmlString .= '<xsd:beneficiaryAccNo>'.($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number'] ?? null).'</xsd:beneficiaryAccNo>';
             if ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited') {
                 $xmlString .= '<xsd:beneficiaryAccType>'.($data['beneficiary_data']['beneficiaryAccType'] ?? null).'</xsd:beneficiaryAccType>';
                 $xmlString .= '<xsd:beneficiaryBranchCode>'.($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null).'</xsd:beneficiaryBranchCode>';
