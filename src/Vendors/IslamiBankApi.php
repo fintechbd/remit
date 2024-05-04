@@ -376,7 +376,7 @@ XML;
      */
     private function __responseCodeList(int $code): array
     {
-        return [
+        $return = [
             1000 => 'ERROR OTHERS',
             1001 => 'TRANSACTION REF INVALID',
             1002 => 'AMOUNT INVALID',
@@ -453,6 +453,8 @@ XML;
             7004 => 'USER IS INACTIVE',
             7005 => 'USER IS DEAD (PERMANENTLY BLOCKED)',
         ];
+
+        return $return[$code];
     }
 
     /**
