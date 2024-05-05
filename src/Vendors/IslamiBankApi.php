@@ -175,7 +175,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      */
     public function directCreditRemittance(array $data): array
     {
-        dd($data);
+        //dd($data);
         $xmlString = '
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
             <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
