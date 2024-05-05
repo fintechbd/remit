@@ -236,7 +236,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
                 $xmlString .= '<xsd:paymentType>3</xsd:paymentType>';
             }
         }
-        $xmlString .= '<xsd:beneficiaryRoutingNo>'.($data['beneficiary_data']['branch_information']['branch_data']['routing_no'] ?? "?").'</xsd:beneficiaryRoutingNo>';
+        $xmlString .= '<xsd:beneficiaryRoutingNo>'.($data['beneficiary_data']['branch_information']['branch_data']['routing_no'] ?? '?').'</xsd:beneficiaryRoutingNo>';
 
         $xmlString .= '<xsd:beneficiaryAddress>'.($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null).'</xsd:beneficiaryAddress>';
         $xmlString .= '<xsd:beneficiaryBankCode>'.($data['beneficiary_data']['bank_information']['bank_data']['islami_bank_code'] ?? null).'</xsd:beneficiaryBankCode>';
@@ -245,7 +245,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         $xmlString .= '<xsd:beneficiaryName>'.($data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null).'</xsd:beneficiaryName>';
         $xmlString .= '<xsd:beneficiaryPhoneNo>'.($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null).'</xsd:beneficiaryPhoneNo>';
         $xmlString .= '<xsd:issueDate>'.(date('Y-m-d', strtotime($data['created_at'])) ?? null).'</xsd:issueDate>';
-        $xmlString .= '<xsd:note>'.($data['note'] ?? "?").'</xsd:note>';
+        $xmlString .= '<xsd:note>'.($data['note'] ?? '?').'</xsd:note>';
         $xmlString .= '<xsd:remitterAddress>'.($data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null).'</xsd:remitterAddress>';
         $xmlString .= '<xsd:remitterCountry>'.($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null).'</xsd:remitterCountry>';
         $xmlString .= '<xsd:identityType>'.($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] ?? null).'</xsd:identityType>';
