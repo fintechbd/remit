@@ -182,8 +182,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
         ';
         //$xmlString .= '<ser:transRefNo>'.($data['beneficiary_data']['reference_no'] ?? null).'</ser:transRefNo>';
         $xmlString .= '<ser:wsMessage>';
-        $xmlString .= '<xsd:amount>'.($data['sending_amount'] ?? null).'</xsd:amount>';
-        $xmlString .= '<xsd:isoCode>'.($data['sending_currency'] ?? null).'</xsd:isoCode>';
         $xmlString .= '<!--Optional:-->
             <xsd:additionalField1>?</xsd:additionalField1>
             <!--Optional:-->
@@ -201,8 +199,10 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
             <!--Optional:-->
             <xsd:additionalField8>?</xsd:additionalField8>
             <!--Optional:-->
-            <xsd:additionalField9>?</xsd:additionalField9>
-            <xsd:batchID>?</xsd:batchID>';
+            <xsd:additionalField9>?</xsd:additionalField9>';
+        $xmlString .= '<xsd:amount>'.($data['sending_amount'] ?? null).'</xsd:amount>';
+        $xmlString .= '<xsd:batchID>?</xsd:batchID>';
+        $xmlString .= '<xsd:isoCode>'.($data['sending_currency'] ?? null).'</xsd:isoCode>';
 
         if ($data['service_slug'] == 'bank_transfer') {
             $xmlString .= '<xsd:beneficiaryAccNo>'.($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number'] ?? null).'</xsd:beneficiaryAccNo>';
@@ -227,6 +227,13 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
             }
         }
         $xmlString .= '<xsd:beneficiaryRoutingNo>'.($data['beneficiary_data']['branch_information']['branch_data']['routing_no'] ?? '?').'</xsd:beneficiaryRoutingNo>';
+        $xmlString .= '<xsd:beneficiaryAddress>'.($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null).'</xsd:beneficiaryAddress>';
+        $xmlString .= '<xsd:beneficiaryBankCode>'.($data['beneficiary_data']['bank_information']['bank_data']['islami_bank_code'] ?? null).'</xsd:beneficiaryBankCode>';
+        $xmlString .= '<xsd:beneficiaryBankName>'.($data['beneficiary_data']['bank_information']['bank_name'] ?? null).'</xsd:beneficiaryBankName>';
+        $xmlString .= '<xsd:beneficiaryBranchName>'.($data['beneficiary_data']['branch_information']['branch_name'] ?? null).'</xsd:beneficiaryBranchName>';
+        $xmlString .= '<xsd:beneficiaryName>'.($data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null).'</xsd:beneficiaryName>';
+        $xmlString .= '<xsd:beneficiaryPassportNo>>?</xsd:beneficiaryPassportNo>';
+        $xmlString .= '<xsd:beneficiaryPhoneNo>'.($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null).'</xsd:beneficiaryPhoneNo>';
         $xmlString .= '<!--Optional:-->
             <xsd:exHouseTxID>?</xsd:exHouseTxID>
             <!--Optional:-->
@@ -237,12 +244,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
             <xsd:identityDescription>?</xsd:identityDescription>
             <!--Optional:-->
             <xsd:orderNo>?</xsd:orderNo>';
-        $xmlString .= '<xsd:beneficiaryAddress>'.($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null).'</xsd:beneficiaryAddress>';
-        $xmlString .= '<xsd:beneficiaryBankCode>'.($data['beneficiary_data']['bank_information']['bank_data']['islami_bank_code'] ?? null).'</xsd:beneficiaryBankCode>';
-        $xmlString .= '<xsd:beneficiaryBankName>'.($data['beneficiary_data']['bank_information']['bank_name'] ?? null).'</xsd:beneficiaryBankName>';
-        $xmlString .= '<xsd:beneficiaryBranchName>'.($data['beneficiary_data']['branch_information']['branch_name'] ?? null).'</xsd:beneficiaryBranchName>';
-        $xmlString .= '<xsd:beneficiaryName>'.($data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null).'</xsd:beneficiaryName>';
-        $xmlString .= '<xsd:beneficiaryPhoneNo>'.($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null).'</xsd:beneficiaryPhoneNo>';
         $xmlString .= '<xsd:issueDate>'.(date('Y-m-d', strtotime($data['created_at'])) ?? null).'</xsd:issueDate>';
         $xmlString .= '<xsd:note>'.($data['note'] ?? '?').'</xsd:note>';
         $xmlString .= '<xsd:remitterAddress>'.($data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null).'</xsd:remitterAddress>';
