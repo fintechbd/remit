@@ -215,16 +215,6 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
                 $xmlString .= '<xsd:beneficiaryBranchCode>?</xsd:beneficiaryBranchCode>';
                 $xmlString .= '<xsd:paymentType>3</xsd:paymentType>';
             }
-            $xmlString .= '<!--Optional:-->
-            <xsd:exHouseTxID>?</xsd:exHouseTxID>
-            <!--Optional:-->
-            <xsd:exchHouseBranchCode>?</xsd:exchHouseBranchCode>
-            <!--Optional:-->
-            <xsd:exchHouseSwiftCode>?</xsd:exchHouseSwiftCode>
-            <!--Optional:-->
-            <xsd:identityDescription>?</xsd:identityDescription>
-            <!--Optional:-->
-            <xsd:orderNo>?</xsd:orderNo>';
         } elseif ($data['receiver_information']['beneficiary_type_name'] == 'cash_pickup') {
             $xmlString .= '<xsd:beneficiaryAccNo>?</xsd:beneficiaryAccNo>';
             if ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited') {
@@ -237,7 +227,16 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
             }
         }
         $xmlString .= '<xsd:beneficiaryRoutingNo>'.($data['beneficiary_data']['branch_information']['branch_data']['routing_no'] ?? '?').'</xsd:beneficiaryRoutingNo>';
-
+        $xmlString .= '<!--Optional:-->
+            <xsd:exHouseTxID>?</xsd:exHouseTxID>
+            <!--Optional:-->
+            <xsd:exchHouseBranchCode>?</xsd:exchHouseBranchCode>
+            <!--Optional:-->
+            <xsd:exchHouseSwiftCode>?</xsd:exchHouseSwiftCode>
+            <!--Optional:-->
+            <xsd:identityDescription>?</xsd:identityDescription>
+            <!--Optional:-->
+            <xsd:orderNo>?</xsd:orderNo>';
         $xmlString .= '<xsd:beneficiaryAddress>'.($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null).'</xsd:beneficiaryAddress>';
         $xmlString .= '<xsd:beneficiaryBankCode>'.($data['beneficiary_data']['bank_information']['bank_data']['islami_bank_code'] ?? null).'</xsd:beneficiaryBankCode>';
         $xmlString .= '<xsd:beneficiaryBankName>'.($data['beneficiary_data']['bank_information']['bank_name'] ?? null).'</xsd:beneficiaryBankName>';
