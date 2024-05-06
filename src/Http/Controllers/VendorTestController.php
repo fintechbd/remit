@@ -97,6 +97,7 @@ class VendorTestController extends Controller
         //dd($order_data);
         dump($vendor->directCreditRemittance($order_data));
     }
+
     public function islamiBankAccountPayee(): void
     {
         $vendor = app()->make(\Fintech\Remit\Vendors\IslamiBankApi::class);
@@ -139,6 +140,7 @@ class VendorTestController extends Controller
         //dd($order_data);
         dump($vendor->directCreditRemittance($order_data));
     }
+
     public function islamiBankThirdBank(): void
     {
         $vendor = app()->make(\Fintech\Remit\Vendors\IslamiBankApi::class);
@@ -181,6 +183,7 @@ class VendorTestController extends Controller
         //dd($order_data);
         dump($vendor->directCreditRemittance($order_data));
     }
+
     public function islamiBankMobileBankingMCash(): void
     {
         $vendor = app()->make(\Fintech\Remit\Vendors\IslamiBankApi::class);
@@ -223,6 +226,7 @@ class VendorTestController extends Controller
         //dd($order_data);
         dump($vendor->directCreditRemittance($order_data));
     }
+
     public function islamiBankRemittanceCard(): void
     {
         $vendor = app()->make(\Fintech\Remit\Vendors\IslamiBankApi::class);
