@@ -467,19 +467,13 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      */
     public function validateBeneficiaryWallet(array $data): array
     {
-        $paymentType = match ($data['service_slug']) {
-            'mbs_m_cash' => 5,
-            'mfs_bkash' => 7,
-            'mfs_nagad' => 8
-        };
-
+        $validateBeneficiaryWallet = $this->__transferData($data);
         $xmlString = '
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
             <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
         ';
-        $xmlString .= '<ser:walletNo>'.($data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null).'</ser:walletNo>';
-        //$xmlString .= '<ser:paymentType>'.($data['account_type'] ?? null).'</ser:paymentType>';
-        $xmlString .= '<ser:paymentType>'.$paymentType.'</ser:paymentType>';
+        $xmlString .= '<ser:walletNo>'.($validateBeneficiaryWallet['beneficiaryAccNo']).'</ser:walletNo>';
+        $xmlString .= '<ser:paymentType>'.($validateBeneficiaryWallet['paymentType']).'</ser:paymentType>';
         $soapMethod = 'validateBeneficiaryWallet';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
