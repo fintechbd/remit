@@ -175,90 +175,160 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      */
     public function directCreditRemittance(array $data): array
     {
-        //dd($data);
+        $directCreditRemittance = $this->__transferData($data);
         $xmlString = '
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
             <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
         ';
-        //$xmlString .= '<ser:transRefNo>'.($data['beneficiary_data']['reference_no'] ?? null).'</ser:transRefNo>';
         $xmlString .= '<ser:wsMessage>';
-        $xmlString .= '<!--Optional:-->
-            <xsd:additionalField1>?</xsd:additionalField1>
+        $xmlString .= '
             <!--Optional:-->
-            <xsd:additionalField2>?</xsd:additionalField2>
+            <xsd:additionalField1>'.$directCreditRemittance['additionalField1'].'</xsd:additionalField1>
             <!--Optional:-->
-            <xsd:additionalField3>?</xsd:additionalField3>
+            <xsd:additionalField2>'.$directCreditRemittance['additionalField2'].'</xsd:additionalField2>
             <!--Optional:-->
-            <xsd:additionalField4>?</xsd:additionalField4>
+            <xsd:additionalField3>'.$directCreditRemittance['additionalField3'].'</xsd:additionalField3>
             <!--Optional:-->
-            <xsd:additionalField5>?</xsd:additionalField5>
+            <xsd:additionalField4>'.$directCreditRemittance['additionalField4'].'</xsd:additionalField4>
             <!--Optional:-->
-            <xsd:additionalField6>?</xsd:additionalField6>
+            <xsd:additionalField5>'.$directCreditRemittance['additionalField5'].'</xsd:additionalField5>
             <!--Optional:-->
-            <xsd:additionalField7>?</xsd:additionalField7>
+            <xsd:additionalField6>'.$directCreditRemittance['additionalField6'].'</xsd:additionalField6>
             <!--Optional:-->
-            <xsd:additionalField8>?</xsd:additionalField8>
+            <xsd:additionalField7>'.$directCreditRemittance['additionalField7'].'</xsd:additionalField7>
             <!--Optional:-->
-            <xsd:additionalField9>?</xsd:additionalField9>';
-        $xmlString .= '<xsd:amount>'.($data['sending_amount'] ?? null).'</xsd:amount>';
-        $xmlString .= '<xsd:batchID>?</xsd:batchID>';
-        $xmlString .= '<xsd:isoCode>'.($data['sending_currency'] ?? null).'</xsd:isoCode>';
-
-        if ($data['service_slug'] == 'bank_transfer') {
-            $xmlString .= '<xsd:beneficiaryAccNo>'.($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number'] ?? null).'</xsd:beneficiaryAccNo>';
-            if ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited') {
-                $xmlString .= '<xsd:beneficiaryAccType>'.($data['beneficiary_data']['beneficiary_acc_type'] ?? '02').'</xsd:beneficiaryAccType>';
-                $xmlString .= '<xsd:beneficiaryBranchCode>'.($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null).'</xsd:beneficiaryBranchCode>';
-                $xmlString .= '<xsd:paymentType>2</xsd:paymentType>';
-            } else {
-                $xmlString .= '<xsd:beneficiaryAccType>?</xsd:beneficiaryAccType>';
-                $xmlString .= '<xsd:beneficiaryBranchCode>?</xsd:beneficiaryBranchCode>';
-                $xmlString .= '<xsd:paymentType>3</xsd:paymentType>';
-            }
-        } elseif ($data['receiver_information']['beneficiary_type_name'] == 'cash_pickup') {
-            $xmlString .= '<xsd:beneficiaryAccNo>?</xsd:beneficiaryAccNo>';
-            if ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited') {
-                $xmlString .= '<xsd:beneficiaryAccType>?</xsd:beneficiaryAccType>';
-                $xmlString .= '<xsd:beneficiaryBranchCode>'.($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null).'</xsd:beneficiaryBranchCode>';
-                $xmlString .= '<xsd:paymentType>1</xsd:paymentType>';
-            } else {
-                $xmlString .= '<xsd:beneficiaryAccType>?</xsd:beneficiaryAccType>';
-                $xmlString .= '<xsd:paymentType>3</xsd:paymentType>';
-            }
-        }
-        $xmlString .= '<xsd:beneficiaryRoutingNo>'.($data['beneficiary_data']['branch_information']['branch_data']['routing_no'] ?? '?').'</xsd:beneficiaryRoutingNo>';
-        $xmlString .= '<xsd:beneficiaryAddress>'.($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null).'</xsd:beneficiaryAddress>';
-        $xmlString .= '<xsd:beneficiaryBankCode>'.($data['beneficiary_data']['bank_information']['bank_data']['islami_bank_code'] ?? null).'</xsd:beneficiaryBankCode>';
-        $xmlString .= '<xsd:beneficiaryBankName>'.($data['beneficiary_data']['bank_information']['bank_name'] ?? null).'</xsd:beneficiaryBankName>';
-        $xmlString .= '<xsd:beneficiaryBranchName>'.($data['beneficiary_data']['branch_information']['branch_name'] ?? null).'</xsd:beneficiaryBranchName>';
-        $xmlString .= '<xsd:beneficiaryName>'.($data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null).'</xsd:beneficiaryName>';
-        $xmlString .= '<xsd:beneficiaryPassportNo>>?</xsd:beneficiaryPassportNo>';
-        $xmlString .= '<xsd:beneficiaryPhoneNo>'.($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null).'</xsd:beneficiaryPhoneNo>';
-        $xmlString .= '<!--Optional:-->
-            <xsd:exHouseTxID>?</xsd:exHouseTxID>
+            <xsd:additionalField8>'.$directCreditRemittance['additionalField8'].'</xsd:additionalField8>
             <!--Optional:-->
-            <xsd:exchHouseBranchCode>?</xsd:exchHouseBranchCode>
+            <xsd:additionalField9>'.$directCreditRemittance['additionalField9'].'</xsd:additionalField9>
+        ';
+        $xmlString .= '
             <!--Optional:-->
-            <xsd:exchHouseSwiftCode>?</xsd:exchHouseSwiftCode>
+            <xsd:amount>'.$directCreditRemittance['amount'].'</xsd:amount>
+        ';
+        $xmlString .= '
             <!--Optional:-->
-            <xsd:identityDescription>?</xsd:identityDescription>
+            <xsd:batchID>'.$directCreditRemittance['batchID'].'</xsd:batchID>
+        ';
+        $xmlString .= '
             <!--Optional:-->
-            <xsd:orderNo>?</xsd:orderNo>';
-        $xmlString .= '<xsd:issueDate>'.(date('Y-m-d', strtotime($data['created_at'])) ?? null).'</xsd:issueDate>';
-        $xmlString .= '<xsd:note>'.($data['note'] ?? '?').'</xsd:note>';
-        $xmlString .= '<xsd:remitterAddress>'.($data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null).'</xsd:remitterAddress>';
-        $xmlString .= '<xsd:remitterCountry>'.($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null).'</xsd:remitterCountry>';
-        $xmlString .= '<xsd:identityType>'.($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] ?? null).'</xsd:identityType>';
-        if ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] == 'passport') {
-            $xmlString .= '<xsd:remitterPassportNo>'.($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null).'</xsd:remitterPassportNo>';
-        } else {
-            $xmlString .= '<xsd:remitterIdentificationNo>'.($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null).'</xsd:remitterIdentificationNo>';
-        }
-        $xmlString .= '<xsd:remitterName>'.($data['beneficiary_data']['sender_information']['name'] ?? null).'</xsd:remitterName>';
-        $xmlString .= '<xsd:remitterPhoneNo>'.($data['beneficiary_data']['sender_information']['mobile'] ?? null).'</xsd:remitterPhoneNo>';
-        $xmlString .= '<xsd:secretKey>'.($data['beneficiary_data']['reference_no'] ?? null).'</xsd:secretKey>';
-        $xmlString .= '<xsd:transReferenceNo>'.($data['beneficiary_data']['reference_no'] ?? null).'</xsd:transReferenceNo>';
-        $xmlString .= '<xsd:remittancePurpose>'.($data['remittance_purpose'] ?? null).'</xsd:remittancePurpose>';
+            <xsd:beneficiaryAccNo>'.$directCreditRemittance['beneficiaryAccNo'].'</xsd:beneficiaryAccNo>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:beneficiaryAccType>'.$directCreditRemittance['beneficiaryAccType'].'</xsd:beneficiaryAccType>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:beneficiaryAddress>'.$directCreditRemittance['beneficiaryAddress'].'</xsd:beneficiaryAddress>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:beneficiaryBankCode>'.$directCreditRemittance['beneficiaryBankCode'].'</xsd:beneficiaryBankCode>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:beneficiaryBankName>'.$directCreditRemittance['beneficiaryBankName'].'</xsd:beneficiaryBankName>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:beneficiaryBranchCode>'.$directCreditRemittance['beneficiaryBranchCode'].'</xsd:beneficiaryBranchCode>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:beneficiaryBranchName>'.$directCreditRemittance['beneficiaryBranchName'].'</xsd:beneficiaryBranchName>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:beneficiaryName>'.$directCreditRemittance['beneficiaryName'].'</xsd:beneficiaryName>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:beneficiaryPassportNo>'.$directCreditRemittance['beneficiaryPassportNo'].'</xsd:beneficiaryPassportNo>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:beneficiaryPhoneNo>'.$directCreditRemittance['beneficiaryPhoneNo'].'</xsd:beneficiaryPhoneNo>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:beneficiaryRoutingNo>'.$directCreditRemittance['beneficiaryRoutingNo'].'</xsd:beneficiaryRoutingNo>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:exHouseTxID>'.$directCreditRemittance['exHouseTxID'].'</xsd:exHouseTxID>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:exchHouseBranchCode>'.$directCreditRemittance['exchHouseBranchCode'].'</xsd:exchHouseBranchCode>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:exchHouseSwiftCode>'.$directCreditRemittance['exchHouseSwiftCode'].'</xsd:exchHouseSwiftCode>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:identityDescription>'.$directCreditRemittance['identityDescription'].'</xsd:identityDescription>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:identityType>'.$directCreditRemittance['identityType'].'</xsd:identityType>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:isoCode>'.($directCreditRemittance['isoCode'] ?? null).'</xsd:isoCode>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:issueDate>'.$directCreditRemittance['issueDate'].'</xsd:issueDate>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:note>'.$directCreditRemittance['note'].'</xsd:note>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:orderNo>'.$directCreditRemittance['orderNo'].'</xsd:orderNo>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:paymentType>'.$directCreditRemittance['paymentType'].'</xsd:paymentType>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:remittancePurpose>'.$directCreditRemittance['remittancePurpose'].'</xsd:remittancePurpose>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:remitterAddress>'.$directCreditRemittance['remitterAddress'].'</xsd:remitterAddress>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:remitterCountry>'.$directCreditRemittance['remitterCountry'].'</xsd:remitterCountry>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:remitterIdentificationNo>'.$directCreditRemittance['remitterIdentificationNo'].'</xsd:remitterIdentificationNo>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:remitterName>'.$directCreditRemittance['remitterName'].'</xsd:remitterName>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:remitterPassportNo>'.$directCreditRemittance['remitterPassportNo'].'</xsd:remitterPassportNo>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:remitterPhoneNo>'.$directCreditRemittance['remitterPhoneNo'].'</xsd:remitterPhoneNo>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:secretKey>'.($directCreditRemittance['reference_no'] ?? null).'</xsd:secretKey>
+        ';
+        $xmlString .= '
+            <!--Optional:-->
+            <xsd:transReferenceNo>'.($directCreditRemittance['reference_no'] ?? null).'</xsd:transReferenceNo>
+        ';
         $xmlString .= '</ser:wsMessage>';
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
@@ -707,5 +777,82 @@ XML;
     public function requestQuotation($order): array
     {
         return [];
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function __transferData(array $data): array
+    {
+        $bankTransferData['additionalField1'] = '?';
+        $bankTransferData['additionalField2'] = '?';
+        $bankTransferData['additionalField3'] = '?';
+        $bankTransferData['additionalField4'] = '?';
+        $bankTransferData['additionalField5'] = '?';
+        $bankTransferData['additionalField6'] = '?';
+        $bankTransferData['additionalField7'] = '?';
+        $bankTransferData['additionalField8'] = '?';
+        $bankTransferData['additionalField9'] = '?';
+        $bankTransferData['amount'] = ($data['sending_amount'] ?? null);
+        $bankTransferData['batchID'] = '?';
+        $bankTransferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number'] ?? $data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
+        $bankTransferData['paymentType'] = 3;
+        $bankTransferData['beneficiaryRoutingNo'] = ($data['beneficiary_data']['branch_information']['branch_data']['routing_no'] ?? '?');
+        if ($data['service_slug'] == 'mbs_m_cash') {
+            $bankTransferData['paymentType'] = 5;
+            $bankTransferData['beneficiaryRoutingNo'] = '?';
+        }elseif ($data['service_slug'] == 'mfs_bkash'){
+            $bankTransferData['paymentType'] = 7;
+            $bankTransferData['beneficiaryRoutingNo'] = '?';
+        }elseif ($data['service_slug'] == 'mfs_nagad'){
+            $bankTransferData['paymentType'] = 8;
+            $bankTransferData['beneficiaryRoutingNo'] = '?';
+        }
+        if ($data['service_slug'] == 'cash_pickup') {
+            $bankTransferData['beneficiaryAccNo'] = '';
+            $bankTransferData['paymentType'] = 1;
+            $bankTransferData['beneficiaryRoutingNo'] = '?';
+        }
+        $bankTransferData['beneficiaryAccType'] = '';
+        $bankTransferData['beneficiaryBranchCode'] = '';
+        if ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited') {
+            $bankTransferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? null);
+            $bankTransferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null);
+            $bankTransferData['beneficiaryRoutingNo'] = '?';
+            $bankTransferData['paymentType'] = 2;
+        }
+        $bankTransferData['beneficiaryAddress'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $bankTransferData['beneficiaryBankCode'] = ($data['beneficiary_data']['bank_information']['bank_data']['islami_bank_code'] ?? null);
+        $bankTransferData['beneficiaryBankName'] = ($data['beneficiary_data']['bank_information']['bank_name'] ?? null);
+        $bankTransferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? null);
+        $bankTransferData['beneficiaryName'] = ($data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
+        $bankTransferData['beneficiaryPassportNo'] = '?';
+        $bankTransferData['beneficiaryPhoneNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null);
+        $bankTransferData['exHouseTxID'] = '?';
+        $bankTransferData['exchHouseBranchCode'] = '?';
+        $bankTransferData['exchHouseSwiftCode'] = '?';
+        $bankTransferData['identityDescription'] = '?';
+        $bankTransferData['identityType'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] ?? null);
+        $bankTransferData['remitterPassportNo'] = '?';
+        $bankTransferData['remitterIdentificationNo'] = '?';
+        if ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] == 'passport') {
+            $bankTransferData['remitterPassportNo'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
+        } else {
+            $bankTransferData['remitterIdentificationNo'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
+        }
+        $bankTransferData['isoCode'] = ($data['sending_currency'] ?? null);
+        $bankTransferData['issueDate'] = (date('Y-m-d', strtotime($data['created_at'])) ?? null);
+        $bankTransferData['note'] = '?';
+        $bankTransferData['orderNo'] = '?';
+        $bankTransferData['remittancePurpose'] = '?';
+        $bankTransferData['remitterAddress'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null);
+        $bankTransferData['remitterCountry'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
+        $bankTransferData['remitterName'] = ($data['beneficiary_data']['sender_information']['name'] ?? null);
+        $bankTransferData['remitterPhoneNo'] = ($data['beneficiary_data']['sender_information']['mobile'] ?? null);
+        $bankTransferData['secretKey'] = ($data['beneficiary_data']['reference_no'] ?? null);
+        $bankTransferData['transReferenceNo'] = ($data['beneficiary_data']['reference_no'] ?? null);
+
+        return $bankTransferData;
     }
 }
