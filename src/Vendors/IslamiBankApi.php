@@ -720,7 +720,6 @@ XML;
      * Account Type Code
      * Please send the following two-digit code against the different types of account.
      *
-     * @param string $code
      * @return array|string|string[]
      */
     private function __accountTypeCode(string $code): array|string
@@ -787,10 +786,6 @@ XML;
         return [];
     }
 
-    /**
-     * @param array $data
-     * @return array
-     */
     private function __transferData(array $data): array
     {
         $transferData['additionalField1'] = '?';
