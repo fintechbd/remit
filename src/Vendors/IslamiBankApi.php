@@ -477,7 +477,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
             <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
         ';
-        $xmlString .= '<ser:walletNo>'.($data['account_number'] ?? null).'</ser:walletNo>';
+        $xmlString .= '<ser:walletNo>'.($data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null).'</ser:walletNo>';
         //$xmlString .= '<ser:paymentType>'.($data['account_type'] ?? null).'</ser:paymentType>';
         $xmlString .= '<ser:paymentType>'.$paymentType.'</ser:paymentType>';
         $soapMethod = 'validateBeneficiaryWallet';
