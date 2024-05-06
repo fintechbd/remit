@@ -23,3 +23,15 @@ Route::get('islami-bank-fetch-validate-beneficiary-wallet', [VendorTestControlle
 
 Route::get('islami-bank-spot-cash', [VendorTestController::class, 'islamiBankSpotCash'])
     ->name('islami-bank-spot-cash');
+
+Route::get('islami-bank-account-payee', [VendorTestController::class, 'islamiBankAccountPayee'])
+    ->name('islami-bank-account-payee');
+
+Route::get('islami-bank-third-bank', [VendorTestController::class, 'islamiBankThirdBank'])
+    ->name('islami-bank-third-bank');
+
+Route::get('islami-bank-mobile-banking-m-cash', [VendorTestController::class, 'islamiBankMobileBankingMCash'])
+    ->name('islami-bank-mobile-banking-m-cash');
+
+Route::get('islami-bank-remittance-card', [VendorTestController::class, 'islamiBankRemittanceCard'])
+    ->name('islami-bank-remittance-card');
