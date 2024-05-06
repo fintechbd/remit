@@ -713,9 +713,10 @@ XML;
      * Account Type Code
      * Please send the following two-digit code against the different types of account.
      *
-     * @return string[]
+     * @param string $code
+     * @return array|string|string[]
      */
-    private function __accountTypeCode(string $code): array
+    private function __accountTypeCode(string $code): array|string
     {
         $return = [
             '01' => 'AWCA (Current)',
@@ -779,120 +780,124 @@ XML;
         return [];
     }
 
+    /**
+     * @param array $data
+     * @return array
+     */
     private function __transferData(array $data): array
     {
-        $bankTransferData['additionalField1'] = '?';
-        $bankTransferData['additionalField2'] = '?';
-        $bankTransferData['additionalField3'] = '?';
-        $bankTransferData['additionalField4'] = '?';
-        $bankTransferData['additionalField5'] = '?';
-        $bankTransferData['additionalField6'] = '?';
-        $bankTransferData['additionalField7'] = '?';
-        $bankTransferData['additionalField8'] = '?';
-        $bankTransferData['additionalField9'] = '?';
-        $bankTransferData['amount'] = ($data['sending_amount'] ?? null);
-        $bankTransferData['batchID'] = '?';
-        $bankTransferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number'] ?? $data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
-        $bankTransferData['beneficiaryAccType'] = '';
-        $bankTransferData['beneficiaryAddress'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
-        $bankTransferData['beneficiaryBankCode'] = ($data['beneficiary_data']['bank_information']['bank_data']['islami_bank_code'] ?? null);
-        $bankTransferData['beneficiaryBankName'] = ($data['beneficiary_data']['bank_information']['bank_name'] ?? null);
-        $bankTransferData['beneficiaryBranchCode'] = '';
-        $bankTransferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? null);
-        $bankTransferData['beneficiaryName'] = ($data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
-        $bankTransferData['beneficiaryPassportNo'] = '?';
-        $bankTransferData['beneficiaryPhoneNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null);
-        $bankTransferData['beneficiaryRoutingNo'] = ($data['beneficiary_data']['branch_information']['branch_data']['routing_no'] ?? '?');
-        $bankTransferData['exHouseTxID'] = '?';
-        $bankTransferData['exchHouseBranchCode'] = '?';
-        $bankTransferData['exchHouseSwiftCode'] = '?';
-        $bankTransferData['identityDescription'] = '?';
-        $bankTransferData['identityType'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] ?? null);
-        $bankTransferData['isoCode'] = ($data['sending_currency'] ?? null);
-        $bankTransferData['issueDate'] = (date('Y-m-d', strtotime($data['created_at'])) ?? null);
-        $bankTransferData['note'] = '?';
-        $bankTransferData['orderNo'] = '?';
-        $bankTransferData['paymentType'] = 3;
-        $bankTransferData['remittancePurpose'] = '?';
-        $bankTransferData['remitterAddress'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null);
-        $bankTransferData['remitterCountry'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
-        $bankTransferData['remitterIdentificationNo'] = '?';
-        $bankTransferData['remitterName'] = ($data['beneficiary_data']['sender_information']['name'] ?? null);
-        $bankTransferData['remitterPassportNo'] = '?';
-        $bankTransferData['remitterPhoneNo'] = ($data['beneficiary_data']['sender_information']['mobile'] ?? null);
-        $bankTransferData['secretKey'] = ($data['beneficiary_data']['reference_no'] ?? null);
-        $bankTransferData['transReferenceNo'] = ($data['beneficiary_data']['reference_no'] ?? null);
+        $transferData['additionalField1'] = '?';
+        $transferData['additionalField2'] = '?';
+        $transferData['additionalField3'] = '?';
+        $transferData['additionalField4'] = '?';
+        $transferData['additionalField5'] = '?';
+        $transferData['additionalField6'] = '?';
+        $transferData['additionalField7'] = '?';
+        $transferData['additionalField8'] = '?';
+        $transferData['additionalField9'] = '?';
+        $transferData['amount'] = ($data['sending_amount'] ?? null);
+        $transferData['batchID'] = '?';
+        $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number'] ?? $data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
+        $transferData['beneficiaryAccType'] = '';
+        $transferData['beneficiaryAddress'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['bank_information']['bank_data']['islami_bank_code'] ?? null);
+        $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['bank_information']['bank_name'] ?? null);
+        $transferData['beneficiaryBranchCode'] = '';
+        $transferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? null);
+        $transferData['beneficiaryName'] = ($data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
+        $transferData['beneficiaryPassportNo'] = '?';
+        $transferData['beneficiaryPhoneNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null);
+        $transferData['beneficiaryRoutingNo'] = ($data['beneficiary_data']['branch_information']['branch_data']['routing_no'] ?? '?');
+        $transferData['exHouseTxID'] = '?';
+        $transferData['exchHouseBranchCode'] = '?';
+        $transferData['exchHouseSwiftCode'] = '?';
+        $transferData['identityDescription'] = '?';
+        $transferData['identityType'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] ?? null);
+        $transferData['isoCode'] = ($data['sending_currency'] ?? null);
+        $transferData['issueDate'] = (date('Y-m-d', strtotime($data['created_at'])) ?? null);
+        $transferData['note'] = '?';
+        $transferData['orderNo'] = '?';
+        $transferData['paymentType'] = 3;
+        $transferData['remittancePurpose'] = '?';
+        $transferData['remitterAddress'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null);
+        $transferData['remitterCountry'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
+        $transferData['remitterIdentificationNo'] = '?';
+        $transferData['remitterName'] = ($data['beneficiary_data']['sender_information']['name'] ?? null);
+        $transferData['remitterPassportNo'] = '?';
+        $transferData['remitterPhoneNo'] = ($data['beneficiary_data']['sender_information']['mobile'] ?? null);
+        $transferData['secretKey'] = ($data['beneficiary_data']['reference_no'] ?? null);
+        $transferData['transReferenceNo'] = ($data['beneficiary_data']['reference_no'] ?? null);
 
         switch ($data['service_slug']) {
             case 'mbs_m_cash':
-                $bankTransferData['paymentType'] = 5;
-                $bankTransferData['beneficiaryRoutingNo'] = '?';
+                $transferData['paymentType'] = 5;
+                $transferData['beneficiaryRoutingNo'] = '?';
                 break;
             case 'mfs_bkash':
-                $bankTransferData['paymentType'] = 7;
-                $bankTransferData['beneficiaryRoutingNo'] = '?';
+                $transferData['paymentType'] = 7;
+                $transferData['beneficiaryRoutingNo'] = '?';
                 break;
             case 'mfs_nagad':
-                $bankTransferData['paymentType'] = 8;
-                $bankTransferData['beneficiaryRoutingNo'] = '?';
+                $transferData['paymentType'] = 8;
+                $transferData['beneficiaryRoutingNo'] = '?';
                 break;
             case 'remittance_card':
-                $bankTransferData['paymentType'] = 4;
-                $bankTransferData['beneficiaryRoutingNo'] = '?';
-                $bankTransferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? 71);
+                $transferData['paymentType'] = 4;
+                $transferData['beneficiaryRoutingNo'] = '?';
+                $transferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? 71);
                 break;
             case 'cash_pickup':
-                $bankTransferData['beneficiaryAccNo'] = '';
-                $bankTransferData['paymentType'] = 1;
-                $bankTransferData['beneficiaryRoutingNo'] = '?';
+                $transferData['beneficiaryAccNo'] = '';
+                $transferData['paymentType'] = 1;
+                $transferData['beneficiaryRoutingNo'] = '?';
                 break;
             case 'bank_transfer':
                 if ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited') {
-                    $bankTransferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? null);
-                    $bankTransferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null);
-                    $bankTransferData['beneficiaryRoutingNo'] = '?';
-                    $bankTransferData['paymentType'] = 2;
+                    $transferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? null);
+                    $transferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null);
+                    $transferData['beneficiaryRoutingNo'] = '?';
+                    $transferData['paymentType'] = 2;
                 }
                 break;
             case 'instant_bank_transfer':
-                $bankTransferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? null);
-                $bankTransferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null);
-                $bankTransferData['beneficiaryRoutingNo'] = '?';
-                $bankTransferData['paymentType'] = 1;
+                $transferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? null);
+                $transferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null);
+                $transferData['beneficiaryRoutingNo'] = '?';
+                $transferData['paymentType'] = 1;
                 break;
             default:
                 //code block
         }
         /*if ($data['service_slug'] == 'mbs_m_cash') {
-            $bankTransferData['paymentType'] = 5;
-            $bankTransferData['beneficiaryRoutingNo'] = '?';
+            $transferData['paymentType'] = 5;
+            $transferData['beneficiaryRoutingNo'] = '?';
         } elseif ($data['service_slug'] == 'mfs_bkash') {
-            $bankTransferData['paymentType'] = 7;
-            $bankTransferData['beneficiaryRoutingNo'] = '?';
+            $transferData['paymentType'] = 7;
+            $transferData['beneficiaryRoutingNo'] = '?';
         } elseif ($data['service_slug'] == 'mfs_nagad') {
-            $bankTransferData['paymentType'] = 8;
-            $bankTransferData['beneficiaryRoutingNo'] = '?';
+            $transferData['paymentType'] = 8;
+            $transferData['beneficiaryRoutingNo'] = '?';
         } elseif ($data['service_slug'] == 'remittance_card') {
-            $bankTransferData['paymentType'] = 4;
-            $bankTransferData['beneficiaryRoutingNo'] = '?';
-            $bankTransferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? 71);
+            $transferData['paymentType'] = 4;
+            $transferData['beneficiaryRoutingNo'] = '?';
+            $transferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? 71);
         } elseif ($data['service_slug'] == 'cash_pickup') {
-            $bankTransferData['beneficiaryAccNo'] = '';
-            $bankTransferData['paymentType'] = 1;
-            $bankTransferData['beneficiaryRoutingNo'] = '?';
+            $transferData['beneficiaryAccNo'] = '';
+            $transferData['paymentType'] = 1;
+            $transferData['beneficiaryRoutingNo'] = '?';
         } elseif ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited') {
-            $bankTransferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? null);
-            $bankTransferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null);
-            $bankTransferData['beneficiaryRoutingNo'] = '?';
-            $bankTransferData['paymentType'] = 2;
+            $transferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? null);
+            $transferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null);
+            $transferData['beneficiaryRoutingNo'] = '?';
+            $transferData['paymentType'] = 2;
         }*/
 
         if ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] == 'passport') {
-            $bankTransferData['remitterPassportNo'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
+            $transferData['remitterPassportNo'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
         } else {
-            $bankTransferData['remitterIdentificationNo'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
+            $transferData['remitterIdentificationNo'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
         }
 
-        return $bankTransferData;
+        return $transferData;
     }
 }
