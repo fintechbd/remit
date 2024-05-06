@@ -828,14 +828,17 @@ XML;
             case 'mbs_m_cash':
                 $transferData['paymentType'] = 5;
                 $transferData['beneficiaryRoutingNo'] = '?';
+                $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
                 break;
             case 'mfs_bkash':
                 $transferData['paymentType'] = 7;
                 $transferData['beneficiaryRoutingNo'] = '?';
+                $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
                 break;
             case 'mfs_nagad':
                 $transferData['paymentType'] = 8;
                 $transferData['beneficiaryRoutingNo'] = '?';
+                $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
                 break;
             case 'remittance_card':
                 $transferData['paymentType'] = 4;
