@@ -779,10 +779,6 @@ XML;
         return [];
     }
 
-    /**
-     * @param array $data
-     * @return array
-     */
     private function __transferData(array $data): array
     {
         $bankTransferData['additionalField1'] = '?';
@@ -802,10 +798,10 @@ XML;
         if ($data['service_slug'] == 'mbs_m_cash') {
             $bankTransferData['paymentType'] = 5;
             $bankTransferData['beneficiaryRoutingNo'] = '?';
-        }elseif ($data['service_slug'] == 'mfs_bkash'){
+        } elseif ($data['service_slug'] == 'mfs_bkash') {
             $bankTransferData['paymentType'] = 7;
             $bankTransferData['beneficiaryRoutingNo'] = '?';
-        }elseif ($data['service_slug'] == 'mfs_nagad'){
+        } elseif ($data['service_slug'] == 'mfs_nagad') {
             $bankTransferData['paymentType'] = 8;
             $bankTransferData['beneficiaryRoutingNo'] = '?';
         }
