@@ -193,6 +193,7 @@ class VendorTestController extends Controller
             'restored_at' => null,
         ];
     }
+
     private function __dummyBankTransferOrderData(): array
     {
         return [
@@ -225,6 +226,7 @@ class VendorTestController extends Controller
             'restored_at' => null,
         ];
     }
+
     private function __dummyWalletTransferOrderData(): array
     {
         return [
