@@ -85,8 +85,7 @@ class TransFastApi
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Authorization: Credentials '.$this->config[$this->status]['token']]
-        );
+            'Authorization: Credentials '.$this->config[$this->status]['token']]);
 
         $response = curl_exec($curl);
         $info = curl_getinfo($curl);
