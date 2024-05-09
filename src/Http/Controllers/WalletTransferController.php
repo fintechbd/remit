@@ -164,7 +164,7 @@ class WalletTransferController extends Controller
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
                 DB::commit();
 
-                return $this->created([
+                return response()->created([
                     'message' => __('restapi::messages.resource.created', ['model' => 'Wallet Transfer']),
                     'id' => $walletTransfer->id,
                 ]);
@@ -206,11 +206,11 @@ class WalletTransferController extends Controller
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return $this->updated(__('restapi::messages.resource.updated', ['model' => 'Wallet Transfer']));
+            return response()->updated(__('restapi::messages.resource.updated', ['model' => 'Wallet Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
-            return $this->notfound($exception->getMessage());
+            return response()->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
 
@@ -240,7 +240,7 @@ class WalletTransferController extends Controller
 
         } catch (ModelNotFoundException $exception) {
 
-            return $this->notfound($exception->getMessage());
+            return response()->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
 
@@ -274,11 +274,11 @@ class WalletTransferController extends Controller
                 throw (new DeleteOperationException())->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return $this->deleted(__('restapi::messages.resource.deleted', ['model' => 'Wallet Transfer']));
+            return response()->deleted(__('restapi::messages.resource.deleted', ['model' => 'Wallet Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
-            return $this->notfound($exception->getMessage());
+            return response()->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
 
@@ -310,11 +310,11 @@ class WalletTransferController extends Controller
                 throw (new RestoreOperationException())->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return $this->restored(__('restapi::messages.resource.restored', ['model' => 'Wallet Transfer']));
+            return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Wallet Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
-            return $this->notfound($exception->getMessage());
+            return response()->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
 
@@ -336,7 +336,7 @@ class WalletTransferController extends Controller
 
             $walletTransferPaginate = Remit::walletTransfer()->export($inputs);
 
-            return $this->exported(__('restapi::messages.resource.exported', ['model' => 'Wallet Transfer']));
+            return response()->exported(__('restapi::messages.resource.exported', ['model' => 'Wallet Transfer']));
 
         } catch (Exception $exception) {
 

@@ -39,7 +39,7 @@ class AssignVendorController extends Controller
 
         } catch (ModelNotFoundException $exception) {
 
-            return $this->notfound($exception->getMessage());
+            return response()->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
 
@@ -81,11 +81,11 @@ class AssignVendorController extends Controller
 
             $jsonResponse = $instance->requestQuotation($order);
 
-            return $this->success($jsonResponse);
+            return response()->success($jsonResponse);
 
         } catch (ModelNotFoundException $exception) {
 
-            return $this->notfound($exception->getMessage());
+            return response()->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
 
