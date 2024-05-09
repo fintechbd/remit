@@ -6,6 +6,9 @@ use Fintech\Core\Traits\RegisterPackageTrait;
 use Fintech\Remit\Commands\AgraniInstallCommand;
 use Fintech\Remit\Commands\InstallCommand;
 use Fintech\Remit\Commands\RemitCommand;
+use Fintech\Remit\Providers\EventServiceProvider;
+use Fintech\Remit\Providers\RepositoryServiceProvider;
+use Fintech\Remit\Providers\RouteServiceProvider;
 use Illuminate\Support\ServiceProvider;
 
 class RemitServiceProvider extends ServiceProvider
@@ -22,12 +25,12 @@ class RemitServiceProvider extends ServiceProvider
         $this->packageCode = 'remit';
 
         $this->mergeConfigFrom(
-            __DIR__.'/../config/remit.php', 'fintech.remit'
+            __DIR__ . '/../config/remit.php', 'fintech.remit'
         );
 
-        $this->app->register(\Fintech\Remit\Providers\EventServiceProvider::class);
-        $this->app->register(\Fintech\Remit\Providers\RepositoryServiceProvider::class);
-        $this->app->register(\Fintech\Remit\Providers\RouteServiceProvider::class);
+        $this->app->register(EventServiceProvider::class);
+        $this->app->register(RepositoryServiceProvider::class);
+        $this->app->register(RouteServiceProvider::class);
     }
 
     /**
@@ -38,21 +41,21 @@ class RemitServiceProvider extends ServiceProvider
         $this->injectOnConfig();
 
         $this->publishes([
-            __DIR__.'/../config/remit.php' => config_path('fintech/remit.php'),
+            __DIR__ . '/../config/remit.php' => config_path('fintech/remit.php'),
         ]);
 
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
-        $this->loadTranslationsFrom(__DIR__.'/../lang', 'remit');
+        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'remit');
 
         $this->publishes([
-            __DIR__.'/../lang' => $this->app->langPath('vendor/remit'),
+            __DIR__ . '/../lang' => $this->app->langPath('vendor/remit'),
         ]);
 
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'remit');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'remit');
 
         $this->publishes([
-            __DIR__.'/../resources/views' => resource_path('views/vendor/remit'),
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/remit'),
         ]);
 
         if ($this->app->runningInConsole()) {

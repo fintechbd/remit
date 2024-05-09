@@ -20,7 +20,6 @@ use Fintech\Remit\Http\Requests\StoreWalletTransferRequest;
 use Fintech\Remit\Http\Requests\UpdateWalletTransferRequest;
 use Fintech\Remit\Http\Resources\WalletTransferCollection;
 use Fintech\Remit\Http\Resources\WalletTransferResource;
-use Fintech\RestApi\Traits\ApiResponseTrait;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -38,8 +37,6 @@ use Illuminate\Support\Facades\DB;
  */
 class WalletTransferController extends Controller
 {
-    use ApiResponseTrait;
-
     /**
      * @lrd:start
      * Return a listing of the *WalletTransfer* resource as collection.
@@ -59,7 +56,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception->getMessage());
         }
     }
 
@@ -88,7 +85,7 @@ class WalletTransferController extends Controller
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
                 ])->first();
 
-                if (! $depositAccount) {
+                if (!$depositAccount) {
                     throw new Exception("User don't have account deposit balance");
                 }
 
@@ -97,8 +94,8 @@ class WalletTransferController extends Controller
                     'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
                 ])->first();
 
-                if (! $masterUser) {
-                    throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
+                if (!$masterUser) {
+                    throw new Exception('Master User Account not found for ' . $request->input('source_country_id', $depositor->profile?->country_id) . ' country');
                 }
 
                 //set pre defined conditions of deposit
@@ -129,7 +126,7 @@ class WalletTransferController extends Controller
 
                 $walletTransfer = Remit::walletTransfer()->create($inputs);
 
-                if (! $walletTransfer) {
+                if (!$walletTransfer) {
                     throw (new StoreOperationException)->setModel(config('fintech.remit.wallet_transfer_model'));
                 }
 
@@ -148,12 +145,12 @@ class WalletTransferController extends Controller
                 ])->first();
                 //update User Account
                 $depositedUpdatedAccount = $depositedAccount->toArray();
-                $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
-                $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
+                $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float)$depositedUpdatedAccount['user_account_data']['spent_amount'] + (float)$userUpdatedBalance['spent_amount'];
+                $depositedUpdatedAccount['user_account_data']['available_amount'] = (float)$userUpdatedBalance['current_amount'];
 
-                $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
-                $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
-                if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                $order_data['previous_amount'] = (float)$depositedAccount->user_account_data['available_amount'];
+                $order_data['current_amount'] = ((float)$order_data['previous_amount'] + (float)$inputs['converted_currency']);
+                if (!Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'current_status' => $walletTransfer->currentStatus(),
                         'target_status' => OrderStatus::Success->value,
@@ -179,7 +176,7 @@ class WalletTransferController extends Controller
             Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
             DB::rollBack();
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception->getMessage());
         }
     }
 
@@ -198,13 +195,13 @@ class WalletTransferController extends Controller
 
             $walletTransfer = Remit::walletTransfer()->find($id);
 
-            if (! $walletTransfer) {
+            if (!$walletTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
             $inputs = $request->validated();
 
-            if (! Remit::walletTransfer()->update($id, $inputs)) {
+            if (!Remit::walletTransfer()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
@@ -217,7 +214,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception->getMessage());
         }
     }
 
@@ -235,7 +232,7 @@ class WalletTransferController extends Controller
 
             $walletTransfer = Remit::walletTransfer()->find($id);
 
-            if (! $walletTransfer) {
+            if (!$walletTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
@@ -247,7 +244,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception->getMessage());
         }
     }
 
@@ -268,11 +265,11 @@ class WalletTransferController extends Controller
 
             $walletTransfer = Remit::walletTransfer()->find($id);
 
-            if (! $walletTransfer) {
+            if (!$walletTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            if (! Remit::walletTransfer()->destroy($id)) {
+            if (!Remit::walletTransfer()->destroy($id)) {
 
                 throw (new DeleteOperationException())->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
@@ -285,7 +282,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception->getMessage());
         }
     }
 
@@ -304,11 +301,11 @@ class WalletTransferController extends Controller
 
             $walletTransfer = Remit::walletTransfer()->find($id, true);
 
-            if (! $walletTransfer) {
+            if (!$walletTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            if (! Remit::walletTransfer()->restore($id)) {
+            if (!Remit::walletTransfer()->restore($id)) {
 
                 throw (new RestoreOperationException())->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
@@ -321,7 +318,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception->getMessage());
         }
     }
 
@@ -343,7 +340,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception->getMessage());
         }
     }
 
@@ -367,7 +364,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception->getMessage());
         }
     }
 }

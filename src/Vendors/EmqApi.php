@@ -73,7 +73,7 @@ class EmqApi implements BankTransfer, OrderQuotation
      * EMQApiService constructor.
      */
     public function __construct(CatalogListService $catalogListService,
-        CountryService $countryService)
+                                CountryService     $countryService)
     {
         $this->config = config('emq');
         $this->status = ($this->config['mode'] === 'sandbox') ? 'sandbox' : 'live';
@@ -90,7 +90,7 @@ class EmqApi implements BankTransfer, OrderQuotation
      */
     protected function encodeCredential()
     {
-        $asciString = mb_convert_encoding($this->config[$this->status]['username'].':'.$this->config[$this->status]['password'], 'ASCII');
+        $asciString = mb_convert_encoding($this->config[$this->status]['username'] . ':' . $this->config[$this->status]['password'], 'ASCII');
         $this->basicAuthHash = base64_encode($asciString);
     }
 
@@ -144,7 +144,7 @@ class EmqApi implements BankTransfer, OrderQuotation
 
                     default:
 
-                        $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
+                        $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
                         $returnData->status = 'failed';
                         break;
 
@@ -169,7 +169,7 @@ class EmqApi implements BankTransfer, OrderQuotation
 
             default:
 
-                $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
+                $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
                 $returnData->status = 'failed';
                 $returnData->status_code = 201;
                 break;
@@ -197,7 +197,7 @@ class EmqApi implements BankTransfer, OrderQuotation
 
         $full_name = $sender_first_name;
         if (strlen($sender_last_name) > 0) {
-            $full_name .= (' '.$sender_last_name);
+            $full_name .= (' ' . $sender_last_name);
         }
 
         $nameArray = preg_split("/\s+(?=\S*+$)/", $full_name);
@@ -210,17 +210,17 @@ class EmqApi implements BankTransfer, OrderQuotation
         }
 
         $transferInfo['destination_amount']['currency'] = isset($data->transfer_currency) ? $data->transfer_currency : null;
-        $transferInfo['destination_amount']['units'] = isset($data->transfer_amount) ? (string) round($data->transfer_amount, 2) : null; //TODO with charge or without charge
+        $transferInfo['destination_amount']['units'] = isset($data->transfer_amount) ? (string)round($data->transfer_amount, 2) : null; //TODO with charge or without charge
         //TODO FOR PHL
         $transferInfo['destination']['country'] = isset($data->emq_receiver_country_iso_code) ? $data->emq_receiver_country_iso_code : null;
         if (in_array($transferInfo['destination']['country'], ['PHL', 'IDN'])) {
-            $transferInfo['destination_amount']['units'] = isset($data->transfer_amount) ? (string) floor($data->transfer_amount) : null; //TODO with charge or without charge
+            $transferInfo['destination_amount']['units'] = isset($data->transfer_amount) ? (string)floor($data->transfer_amount) : null; //TODO with charge or without charge
         }
 
         //$transferInfo["source_amount"]["currency"] = isset($data->sender_currency) ? $data->sender_currency : null;
         //$transferInfo["source_amount"]["units"] = isset($data->sender_amount) ? (string)round($data->sender_amount) : null; //TODO with charge or without charge
 
-        $transferInfo['compliance']['source_of_funds'] = isset($data->emq_sender_source_of_fund_id) ? (string) $data->emq_sender_source_of_fund_id : null;
+        $transferInfo['compliance']['source_of_funds'] = isset($data->emq_sender_source_of_fund_id) ? (string)$data->emq_sender_source_of_fund_id : null;
         $transferInfo['compliance']['remittance_purpose'] = isset($data->emq_purpose_of_remittance) ? $data->emq_purpose_of_remittance : null;
 
         $transferInfo['compliance']['relationship']['code'] = isset($data->emq_sender_beneficiary_relationship_code) ? $data->emq_sender_beneficiary_relationship_code : null;
@@ -238,7 +238,7 @@ class EmqApi implements BankTransfer, OrderQuotation
         $transferInfo['source']['legal_name_first'] = $sender_first_name;
         $transferInfo['source']['legal_name_last'] = $sender_last_name;
 
-        $transferInfo['source']['mobile_number'] = isset($data->sender_mobile) ? ('+'.$data->sender_mobile) : null;
+        $transferInfo['source']['mobile_number'] = isset($data->sender_mobile) ? ('+' . $data->sender_mobile) : null;
 
         $transferInfo['source']['date_of_birth'] = isset($data->sender_date_of_birth) ? Carbon::parse($data->sender_date_of_birth)->format('Y-m-d') : null;
 
@@ -263,7 +263,7 @@ class EmqApi implements BankTransfer, OrderQuotation
         $transferInfo['destination']['country'] = isset($data->emq_receiver_country_iso_code) ? $data->emq_receiver_country_iso_code : null;
         $transferInfo['destination']['legal_name_first'] = isset($data->receiver_first_name) ? $data->receiver_first_name : null;
         $transferInfo['destination']['legal_name_last'] = isset($data->receiver_last_name) ? $data->receiver_last_name : null;
-        $transferInfo['destination']['mobile_number'] = isset($data->receiver_contact_number) ? ('+'.$data->receiver_contact_number) : null;
+        $transferInfo['destination']['mobile_number'] = isset($data->receiver_contact_number) ? ('+' . $data->receiver_contact_number) : null;
 
         $transferInfo['destination']['address_line'] = isset($data->receiver_address) ? $data->receiver_address : null;
         $transferInfo['destination']['address_city'] = isset($data->receiver_city) ? $data->receiver_city : null;
@@ -362,7 +362,7 @@ class EmqApi implements BankTransfer, OrderQuotation
      */
     public function putPostData(string $url, array $dataArray, string $method = 'POST')
     {
-        $apiUrl = $this->apiUrl.$url;
+        $apiUrl = $this->apiUrl . $url;
         Log::info($apiUrl);
         $jsonArray = json_encode($dataArray);
         Log::info(json_decode($jsonArray, true));
@@ -375,11 +375,11 @@ class EmqApi implements BankTransfer, OrderQuotation
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_VERBOSE, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
-            'cache-control: no-cache',
-            'Content-Type: application/json',
-            'Accepts: application/json',
-            'Authorization: Basic '.$this->getBasicAuthHash(),
-        ]
+                'cache-control: no-cache',
+                'Content-Type: application/json',
+                'Accepts: application/json',
+                'Authorization: Basic ' . $this->getBasicAuthHash(),
+            ]
         );
 
         $response = curl_exec($curl);
@@ -426,8 +426,8 @@ class EmqApi implements BankTransfer, OrderQuotation
     /**
      * Render Emq Response to pointed StdClass
      *
-     * @param  array  $response  emq response
-     * @param  stdClass  $returnData  class that will get rendered response
+     * @param array $response emq response
+     * @param stdClass $returnData class that will get rendered response
      * @return void
      */
     public function renderApiResponse(array $response, stdClass &$returnData)
@@ -525,38 +525,38 @@ class EmqApi implements BankTransfer, OrderQuotation
                 case 'invalid_account_name':
                 case 'unable_to_verify':
                     $message = (is_array($response['message']))
-                        ? (implode("\n", $response['message']).PHP_EOL)
-                        : ucwords($response['message']).PHP_EOL;
+                        ? (implode("\n", $response['message']) . PHP_EOL)
+                        : ucwords($response['message']) . PHP_EOL;
                     break;
 
                 case 'invalid_country':
-                    $message = 'URL country segment is invalid'.PHP_EOL;
+                    $message = 'URL country segment is invalid' . PHP_EOL;
                     break;
 
                 case 'no_rate':
-                    $message = $response['message'].' between '.(implode('and', $response['detail'])).PHP_EOL;
+                    $message = $response['message'] . ' between ' . (implode('and', $response['detail'])) . PHP_EOL;
                     break;
 
                 case 'validation_failed':
 
-                    $message = ucwords($response['message']).PHP_EOL;
+                    $message = ucwords($response['message']) . PHP_EOL;
 
                     $errorArray = Arr::dot($response['detail']);
 
                     foreach ($errorArray as $field => $error) {
-                        $message .= $this->customErrorMessage(['field' => $field], $error).PHP_EOL;
+                        $message .= $this->customErrorMessage(['field' => $field], $error) . PHP_EOL;
                     }
 
                     break;
 
                 case 'validation_not_rounded':
 
-                    $message = ucwords($response['message']).PHP_EOL;
+                    $message = ucwords($response['message']) . PHP_EOL;
 
                     $errorArray = Arr::dot($response['detail']);
 
                     foreach ($errorArray as $field => $error) {
-                        $message .= "{$field} {$error}".PHP_EOL;
+                        $message .= "{$field} {$error}" . PHP_EOL;
                     }
 
                     break;
@@ -564,13 +564,13 @@ class EmqApi implements BankTransfer, OrderQuotation
                 case 'required_not_provided':
 
                     $message = (isset($response['detail']['fields']))
-                        ? ucwords($response['message']).'Fields ( '.implode(', ', $response['detail']['fields']).')'.PHP_EOL
-                        : ucwords($response['message']).PHP_EOL;
+                        ? ucwords($response['message']) . 'Fields ( ' . implode(', ', $response['detail']['fields']) . ')' . PHP_EOL
+                        : ucwords($response['message']) . PHP_EOL;
 
                     break;
 
                 default:
-                    $message = 'Unknown Error from Vendor. Reason: '.$response['reason'].PHP_EOL;
+                    $message = 'Unknown Error from Vendor. Reason: ' . $response['reason'] . PHP_EOL;
                     break;
             }
         }
@@ -588,19 +588,19 @@ class EmqApi implements BankTransfer, OrderQuotation
         if (isset($customMessages[$message])) {
             $valueFields = array_values($fields);
             $mapFields = array_map(function ($item) {
-                return ':'.$item;
+                return ':' . $item;
             }, array_keys($fields));
 
             return str_replace($mapFields, $valueFields, $customMessages[$message]);
         } else {
-            return $fields['field'].' '.$message;
+            return $fields['field'] . ' ' . $message;
         }
     }
 
     /**
      * Convert Country full into ISO 3 value
      *
-     * @param  string|null  $country  country full name
+     * @param string|null $country country full name
      * @return string|null country iso3 country code
      */
     public function getCountryISO3FromName(?string $country = null)
@@ -613,7 +613,7 @@ class EmqApi implements BankTransfer, OrderQuotation
     /**
      * Get Catalog Emq Code of catalog
      *
-     * @param  string|null  $catalog  country full name
+     * @param string|null $catalog country full name
      * @return string|null country iso3 country code
      */
     public function getCatalogeEmqCodeFromName(string $catalog, string $type)
@@ -675,14 +675,14 @@ class EmqApi implements BankTransfer, OrderQuotation
      */
     public function getQuotes(array $data)
     {
-        $source = ($data['source_partner'].':');
-        $source .= ($data['source_method'].':');
-        $source .= ($data['source_country'].':');
+        $source = ($data['source_partner'] . ':');
+        $source .= ($data['source_method'] . ':');
+        $source .= ($data['source_country'] . ':');
         $source .= ($data['source_currency']);
 
-        $destination = ($data['destination_partner'].':');
-        $destination .= ($data['destination_method'].':');
-        $destination .= ($data['destination_country'].':');
+        $destination = ($data['destination_partner'] . ':');
+        $destination .= ($data['destination_method'] . ':');
+        $destination .= ($data['destination_country'] . ':');
         $destination .= ($data['destination_currency']);
 
         return $this->getData("/quotes/{$source}/{$destination}");
@@ -692,14 +692,14 @@ class EmqApi implements BankTransfer, OrderQuotation
     /**
      * Base function that is responsible for interacting directly with the nium api to obtain data
      *
-     * @param  array  $params
+     * @param array $params
      * @return array
      *
      * @throws Exception
      */
     public function getData($url, $params = [])
     {
-        $apiUrl = $this->apiUrl.$url;
+        $apiUrl = $this->apiUrl . $url;
         $apiUrl .= http_build_query($params);
         Log::info($apiUrl);
 
@@ -708,11 +708,11 @@ class EmqApi implements BankTransfer, OrderQuotation
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
-            'cache-control: no-cache',
-            'Content-Type: application/json',
-            'Accepts: application/json',
-            'Authorization: Basic '.$this->getBasicAuthHash(),
-        ]
+                'cache-control: no-cache',
+                'Content-Type: application/json',
+                'Accepts: application/json',
+                'Authorization: Basic ' . $this->getBasicAuthHash(),
+            ]
         );
 
         $response = curl_exec($curl);
@@ -728,7 +728,7 @@ class EmqApi implements BankTransfer, OrderQuotation
         $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
 
-        Log::info('API Response : '.$response);
+        Log::info('API Response : ' . $response);
 
         return [
             'status' => $status,
@@ -770,7 +770,7 @@ class EmqApi implements BankTransfer, OrderQuotation
     /**
      * Retrieve a daily statement for a given day.
      *
-     * @param  string  $date  'YYYY-MM-DD' format date string
+     * @param string $date 'YYYY-MM-DD' format date string
      * @return array
      *
      * @throws Exception
@@ -787,7 +787,7 @@ class EmqApi implements BankTransfer, OrderQuotation
      * Retrieve a monthly statement up to a given day.
      *  Example 2021-04-01
      *
-     * @param  string  $date  'YYYY-MM-DD' format date string
+     * @param string $date 'YYYY-MM-DD' format date string
      *
      * @throws Exception
      */
@@ -802,9 +802,9 @@ class EmqApi implements BankTransfer, OrderQuotation
     /**
      * Retrieve the settlement report for a given date and a given destination country
      *
-     * @param  string  $param  ['source_country'] source country ISO3
-     * @param  string  $param  ['dest_country'] source country ISO3
-     * @param  string  $param  ['date'] 'YYYY-MM-DD' format date string
+     * @param string $param ['source_country'] source country ISO3
+     * @param string $param ['dest_country'] source country ISO3
+     * @param string $param ['date'] 'YYYY-MM-DD' format date string
      *
      * @throws Exception
      */
@@ -817,7 +817,7 @@ class EmqApi implements BankTransfer, OrderQuotation
     /**
      * List or search senders
      *
-     * @param  array  $params  [sender_id, name, mobile_number, id_number, page=1, page_size = 20]
+     * @param array $params [sender_id, name, mobile_number, id_number, page=1, page_size = 20]
      * @return array
      *
      * @throws Exception
@@ -855,7 +855,7 @@ class EmqApi implements BankTransfer, OrderQuotation
     /**
      * Retrieve a sender
      *
-     * @param  string  $senderId  string
+     * @param string $senderId string
      *
      * @throws Exception
      */
@@ -903,7 +903,7 @@ class EmqApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * @param  array  $data
+     * @param array $data
      *                       ["country": "PHL",
      *                       "segment": "individual",
      *                       "legal_name_first": "Joe P.",
@@ -936,7 +936,7 @@ class EmqApi implements BankTransfer, OrderQuotation
     /**
      * Update a recipient.
      *
-     * @param  array  $data
+     * @param array $data
      *                       ["country": "PHL",
      *                       "segment": "individual",
      *                       "legal_name_first": "Joe P.",
@@ -955,7 +955,7 @@ class EmqApi implements BankTransfer, OrderQuotation
     /**
      * Verify a recipient.
      *
-     * @param  array  $data
+     * @param array $data
      *                       {
      *                       "type": "bank_account",
      *                       "country": "CHN",
@@ -1279,7 +1279,7 @@ class EmqApi implements BankTransfer, OrderQuotation
     /**
      * List transfers, oldest first.
      *
-     * @param  array  $data  [page, page_size, start_datetime, end_datetime]
+     * @param array $data [page, page_size, start_datetime, end_datetime]
      * @return array
      *
      * @throws Exception
@@ -1291,7 +1291,7 @@ class EmqApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * @param  array  $reference  MCM6196575170666
+     * @param array $reference MCM6196575170666
      * @return array|mixed
      *
      * @throws Exception
@@ -1350,7 +1350,7 @@ class EmqApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Model|Model  $order
+     * @param \Illuminate\Database\Eloquent\Model|Model $order
      */
     public function requestQuotation($order): mixed
     {

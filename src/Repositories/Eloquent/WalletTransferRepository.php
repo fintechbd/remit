@@ -19,7 +19,7 @@ class WalletTransferRepository extends OrderRepository implements InterfacesWall
     {
         $model = app(config('fintech.remit.wallet_transfer_model', WalletTransfer::class));
 
-        if (! $model instanceof Model) {
+        if (!$model instanceof Model) {
             throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
         }
 
