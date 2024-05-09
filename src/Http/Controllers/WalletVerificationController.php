@@ -3,9 +3,9 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
-use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Remit\Http\Requests\WalletVerificationRequest;
 use Fintech\Remit\Http\Resources\WalletVerificationResource;
+use Fintech\RestApi\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
