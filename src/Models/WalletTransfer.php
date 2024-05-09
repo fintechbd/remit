@@ -47,7 +47,7 @@ class WalletTransfer extends Order
         $primaryKey = $this->getKey();
 
         return [
-            'show' => action_link(route('remit.wallet-transfers.show', $primaryKey), __('core::messages.action.show'), 'get'),
+            'show' => action_link(route('remit.wallet-transfers.show', $primaryKey), __('restapi::messages.action.show'), 'get'),
         ];
     }
 
