@@ -101,7 +101,7 @@ class VendorTestController extends Controller
         //$order_data = $order->order_data;
         $order = $this->__dummyCashPickUpOrderData();
         $order_data = json_decode($order['order_data'], true);
-        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
+        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
         //dd($order_data);
@@ -149,7 +149,7 @@ class VendorTestController extends Controller
         //$order_data = $order->order_data;
         $order = $this->__dummyBankTransferOrderData();
         $order_data = json_decode($order['order_data'], true);
-        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
+        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
         //dd($order_data);
@@ -197,7 +197,7 @@ class VendorTestController extends Controller
         //$order_data = $order->order_data;
         $order = $this->__dummyBankTransferOrderData();
         $order_data = json_decode($order['order_data'], true);
-        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
+        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
         //dd($order_data);
@@ -212,7 +212,7 @@ class VendorTestController extends Controller
         //$order_data = $order->order_data;
         $order = $this->__dummyWalletTransferOrderData();
         $order_data = json_decode($order['order_data'], true);
-        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
+        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
         //dd($order_data);
@@ -255,7 +255,7 @@ class VendorTestController extends Controller
             'restored_at' => null,
         ];
         $order_data = json_decode($order['order_data'], true);
-        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
+        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
         //dd($order_data);

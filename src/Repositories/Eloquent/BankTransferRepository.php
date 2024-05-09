@@ -20,7 +20,7 @@ class BankTransferRepository extends OrderRepository implements InterfacesBankTr
     {
         $model = app(config('fintech.remit.bank_transfer_model', BankTransfer::class));
 
-        if (!$model instanceof Model) {
+        if (! $model instanceof Model) {
             throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
         }
 
