@@ -47,17 +47,17 @@ class WalletTransferController extends Controller
      */
     public function index(IndexWalletTransferRequest $request): WalletTransferCollection|JsonResponse
     {
-//        try {
-            $inputs = $request->validated();
-            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'wallet_transfer'])->first()->getKey();
-            $walletTransferPaginate = Remit::walletTransfer()->list($inputs);
+        //        try {
+        $inputs = $request->validated();
+        $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'wallet_transfer'])->first()->getKey();
+        $walletTransferPaginate = Remit::walletTransfer()->list($inputs);
 
-            return new WalletTransferCollection($walletTransferPaginate);
+        return new WalletTransferCollection($walletTransferPaginate);
 
-//        } catch (Exception $exception) {
-//
-//            return response()->failed($exception->getMessage());
-//        }
+        //        } catch (Exception $exception) {
+        //
+        //            return response()->failed($exception->getMessage());
+        //        }
     }
 
     /**
