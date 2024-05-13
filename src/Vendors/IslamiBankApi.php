@@ -398,11 +398,11 @@ XML;
         ';
         $xmlString .= '
             <!--Optional:-->
-            <xsd:secretKey>'.($directCreditRemittance['reference_no'] ?? null).'</xsd:secretKey>
+            <xsd:secretKey>'.($directCreditRemittance['secretKey'] ?? null).'</xsd:secretKey>
         ';
         $xmlString .= '
             <!--Optional:-->
-            <xsd:transReferenceNo>'.($directCreditRemittance['reference_no'] ?? null).'</xsd:transReferenceNo>
+            <xsd:transReferenceNo>'.($directCreditRemittance['transReferenceNo'] ?? null).'</xsd:transReferenceNo>
         ';
         $xmlString .= '</ser:wsMessage>';
         $soapMethod = 'directCreditWSMessage';
@@ -436,14 +436,14 @@ XML;
         $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number'] ?? $data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
         $transferData['beneficiaryAccType'] = '';
         $transferData['beneficiaryAddress'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
-        $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['bank_information']['bank_data']['islami_bank_code'] ?? null);
+        $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['bank_information']['vendor_code']['remit'] ['islamibank'] ?? null);
         $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['bank_information']['bank_name'] ?? null);
         $transferData['beneficiaryBranchCode'] = '';
         $transferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? null);
         $transferData['beneficiaryName'] = ($data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
         $transferData['beneficiaryPassportNo'] = '?';
         $transferData['beneficiaryPhoneNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null);
-        $transferData['beneficiaryRoutingNo'] = ($data['beneficiary_data']['branch_information']['branch_data']['routing_no'] ?? '?');
+        $transferData['beneficiaryRoutingNo'] = ($data['beneficiary_data']['branch_information']['branch_data']['location_no'] ?? '?');
         $transferData['exHouseTxID'] = '?';
         $transferData['exchHouseBranchCode'] = '?';
         $transferData['exchHouseSwiftCode'] = '?';
@@ -491,16 +491,16 @@ XML;
                 $transferData['beneficiaryRoutingNo'] = '?';
                 break;
             case 'bank_transfer':
-                if ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited') {
-                    $transferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? null);
-                    $transferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null);
+                if ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami-bank-bangladesh-limited') {
+                    $transferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? 10);
+                    $transferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['vendor_code']['remit'] ['islamibank'] ?? null);
                     $transferData['beneficiaryRoutingNo'] = '?';
                     $transferData['paymentType'] = 2;
                 }
                 break;
             case 'instant_bank_transfer':
-                $transferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? null);
-                $transferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null);
+                $transferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? 10);
+                $transferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['vendor_code']['remit']['islamibank'] ?? null);
                 $transferData['beneficiaryRoutingNo'] = '?';
                 $transferData['paymentType'] = 1;
                 break;
@@ -524,9 +524,9 @@ XML;
             $transferData['beneficiaryAccNo'] = '';
             $transferData['paymentType'] = 1;
             $transferData['beneficiaryRoutingNo'] = '?';
-        } elseif ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami_bank_bangladesh_limited') {
+        } elseif ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami-bank-bangladesh-limited') {
             $transferData['beneficiaryAccType'] = ($data['beneficiary_data']['beneficiary_acc_type'] ?? null);
-            $transferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['branch_data']['islami_bank_branch_code'] ?? null);
+            $transferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['vendor_code']['remit'] ['islamibank'] ?? null);
             $transferData['beneficiaryRoutingNo'] = '?';
             $transferData['paymentType'] = 2;
         }*/
@@ -537,6 +537,7 @@ XML;
             $transferData['remitterIdentificationNo'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
         }
 
+        //dd($transferData);
         return $transferData;
     }
 
