@@ -97,10 +97,10 @@ class VendorTestController extends Controller
     {
         $vendor = app()->make(IslamiBankApi::class);
         $repo = app()->make(OrderService::class);
-        $order = $repo->find(22);
+        //$order = $repo->find(20);
         //dd($order);
-        $order_data = $order->order_data;
-        dd($order_data);
+        //$order_data = $order->order_data;
+        //dd($order_data);
         $order = $this->__dummyCashPickUpOrderData();
         $order_data = json_decode($order['order_data'], true);
         $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
@@ -113,33 +113,33 @@ class VendorTestController extends Controller
     private function __dummyCashPickUpOrderData(): array
     {
         return [
-            'id' => 22,
-            'source_country_id' => 39,
-            'destination_country_id' => 19,
-            'parent_id' => null,
-            'sender_receiver_id' => 10,
-            'user_id' => 6,
-            'service_id' => 13,
-            'transaction_form_id' => 6,
-            'ordered_at' => '2024-05-11 18:39:27',
-            'amount' => '8725.000000',
-            'currency' => 'BDT',
-            'converted_amount' => '100.000000',
-            'converted_currency' => 'CAD',
-            'order_number' => 'CAN00000000000000022',
-            'risk_profile' => 'green',
-            'notes' => null,
-            'is_refunded' => 0,
-            'order_data' => '{"bank_id": 392, "user_name": "Test User 1", "created_at": "2024-05-11T18:39:28.424679Z", "created_by": "Test User 1", "fund_source": "Business", "assign_order": "no", "request_from": "web", "service_name": "Bank Transfer", "service_slug": "bank_transfer", "account_number": "123456", "bank_branch_id": 3678, "beneficiary_id": 3, "current_amount": 51422.76503, "previous_amount": 51422.76503, "purchase_number": "CAN00000000000000022", "beneficiary_data": {"reference_no": "MCM00000000000000022", "bank_information": {"bank_data": [], "bank_name": "ISLAMI BANK BANGLADESH LIMITED"}, "branch_information": {"branch_data": {"routing_no": "125262536"}, "branch_name": "KARWAN BAZAR"}, "sender_information": {"name": "Test User 1", "email": "testuser1@gmail.com", "mobile": "01600000007", "profile": {"id_doc": {"id_no": "12345678", "id_type": "passport", "id_issue_at": "2024-05-01T00:00:00.000000Z", "id_expired_at": "2029-05-01T00:00:00.000000Z", "id_no_duplicate": "no", "id_issue_country": "Bangladesh"}, "blacklisted": "no", "profile_data": {"note": "Testing", "gender": "male", "occupation": "service", "father_name": "Mustak Ahmed", "mother_name": "Hamida Begum", "nationality": "Bangladeshi", "marital_status": "unmarried", "source_of_income": "salary"}, "date_of_birth": "1999-05-01T00:00:00.000000Z", "present_address": {"address": "Mohammadpur", "city_id": 16152, "state_id": 866, "city_data": null, "city_name": "Ajax", "post_code": "1234", "country_id": 39, "state_data": [], "state_name": "Ontario", "country_data": {"is_serving": true, "language_enabled": true, "multi_currency_enabled": true}, "country_name": "Canada"}}, "currency": "CAD", "language": "en", "fcm_token": "5dWbLOx5t3mMlURkoOQIElgw4BwZueHbv4jwJn0H"}, "receiver_information": {"city_id": 8479, "state_id": 767, "city_data": null, "city_name": "Chhātak", "country_id": 19, "state_data": [], "state_name": "Sylhet District", "relation_id": 58, "country_data": {"is_serving": true, "language_enabled": true, "multi_currency_enabled": true}, "country_name": "Bangladesh", "relation_data": null, "relation_name": "Niece", "beneficiary_data": {"email": "test.user@gmail.com", "bank_id": 392, "bank_name": "ISLAMI BANK BANGLADESH LIMITED", "cash_name": null, "wallet_name": null, "account_name": "islam bank", "bank_branch_id": 3678, "bank_branch_name": "KARWAN BAZAR", "instant_bank_name": null, "bank_account_number": "123456", "instant_bank_branch_name": null}, "beneficiary_name": "test user", "beneficiary_mobile": "+8801234567899", "beneficiary_address": null, "beneficiary_type_id": 1, "beneficiary_type_name": "Bank Transfer"}}, "master_user_name": "Afghanistan Master User", "service_stat_data": {"charge": "6%", "discount": "6%", "commission": "2%", "charge_refund": "yes", "discount_refund": "yes", "service_stat_id": 6209, "commission_refund": "yes", "charge_break_down_id": null}, "remittance_purpose": "Pay Employee Salary", "beneficiary_type_id": 1, "currency_convert_rate": {"rate": 87.25, "input": "BDT", "amount": "8725.00", "output": "CAD", "converted": 100, "amount_formatted": "CA$8,725.00", "converted_formatted": "BDT 100.00"}, "created_by_mobile_number": "01600000007", "system_notification_variable_failed": "bank_transfer_failed", "system_notification_variable_success": "bank_transfer_success"}',
-            'status' => 'successful',
-            'creator_id' => null,
-            'editor_id' => null,
-            'destroyer_id' => null,
-            'restorer_id' => null,
-            'created_at' => '2024-05-11 18:39:28',
-            'updated_at' => '2024-05-11 18:39:28',
-            'deleted_at' => null,
-            'restored_at' => null,
+            "id" => 20,
+            "source_country_id" => 39,
+            "destination_country_id" => 19,
+            "parent_id" => null,
+            "sender_receiver_id" => 10,
+            "user_id" => 8,
+            "service_id" => 14,
+            "transaction_form_id" => 6,
+            "ordered_at" => "2024-05-14 17:18:49",
+            "amount" => "2814.130000",
+            "currency" => "BDT",
+            "converted_amount" => "31.679950",
+            "converted_currency" => "CAD",
+            "order_number" => "CAN00000000000000020",
+            "risk_profile" => "green",
+            "notes" => null,
+            "is_refunded" => 0,
+            "order_data" => '{"cash_id": 61, "user_name": "Test User 3", "created_at": "2024-05-14T17:18:49.861607Z", "created_by": "Test User 3", "fund_source": "Share Money With Relative", "assign_order": "no", "request_from": "web", "service_name": "Cash Pickup", "service_slug": "cash_pickup", "beneficiary_id": 4, "current_amount": 50030.828934, "previous_amount": 50030.828934, "purchase_number": "CAN00000000000000020", "beneficiary_data": {"reference_no": "MCM00000000000000020", "cash_information": {"bank_data": {"swift_code": "BBHOBDDH"}, "bank_name": "BANGLADESH BANK", "bank_slug": "bangladesh-bank", "vendor_code": {"remit": {"agrani": null, "emqapi": null, "valyou": null, "citybank": null, "transfast": "BA01", "islamibank": "10"}}}, "sender_information": {"name": "Test User 3", "email": "testuser3@gmail.com", "mobile": "01600000009", "profile": {"id_doc": {"id_no": "12345678", "id_type": "passport", "id_issue_at": "2024-05-12T00:00:00.000000Z", "id_expired_at": "2029-05-12T00:00:00.000000Z", "id_no_duplicate": "no", "id_issue_country": "Bangladesh"}, "blacklisted": "no", "profile_data": {"note": "Testing", "gender": "male", "occupation": "service", "father_name": "Mustak Ahmed", "mother_name": "Hamida Begum", "nationality": "Bangladeshi", "marital_status": "unmarried", "source_of_income": "salary"}, "date_of_birth": "1999-05-12T00:00:00.000000Z", "present_address": {"address": "Mohammadpur", "city_id": 16152, "state_id": 866, "city_data": null, "city_name": "Ajax", "post_code": "1234", "country_id": 39, "state_data": [], "state_name": "Ontario", "country_data": {"is_serving": true, "language_enabled": true, "multi_currency_enabled": true}, "country_name": "Canada"}}, "currency": "CAD", "language": "en", "fcm_token": "SLFtv0PgwYEqYxO5Y6NIYOVA8eVVqDHy1H6IzCOj"}, "receiver_information": {"city_id": 8547, "state_id": 771, "city_data": null, "city_name": "Narayanganj", "country_id": 19, "state_data": [], "state_name": "Dhaka District", "relation_id": 51, "country_data": {"is_serving": true, "language_enabled": true, "multi_currency_enabled": true}, "country_name": "Bangladesh", "relation_data": null, "relation_name": "Friend", "beneficiary_data": {"email": "bd.cash.recipient.1@gmail.com", "cash_id": 61, "bank_name": null, "cash_name": "BANGLADESH BANK", "wallet_name": null, "bank_branch_name": null, "instant_bank_name": null, "cash_account_number": "bd cash recipient 1 account", "instant_bank_branch_name": null}, "beneficiary_name": "bd cash recipient 1", "beneficiary_mobile": "+8801856660645", "beneficiary_address": null, "beneficiary_type_id": 3, "beneficiary_type_name": "Cash Pickup"}}, "master_user_name": "Afghanistan Master User", "service_stat_data": {"charge": "5%", "discount": "1%", "commission": "7%", "charge_refund": "yes", "discount_refund": "yes", "service_stat_id": 6641, "commission_refund": "yes", "charge_break_down_id": null}, "remittance_purpose": "Religious Festival", "beneficiary_type_id": 3, "cash_account_number": "bd cash recipient 1 account", "currency_convert_rate": {"rate": 88.83, "input": "BDT", "amount": "2814.13", "output": "CAD", "converted": 31.67995046718451, "amount_formatted": "CA$2,814.13", "converted_formatted": "BDT 31.68"}, "created_by_mobile_number": "01600000009", "system_notification_variable_failed": "cash_pickup_failed", "system_notification_variable_success": "cash_pickup_success"}',
+            "status" => "successful",
+            "creator_id" => null,
+            "editor_id" => null,
+            "destroyer_id" => null,
+            "restorer_id" => null,
+            "created_at" => "2024-05-14 17:18:49",
+            "updated_at" => "2024-05-14 17:18:49",
+            "deleted_at" => null,
+            "restored_at" => null
         ];
     }
 
@@ -147,8 +147,8 @@ class VendorTestController extends Controller
     {
         $vendor = app()->make(IslamiBankApi::class);
         $repo = app()->make(OrderService::class);
-        //$order = $repo->find(3);
-        //dd($order);
+        $order = $repo->find(18);
+        dd($order);
         //$order_data = $order->order_data;
         //dd($order_data);
         $order = $this->__dummyBankTransferOrderData();
