@@ -93,7 +93,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     private function connectionCheck($xml_post_string, $method): array
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
-        dump($method.'<br>'.$xml_string);
+        dump($method.'<br>'.$xml_string);exit();
         $response = Http::soap($this->apiUrl, $method, $xml_string);
 
         //        $headers = [
@@ -469,16 +469,28 @@ XML;
                 $transferData['paymentType'] = 5;
                 $transferData['beneficiaryRoutingNo'] = '?';
                 $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
+                $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['wallet_information']['vendor_code']['remit']['islamibank'] ?? "42");
+                $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['wallet_information']['bank_name'] ?? "ISLAMI BANK BANGLADESH LIMITED");
+                $transferData['beneficiaryBranchCode'] = '358';
+                $transferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? "Head Office Complex");
                 break;
             case 'mfs_bkash':
                 $transferData['paymentType'] = 7;
                 $transferData['beneficiaryRoutingNo'] = '?';
                 $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
+                $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['wallet_information']['vendor_code']['remit']['islamibank'] ?? "42");
+                $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['wallet_information']['bank_name'] ?? "ISLAMI BANK BANGLADESH LIMITED");
+                $transferData['beneficiaryBranchCode'] = '358';
+                $transferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? "Head Office Complex");
                 break;
             case 'mfs_nagad':
                 $transferData['paymentType'] = 8;
                 $transferData['beneficiaryRoutingNo'] = '?';
                 $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
+                $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['wallet_information']['vendor_code']['remit']['islamibank'] ?? "42");
+                $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['wallet_information']['bank_name'] ?? "ISLAMI BANK BANGLADESH LIMITED");
+                $transferData['beneficiaryBranchCode'] = '358';
+                $transferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? "Head Office Complex");
                 break;
             case 'remittance_card':
                 $transferData['paymentType'] = 4;
@@ -489,6 +501,10 @@ XML;
                 $transferData['beneficiaryAccNo'] = '';
                 $transferData['paymentType'] = 1;
                 $transferData['beneficiaryRoutingNo'] = '?';
+                $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['cash_information']['vendor_code']['remit']['islamibank'] ?? null);
+                $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['cash_information']['bank_name'] ?? null);
+                $transferData['beneficiaryBranchCode'] = '';
+                $transferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? null);
                 break;
             case 'bank_transfer':
                 if ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami-bank-bangladesh-limited') {
