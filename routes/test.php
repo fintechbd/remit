@@ -9,12 +9,6 @@ Route::get('islami-bank-fetch-balance', [VendorTestController::class, 'islamiBan
 Route::get('islami-bank-fetch-account-detail', [VendorTestController::class, 'islamiBankFetchAccountDetail'])
     ->name('islami-bank-fetch-account-detail');
 
-Route::get('islami-bank-fetch-remittance-card', [VendorTestController::class, 'islamiBankFetchRemittanceCard'])
-    ->name('islami-bank-fetch-remittance-card');
-
-Route::get('islami-bank-fetch-mobile-banking-m-cash', [VendorTestController::class, 'islamiBankFetchMobileBankingMCash'])
-    ->name('islami-bank-fetch-mobile-banking-m-cash');
-
 Route::get('islami-bank-fetch-remittance-status', [VendorTestController::class, 'islamiBankFetchRemittanceStatus'])
     ->name('islami-bank-fetch-remittance-status');
 
@@ -30,8 +24,14 @@ Route::get('islami-bank-account-payee', [VendorTestController::class, 'islamiBan
 Route::get('islami-bank-third-bank', [VendorTestController::class, 'islamiBankThirdBank'])
     ->name('islami-bank-third-bank');
 
+Route::get('islami-bank-fetch-mobile-banking-m-cash', [VendorTestController::class, 'islamiBankFetchMobileBankingMCash'])
+    ->name('islami-bank-fetch-mobile-banking-m-cash');
+
 Route::get('islami-bank-mobile-banking-m-cash', [VendorTestController::class, 'islamiBankMobileBankingMCash'])
     ->name('islami-bank-mobile-banking-m-cash');
+
+Route::get('islami-bank-fetch-remittance-card', [VendorTestController::class, 'islamiBankFetchRemittanceCard'])
+    ->name('islami-bank-fetch-remittance-card');
 
 Route::get('islami-bank-remittance-card', [VendorTestController::class, 'islamiBankRemittanceCard'])
     ->name('islami-bank-remittance-card');
