@@ -8,12 +8,13 @@ use Illuminate\Routing\Controller;
 
 class VendorTestController extends Controller
 {
-
     public function islamiBankAccountTypeCode()
     {
         $vendor = app()->make(IslamiBankApi::class);
+
         return $vendor->accountTypeCode('');
     }
+
     public function islamiBankFetchBalance(): void
     {
         $vendor = app()->make(IslamiBankApi::class);

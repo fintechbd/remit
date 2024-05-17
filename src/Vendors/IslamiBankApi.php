@@ -914,11 +914,12 @@ XML;
             '71' => 'Remittance card',
         ];
 
-        if($code == ''){
+        if ($code == '') {
             $returnValue = $return;
-        }else{
+        } else {
             $returnValue = $return[$code];
         }
+
         return $returnValue;
     }
 }
