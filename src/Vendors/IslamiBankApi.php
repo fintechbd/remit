@@ -93,7 +93,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     private function connectionCheck($xml_post_string, $method): array
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
-        dump($method.'<br>'.$xml_string);
+        dump($method.'<br>'.$xml_string);exit();
         $response = Http::soap($this->apiUrl, $method, $xml_string);
 
         //        $headers = [
@@ -503,8 +503,8 @@ XML;
                 $transferData['beneficiaryRoutingNo'] = '?';
                 $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['cash_information']['vendor_code']['remit']['islamibank'] ?? null);
                 $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['cash_information']['bank_name'] ?? null);
-                $transferData['beneficiaryBranchCode'] = '';
-                $transferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? null);
+                $transferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['vendor_code']['remit']['islamibank'] ?? 123);
+                $transferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? 'Head Office Complex');
                 break;
             case 'bank_transfer':
                 if ($data['beneficiary_data']['bank_information']['bank_slug'] == 'islami-bank-bangladesh-limited') {
