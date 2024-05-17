@@ -38,50 +38,6 @@ class VendorTestController extends Controller
         dump($vendor->fetchRemittanceStatus($data));
     }
 
-    public function islamiBankValidateBeneficiaryWallet(): void
-    {
-        $vendor = app()->make(IslamiBankApi::class);
-        $order = $this->__dummyWalletTransferOrderData();
-        $order_data = json_decode($order['order_data'], true);
-        $order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
-        //$data['account_number'] = '016147470541';
-        //$data['account_type'] = $order_data;
-        dump($vendor->validateBeneficiaryWallet($order_data));
-    }
-
-    private function __dummyWalletTransferOrderData(): array
-    {
-        return [
-            'id' => 17,
-            'source_country_id' => 39,
-            'destination_country_id' => 19,
-            'parent_id' => null,
-            'sender_receiver_id' => 10,
-            'user_id' => 8,
-            'service_id' => 19,
-            'transaction_form_id' => 10,
-            'ordered_at' => '2024-05-14 17:13:37',
-            'amount' => '5617.700000',
-            'currency' => 'BDT',
-            'converted_amount' => '55.000000',
-            'converted_currency' => 'CAD',
-            'order_number' => 'CAN00000000000000017',
-            'risk_profile' => 'green',
-            'notes' => null,
-            'is_refunded' => 0,
-            'order_data' => '{"user_name": "Test User 3", "wallet_id": 25, "created_at": "2024-05-14T17:13:37.995533Z", "created_by": "Test User 3", "assign_order": "no", "request_from": "web", "service_name": "MCash", "service_slug": "mbs_m_cash", "beneficiary_id": 6, "current_amount": 50177.38415, "previous_amount": 50177.38415, "purchase_number": "CAN00000000000000017", "beneficiary_data": {"reference_no": "MCM00000000000000017", "sender_information": {"name": "Test User 3", "email": "testuser3@gmail.com", "mobile": "01600000009", "profile": {"id_doc": {"id_no": "12345678", "id_type": "passport", "id_issue_at": "2024-05-12T00:00:00.000000Z", "id_expired_at": "2029-05-12T00:00:00.000000Z", "id_no_duplicate": "no", "id_issue_country": "Bangladesh"}, "blacklisted": "no", "profile_data": {"note": "Testing", "gender": "male", "occupation": "service", "father_name": "Mustak Ahmed", "mother_name": "Hamida Begum", "nationality": "Bangladeshi", "marital_status": "unmarried", "source_of_income": "salary"}, "date_of_birth": "1999-05-12T00:00:00.000000Z", "present_address": {"address": "Mohammadpur", "city_id": 16152, "state_id": 866, "city_data": null, "city_name": "Ajax", "post_code": "1234", "country_id": 39, "state_data": [], "state_name": "Ontario", "country_data": {"is_serving": true, "language_enabled": true, "multi_currency_enabled": true}, "country_name": "Canada"}}, "currency": "CAD", "language": "en", "fcm_token": "SLFtv0PgwYEqYxO5Y6NIYOVA8eVVqDHy1H6IzCOj"}, "wallet_information": {"bank_data": {"swift_code": "BSONBDDH"}, "bank_name": "SONALI BANK LIMITED"}, "receiver_information": {"city_id": 8527, "state_id": 771, "city_data": null, "city_name": "Madaripur", "country_id": 19, "state_data": [], "state_name": "Dhaka District", "relation_id": 58, "country_data": {"is_serving": true, "language_enabled": true, "multi_currency_enabled": true}, "country_name": "Bangladesh", "relation_data": null, "relation_name": "Niece", "beneficiary_data": {"email": "bd.wallet.beneficiary.1@gmail.com", "bank_name": null, "cash_name": null, "wallet_id": 25, "wallet_name": "SONALI BANK LIMITED", "account_name": "Bkash", "bank_branch_name": null, "instant_bank_name": null, "wallet_account_number": "147852369852", "instant_bank_branch_name": null}, "beneficiary_name": "bd wallet beneficiary 1", "beneficiary_mobile": "+8801478523000", "beneficiary_address": null, "beneficiary_type_id": 5, "beneficiary_type_name": "Wallet Transfer"}}, "master_user_name": "Afghanistan Master User", "service_stat_data": {"charge": "6%", "discount": "6%", "commission": "4%", "charge_refund": "yes", "discount_refund": "yes", "service_stat_id": 8801, "commission_refund": "yes", "charge_break_down_id": null}, "beneficiary_type_id": 5, "currency_convert_rate": {"rate": 102.14, "input": "BDT", "amount": "5617.70", "output": "CAD", "converted": 55, "amount_formatted": "CA$5,617.70", "converted_formatted": "BDT 55.00"}, "wallet_account_number": "147852369852", "created_by_mobile_number": "01600000009", "wallet_account_actual_name": "Bkash", "system_notification_variable_failed": "wallet_transfer_failed", "system_notification_variable_success": "wallet_transfer_success"}',
-            'status' => 'successful',
-            'creator_id' => null,
-            'editor_id' => null,
-            'destroyer_id' => null,
-            'restorer_id' => null,
-            'created_at' => '2024-05-14 17:13:37',
-            'updated_at' => '2024-05-14 17:13:38',
-            'deleted_at' => null,
-            'restored_at' => null,
-        ];
-    }
-
     private function __dummyCashPickUpOrderData(): array
     {
         return [
