@@ -35,3 +35,6 @@ Route::get('islami-bank-mobile-banking-m-cash', [VendorTestController::class, 'i
 
 Route::get('islami-bank-remittance-card', [VendorTestController::class, 'islamiBankRemittanceCard'])
     ->name('islami-bank-remittance-card');
+
+Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])
+    ->name('islami-bank-account-type-code');
