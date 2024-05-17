@@ -344,11 +344,6 @@ class VendorTestController extends Controller
     public function islamiBankValidateBeneficiaryWalletBkash(): void
     {
         $vendor = app()->make(IslamiBankApi::class);
-        $repo = app()->make(OrderService::class);
-        //$order = $repo->find(23);
-        //dd($order);
-        //$order_data = $order->order_data;
-        //dd($order_data);
         $order = $this->__dummyWalletBkashTransferOrderData();
         $order_data = json_decode($order['order_data'], true);
         $order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
@@ -356,5 +351,20 @@ class VendorTestController extends Controller
         //$data['account_type'] = $order_data;
         dump($vendor->validateBeneficiaryWallet($order_data));
     }
-
+    public function islamiBankWalletTransferBkash(): void
+    {
+        $vendor = app()->make(IslamiBankApi::class);
+        $repo = app()->make(OrderService::class);
+        //$order = $repo->find(23);
+        //dd($order);
+        //$order_data = $order->order_data;
+        //dd($order_data);
+        $order = $this->__dummyWalletBkashTransferOrderData();
+        $order_data = json_decode($order['order_data'], true);
+        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
+        $order_data['sending_amount'] = $order['amount'];
+        $order_data['sending_currency'] = $order['currency'];
+        //dd($order_data);
+        dump($vendor->directCreditRemittance($order_data));
+    }
 }
