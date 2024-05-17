@@ -42,5 +42,11 @@ Route::get('islami-bank-fetch-validate-beneficiary-wallet-bkash', [VendorTestCon
 Route::get('islami-bank-mobile-banking-bkash', [VendorTestController::class, 'islamiBankWalletTransferBkash'])
     ->name('islami-bank-mobile-banking-bkash');
 
+Route::get('islami-bank-fetch-validate-beneficiary-wallet-nagad', [VendorTestController::class, 'islamiBankValidateBeneficiaryWalletNagad'])
+    ->name('islami-bank-fetch-validate-beneficiary-wallet-nagad');
+
+Route::get('islami-bank-mobile-banking-nagad', [VendorTestController::class, 'islamiBankWalletTransferNagad'])
+    ->name('islami-bank-mobile-banking-nagad');
+
 Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])
     ->name('islami-bank-account-type-code');
