@@ -896,7 +896,7 @@ XML;
      *
      * @return array|string|string[]
      */
-    private function __accountTypeCode(string $code): array|string
+    public function accountTypeCode(string $code): array|string
     {
         $return = [
             '01' => 'AWCA (Current)',
@@ -914,6 +914,11 @@ XML;
             '71' => 'Remittance card',
         ];
 
-        return $return[$code];
+        if($code == ''){
+            $returnValue = $return;
+        }else{
+            $returnValue = $return[$code];
+        }
+        return $returnValue;
     }
 }
