@@ -4,6 +4,7 @@ use Fintech\Core\Facades\Core;
 use Fintech\Remit\Http\Controllers\AssignVendorController;
 use Fintech\Remit\Http\Controllers\BankTransferController;
 use Fintech\Remit\Http\Controllers\CashPickupController;
+use Fintech\Remit\Http\Controllers\VendorTestController;
 use Fintech\Remit\Http\Controllers\WalletTransferController;
 use Fintech\Remit\Http\Controllers\WalletVerificationController;
 use Illuminate\Support\Facades\Config;
@@ -30,6 +31,7 @@ if (Config::get('fintech.remit.enabled')) {
             Route::apiResource('cash-pickups', CashPickupController::class)->except('update', 'destroy');
             Route::apiResource('wallet-transfers', WalletTransferController::class)->except('update', 'destroy');
             Route::post('wallet-verification', WalletVerificationController::class)->name('wallet-verification');
+            Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])->name('islami-bank-account-type-code');
 
             //DO NOT REMOVE THIS LINE//
         });
