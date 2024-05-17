@@ -308,4 +308,53 @@ class VendorTestController extends Controller
         //dd($order_data);
         dump($vendor->directCreditRemittance($order_data));
     }
+
+    private function __dummyWalletBkashTransferOrderData(): array
+    {
+        return [
+            "id" => 23,
+            "source_country_id" => 39,
+            "destination_country_id" => 19,
+            "parent_id" => null,
+            "sender_receiver_id" => 10,
+            "user_id" => 6,
+            "service_id" => 16,
+            "transaction_form_id" => 10,
+            "ordered_at" => "2024-05-17 21:05:14",
+            "amount" => "1132.920000",
+            "currency" => "BDT",
+            "converted_amount" => "10.100027",
+            "converted_currency" => "CAD",
+            "order_number" => "CAN00000000000000023",
+            "risk_profile" => "green",
+            "notes" => null,
+            "is_refunded" => 0,
+            "order_data" => '{"user_name": "Test User 1", "wallet_id": 634, "created_at": "2024-05-17T21:05:14.609017Z", "created_by": "Test User 1", "assign_order": "no", "request_from": "web", "service_name": "bKash", "service_slug": "mfs_bkash", "beneficiary_id": 15, "current_amount": 20958.491844, "previous_amount": 20958.491844, "purchase_number": "CAN00000000000000023", "beneficiary_data": {"reference_no": "MCM00000000000000023", "sender_information": {"name": "Test User 1", "email": "testuser1@gmail.com", "mobile": "01600000007", "profile": {"id_doc": {"id_no": "12345678", "id_type": "passport", "id_issue_at": "2024-05-12T00:00:00.000000Z", "id_expired_at": "2029-05-12T00:00:00.000000Z", "id_no_duplicate": "no", "id_issue_country": "Bangladesh"}, "blacklisted": "no", "profile_data": {"note": "Testing", "gender": "male", "occupation": "service", "father_name": "Mustak Ahmed", "mother_name": "Hamida Begum", "nationality": "Bangladeshi", "marital_status": "unmarried", "source_of_income": "salary"}, "date_of_birth": "1999-05-12T00:00:00.000000Z", "present_address": {"address": "Mohammadpur", "city_id": 16152, "state_id": 866, "city_data": null, "city_name": "Ajax", "post_code": "1234", "country_id": 39, "state_data": [], "state_name": "Ontario", "country_data": {"is_serving": true, "language_enabled": true, "multi_currency_enabled": true}, "country_name": "Canada"}}, "currency": "CAD", "language": "en", "fcm_token": "e1xcoyZ4AJ8jdkb37mG6RgFffqSTd6fRtHAYZlHI"}, "wallet_information": {"bank_data": {"swift_code": null}, "bank_name": "BKASH", "bank_slug": "bkash", "vendor_code": {"remit": {"agrani": null, "emqapi": null, "valyou": null, "citybank": null, "transfast": null, "islamibank": "42"}}}, "receiver_information": {"city_id": 8486, "state_id": 771, "city_data": null, "city_name": "Dhaka", "country_id": 19, "state_data": [], "state_name": "Dhaka District", "relation_id": 79, "country_data": {"is_serving": true, "language_enabled": true, "multi_currency_enabled": true}, "country_name": "Bangladesh", "relation_data": null, "relation_name": "Others", "beneficiary_data": {"email": "mah.shamim@gmail.com", "bank_name": null, "cash_name": null, "wallet_id": 634, "wallet_name": "BKASH", "account_name": "Bkash", "bank_branch_name": null, "instant_bank_name": null, "wallet_account_number": "01614747054", "instant_bank_branch_name": null}, "beneficiary_name": "MD ARIFUL HAQUE", "beneficiary_mobile": "+8801614747054", "beneficiary_address": null, "beneficiary_type_id": 5, "beneficiary_type_name": "Wallet Transfer"}}, "master_user_name": "Afghanistan Master User", "service_stat_data": {"charge": "5%", "discount": "6%", "commission": "3%", "charge_refund": "yes", "discount_refund": "yes", "service_stat_id": 7505, "commission_refund": "yes", "charge_break_down_id": null}, "beneficiary_type_id": 5, "currency_convert_rate": {"rate": 112.17, "input": "BDT", "amount": "1132.92", "output": "CAD", "converted": 10.100026745119017, "amount_formatted": "CA$1,132.92", "converted_formatted": "BDT 10.10"}, "wallet_account_number": "01614747054", "created_by_mobile_number": "01600000007", "wallet_account_actual_name": "Bkash", "system_notification_variable_failed": "wallet_transfer_failed", "system_notification_variable_success": "wallet_transfer_success"}',
+            "status" => "successful",
+            "creator_id" => null,
+            "editor_id" => null,
+            "destroyer_id" => null,
+            "restorer_id" => null,
+            "created_at" => "2024-05-17 21:05:14",
+            "updated_at" => "2024-05-17 21:05:14",
+            "deleted_at" => null,
+            "restored_at" => null
+        ];
+    }
+    public function islamiBankValidateBeneficiaryWalletBkash(): void
+    {
+        $vendor = app()->make(IslamiBankApi::class);
+        $repo = app()->make(OrderService::class);
+        //$order = $repo->find(23);
+        //dd($order);
+        //$order_data = $order->order_data;
+        //dd($order_data);
+        $order = $this->__dummyWalletBkashTransferOrderData();
+        $order_data = json_decode($order['order_data'], true);
+        $order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
+        //$data['account_number'] = '016147470541';
+        //$data['account_type'] = $order_data;
+        dump($vendor->validateBeneficiaryWallet($order_data));
+    }
+
 }
