@@ -24,10 +24,10 @@ class VendorTestController extends Controller
     public function islamiBankFetchAccountDetail(): void
     {
         $vendor = app()->make(IslamiBankApi::class);
-        $data['account_number'] = '11052';
-        $data['account_type'] = '10';
-        $data['branch_code'] = '213';
-        dump($vendor->fetchAccountDetail($data));
+        $repo = app()->make(OrderService::class);
+        $order = $repo->list(['service_id' => 13, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
+        $order_data = $order->order_data;
+        dump($vendor->fetchAccountDetail($order_data));
     }
 
     public function islamiBankFetchRemittanceStatus(): void
@@ -43,15 +43,10 @@ class VendorTestController extends Controller
         $vendor = app()->make(IslamiBankApi::class);
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 14, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
-        //dd($order);
         $order_data = $order->order_data;
-        //dd($order_data);
-        //$order = $this->__dummyCashPickUpOrderData();
-        //$order_data = json_decode($order['order_data'], true);
         $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
-        //dd($order_data);
         dump($vendor->directCreditRemittance($order_data));
     }
 
@@ -60,16 +55,10 @@ class VendorTestController extends Controller
         $vendor = app()->make(IslamiBankApi::class);
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 13, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
-        //dd($order);
         $order_data = $order->order_data;
-        //dd($order_data);
-        //$order = $this->__dummyBankTransferOwnBankOrderData();
-        //$order_data = json_decode($order['order_data'], true);
-        //dd($order_data);
         $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
-        //dd($order_data);
         dump($vendor->directCreditRemittance($order_data));
     }
 
@@ -78,15 +67,10 @@ class VendorTestController extends Controller
         $vendor = app()->make(IslamiBankApi::class);
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 13, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
-        //dd($order);
         $order_data = $order->order_data;
-        //dd($order);
-        //$order = $this->__dummyBankTransferThirdBankOrderData();
-        //$order_data = json_decode($order['order_data'], true);
         $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
-        //dd($order_data);
         dump($vendor->directCreditRemittance($order_data));
     }
 
@@ -95,14 +79,8 @@ class VendorTestController extends Controller
         $vendor = app()->make(IslamiBankApi::class);
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 19, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
-        //dd($order);
         $order_data = $order->order_data;
-        //$order = $this->__dummyWalletTransferOrderDataMCash();
-        //$order_data = json_decode($order['order_data'], true);
-        //dd($order_data);
-        $order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
-        //$data['account_number'] = '016147470541';
-        //$data['account_type'] = $order_data;
+        //$order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
         dump($vendor->fetchAccountDetail($order_data));
     }
 
@@ -111,14 +89,10 @@ class VendorTestController extends Controller
         $vendor = app()->make(IslamiBankApi::class);
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 19, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
-        //dd($order);
         $order_data = $order->order_data;
-        //$order = $this->__dummyWalletTransferOrderDataMCash();
-        //$order_data = json_decode($order['order_data'], true);
         $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
-        //dd($order_data);
         dump($vendor->directCreditRemittance($order_data));
     }
 
@@ -179,14 +153,9 @@ class VendorTestController extends Controller
         $vendor = app()->make(IslamiBankApi::class);
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 16, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
-        //dd($order);
         $order_data = $order->order_data;
-        //$order = $this->__dummyWalletBkashTransferOrderData();
-        //$order_data = json_decode($order['order_data'], true);
-        $order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
-        //$data['account_number'] = '016147470541';
-        //$data['account_type'] = $order_data;
-        dump($vendor->fetchAccountDetail($order_data));
+        //$order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
+        dump($vendor->validateBeneficiaryWallet($order_data));
     }
 
     public function islamiBankWalletTransferBkash(): void
@@ -194,15 +163,10 @@ class VendorTestController extends Controller
         $vendor = app()->make(IslamiBankApi::class);
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 16, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
-        //dd($order);
         $order_data = $order->order_data;
-        //dd($order_data);
-        //$order = $this->__dummyWalletBkashTransferOrderData();
-        //$order_data = json_decode($order['order_data'], true);
         $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
-        //dd($order_data);
         dump($vendor->directCreditRemittance($order_data));
     }
 
@@ -211,14 +175,9 @@ class VendorTestController extends Controller
         $vendor = app()->make(IslamiBankApi::class);
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 17, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
-        //dd($order);
         $order_data = $order->order_data;
-        //$order = $this->__dummyWalletNagadTransferOrderData();
-        //$order_data = json_decode($order['order_data'], true);
-        $order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
-        //$data['account_number'] = '016147470541';
-        //$data['account_type'] = $order_data;
-        dump($vendor->fetchAccountDetail($order_data));
+        //$order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
+        dump($vendor->validateBeneficiaryWallet($order_data));
     }
 
     public function islamiBankWalletTransferNagad(): void
@@ -226,15 +185,10 @@ class VendorTestController extends Controller
         $vendor = app()->make(IslamiBankApi::class);
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 17, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
-        //dd($order);
         $order_data = $order->order_data;
-        //dd($order_data);
-        //$order = $this->__dummyWalletNagadTransferOrderData();
-        //$order_data = json_decode($order['order_data'], true);
         $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
-        //dd($order_data);
         dump($vendor->directCreditRemittance($order_data));
     }
 }

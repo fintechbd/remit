@@ -57,13 +57,14 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
      */
     public function fetchAccountDetail(array $data): array
     {
+        $accountDetail = $this->__transferData($data);
         $xmlString = '
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
             <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
         ';
-        $xmlString .= '<ser:accNo>'.($data['account_number'] ?? null).'</ser:accNo>';
-        $xmlString .= '<ser:accType>'.($data['account_type'] ?? null).'</ser:accType>';
-        $xmlString .= '<ser:branchCode>'.($data['branch_code'] ?? null).'</ser:branchCode>';
+        $xmlString .= '<ser:accNo>'.($accountDetail['beneficiaryAccNo'] ?? null).'</ser:accNo>';
+        $xmlString .= '<ser:accType>'.($accountDetail['beneficiaryAccType'] ?? null).'</ser:accType>';
+        $xmlString .= '<ser:branchCode>'.($accountDetail['beneficiaryBankCode'] ?? null).'</ser:branchCode>';
         $soapMethod = 'fetchAccountDetail';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
