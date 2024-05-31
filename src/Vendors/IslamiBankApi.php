@@ -94,7 +94,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     private function connectionCheck($xml_post_string, $method): array
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
-        dump($method.'<br>'.$xml_string);exit();
+        dump($method.'<br>'.$xml_string);
         $response = Http::soap($this->apiUrl, $method, $xml_string);
 
         //        $headers = [
@@ -455,7 +455,7 @@ XML;
         $transferData['note'] = '?';
         $transferData['orderNo'] = '?';
         $transferData['paymentType'] = 3;
-        $transferData['remittancePurpose'] = '?';
+        $transferData['remittancePurpose'] = ($data['remittance_purpose'] ?? '?');
         $transferData['remitterAddress'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null);
         $transferData['remitterCountry'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
         $transferData['remitterIdentificationNo'] = '?';
