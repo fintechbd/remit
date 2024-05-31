@@ -88,39 +88,6 @@ class VendorTestController extends Controller
         dump($vendor->directCreditRemittance($order_data));
     }
 
-    private function __dummyBankTransferOwnBankOrderData(): array
-    {
-        return [
-            'id' => 27,
-            'source_country_id' => 39,
-            'destination_country_id' => 19,
-            'parent_id' => null,
-            'sender_receiver_id' => 10,
-            'user_id' => 6,
-            'service_id' => 13,
-            'transaction_form_id' => 6,
-            'ordered_at' => '2024-05-17 21:08:20',
-            'amount' => '1117.820000',
-            'currency' => 'BDT',
-            'converted_amount' => '10.200018',
-            'converted_currency' => 'CAD',
-            'order_number' => 'CAN00000000000000027',
-            'risk_profile' => 'green',
-            'notes' => null,
-            'is_refunded' => 0,
-            'order_data' => '{"bank_id": 45, "user_name": "Test User 1", "created_at": "2024-05-17T21:08:20.678561Z", "created_by": "Test User 1", "fund_source": "Salary", "assign_order": "no", "request_from": "web", "service_name": "Bank Transfer", "service_slug": "bank_transfer", "account_number": "1234567890", "bank_branch_id": 3879, "beneficiary_id": 14, "current_amount": 20918.258854, "previous_amount": 20918.258854, "purchase_number": "CAN00000000000000027", "beneficiary_data": {"reference_no": "MCM00000000000000027", "bank_information": {"bank_data": {"swift_code": "IBBLBDDH"}, "bank_name": "ISLAMI BANK BANGLADESH LIMITED", "bank_slug": "islami-bank-bangladesh-limited", "vendor_code": {"remit": {"agrani": null, "emqapi": null, "valyou": null, "citybank": null, "transfast": "BA26", "islamibank": "42"}}}, "branch_information": {"branch_data": {"location_no": "125271848"}, "branch_name": "DHOLAIKHAL BRANCH", "vendor_code": {"remit": {"agrani": null, "emqapi": null, "valyou": null, "citybank": null, "transfast": null, "islamibank": null}}}, "sender_information": {"name": "Test User 1", "email": "testuser1@gmail.com", "mobile": "01600000007", "profile": {"id_doc": {"id_no": "12345678", "id_type": "passport", "id_issue_at": "2024-05-12T00:00:00.000000Z", "id_expired_at": "2029-05-12T00:00:00.000000Z", "id_no_duplicate": "no", "id_issue_country": "Bangladesh"}, "blacklisted": "no", "profile_data": {"note": "Testing", "gender": "male", "occupation": "service", "father_name": "Mustak Ahmed", "mother_name": "Hamida Begum", "nationality": "Bangladeshi", "marital_status": "unmarried", "source_of_income": "salary"}, "date_of_birth": "1999-05-12T00:00:00.000000Z", "present_address": {"address": "Mohammadpur", "city_id": 16152, "state_id": 866, "city_data": null, "city_name": "Ajax", "post_code": "1234", "country_id": 39, "state_data": [], "state_name": "Ontario", "country_data": {"is_serving": true, "language_enabled": true, "multi_currency_enabled": true}, "country_name": "Canada"}}, "currency": "CAD", "language": "en", "fcm_token": "e1xcoyZ4AJ8jdkb37mG6RgFffqSTd6fRtHAYZlHI"}, "receiver_information": {"city_id": 8486, "state_id": 771, "city_data": null, "city_name": "Dhaka", "country_id": 19, "state_data": [], "state_name": "Dhaka District", "relation_id": 79, "country_data": {"is_serving": true, "language_enabled": true, "multi_currency_enabled": true}, "country_name": "Bangladesh", "relation_data": null, "relation_name": "Others", "beneficiary_data": {"email": "mah.shamim@gmail.com", "bank_id": 45, "bank_name": "ISLAMI BANK BANGLADESH LIMITED", "cash_name": null, "wallet_name": null, "account_name": "MD ARIFUL HAQUE", "bank_branch_id": 3879, "bank_branch_name": "DHOLAIKHAL BRANCH", "instant_bank_name": null, "bank_account_number": "1234567890", "instant_bank_branch_name": null}, "beneficiary_name": "MD ARIFUL HAQUE ISLAMI BANK", "beneficiary_mobile": "+8801760233030", "beneficiary_address": null, "beneficiary_type_id": 1, "beneficiary_type_name": "Bank Transfer"}}, "master_user_name": "Afghanistan Master User", "service_stat_data": {"charge": "4%", "discount": "6%", "commission": "3%", "charge_refund": "yes", "discount_refund": "yes", "service_stat_id": 6209, "commission_refund": "yes", "charge_break_down_id": null}, "remittance_purpose": "Family Maintenance or Savings", "beneficiary_type_id": 1, "currency_convert_rate": {"rate": 109.59, "input": "BDT", "amount": "1117.82", "output": "CAD", "converted": 10.200018249840314, "amount_formatted": "CA$1,117.82", "converted_formatted": "BDT 10.20"}, "created_by_mobile_number": "01600000007", "system_notification_variable_failed": "bank_transfer_failed", "system_notification_variable_success": "bank_transfer_success"}',
-            'status' => 'successful',
-            'creator_id' => null,
-            'editor_id' => null,
-            'destroyer_id' => null,
-            'restorer_id' => null,
-            'created_at' => '2024-05-17 21:08:20',
-            'updated_at' => '2024-05-17 21:08:20',
-            'deleted_at' => null,
-            'restored_at' => null,
-        ];
-    }
-
     public function islamiBankAccountPayee(): void
     {
         $vendor = app()->make(IslamiBankApi::class);
