@@ -235,7 +235,7 @@ class VendorTestController extends Controller
         $order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
         //$data['account_number'] = '016147470541';
         //$data['account_type'] = $order_data;
-        dump($vendor->validateBeneficiaryWallet($order_data));
+        dump($vendor->fetchAccountDetail($order_data));
     }
 
     public function islamiBankMobileBankingMCash(): void
