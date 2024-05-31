@@ -880,9 +880,6 @@ XML;
 
     /**
      * Beneficiary Identity Type Code
-     * @param int|string $code
-     * @param string $flag
-     * @return string
      */
     private function __beneficiaryIdentityTypeCode(int|string $code, string $flag = 'key'): string
     {
@@ -900,7 +897,7 @@ XML;
             11 => 'Student ID Card',
         ];
 
-        if($flag == 'value'){
+        if ($flag == 'value') {
             $return = [
                 1 => 'Passport', 2 => 'Cheque', 3 => 'Photo', 4 => 'Finger Print',
                 5 => 'Introducer', 6 => 'Driving License', 7 => 'Other', 8 => 'Remittance Card',
@@ -912,7 +909,7 @@ XML;
             $return = array_flip($return);
         }
 
-        if(is_string($code)){
+        if (is_string($code)) {
             $code = ucwords(str_replace('-', ' ', $code));
         }
 
