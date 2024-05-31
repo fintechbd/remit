@@ -371,39 +371,6 @@ class VendorTestController extends Controller
         dump($vendor->directCreditRemittance($order_data));
     }
 
-    private function __dummyWalletNagadTransferOrderData(): array
-    {
-        return [
-            'id' => 24,
-            'source_country_id' => 39,
-            'destination_country_id' => 19,
-            'parent_id' => null,
-            'sender_receiver_id' => 10,
-            'user_id' => 6,
-            'service_id' => 17,
-            'transaction_form_id' => 10,
-            'ordered_at' => '2024-05-17 21:06:09',
-            'amount' => '720.300000',
-            'currency' => 'BDT',
-            'converted_amount' => '10.399942',
-            'converted_currency' => 'CAD',
-            'order_number' => 'CAN00000000000000024',
-            'risk_profile' => 'green',
-            'notes' => null,
-            'is_refunded' => 0,
-            'order_data' => '{"user_name": "Test User 1", "wallet_id": 635, "created_at": "2024-05-17T21:06:09.962824Z", "created_by": "Test User 1", "assign_order": "no", "request_from": "web", "service_name": "Nagad", "service_slug": "mfs_nagad", "beneficiary_id": 16, "current_amount": 20948.290816, "previous_amount": 20948.290816, "purchase_number": "CAN00000000000000024", "beneficiary_data": {"reference_no": "MCM00000000000000024", "sender_information": {"name": "Test User 1", "email": "testuser1@gmail.com", "mobile": "01600000007", "profile": {"id_doc": {"id_no": "12345678", "id_type": "passport", "id_issue_at": "2024-05-12T00:00:00.000000Z", "id_expired_at": "2029-05-12T00:00:00.000000Z", "id_no_duplicate": "no", "id_issue_country": "Bangladesh"}, "blacklisted": "no", "profile_data": {"note": "Testing", "gender": "male", "occupation": "service", "father_name": "Mustak Ahmed", "mother_name": "Hamida Begum", "nationality": "Bangladeshi", "marital_status": "unmarried", "source_of_income": "salary"}, "date_of_birth": "1999-05-12T00:00:00.000000Z", "present_address": {"address": "Mohammadpur", "city_id": 16152, "state_id": 866, "city_data": null, "city_name": "Ajax", "post_code": "1234", "country_id": 39, "state_data": [], "state_name": "Ontario", "country_data": {"is_serving": true, "language_enabled": true, "multi_currency_enabled": true}, "country_name": "Canada"}}, "currency": "CAD", "language": "en", "fcm_token": "e1xcoyZ4AJ8jdkb37mG6RgFffqSTd6fRtHAYZlHI"}, "wallet_information": {"bank_data": {"swift_code": null}, "bank_name": "NAGAD", "bank_slug": "nagad", "vendor_code": {"remit": {"agrani": null, "emqapi": null, "valyou": null, "citybank": null, "transfast": null, "islamibank": "42"}}}, "receiver_information": {"city_id": 8486, "state_id": 771, "city_data": null, "city_name": "Dhaka", "country_id": 19, "state_data": [], "state_name": "Dhaka District", "relation_id": 79, "country_data": {"is_serving": true, "language_enabled": true, "multi_currency_enabled": true}, "country_name": "Bangladesh", "relation_data": null, "relation_name": "Others", "beneficiary_data": {"email": "mah.shamim@gmail.com", "bank_name": null, "cash_name": null, "wallet_id": 635, "wallet_name": "NAGAD", "account_name": "Bkash", "bank_branch_name": null, "instant_bank_name": null, "wallet_account_number": "01614747054", "instant_bank_branch_name": null}, "beneficiary_name": "MD ARIFUL HAQUE NAGAD", "beneficiary_mobile": "+8801760233030", "beneficiary_address": null, "beneficiary_type_id": 5, "beneficiary_type_name": "Wallet Transfer"}}, "master_user_name": "Afghanistan Master User", "service_stat_data": {"charge": "3%", "discount": "7%", "commission": "6%", "charge_refund": "yes", "discount_refund": "yes", "service_stat_id": 7937, "commission_refund": "yes", "charge_break_down_id": null}, "beneficiary_type_id": 5, "currency_convert_rate": {"rate": 69.26, "input": "BDT", "amount": "720.30", "output": "CAD", "converted": 10.399942246606988, "amount_formatted": "CA$720.30", "converted_formatted": "BDT 10.40"}, "wallet_account_number": "01614747054", "created_by_mobile_number": "01600000007", "wallet_account_actual_name": "Bkash", "system_notification_variable_failed": "wallet_transfer_failed", "system_notification_variable_success": "wallet_transfer_success"}',
-            'status' => 'successful',
-            'creator_id' => null,
-            'editor_id' => null,
-            'destroyer_id' => null,
-            'restorer_id' => null,
-            'created_at' => '2024-05-17 21:06:09',
-            'updated_at' => '2024-05-17 21:06:10',
-            'deleted_at' => null,
-            'restored_at' => null,
-        ];
-    }
-
     public function islamiBankValidateBeneficiaryWalletNagad(): void
     {
         $vendor = app()->make(IslamiBankApi::class);
