@@ -28,6 +28,10 @@ if (Config::get('fintech.remit.enabled')) {
                     ->name('assignable-vendors.available');
             }
             Route::apiResource('bank-transfers', BankTransferController::class)->except('update', 'destroy');
+            Route::group(['prefix' => 'bank-transfers'], function () {
+                Route::post('store-without-insufficient-balance', [BankTransferController::class, 'storeWithoutInsufficientBalance'])
+                ->name('store-without-insufficient-balance');
+            });
             Route::apiResource('cash-pickups', CashPickupController::class)->except('update', 'destroy');
             Route::apiResource('wallet-transfers', WalletTransferController::class)->except('update', 'destroy');
             Route::post('wallet-verification', WalletVerificationController::class)->name('wallet-verification');
