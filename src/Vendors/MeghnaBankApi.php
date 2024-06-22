@@ -9,6 +9,23 @@ use Illuminate\Support\Facades\Log;
 
 class MeghnaBankApi implements BankTransfer, OrderQuotation
 {
+
+    /**
+     * MeghnaBankApiService constructor.
+     */
+    public function __construct()
+    {
+        $this->config = config('fintech.remit.providers.islamibank');
+
+        if ($this->config['mode'] === 'sandbox') {
+            $this->apiUrl = $this->config[$this->status]['endpoint'];
+            $this->status = 'sandbox';
+
+        } else {
+            $this->apiUrl = $this->config[$this->status]['endpoint'];
+            $this->status = 'live';
+        }
+    }
     public function makeTransfer(array $orderInfo = []): mixed
     {
         // TODO: Implement makeTransfer() method.
