@@ -160,7 +160,7 @@ return [
             'mode' => 'sandbox',
             'driver' => Fintech\Remit\Vendors\IslamiBankApi::class,
             'live' => [
-                'endpoint' => 'http://192.68.19.115/VSLExchangeAPI/Controller/',
+                'endpoint' => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/',
                 'bankid' => env('PACKAGE_REMIT_MEGHNA_BANK_BANK_ID'),
                 'agent' => env('PACKAGE_REMIT_MEGHNA_BANK_AGENT'),
                 'token' => env('PACKAGE_REMIT_MEGHNA_BANK_TOKEN'),
@@ -168,7 +168,7 @@ return [
                 'password' => env('PACKAGE_REMIT_MEGHNA_BANK_PASSWORD'),
             ],
             'sandbox' => [
-                'endpoint' => 'http://192.68.19.115/VSLExchangeAPI/Controller/',
+                'endpoint' => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/',
                 'bankid' => env('PACKAGE_REMIT_MEGHNA_BANK_BANK_ID'),
                 'agent' => env('PACKAGE_REMIT_MEGHNA_BANK_AGENT'),
                 'token' => env('PACKAGE_REMIT_MEGHNA_BANK_TOKEN'),
