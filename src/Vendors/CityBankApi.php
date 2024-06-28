@@ -53,10 +53,7 @@ class CityBankApi implements BankTransfer, OrderQuotation
      *
      * @throws Exception
      */
-    public function getTnxStatus($inputs_data)
-    {
-
-    }
+    public function getTnxStatus($inputs_data) {}
 
     /**
      * bKash customer validation service will help you to validate the beneficiary bkash number before send the transaction

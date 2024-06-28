@@ -1357,8 +1357,5 @@ class EmqApi implements BankTransfer, OrderQuotation
         // TODO: Implement requestQuotation() method.
     }
 
-    protected function getBalanceFromCurrency(string $currency, $response)
-    {
-
-    }
+    protected function getBalanceFromCurrency(string $currency, $response) {}
 }

@@ -125,8 +125,5 @@ class AssignVendorController extends Controller
         ];
     }
 
-    private function cityBankVendorData(): array
-    {
-
-    }
+    private function cityBankVendorData(): array {}
 }

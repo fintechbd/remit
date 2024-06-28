@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Log;
 
 class MeghnaBankApi implements BankTransfer, OrderQuotation
 {
-
     /**
      * MeghnaBankApiService constructor.
      */
@@ -69,6 +68,7 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         ];
 
     }
+
     public function makeTransfer(array $orderInfo = []): mixed
     {
         // TODO: Implement makeTransfer() method.
@@ -98,7 +98,4 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
     {
         // TODO: Implement requestQuotation() method.
     }
-
-
-
 }
