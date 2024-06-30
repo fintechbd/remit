@@ -978,7 +978,7 @@ class TransFastApi implements OrderQuotation
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
      */
     public function requestQuote($order): mixed
     {

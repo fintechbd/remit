@@ -27,7 +27,7 @@ class AssignVendorService
     {
         $availableVendors = config('fintech.remit.providers', []);
 
-        if (!isset($availableVendors[$vendor_slug])) {
+        if (! isset($availableVendors[$vendor_slug])) {
             throw new ErrorException('Service Vendor is not available on the configuration.');
         }
 
@@ -37,7 +37,7 @@ class AssignVendorService
 
         $instance = App::make($driverClass);
 
-        if (!$instance instanceof OrderQuotation) {
+        if (! $instance instanceof OrderQuotation) {
             throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
         }
 
@@ -48,7 +48,7 @@ class AssignVendorService
     {
         $availableVendors = config('fintech.remit.providers', []);
 
-        if (!isset($availableVendors[$vendor_slug])) {
+        if (! isset($availableVendors[$vendor_slug])) {
             throw new ErrorException('Service Vendor is not available on the configuration.');
         }
 
@@ -58,7 +58,7 @@ class AssignVendorService
 
         $instance = App::make($driverClass);
 
-        if (!$instance instanceof OrderQuotation) {
+        if (! $instance instanceof OrderQuotation) {
             throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
         }
 
@@ -69,7 +69,7 @@ class AssignVendorService
     {
         $availableVendors = config('fintech.remit.providers', []);
 
-        if (!isset($availableVendors[$vendor_slug])) {
+        if (! isset($availableVendors[$vendor_slug])) {
             throw new ErrorException('Service Vendor is not available on the configuration.');
         }
 
@@ -79,7 +79,7 @@ class AssignVendorService
 
         $instance = App::make($driverClass);
 
-        if (!$instance instanceof OrderQuotation) {
+        if (! $instance instanceof OrderQuotation) {
             throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
         }
 
@@ -90,7 +90,7 @@ class AssignVendorService
     {
         $availableVendors = config('fintech.remit.providers', []);
 
-        if (!isset($availableVendors[$vendor_slug])) {
+        if (! isset($availableVendors[$vendor_slug])) {
             throw new ErrorException('Service Vendor is not available on the configuration.');
         }
 
@@ -100,7 +100,7 @@ class AssignVendorService
 
         $instance = App::make($driverClass);
 
-        if (!$instance instanceof OrderQuotation) {
+        if (! $instance instanceof OrderQuotation) {
             throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
         }
 

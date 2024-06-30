@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Contracts;
 
-
 interface ProceedOrder
 {
     /**

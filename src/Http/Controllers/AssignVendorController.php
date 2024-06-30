@@ -3,11 +3,8 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use ErrorException;
 use Exception;
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
-use Fintech\Remit\Contracts\OrderQuotation;
 use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\AssignableVendorInfoRequest;
 use Fintech\Remit\Http\Resources\AssignableVendorCollection;
@@ -21,7 +18,7 @@ class AssignVendorController extends Controller
     {
         $order = Transaction::order()->find($id);
 
-        if (!$order) {
+        if (! $order) {
             throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
         }
 

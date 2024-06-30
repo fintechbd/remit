@@ -856,7 +856,8 @@ XML;
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
+     *
      * @throws Exception
      */
     public function requestQuote($order): mixed
@@ -865,7 +866,7 @@ XML;
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
      */
     public function processOrder($order): mixed
     {

@@ -12,7 +12,6 @@ use Fintech\Remit\Contracts\BankTransfer;
 use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
-use MongoDB\Laravel\Eloquent\Model;
 use stdClass;
 
 class EmqApi implements BankTransfer, OrderQuotation
@@ -1350,7 +1349,7 @@ class EmqApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
      */
     public function requestQuote($order): mixed
     {
@@ -1359,8 +1358,5 @@ class EmqApi implements BankTransfer, OrderQuotation
         ];
     }
 
-    protected function getBalanceFromCurrency(string $currency, $response)
-    {
-
-    }
+    protected function getBalanceFromCurrency(string $currency, $response) {}
 }
