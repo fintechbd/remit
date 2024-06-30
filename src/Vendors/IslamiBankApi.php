@@ -6,9 +6,10 @@ use Exception;
 use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\BankTransfer;
 use Fintech\Remit\Contracts\OrderQuotation;
+use Fintech\Remit\Contracts\ProceedOrder;
 use Illuminate\Support\Facades\Http;
 
-class IslamiBankApi implements BankTransfer, OrderQuotation
+class IslamiBankApi implements BankTransfer, OrderQuotation, ProceedOrder
 {
     /**
      * IslamiBank API configuration.
@@ -94,7 +95,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     private function connectionCheck($xml_post_string, $method): array
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
-        dump($method.'<br>'.$xml_string);
+
         $response = Http::soap($this->apiUrl, $method, $xml_string);
 
         //        $headers = [
@@ -854,9 +855,23 @@ XML;
         return $return;
     }
 
-    public function requestQuotation($order): array
+    /**
+     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     * @throws Exception
+     */
+    public function requestQuote($order): mixed
     {
-        return [];
+        return $this->fetchBalance('BDT');
+    }
+
+    /**
+     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     */
+    public function processOrder($order): mixed
+    {
+        return [
+
+        ];
     }
 
     /**
@@ -899,12 +914,23 @@ XML;
 
         if ($flag == 'value') {
             $return = [
-                1 => 'Passport', 2 => 'Cheque', 3 => 'Photo', 4 => 'Finger Print',
-                5 => 'Introducer', 6 => 'Driving License', 7 => 'Other', 8 => 'Remittance Card',
-                9 => 'National ID', 9 => 'National ID Card', 9 => 'National Identity Card',
-                9 => 'Voter ID', 9 => 'Voter ID Card', 9 => 'Voter Identity Card',
+                1 => 'Passport',
+                2 => 'Cheque',
+                3 => 'Photo',
+                4 => 'Finger Print',
+                5 => 'Introducer',
+                6 => 'Driving License',
+                7 => 'Other',
+                8 => 'Remittance Card',
+                9 => 'National ID',
+                9 => 'National ID Card',
+                9 => 'National Identity Card',
+                9 => 'Voter ID',
+                9 => 'Voter ID Card',
+                9 => 'Voter Identity Card',
                 10 => 'Birth Certificate',
-                11 => 'Student ID Card', 11 => 'Student Identity Card',
+                11 => 'Student ID Card',
+                11 => 'Student Identity Card',
             ];
             $return = array_flip($return);
         }

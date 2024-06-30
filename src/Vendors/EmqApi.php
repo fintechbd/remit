@@ -1350,11 +1350,13 @@ class EmqApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Model|Model  $order
+     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
      */
-    public function requestQuotation($order): mixed
+    public function requestQuote($order): mixed
     {
-        // TODO: Implement requestQuotation() method.
+        return [
+
+        ];
     }
 
     protected function getBalanceFromCurrency(string $currency, $response)

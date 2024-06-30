@@ -3,10 +3,10 @@
 namespace Fintech\Remit\Contracts;
 
 
-interface OrderQuotation
+interface ProceedOrder
 {
     /**
      * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
      */
-    public function requestQuote($order): mixed;
+    public function processOrder($order): mixed;
 }
