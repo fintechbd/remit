@@ -17,7 +17,7 @@ class AssignVendorService
     {
         $availableVendors = config('fintech.remit.providers', []);
 
-        if (!isset($availableVendors[$slug])) {
+        if (! isset($availableVendors[$slug])) {
             throw new ErrorException('Service Vendor is not available on the configuration.');
         }
 
@@ -44,7 +44,7 @@ class AssignVendorService
     {
         $vendor = $this->getVendorDriverInstance($vendor_slug);
 
-        if (!$vendor instanceof OrderQuotation) {
+        if (! $vendor instanceof OrderQuotation) {
             throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
         }
 
@@ -58,7 +58,7 @@ class AssignVendorService
     {
         $vendor = $this->getVendorDriverInstance($vendor_slug);
 
-        if (!$vendor instanceof ProceedOrder) {
+        if (! $vendor instanceof ProceedOrder) {
             throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\ProceedOrder` interface.');
         }
 
@@ -72,7 +72,7 @@ class AssignVendorService
     {
         $vendor = $this->getVendorDriverInstance($vendor_slug);
 
-        if (!$vendor instanceof OrderInquiry) {
+        if (! $vendor instanceof OrderInquiry) {
             throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderInquiry` interface.');
         }
 
@@ -86,7 +86,7 @@ class AssignVendorService
     {
         $vendor = $this->getVendorDriverInstance($vendor_slug);
 
-        if (!$vendor instanceof OrderQuotation) {
+        if (! $vendor instanceof OrderQuotation) {
             throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
         }
 

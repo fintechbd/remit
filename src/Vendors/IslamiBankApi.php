@@ -9,7 +9,7 @@ use Fintech\Remit\Contracts\OrderQuotation;
 use Fintech\Remit\Contracts\ProceedOrder;
 use Illuminate\Support\Facades\Http;
 
-class IslamiBankApi implements OrderQuotation, ProceedOrder, OrderInquiry
+class IslamiBankApi implements OrderInquiry, OrderQuotation, ProceedOrder
 {
     /**
      * IslamiBank API configuration.
@@ -939,13 +939,13 @@ XML;
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
      *
      * @throws Exception
      */
     public function orderStatus($order): mixed
     {
-//        $data['transaction_reference_number'] = 'GIT4296253';
+        //        $data['transaction_reference_number'] = 'GIT4296253';
         $data['transaction_reference_number'] = $order->order_number;
         $data['secret_key'] = '';
 
