@@ -4,12 +4,12 @@ namespace Fintech\Remit\Vendors;
 
 use Exception;
 use Fintech\Core\Supports\Utility;
-use Fintech\Remit\Contracts\BankTransfer;
+use Fintech\Remit\Contracts\OrderInquiry;
 use Fintech\Remit\Contracts\OrderQuotation;
 use Fintech\Remit\Contracts\ProceedOrder;
 use Illuminate\Support\Facades\Http;
 
-class IslamiBankApi implements OrderQuotation, ProceedOrder
+class IslamiBankApi implements OrderQuotation, ProceedOrder, OrderInquiry
 {
     /**
      * IslamiBank API configuration.
@@ -923,17 +923,31 @@ XML;
 
     /**
      * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     *
      * @throws Exception
      */
     public function processOrder($order): mixed
     {
         $order_data = $order->order_data ?? [];
 
-        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
+        $order_data['beneficiary_data']['reference_no'] = $order->order_number;
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
 
         return $this->directCreditRemittance($order_data);
     }
 
+    /**
+     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     *
+     * @throws Exception
+     */
+    public function orderStatus($order): mixed
+    {
+//        $data['transaction_reference_number'] = 'GIT4296253';
+        $data['transaction_reference_number'] = $order->order_number;
+        $data['secret_key'] = '';
+
+        return $this->fetchRemittanceStatus($data);
+    }
 }
