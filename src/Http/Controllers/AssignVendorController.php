@@ -85,7 +85,7 @@ class AssignVendorController extends Controller
 
             $order = $this->getOrder($order_id);
 
-            $jsonResponse = Remit::assignVendor()->requestQuote($order, $service_vendor_slug);
+            $jsonResponse = Remit::assignVendor()->processOrder($order, $service_vendor_slug);
 
             return response()->success($jsonResponse);
 
