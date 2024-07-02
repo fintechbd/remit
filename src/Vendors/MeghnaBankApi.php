@@ -71,31 +71,46 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
 
     public function makeTransfer(array $orderInfo = []): mixed
     {
-        // TODO: Implement makeTransfer() method.
+        return [
+
+        ];
     }
 
     public function transferStatus(array $orderInfo = []): mixed
     {
-        // TODO: Implement transferStatus() method.
+        return [
+
+        ];
     }
 
     public function cancelTransfer(array $orderInfo = []): mixed
     {
-        // TODO: Implement cancelTransfer() method.
+        return [
+
+        ];
     }
 
     public function verifyAccount(array $accountInfo = []): mixed
     {
-        // TODO: Implement verifyAccount() method.
+        return [
+
+        ];
     }
 
     public function vendorBalance(array $accountInfo = []): mixed
     {
-        // TODO: Implement vendorBalance() method.
+        return [
+
+        ];
     }
 
-    public function requestQuotation($order): mixed
+    /**
+     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     */
+    public function requestQuote($order): mixed
     {
-        // TODO: Implement requestQuotation() method.
+        return [
+
+        ];
     }
 }

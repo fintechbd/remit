@@ -158,7 +158,7 @@ return [
         ],
         'meghnabank' => [
             'mode' => 'sandbox',
-            'driver' => Fintech\Remit\Vendors\IslamiBankApi::class,
+            'driver' => Fintech\Remit\Vendors\MeghnaBankApi::class,
             'live' => [
                 'endpoint' => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/',
                 'bankid' => env('PACKAGE_REMIT_MEGHNA_BANK_BANK_ID'),
