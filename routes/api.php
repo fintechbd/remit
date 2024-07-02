@@ -24,8 +24,23 @@ if (Config::get('fintech.remit.enabled')) {
     Route::prefix('remit')->name('remit.')
         ->middleware(config('fintech.auth.middleware'))->group(function () {
             if (Core::packageExists('Transaction')) {
-                Route::get('assignable-vendors/{order_id}', [AssignVendorController::class, 'available'])
-                    ->name('assignable-vendors.available');
+                Route::get('assign-vendors/available/{order_id}', [AssignVendorController::class, 'available'])
+                    ->name('assign-vendors.available');
+
+                Route::post('assign-vendors/quote', [AssignVendorController::class, 'vendor'])
+                    ->name('assign-vendors.quota');
+
+                Route::post('assign-vendors/process', [AssignVendorController::class, 'process'])
+                    ->name('assign-vendors.process');
+
+                Route::post('assign-vendors/status', [AssignVendorController::class, 'status'])
+                    ->name('assign-vendors.status');
+
+                Route::post('assign-vendors/release', [AssignVendorController::class, 'release'])
+                    ->name('assign-vendors.release');
+
+                Route::post('assign-vendors/cancel', [AssignVendorController::class, 'cancel'])
+                    ->name('assign-vendors.cancel');
             }
             Route::apiResource('bank-transfers', BankTransferController::class)->except('update', 'destroy');
             Route::group(['prefix' => 'bank-transfers'], function () {

@@ -3,9 +3,10 @@
 namespace Fintech\Remit\Vendors;
 
 use Exception;
+use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Facades\Log;
 
-class TransFastApi
+class TransFastApi implements OrderQuotation
 {
     protected $payment_mode;
 
@@ -974,5 +975,15 @@ class TransFastApi
 
         //dd($params);
         return $this->putPostData($url, $params);
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
+     */
+    public function requestQuote($order): mixed
+    {
+        return [
+
+        ];
     }
 }

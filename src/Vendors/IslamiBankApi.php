@@ -4,11 +4,12 @@ namespace Fintech\Remit\Vendors;
 
 use Exception;
 use Fintech\Core\Supports\Utility;
-use Fintech\Remit\Contracts\BankTransfer;
+use Fintech\Remit\Contracts\OrderInquiry;
 use Fintech\Remit\Contracts\OrderQuotation;
+use Fintech\Remit\Contracts\ProceedOrder;
 use Illuminate\Support\Facades\Http;
 
-class IslamiBankApi implements BankTransfer, OrderQuotation
+class IslamiBankApi implements OrderInquiry, OrderQuotation, ProceedOrder
 {
     /**
      * IslamiBank API configuration.
@@ -94,7 +95,7 @@ class IslamiBankApi implements BankTransfer, OrderQuotation
     private function connectionCheck($xml_post_string, $method): array
     {
         $xml_string = $this->xmlGenerate($xml_post_string, $method);
-        dump($method.'<br>'.$xml_string);
+
         $response = Http::soap($this->apiUrl, $method, $xml_string);
 
         //        $headers = [
@@ -247,6 +248,8 @@ XML;
      *
      * Parameters: userID, password, accNo, wsMessage
      *
+     * @reference directCreditRemittance
+     *
      * @throws Exception
      */
     public function directCreditRemittance(array $data): array
@@ -258,151 +261,110 @@ XML;
         ';
         $xmlString .= '<ser:wsMessage>';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:additionalField1>'.$directCreditRemittance['additionalField1'].'</xsd:additionalField1>
-            <!--Optional:-->
             <xsd:additionalField2>'.$directCreditRemittance['additionalField2'].'</xsd:additionalField2>
-            <!--Optional:-->
             <xsd:additionalField3>'.$directCreditRemittance['additionalField3'].'</xsd:additionalField3>
-            <!--Optional:-->
             <xsd:additionalField4>'.$directCreditRemittance['additionalField4'].'</xsd:additionalField4>
-            <!--Optional:-->
             <xsd:additionalField5>'.$directCreditRemittance['additionalField5'].'</xsd:additionalField5>
-            <!--Optional:-->
             <xsd:additionalField6>'.$directCreditRemittance['additionalField6'].'</xsd:additionalField6>
-            <!--Optional:-->
             <xsd:additionalField7>'.$directCreditRemittance['additionalField7'].'</xsd:additionalField7>
-            <!--Optional:-->
             <xsd:additionalField8>'.$directCreditRemittance['additionalField8'].'</xsd:additionalField8>
-            <!--Optional:-->
             <xsd:additionalField9>'.$directCreditRemittance['additionalField9'].'</xsd:additionalField9>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:amount>'.$directCreditRemittance['amount'].'</xsd:amount>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:batchID>'.$directCreditRemittance['batchID'].'</xsd:batchID>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:beneficiaryAccNo>'.$directCreditRemittance['beneficiaryAccNo'].'</xsd:beneficiaryAccNo>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:beneficiaryAccType>'.$directCreditRemittance['beneficiaryAccType'].'</xsd:beneficiaryAccType>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:beneficiaryAddress>'.$directCreditRemittance['beneficiaryAddress'].'</xsd:beneficiaryAddress>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:beneficiaryBankCode>'.$directCreditRemittance['beneficiaryBankCode'].'</xsd:beneficiaryBankCode>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:beneficiaryBankName>'.$directCreditRemittance['beneficiaryBankName'].'</xsd:beneficiaryBankName>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:beneficiaryBranchCode>'.$directCreditRemittance['beneficiaryBranchCode'].'</xsd:beneficiaryBranchCode>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:beneficiaryBranchName>'.$directCreditRemittance['beneficiaryBranchName'].'</xsd:beneficiaryBranchName>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:beneficiaryName>'.$directCreditRemittance['beneficiaryName'].'</xsd:beneficiaryName>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:beneficiaryPassportNo>'.$directCreditRemittance['beneficiaryPassportNo'].'</xsd:beneficiaryPassportNo>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:beneficiaryPhoneNo>'.$directCreditRemittance['beneficiaryPhoneNo'].'</xsd:beneficiaryPhoneNo>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:beneficiaryRoutingNo>'.$directCreditRemittance['beneficiaryRoutingNo'].'</xsd:beneficiaryRoutingNo>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:exHouseTxID>'.$directCreditRemittance['exHouseTxID'].'</xsd:exHouseTxID>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:exchHouseBranchCode>'.$directCreditRemittance['exchHouseBranchCode'].'</xsd:exchHouseBranchCode>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:exchHouseSwiftCode>'.$directCreditRemittance['exchHouseSwiftCode'].'</xsd:exchHouseSwiftCode>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:identityDescription>'.$directCreditRemittance['identityDescription'].'</xsd:identityDescription>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:identityType>'.$directCreditRemittance['identityType'].'</xsd:identityType>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:isoCode>'.($directCreditRemittance['isoCode'] ?? null).'</xsd:isoCode>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:issueDate>'.$directCreditRemittance['issueDate'].'</xsd:issueDate>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:note>'.$directCreditRemittance['note'].'</xsd:note>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:orderNo>'.$directCreditRemittance['orderNo'].'</xsd:orderNo>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:paymentType>'.$directCreditRemittance['paymentType'].'</xsd:paymentType>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:remittancePurpose>'.$directCreditRemittance['remittancePurpose'].'</xsd:remittancePurpose>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:remitterAddress>'.$directCreditRemittance['remitterAddress'].'</xsd:remitterAddress>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:remitterCountry>'.$directCreditRemittance['remitterCountry'].'</xsd:remitterCountry>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:remitterIdentificationNo>'.$directCreditRemittance['remitterIdentificationNo'].'</xsd:remitterIdentificationNo>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:remitterName>'.$directCreditRemittance['remitterName'].'</xsd:remitterName>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:remitterPassportNo>'.$directCreditRemittance['remitterPassportNo'].'</xsd:remitterPassportNo>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:remitterPhoneNo>'.$directCreditRemittance['remitterPhoneNo'].'</xsd:remitterPhoneNo>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:secretKey>'.($directCreditRemittance['secretKey'] ?? null).'</xsd:secretKey>
         ';
         $xmlString .= '
-            <!--Optional:-->
             <xsd:transReferenceNo>'.($directCreditRemittance['transReferenceNo'] ?? null).'</xsd:transReferenceNo>
         ';
         $xmlString .= '</ser:wsMessage>';
@@ -680,11 +642,6 @@ XML;
         return $return;
     }
 
-    public function makeTransfer(array $orderInfo = []): array
-    {
-        return [];
-    }
-
     /**
      * @throws Exception
      */
@@ -854,11 +811,6 @@ XML;
         return $return;
     }
 
-    public function requestQuotation($order): array
-    {
-        return [];
-    }
-
     /**
      * Instrument/Payment Type Code
      */
@@ -899,12 +851,23 @@ XML;
 
         if ($flag == 'value') {
             $return = [
-                1 => 'Passport', 2 => 'Cheque', 3 => 'Photo', 4 => 'Finger Print',
-                5 => 'Introducer', 6 => 'Driving License', 7 => 'Other', 8 => 'Remittance Card',
-                9 => 'National ID', 9 => 'National ID Card', 9 => 'National Identity Card',
-                9 => 'Voter ID', 9 => 'Voter ID Card', 9 => 'Voter Identity Card',
+                1 => 'Passport',
+                2 => 'Cheque',
+                3 => 'Photo',
+                4 => 'Finger Print',
+                5 => 'Introducer',
+                6 => 'Driving License',
+                7 => 'Other',
+                8 => 'Remittance Card',
+                9 => 'National ID',
+                9 => 'National ID Card',
+                9 => 'National Identity Card',
+                9 => 'Voter ID',
+                9 => 'Voter ID Card',
+                9 => 'Voter Identity Card',
                 10 => 'Birth Certificate',
-                11 => 'Student ID Card', 11 => 'Student Identity Card',
+                11 => 'Student ID Card',
+                11 => 'Student Identity Card',
             ];
             $return = array_flip($return);
         }
@@ -947,5 +910,45 @@ XML;
         }
 
         return $returnValue;
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
+     *
+     * @throws Exception
+     */
+    public function requestQuote($order): mixed
+    {
+        return $this->fetchBalance('BDT');
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
+     *
+     * @throws Exception
+     */
+    public function processOrder($order): mixed
+    {
+        $order_data = $order->order_data ?? [];
+
+        $order_data['beneficiary_data']['reference_no'] = $order->order_number;
+        $order_data['sending_amount'] = $order['amount'];
+        $order_data['sending_currency'] = $order['currency'];
+
+        return $this->directCreditRemittance($order_data);
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
+     *
+     * @throws Exception
+     */
+    public function orderStatus($order): mixed
+    {
+        //        $data['transaction_reference_number'] = 'GIT4296253';
+        $data['transaction_reference_number'] = $order->order_number;
+        $data['secret_key'] = '';
+
+        return $this->fetchRemittanceStatus($data);
     }
 }

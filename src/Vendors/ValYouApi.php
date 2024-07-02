@@ -3,10 +3,11 @@
 namespace Fintech\Remit\Vendors;
 
 use Exception;
+use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 
-class ValYouApi
+class ValYouApi implements OrderQuotation
 {
     /**
      * @var string
@@ -662,5 +663,15 @@ class ValYouApi
         Log::info(json_decode(json_encode($response->Authorized_ConfirmedResponse->Authorized_ConfirmedResult), true));
 
         return json_decode(json_encode($response->Authorized_ConfirmedResponse->Authorized_ConfirmedResult), true);
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
+     */
+    public function requestQuote($order): mixed
+    {
+        return [
+
+        ];
     }
 }

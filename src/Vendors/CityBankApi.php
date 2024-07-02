@@ -620,7 +620,7 @@ class CityBankApi implements BankTransfer, OrderQuotation
      *
      * @throws Exception
      */
-    public function requestQuotation($order): mixed
+    public function requestQuote($order): mixed
     {
         return $this->vendorBalance();
     }
