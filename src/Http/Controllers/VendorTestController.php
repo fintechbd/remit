@@ -193,7 +193,6 @@ class VendorTestController extends Controller
         dump($vendor->directCreditRemittance($order_data));
     }
 
-    #[NoReturn]
     public function meghnaBankConnectionCheck(): void
     {
         $curl = curl_init();
