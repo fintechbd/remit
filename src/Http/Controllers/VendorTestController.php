@@ -5,7 +5,7 @@ namespace Fintech\Remit\Http\Controllers;
 use Fintech\Remit\Vendors\IslamiBankApi;
 use Fintech\Transaction\Services\OrderService;
 use Illuminate\Routing\Controller;
-use JetBrains\PhpStorm\NoReturn;
+use Illuminate\Support\Facades\Http;
 
 class VendorTestController extends Controller
 {
@@ -217,6 +217,17 @@ class VendorTestController extends Controller
         $response = curl_exec($curl);
 
         curl_close($curl);
-        dd($response);
+        dump($response);
+
+        Http::dd()
+            ->withoutVerifying()
+            ->withBasicAuth('MGBL@clavisExchange', 'clavis@6230')
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'bankid' => 'MGBL',
+                'agent' => '14',
+                'Accept' => 'application/json',
+            ])
+            ->get('https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y');
     }
 }
