@@ -5,7 +5,6 @@ namespace Fintech\Remit\Http\Controllers;
 use Fintech\Remit\Vendors\IslamiBankApi;
 use Fintech\Transaction\Services\OrderService;
 use Illuminate\Routing\Controller;
-use JetBrains\PhpStorm\NoReturn;
 
 class VendorTestController extends Controller
 {
