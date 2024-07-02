@@ -219,15 +219,16 @@ class VendorTestController extends Controller
         curl_close($curl);
         dump($response);
 
-        Http::dd()
-            ->withoutVerifying()
-            ->withBasicAuth('MGBL@clavisExchange', 'clavis@6230')
+        $response = Http::withoutVerifying()
+            ->acceptJson()
+            ->contentType('application/json')
+            ->withBasicAuth(sha1('MGBL@clavisExchange'), sha1('clavis@6230'))
             ->withHeaders([
-                'Content-Type' => 'application/json',
                 'bankid' => 'MGBL',
-                'agent' => '14',
-                'Accept' => 'application/json',
+                'agent' => '14'
             ])
             ->get('https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y');
+
+        dd($response->json());
     }
 }
