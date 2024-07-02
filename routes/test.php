@@ -48,7 +48,6 @@ Route::get('islami-bank-mobile-banking-nagad', [VendorTestController::class, 'is
 Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])
     ->name('islami-bank-account-type-code');
 
-
 //MEGHNABANK
 Route::get('meghna-bank-api-connection-check', [VendorTestController::class, 'meghnaBankConnectionCheck'])
     ->name('meghna-bank-api-connection-check');

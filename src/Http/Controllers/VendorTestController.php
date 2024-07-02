@@ -193,12 +193,12 @@ class VendorTestController extends Controller
         dump($vendor->directCreditRemittance($order_data));
     }
 
-
-    #[NoReturn] public function meghnaBankConnectionCheck(): void
+    #[NoReturn]
+    public function meghnaBankConnectionCheck(): void
     {
         $curl = curl_init();
 
-        curl_setopt_array($curl, array(
+        curl_setopt_array($curl, [
             CURLOPT_URL => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
@@ -207,13 +207,13 @@ class VendorTestController extends Controller
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'GET',
-            CURLOPT_HTTPHEADER => array(
+            CURLOPT_HTTPHEADER => [
                 'bankid: MGBL',
-                'agent: 14'
-            ),
+                'agent: 14',
+            ],
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-            CURLOPT_USERPWD => 'MGBL@clavisExchange:clavis@6230'
-        ));
+            CURLOPT_USERPWD => 'MGBL@clavisExchange:clavis@6230',
+        ]);
 
         $response = curl_exec($curl);
 
