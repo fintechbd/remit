@@ -225,7 +225,7 @@ class VendorTestController extends Controller
             ->withBasicAuth(sha1('MGBL@clavisExchange'), sha1('clavis@6230'))
             ->withHeaders([
                 'bankid' => 'MGBL',
-                'agent' => '14'
+                'agent' => '14',
             ])
             ->get('https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y');
 
