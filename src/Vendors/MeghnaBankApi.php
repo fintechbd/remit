@@ -93,7 +93,21 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         return $response;
     }
 
+    /**
+     * @param $order_number
+     * @return array
+     * @throws Exception
+     */
+    public function cancellation($order_number): array
+    {
+        $url = 'transactionTracker?';
+        $params['orderNo'] = $order_number;
+        $params['queryCode'] = 2;
+        $params['info'] = 'CANCELLATION PURPOSE';
+        $response = $this->getData($url, $params);
 
+        return $response;
+    }
 
     public function makeTransfer(array $orderInfo = []): mixed
     {
