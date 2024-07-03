@@ -166,6 +166,29 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         return $response;
     }
 
+    /**
+     * Balance, Treasury Deal& Amendment Enquiry Code List
+     *
+     * @param int|null $code
+     * @return string
+     */
+    private function __enquiryCode(int $code = null): string
+    {
+        $return = [
+            1 => 'Current rate',
+            2 => 'Balance enquiry',
+            3 => 'Amendment enquiry',
+            4 => 'Cancellation enquiry',
+        ];
+
+        if(is_null($code) || $code <= 0){
+            $returnEnquiryCode = $return;
+        }else{
+            $returnEnquiryCode = $return[$code];
+        }
+        return $returnEnquiryCode;
+    }
+
     public function makeTransfer(array $orderInfo = []): mixed
     {
         return [
