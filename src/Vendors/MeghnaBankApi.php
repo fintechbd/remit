@@ -126,6 +126,24 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         return $response;
     }
 
+    /**
+     * Transaction report
+     * Date wise query
+     *
+     * @param $fromDate
+     * @param $toDate
+     * @return array
+     * @throws Exception
+     */
+    public function dateWiseTransactionReport($fromDate, $toDate): array
+    {
+        $url = 'remitDwise?';
+        $params['fromDate'] = $fromDate;
+        $params['toDate'] = $toDate;
+        $response = $this->getData($url, $params);
+
+        return $response;
+    }
 
     public function makeTransfer(array $orderInfo = []): mixed
     {
