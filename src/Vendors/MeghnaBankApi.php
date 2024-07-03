@@ -246,6 +246,49 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         return $return[$code];
     }
 
+    /**
+     * Response Status Code List
+     * @param string $code
+     * @return string
+     */
+    private function __responseCodeList(string $code): string
+    {
+        $return = [
+            '0000' => 'Mandatory field(s) missing',
+            '0001' => 'Successfully insert cash',
+            '0002' => 'Transaction Paid Successfully',
+            '0003' => 'Transaction Failed',
+            '0004' => 'Duplicate order number found',
+            '0091' => 'The routing number must be integer value!',
+            '0092' => 'Wrong routing number format',
+            '0070' => 'Data not found \n No found against the provided value',
+            '0030' => 'Length violation \n Order number length not longer than 25 characters',
+            '0051' => 'Inquiry value does not match',
+            '0052' => 'Order Number or Pin number does not match',
+            '0050' => 'Missing data type or field empty',
+            '404' => 'Object not found',
+            '0044' => 'Amount field value must be numeric type',
+            '0045' => 'Transaction type field value must be A (Bank Deposit) or C(Cash)',
+            '0046' => 'Transaction date field value must be Y-m-d format',
+            '0047' => 'Mobile number must be integer & within 11 digit',
+            '0011' => 'The request resource does not support',
+            '0068' => 'Bank code must be an integer',
+            '0012' => 'The request resource does not support HTTP method',
+            '0013' => 'Please provide bank code \n Invalid Bank Code/Empty bank code',
+            '0022' => 'Unauthorized Access \n Invalid User Credential (IP, username, password, etc.)',
+            '0010' => 'Fund Limit crossed \n Not Enough Fund to Process This Transaction',
+            'CBS-0001' => 'CBS Transaction Already Made \n Already paid through CBS',
+            'CBS-0002' => 'Failed to Process Transaction for BEFTN Register',
+            'CBS-0003' => 'Failed to Transfer Amount from NRTA to BEFTN GL',
+            'CBS-0004' => 'Failed to Transfer Amount From BEFTN GL to BB GL',
+            'CBS-0005' => 'Failed to Transfer Amount From ONLINE GL to CUSTOMER AC',
+            'CBS-0006' => 'Failed to Transfer Amount from NRTA to ONLINE GL',
+            'CBS-0007' => 'Invalid Account No Found in CBS',
+        ];
+
+        return $return[$code];
+    }
+
     public function makeTransfer(array $orderInfo = []): mixed
     {
         return [
