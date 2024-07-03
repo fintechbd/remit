@@ -189,6 +189,22 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         return $returnEnquiryCode;
     }
 
+    /**
+     * Bank-wise Branch Routing Number List Find
+     *
+     * @param int $bankCode
+     * @return array
+     * @throws Exception
+     */
+    public function bankWiseBranchRoutingNumberListFind(int $bankCode): array
+    {
+        $url = 'routings?';
+        $params['bankCode'] = $bankCode;
+        $response = $this->getData($url, $params);
+
+        return $response;
+    }
+
     public function makeTransfer(array $orderInfo = []): mixed
     {
         return [
