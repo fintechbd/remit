@@ -145,6 +145,27 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         return $response;
     }
 
+    /**
+     * Balance, Treasury Deal& Amendment Enquiry
+     * Treasury Deal confirmation (Exchange House)
+     * Current rate=1, Balance enquiry=2, Amendment enquiry=3 & Cancellation enquiry=4
+     * Value will be y/n it’s means y=yes,n=no
+     *
+     * @param int $queryType
+     * @param string $confRate
+     * @return array
+     * @throws Exception
+     */
+    public function enquiry(int $queryType = 1, string $confRate = 'y'): array
+    {
+        $url = 'remitEnquiry?';
+        $params['queryType'] = $queryType;
+        $params['confRate'] = $confRate;
+        $response = $this->getData($url, $params);
+
+        return $response;
+    }
+
     public function makeTransfer(array $orderInfo = []): mixed
     {
         return [
