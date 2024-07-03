@@ -49,7 +49,7 @@ Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islam
     ->name('islami-bank-account-type-code');
 
 //MEGHNABANK
-Route::get('meghna-bank-api-connection-check', [VendorTestController::class, 'sslVRConnectionCheck'])
+Route::get('meghna-bank-api-connection-check', [VendorTestController::class, 'meghnaBankConnectionCheck'])
     ->name('meghna-bank-api-connection-check');
 
 //SSL VR
