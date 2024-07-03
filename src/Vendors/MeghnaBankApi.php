@@ -77,6 +77,22 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
 
     }
 
+    /**
+     * @param $order_number
+     * @return array
+     * @throws Exception
+     */
+    public function amendment($order_number): array
+    {
+        $url = 'transactionTracker?';
+        $params['orderNo'] = $order_number;
+        $params['queryCode'] = 1;
+        $params['info'] = 'AMENDMENT INFO';
+        $response = $this->getData($url, $params);
+
+        return $response;
+    }
+
 
 
     public function makeTransfer(array $orderInfo = []): mixed
