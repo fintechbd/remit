@@ -289,6 +289,63 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         return $return[$code];
     }
 
+    /**
+     * Account Credit
+     *
+     * @param array $data
+     * @return array
+     * @throws Exception
+     */
+    public function accountCredit(array $data): array
+    {
+        $url = 'remitAccCrTransfer';
+
+        $params['ORDER_NO'] = ($data['beneficiary_data']['reference_no'] ?? null);
+        $params['TRANSACTION_PIN'] = '';
+        $params['TRN_DATE'] = (date('Y-m-d', strtotime($data['created_at'])) ?? null);
+        $params['TRNTP'] = $data[''];
+        $params['AMOUNT'] = ($data['sending_amount'] ?? null);
+        //RECEIVER
+        $params['RECEIVER_NAME'] = ($data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
+        $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $params['RECEIVER_AND_SENDER_RELATION'] = $data[''];
+        $params['RECEIVER_CONTACT'] = ($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null);
+        $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] =($data['beneficiary_data']['branch_information']['branch_data']['location_no'] ?? '');
+        $params['RECEIVER_BANK'] = ($data['beneficiary_data']['bank_information']['bank_name'] ?? null);
+        $params['RECEIVER_BANK_BRANCH'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? null);
+        $params['RECEIVER_ACCOUNT_NUMBER'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number']);
+
+        //SENDER
+        $params['SENDER_NAME'] = ($data['beneficiary_data']['sender_information']['name'] ?? null);
+        if ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] == 'passport') {
+            $params['SENDER_PASSPORT_NO'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
+        }else{
+            $params['SENDER_OTHER_ID_NO'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
+        }
+        $params['SENDER_OTHER_ID_TYPE'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_vendor']['remit']['meghna_bank'] ?? null);
+        $params['SENDER_COUNTRY'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
+        $params['SENDER_SUB_COUNTRY_LEVEL_2'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null);
+        $params['SENDER_ADDRESS_LINE'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
+        $params['SENDER_CONTACT'] = ($data['beneficiary_data']['sender_information']['mobile'] ?? null);
+        $params['PURPOSE'] = ($data['beneficiary_data']['sender_information']['profile']['remittance_purpose']['name'] ?? '');
+
+        //Transaction Type(A=Account,C=Cash)
+        switch ($data['service_slug']) {
+            case 'cash_pickup':
+                $params['TRNTP'] = 'C';
+                break;
+            case 'bank_transfer':
+                $params['TRNTP'] = 'A';
+            default:
+                //code block
+        }
+
+        $response = $this->getData($url, $params);
+
+        return $response;
+    }
+
     public function makeTransfer(array $orderInfo = []): mixed
     {
         return [
