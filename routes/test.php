@@ -55,4 +55,3 @@ Route::get('meghna-bank-api-connection-check', [VendorTestController::class, 'me
 //SSL VR
 Route::get('ssl-vr-api-connection-check', [VendorTestController::class, 'sslVRConnectionCheck'])
     ->name('ssl-vr-api-connection-check');
-
