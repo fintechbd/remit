@@ -231,4 +231,29 @@ class VendorTestController extends Controller
 
         dd($response->json());
     }
+
+    public function sslVRConnectionCheck(): void
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => 'http://api.sslwireless.com/api/service-list',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => [
+                'AUTH-KEY: wrkq6YPWt6i2N/lKBZcw4OhzYio2mebZ',
+                'STK-CODE: ClavisFintech',
+            ],
+        ]);
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        dump($response);
+    }
 }
