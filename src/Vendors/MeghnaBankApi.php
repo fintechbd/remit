@@ -115,10 +115,10 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
      *
      * @throws Exception
      */
-    public function orderNumberWiseTransactionReport($order_number): array
+    public function orderNumberWiseTransactionReport(array $data): array
     {
         $url = 'remitReport?';
-        $params['ordpinNo'] = $order_number;
+        $params['ordpinNo'] = ($data['beneficiary_data']['reference_no'] ?? null);
         $response = $this->getData($url, $params);
 
         return $response;
