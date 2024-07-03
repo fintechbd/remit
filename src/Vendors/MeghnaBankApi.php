@@ -43,10 +43,18 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $apiUrl);
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_ENCODING, '');
+        curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 0);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        curl_setopt($curl, CURLOPT_USERPWD, "'".$this->config[$this->status]['user'].":".$this->config[$this->status]['password']."'");
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Credentials '.$this->config[$this->status]['token']]);
+                "'bankid: ".$this->config[$this->status]['user']."'",
+                "'agent: ".$this->config[$this->status]['agent']."'"
+            ]
+        );
 
         $response = curl_exec($curl);
         $info = curl_getinfo($curl);
@@ -68,6 +76,8 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         ];
 
     }
+
+
 
     public function makeTransfer(array $orderInfo = []): mixed
     {
