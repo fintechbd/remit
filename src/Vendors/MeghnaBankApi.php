@@ -78,8 +78,6 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function amendment(array $data): array
@@ -94,8 +92,6 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function cancellation(array $data): array
