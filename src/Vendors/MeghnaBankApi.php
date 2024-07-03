@@ -205,6 +205,25 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         return $response;
     }
 
+    /**
+     * Beneficiary Identity Type Code
+     */
+    private function __beneficiaryIdentityTypeCode(int $code): string
+    {
+        $return = [
+            1 => 'National ID',
+            2 => 'Passport',
+            3 => 'Driving License',
+            4 => 'Government Official ID',
+            5 => 'Birth Certificate & Other ID',
+            6 => 'Arm force ID',
+            7 => 'Work Permit',
+            8 => 'Other ID',
+        ];
+
+        return $return[$code];
+    }
+
     public function makeTransfer(array $orderInfo = []): mixed
     {
         return [
