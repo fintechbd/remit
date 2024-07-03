@@ -109,6 +109,24 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         return $response;
     }
 
+    /**
+     * Transaction report
+     * Order NO / Pin No wise query
+     *
+     * @param $order_number
+     * @return array
+     * @throws Exception
+     */
+    public function orderNumberWiseTransactionReport($order_number): array
+    {
+        $url = 'remitReport?';
+        $params['ordpinNo'] = $order_number;
+        $response = $this->getData($url, $params);
+
+        return $response;
+    }
+
+
     public function makeTransfer(array $orderInfo = []): mixed
     {
         return [
