@@ -224,6 +224,28 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         return $return[$code];
     }
 
+    /**
+     * Status Code List
+     *
+     * @param string $code
+     * @return string
+     */
+    private function __statusCodeList(string $code): string
+    {
+        $return = [
+            0 => 'Unpaid',
+            1 => 'Paid',
+            2 => 'Unprocessed',
+            3 => 'Return',
+            4 => 'Amendment',
+            5 => 'Cancelled',
+            6 => 'Pending Cancellation',
+            null => 'Error',
+        ];
+
+        return $return[$code];
+    }
+
     public function makeTransfer(array $orderInfo = []): mixed
     {
         return [
