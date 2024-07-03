@@ -49,11 +49,11 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($curl, CURLOPT_USERPWD, "'".$this->config[$this->status]['user'].":".$this->config[$this->status]['password']."'");
+        curl_setopt($curl, CURLOPT_USERPWD, "'".$this->config[$this->status]['user'].':'.$this->config[$this->status]['password']."'");
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
-                "'bankid: ".$this->config[$this->status]['user']."'",
-                "'agent: ".$this->config[$this->status]['agent']."'"
-            ]
+            "'bankid: ".$this->config[$this->status]['user']."'",
+            "'agent: ".$this->config[$this->status]['agent']."'",
+        ]
         );
 
         $response = curl_exec($curl);
@@ -78,8 +78,6 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * @param $order_number
-     * @return array
      * @throws Exception
      */
     public function amendment($order_number): array
@@ -94,8 +92,6 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
     }
 
     /**
-     * @param $order_number
-     * @return array
      * @throws Exception
      */
     public function cancellation($order_number): array
@@ -113,8 +109,6 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
      * Transaction report
      * Order NO / Pin No wise query
      *
-     * @param $order_number
-     * @return array
      * @throws Exception
      */
     public function orderNumberWiseTransactionReport($order_number): array
@@ -130,9 +124,6 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
      * Transaction report
      * Date wise query
      *
-     * @param $fromDate
-     * @param $toDate
-     * @return array
      * @throws Exception
      */
     public function dateWiseTransactionReport($fromDate, $toDate): array
@@ -151,9 +142,6 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
      * Current rate=1, Balance enquiry=2, Amendment enquiry=3 & Cancellation enquiry=4
      * Value will be y/n it’s means y=yes,n=no
      *
-     * @param int $queryType
-     * @param string $confRate
-     * @return array
      * @throws Exception
      */
     public function enquiry(int $queryType = 1, string $confRate = 'y'): array
@@ -168,11 +156,8 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
 
     /**
      * Balance, Treasury Deal& Amendment Enquiry Code List
-     *
-     * @param int|null $code
-     * @return string
      */
-    private function __enquiryCode(int $code = null): string
+    private function __enquiryCode(?int $code = null): string
     {
         $return = [
             1 => 'Current rate',
@@ -181,19 +166,18 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
             4 => 'Cancellation enquiry',
         ];
 
-        if(is_null($code) || $code <= 0){
+        if (is_null($code) || $code <= 0) {
             $returnEnquiryCode = $return;
-        }else{
+        } else {
             $returnEnquiryCode = $return[$code];
         }
+
         return $returnEnquiryCode;
     }
 
     /**
      * Bank-wise Branch Routing Number List Find
      *
-     * @param int $bankCode
-     * @return array
      * @throws Exception
      */
     public function bankWiseBranchRoutingNumberListFind(int $bankCode): array
@@ -226,9 +210,6 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
 
     /**
      * Status Code List
-     *
-     * @param string $code
-     * @return string
      */
     private function __statusCodeList(string $code): string
     {
@@ -248,8 +229,6 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
 
     /**
      * Response Status Code List
-     * @param string $code
-     * @return string
      */
     private function __responseCodeList(string $code): string
     {
@@ -292,8 +271,6 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
     /**
      * Account Credit
      *
-     * @param array $data
-     * @return array
      * @throws Exception
      */
     public function accountCredit(array $data): array
@@ -311,7 +288,7 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         $params['RECEIVER_ADDRESS'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $data[''];
         $params['RECEIVER_CONTACT'] = ($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null);
-        $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] =($data['beneficiary_data']['branch_information']['branch_data']['location_no'] ?? '');
+        $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = ($data['beneficiary_data']['branch_information']['branch_data']['location_no'] ?? '');
         $params['RECEIVER_BANK'] = ($data['beneficiary_data']['bank_information']['bank_name'] ?? null);
         $params['RECEIVER_BANK_BRANCH'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? null);
         $params['RECEIVER_ACCOUNT_NUMBER'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number']);
@@ -320,7 +297,7 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         $params['SENDER_NAME'] = ($data['beneficiary_data']['sender_information']['name'] ?? null);
         if ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] == 'passport') {
             $params['SENDER_PASSPORT_NO'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
-        }else{
+        } else {
             $params['SENDER_OTHER_ID_NO'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
         }
         $params['SENDER_OTHER_ID_TYPE'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_vendor']['remit']['meghna_bank'] ?? null);
