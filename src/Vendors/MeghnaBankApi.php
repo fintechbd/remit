@@ -278,7 +278,7 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         $url = 'remitAccCrTransfer';
 
         $params['ORDER_NO'] = ($data['beneficiary_data']['reference_no'] ?? null);
-        $params['TRANSACTION_PIN'] = '';
+        $params['TRANSACTION_PIN'] = ($data['beneficiary_data']['reference_no'] ?? null);
         $params['TRN_DATE'] = (date('Y-m-d', strtotime($data['created_at'])) ?? null);
         $params['TRNTP'] = $data[''];
         $params['AMOUNT'] = ($data['sending_amount'] ?? null);
@@ -295,11 +295,7 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
 
         //SENDER
         $params['SENDER_NAME'] = ($data['beneficiary_data']['sender_information']['name'] ?? null);
-        if ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_type'] == 'passport') {
-            $params['SENDER_PASSPORT_NO'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
-        } else {
-            $params['SENDER_OTHER_ID_NO'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
-        }
+        $params['SENDER_PASSPORT_NO'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
         $params['SENDER_OTHER_ID_TYPE'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_vendor']['remit']['meghna_bank'] ?? null);
         $params['SENDER_COUNTRY'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
         $params['SENDER_SUB_COUNTRY_LEVEL_2'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null);
