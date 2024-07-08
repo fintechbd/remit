@@ -198,7 +198,7 @@ class VendorTestController extends Controller
         $curl = curl_init();
 
         curl_setopt_array($curl, [
-            CURLOPT_URL => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y',
+            CURLOPT_URL => 'http://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -211,7 +211,8 @@ class VendorTestController extends Controller
                 'agent: 14',
             ],
             CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-            CURLOPT_USERPWD => 'MGBL@clavisExchange:clavis@6230',
+            //CURLOPT_USERPWD => 'MGBL@clavisExchange:clavis@6230',
+            CURLOPT_USERPWD => sha1('MGBL@clavisExchange').':'.sha1('clavis@6230'),
         ]);
 
         $response = curl_exec($curl);
