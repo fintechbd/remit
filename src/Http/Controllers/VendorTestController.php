@@ -227,7 +227,7 @@ class VendorTestController extends Controller
                 'bankid' => 'MGBL',
                 'agent' => '14',
             ])
-            ->get('http://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y');
+            ->get('https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y');
 
         dd($response->json());
     }
