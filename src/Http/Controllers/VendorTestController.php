@@ -238,8 +238,8 @@ class VendorTestController extends Controller
         $host = 'uatrmsapi.meghnabank.com.bd';
         $port = 23;
         $path = '/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y';
-        $user = ('MGBL@clavisExchange');
-        $password = ('clavis@6230');
+        $user = sha1('MGBL@clavisExchange');
+        $password = sha1('clavis@6230');
         $headers = [
             'bankid' => 'MGBL',
             'agent' => '14',
@@ -285,7 +285,7 @@ class VendorTestController extends Controller
         }
 
         // Create the Basic Auth header
-        $auth = ("$user:$password");
+        $auth = base64_encode("$user:$password");
         $headerString = "GET $path HTTP/1.1\r\n";
         $headerString .= "Host: $host\r\n";
         $headerString .= "Authorization: Basic $auth\r\n";
