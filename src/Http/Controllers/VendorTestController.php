@@ -238,8 +238,8 @@ class VendorTestController extends Controller
         $host = 'uatrmsapi.meghnabank.com.bd';
         $port = 80;
         $path = '/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y';
-        $user = sha1('MGBL@clavisExchange');
-        $password = sha1('clavis@6230');
+        $user = ('MGBL@clavisExchange');
+        $password = ('clavis@6230');
         $headers = [
             'bankid' => 'MGBL',
             'agent' => '14',
