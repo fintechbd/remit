@@ -275,11 +275,12 @@ class VendorTestController extends Controller
         dump($response);
     }
 
-
-    function sendTelnetRequest($host, $port, $path, $user, $password, $headers) {
+    public function sendTelnetRequest($host, $port, $path, $user, $password, $headers)
+    {
         $fp = fsockopen($host, $port, $errno, $errstr, 30);
-        if (!$fp) {
+        if (! $fp) {
             echo "Error: $errno - $errstr<br />\n";
+
             return;
         }
 
@@ -301,7 +302,7 @@ class VendorTestController extends Controller
 
         // Get the response
         $response = '';
-        while (!feof($fp)) {
+        while (! feof($fp)) {
             $response .= fgets($fp, 128);
         }
 
