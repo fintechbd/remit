@@ -236,7 +236,7 @@ class VendorTestController extends Controller
     {
         // Example usage
         $host = 'uatrmsapi.meghnabank.com.bd';
-        $port = 80;
+        $port = 23;
         $path = '/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y';
         $user = ('MGBL@clavisExchange');
         $password = ('clavis@6230');
