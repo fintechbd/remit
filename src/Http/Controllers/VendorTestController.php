@@ -285,7 +285,7 @@ class VendorTestController extends Controller
         }
 
         // Create the Basic Auth header
-        $auth = base64_encode("$user:$password");
+        $auth = ("$user:$password");
         $headerString = "GET $path HTTP/1.1\r\n";
         $headerString .= "Host: $host\r\n";
         $headerString .= "Authorization: Basic $auth\r\n";
