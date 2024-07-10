@@ -193,7 +193,7 @@ class VendorTestController extends Controller
         dump($vendor->directCreditRemittance($order_data));
     }
 
-    public function meghnaBankConnectionCheck(): void
+    /*public function meghnaBankConnectionCheck(): void
     {
         $curl = curl_init();
 
@@ -231,6 +231,23 @@ class VendorTestController extends Controller
             ->get('https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y');
 
         dd($response->json());
+    }*/
+    public function meghnaBankConnectionCheck(): void
+    {
+        // Example usage
+        $host = 'uatrmsapi.meghnabank.com.bd';
+        $port = 80;
+        $path = '/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y';
+        $user = sha1('MGBL@clavisExchange');
+        $password = sha1('clavis@6230');
+        $headers = [
+            'bankid' => 'MGBL',
+            'agent' => '14',
+            //'token' => 'yourToken'
+        ];
+
+        $response = $this->sendTelnetRequest($host, $port, $path, $user, $password, $headers);
+        echo nl2br(htmlspecialchars($response));
     }
 
     public function sslVRConnectionCheck(): void
@@ -256,5 +273,41 @@ class VendorTestController extends Controller
 
         curl_close($curl);
         dump($response);
+    }
+
+
+    function sendTelnetRequest($host, $port, $path, $user, $password, $headers) {
+        $fp = fsockopen($host, $port, $errno, $errstr, 30);
+        if (!$fp) {
+            echo "Error: $errno - $errstr<br />\n";
+            return;
+        }
+
+        // Create the Basic Auth header
+        $auth = base64_encode("$user:$password");
+        $headerString = "GET $path HTTP/1.1\r\n";
+        $headerString .= "Host: $host\r\n";
+        $headerString .= "Authorization: Basic $auth\r\n";
+
+        // Add custom headers
+        foreach ($headers as $key => $value) {
+            $headerString .= "$key: $value\r\n";
+        }
+
+        $headerString .= "Connection: Close\r\n\r\n";
+
+        // Send the request
+        fwrite($fp, $headerString);
+
+        // Get the response
+        $response = '';
+        while (!feof($fp)) {
+            $response .= fgets($fp, 128);
+        }
+
+        // Close the connection
+        fclose($fp);
+
+        return $response;
     }
 }
