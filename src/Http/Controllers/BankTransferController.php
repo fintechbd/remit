@@ -267,7 +267,7 @@ class BankTransferController extends Controller
 
             if (! Remit::bankTransfer()->destroy($id)) {
 
-                throw (new DeleteOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
+                throw (new DeleteOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
             return response()->deleted(__('restapi::messages.resource.deleted', ['model' => 'Bank Transfer']));
@@ -344,7 +344,7 @@ class BankTransferController extends Controller
 
             if (! Remit::bankTransfer()->restore($id)) {
 
-                throw (new RestoreOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
+                throw (new RestoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
             return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Bank Transfer']));
@@ -378,7 +378,7 @@ class BankTransferController extends Controller
 
             if (! Remit::bankTransfer()->restore($id)) {
 
-                throw (new RestoreOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
+                throw (new RestoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
             return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Bank Transfer']));
@@ -411,7 +411,7 @@ class BankTransferController extends Controller
 
             if (! Remit::bankTransfer()->restore($id)) {
 
-                throw (new RestoreOperationException())->setModel(config('fintech.remit.bank_transfer_model'), $id);
+                throw (new RestoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
             return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Bank Transfer']));

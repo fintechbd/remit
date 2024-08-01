@@ -118,7 +118,7 @@ class AgraniBankApi implements OrderQuotation
      */
     public function topUp($data)
     {
-        $returnData = new stdClass();
+        $returnData = new stdClass;
 
         $reference = $data->reference_no;
 
@@ -456,7 +456,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function oldTopUp($data)
     {
-        $returnData = new stdClass();
+        $returnData = new stdClass;
 
         $reference = $data->reference_no;
 

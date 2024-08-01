@@ -271,7 +271,7 @@ class CashPickupController extends Controller
 
             if (! Remit::cashPickup()->destroy($id)) {
 
-                throw (new DeleteOperationException())->setModel(config('fintech.remit.cash_pickup_model'), $id);
+                throw (new DeleteOperationException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
             return response()->deleted(__('restapi::messages.resource.deleted', ['model' => 'Cash Pickup']));
@@ -307,7 +307,7 @@ class CashPickupController extends Controller
 
             if (! Remit::cashPickup()->restore($id)) {
 
-                throw (new RestoreOperationException())->setModel(config('fintech.remit.cash_pickup_model'), $id);
+                throw (new RestoreOperationException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
             return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Cash Pickup']));
