@@ -259,7 +259,7 @@ class VendorTestController extends Controller
         $curl = curl_init();
 
         curl_setopt_array($curl, [
-            CURLOPT_URL => 'http://api.sslwireless.com/api/service-list',
+            CURLOPT_URL => 'https://common-api-demo.sslwireless.com/api/service-list',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -268,8 +268,8 @@ class VendorTestController extends Controller
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'GET',
             CURLOPT_HTTPHEADER => [
-                'AUTH-KEY: wrkq6YPWt6i2N/lKBZcw4OhzYio2mebZ',
-                'STK-CODE: ClavisFintech',
+                'AUTH-KEY: BD6pFSIfSOLEIgKyru67MeBhICkRiFla',
+                'STK-CODE: DEMO',
             ],
         ]);
 
