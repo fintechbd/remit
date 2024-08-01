@@ -251,7 +251,7 @@ class VendorTestController extends Controller
         ];
 
         $response = $this->sendTelnetRequest($host, $port, $path, $user, $password, $headers);
-        
+
         dump($response);
 
         dump(nl2br(htmlspecialchars($response)));
