@@ -193,12 +193,12 @@ class VendorTestController extends Controller
         dump($vendor->directCreditRemittance($order_data));
     }
 
-    /*public function meghnaBankConnectionCheck(): void
+    public function meghnaBankConnectionCheck(): void
     {
         $curl = curl_init();
 
         curl_setopt_array($curl, [
-            CURLOPT_URL => 'http://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y',
+            CURLOPT_URL => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -228,11 +228,15 @@ class VendorTestController extends Controller
                 'bankid' => 'MGBL',
                 'agent' => '14',
             ])
-            ->get('https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y');
+            ->get('https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry',[
+                'queryType' => 1,
+                'confRate'=>'y'
+                ]);
 
         dd($response->json());
-    }*/
-    public function meghnaBankConnectionCheck(): void
+    }
+
+    /*public function meghnaBankConnectionCheck(): void
     {
         // Example usage
         $host = 'uatrmsapi.meghnabank.com.bd';
@@ -248,7 +252,7 @@ class VendorTestController extends Controller
 
         $response = $this->sendTelnetRequest($host, $port, $path, $user, $password, $headers);
         echo nl2br(htmlspecialchars($response));
-    }
+    }*/
 
     public function sslVRConnectionCheck(): void
     {
