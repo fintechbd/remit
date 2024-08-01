@@ -228,10 +228,10 @@ class VendorTestController extends Controller
                 'bankid' => 'MGBL',
                 'agent' => '14',
             ])
-            ->get('https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry',[
+            ->get('https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry', [
                 'queryType' => 1,
-                'confRate'=>'y'
-                ]);
+                'confRate' => 'y',
+            ]);
 
         dd($response->json());
     }
@@ -251,7 +251,7 @@ class VendorTestController extends Controller
     //     ];
 
     //     $response = $this->sendTelnetRequest($host, $port, $path, $user, $password, $headers);
-        
+
     //     dump($response);
 
     //     dump(nl2br(htmlspecialchars($response)));
