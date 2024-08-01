@@ -193,54 +193,54 @@ class VendorTestController extends Controller
         dump($vendor->directCreditRemittance($order_data));
     }
 
+    // public function meghnaBankConnectionCheck(): void
+    // {
+    //     $curl = curl_init();
+
+    //     curl_setopt_array($curl, [
+    //         CURLOPT_URL => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y',
+    //         CURLOPT_RETURNTRANSFER => true,
+    //         CURLOPT_ENCODING => '',
+    //         CURLOPT_MAXREDIRS => 10,
+    //         CURLOPT_TIMEOUT => 0,
+    //         CURLOPT_FOLLOWLOCATION => true,
+    //         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    //         CURLOPT_CUSTOMREQUEST => 'GET',
+    //         CURLOPT_HTTPHEADER => [
+    //             'bankid: MGBL',
+    //             'agent: 14',
+    //         ],
+    //         CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
+    //         //CURLOPT_USERPWD => 'MGBL@clavisExchange:clavis@6230',
+    //         CURLOPT_USERPWD => sha1('MGBL@clavisExchange').':'.sha1('clavis@6230'),
+    //     ]);
+
+    //     $response = curl_exec($curl);
+
+    //     curl_close($curl);
+    //     dump($response);
+
+    //     $response = Http::withoutVerifying()
+    //         ->acceptJson()
+    //         ->contentType('application/json')
+    //         ->withBasicAuth(sha1('MGBL@clavisExchange'), sha1('clavis@6230'))
+    //         ->withHeaders([
+    //             'bankid' => 'MGBL',
+    //             'agent' => '14',
+    //         ])
+    //         ->get('https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry',[
+    //             'queryType' => 1,
+    //             'confRate'=>'y'
+    //             ]);
+
+    //     dd($response->json());
+    // }
+
     public function meghnaBankConnectionCheck(): void
-    {
-        $curl = curl_init();
-
-        curl_setopt_array($curl, [
-            CURLOPT_URL => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'GET',
-            CURLOPT_HTTPHEADER => [
-                'bankid: MGBL',
-                'agent: 14',
-            ],
-            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-            //CURLOPT_USERPWD => 'MGBL@clavisExchange:clavis@6230',
-            CURLOPT_USERPWD => sha1('MGBL@clavisExchange').':'.sha1('clavis@6230'),
-        ]);
-
-        $response = curl_exec($curl);
-
-        curl_close($curl);
-        dump($response);
-
-        $response = Http::withoutVerifying()
-            ->acceptJson()
-            ->contentType('application/json')
-            ->withBasicAuth(sha1('MGBL@clavisExchange'), sha1('clavis@6230'))
-            ->withHeaders([
-                'bankid' => 'MGBL',
-                'agent' => '14',
-            ])
-            ->get('https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry',[
-                'queryType' => 1,
-                'confRate'=>'y'
-                ]);
-
-        dd($response->json());
-    }
-
-    /*public function meghnaBankConnectionCheck(): void
     {
         // Example usage
         $host = 'uatrmsapi.meghnabank.com.bd';
-        $port = 23;
+        $port = 443;
         $path = '/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y';
         $user = sha1('MGBL@clavisExchange');
         $password = sha1('clavis@6230');
@@ -251,8 +251,11 @@ class VendorTestController extends Controller
         ];
 
         $response = $this->sendTelnetRequest($host, $port, $path, $user, $password, $headers);
-        echo nl2br(htmlspecialchars($response));
-    }*/
+        
+        dump($response);
+
+        dump(nl2br(htmlspecialchars($response)));
+    }
 
     public function sslVRConnectionCheck(): void
     {
