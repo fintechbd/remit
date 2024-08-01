@@ -102,7 +102,7 @@ class EmqApi implements BankTransfer, OrderQuotation
      */
     public function topUp($data)
     {
-        $returnData = new stdClass();
+        $returnData = new stdClass;
 
         $reference = $data->reference_no;
 

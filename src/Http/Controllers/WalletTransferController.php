@@ -271,7 +271,7 @@ class WalletTransferController extends Controller
 
             if (! Remit::walletTransfer()->destroy($id)) {
 
-                throw (new DeleteOperationException())->setModel(config('fintech.remit.wallet_transfer_model'), $id);
+                throw (new DeleteOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
             return response()->deleted(__('restapi::messages.resource.deleted', ['model' => 'Wallet Transfer']));
@@ -307,7 +307,7 @@ class WalletTransferController extends Controller
 
             if (! Remit::walletTransfer()->restore($id)) {
 
-                throw (new RestoreOperationException())->setModel(config('fintech.remit.wallet_transfer_model'), $id);
+                throw (new RestoreOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
             return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Wallet Transfer']));

@@ -3,7 +3,6 @@
 namespace Fintech\Remit\Services;
 
 use ErrorException;
-use Exception;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Contracts\OrderInquiry;
@@ -29,16 +28,15 @@ class AssignVendorService
         return App::make($driverClass);
     }
 
-    
     /**
      * @throws \Fintech\Transaction\Exceptions\AlreadyAssignedException
      */
     public function availableVendors(BaseModel $order): Collection
     {
-        if($order->assignedUser != null && $order->assignedUser->id != request()->user()->id) {
-            throw new \Fintech\Transaction\Exceptions\AlreadyAssignedException("This order is already assigned by another");
+        if ($order->assignedUser != null && $order->assignedUser->id != request()->user()->id) {
+            throw new \Fintech\Transaction\Exceptions\AlreadyAssignedException('This order is already assigned by another');
         }
-        
+
         return Business::serviceVendor()->list([
             'service_id_array' => [$order->service_id],
             'enabled' => true,
