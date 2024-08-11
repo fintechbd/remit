@@ -44,7 +44,7 @@ class BankTransferResource extends JsonResource
             'status' => $this->status ?? null,
             'created_at' => $this->created_at ?? null,
             'updated_at' => $this->updated_at ?? null,
-            ];
+        ];
 
         if (Core::packageExists('MetaData')) {
             $data['source_country_name'] = $this->sourceCountry?->name ?? null;
