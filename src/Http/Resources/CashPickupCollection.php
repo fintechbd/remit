@@ -47,8 +47,7 @@ class CashPickupCollection extends ResourceCollection
                 'status' => $deposit->status ?? null,
                 'created_at' => $deposit->created_at ?? null,
                 'updated_at' => $deposit->updated_at ?? null,
-                'links' => $deposit->links ?? null,
-            ];
+                ];
 
             if (Core::packageExists('MetaData')) {
                 $data['source_country_name'] = $deposit->sourceCountry?->name ?? null;
