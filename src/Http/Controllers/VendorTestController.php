@@ -195,30 +195,30 @@ class VendorTestController extends Controller
 
     public function meghnaBankConnectionCheck(): void
     {
-//        $curl = curl_init();
-//
-//        curl_setopt_array($curl, [
-//            CURLOPT_URL => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y',
-//            CURLOPT_RETURNTRANSFER => true,
-//            CURLOPT_ENCODING => '',
-//            CURLOPT_MAXREDIRS => 10,
-//            CURLOPT_TIMEOUT => 0,
-//            CURLOPT_FOLLOWLOCATION => true,
-//            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-//            CURLOPT_CUSTOMREQUEST => 'GET',
-//            CURLOPT_HTTPHEADER => [
-//                'bankid: MGBL',
-//                'agent: 14',
-//            ],
-//            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
-//            //CURLOPT_USERPWD => 'MGBL@clavisExchange:clavis@6230',
-//            CURLOPT_USERPWD => sha1('MGBL@clavisExchange').':'.sha1('clavis@6230'),
-//        ]);
-//
-//        $response = curl_exec($curl);
-//
-//        curl_close($curl);
-//        dump($response);
+        //        $curl = curl_init();
+        //
+        //        curl_setopt_array($curl, [
+        //            CURLOPT_URL => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/remitEnquiry?queryType=1&confRate=y',
+        //            CURLOPT_RETURNTRANSFER => true,
+        //            CURLOPT_ENCODING => '',
+        //            CURLOPT_MAXREDIRS => 10,
+        //            CURLOPT_TIMEOUT => 0,
+        //            CURLOPT_FOLLOWLOCATION => true,
+        //            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        //            CURLOPT_CUSTOMREQUEST => 'GET',
+        //            CURLOPT_HTTPHEADER => [
+        //                'bankid: MGBL',
+        //                'agent: 14',
+        //            ],
+        //            CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
+        //            //CURLOPT_USERPWD => 'MGBL@clavisExchange:clavis@6230',
+        //            CURLOPT_USERPWD => sha1('MGBL@clavisExchange').':'.sha1('clavis@6230'),
+        //        ]);
+        //
+        //        $response = curl_exec($curl);
+        //
+        //        curl_close($curl);
+        //        dump($response);
 
         $response = Http::withoutVerifying()
             ->acceptJson()
