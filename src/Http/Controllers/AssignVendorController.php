@@ -4,6 +4,7 @@ namespace Fintech\Remit\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Exception;
+use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Exceptions\AlreadyAssignedException;
 use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\AssignableVendorInfoRequest;
@@ -18,7 +19,7 @@ class AssignVendorController extends Controller
     {
         $order = Transaction::order()->find($id);
 
-        if (! $order) {
+        if (!$order) {
             throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
         }
 
@@ -100,13 +101,11 @@ class AssignVendorController extends Controller
     {
         $order_id = $request->input('order_id');
 
-        $service_vendor_slug = $request->input('vendor_slug');
-
         try {
 
             $order = $this->getOrder($order_id);
 
-            $jsonResponse = Remit::assignVendor()->orderStatus($order, $service_vendor_slug);
+            $jsonResponse = Remit::assignVendor()->orderStatus($order);
 
             return response()->success($jsonResponse);
 
@@ -124,13 +123,11 @@ class AssignVendorController extends Controller
     {
         $order_id = $request->input('order_id');
 
-        $service_vendor_slug = $request->input('vendor_slug');
-
         try {
 
             $order = $this->getOrder($order_id);
 
-            $jsonResponse = Remit::assignVendor()->requestQuote($order, $service_vendor_slug);
+            $jsonResponse = Remit::assignVendor()->cancelOrder($order);
 
             return response()->success($jsonResponse);
 
@@ -148,13 +145,11 @@ class AssignVendorController extends Controller
     {
         $order_id = $request->input('order_id');
 
-        $service_vendor_slug = $request->input('vendor_slug');
-
         try {
 
             $order = $this->getOrder($order_id);
 
-            $jsonResponse = Remit::assignVendor()->amendmentOrder($order, $service_vendor_slug);
+            $jsonResponse = Remit::assignVendor()->amendmentOrder($order);
 
             return response()->success($jsonResponse);
 
@@ -196,15 +191,15 @@ class AssignVendorController extends Controller
     {
         $order_id = $request->input('order_id');
 
-        $service_vendor_slug = $request->input('vendor_slug');
-
         try {
-
             $order = $this->getOrder($order_id);
 
-            $jsonResponse = Remit::assignVendor()->requestQuote($order, $service_vendor_slug);
+            if (!Transaction::order()->update($order->getKey(), ['assigned_user_id' => null, 'service_vendor_id' => null, 'vendor' => null])) {
 
-            return response()->success($jsonResponse);
+                throw (new UpdateOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $order_id);
+            }
+
+            return response()->updated(__('restapi::messages.resource.updated', ['model' => 'Order']));
 
         } catch (ModelNotFoundException $exception) {
 
