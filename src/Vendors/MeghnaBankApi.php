@@ -3,11 +3,12 @@
 namespace Fintech\Remit\Vendors;
 
 use Exception;
-use Fintech\Remit\Contracts\BankTransfer;
+use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Facades\Log;
 
-class MeghnaBankApi implements BankTransfer, OrderQuotation
+class MeghnaBankApi implements MoneyTransfer, OrderQuotation
 {
     /**
      * MeghnaBankApiService constructor.
@@ -362,5 +363,58 @@ class MeghnaBankApi implements BankTransfer, OrderQuotation
         return [
 
         ];
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for an execution of the order.
+     *
+     * @param BaseModel $order
+     * @param string $vendor_slug
+     *
+     * @throws \ErrorException
+     */
+    public function executeOrder(BaseModel $order, string $vendor_slug): mixed
+    {
+        // TODO: Implement executeOrder() method.
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for the progress status of the order.
+     *
+     * @param BaseModel $order
+     * @return mixed
+     * @throws \ErrorException
+     */
+    public function orderStatus(BaseModel $order): mixed
+    {
+        // TODO: Implement orderStatus() method.
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for the cancellation of the order.
+     *
+     * @param BaseModel $order
+     * @return mixed
+     * @throws \ErrorException
+     */
+    public function cancelOrder(BaseModel $order): mixed
+    {
+        // TODO: Implement cancelOrder() method.
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for the amendment of the order.
+     *
+     * @param BaseModel $order
+     * @return mixed
+     * @throws \ErrorException
+     */
+    public function amendmentOrder(BaseModel $order): mixed
+    {
+        // TODO: Implement amendmentOrder() method.
     }
 }

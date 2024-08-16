@@ -5,20 +5,26 @@ namespace Fintech\Remit\Services;
 use ErrorException;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Contracts\OrderInquiry;
 use Fintech\Remit\Contracts\OrderQuotation;
 use Fintech\Remit\Contracts\ProceedOrder;
+use Fintech\Remit\Exceptions\AlreadyAssignedException;
+use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\App;
 
 class AssignVendorService
 {
-    private function getVendorDriverInstance(string $slug): mixed
+    /**
+     * @throws ErrorException
+     */
+    private function getVendorInstance(string $slug): mixed
     {
         $availableVendors = config('fintech.remit.providers', []);
 
-        if (! isset($availableVendors[$slug])) {
-            throw new ErrorException('Service Vendor is not available on the configuration.');
+        if (!isset($availableVendors[$slug])) {
+            throw new ErrorException(__('remit::message.assign_vendor.not_found', ['slug' => ucfirst($slug)]));
         }
 
         $vendor = $availableVendors[$slug];
@@ -29,12 +35,19 @@ class AssignVendorService
     }
 
     /**
-     * @throws \Fintech\Transaction\Exceptions\AlreadyAssignedException
+     * @throws AlreadyAssignedException
+     * @throws UpdateOperationException
      */
-    public function availableVendors(BaseModel $order): Collection
+    public function availableVendors(BaseModel $order, $requestingUserId): Collection
     {
-        if ($order->assignedUser != null && $order->assignedUser->id != request()->user()->id) {
-            throw new \Fintech\Transaction\Exceptions\AlreadyAssignedException('This order is already assigned by another');
+        if ($order->assigned_user_id != null
+            && $order->assigned_user_id != $requestingUserId) {
+            throw new AlreadyAssignedException(__('remit::assign_vendor.already_assigned'));
+        }
+
+        if ($order->assigned_user_id == null
+            && !Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId])) {
+            throw new UpdateOperationException(__('remit::assign_vendor.assigned_user_failed'));
         }
 
         return Business::serviceVendor()->list([
@@ -49,9 +62,9 @@ class AssignVendorService
      */
     public function requestQuote(BaseModel $order, string $vendor_slug): mixed
     {
-        $vendor = $this->getVendorDriverInstance($vendor_slug);
+        $vendor = $this->getVendorInstance($vendor_slug);
 
-        if (! $vendor instanceof OrderQuotation) {
+        if (!$vendor instanceof OrderQuotation) {
             throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
         }
 
@@ -63,9 +76,9 @@ class AssignVendorService
      */
     public function processOrder(BaseModel $order, string $vendor_slug): mixed
     {
-        $vendor = $this->getVendorDriverInstance($vendor_slug);
+        $vendor = $this->getVendorInstance($vendor_slug);
 
-        if (! $vendor instanceof ProceedOrder) {
+        if (!$vendor instanceof ProceedOrder) {
             throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\ProceedOrder` interface.');
         }
 
@@ -75,11 +88,11 @@ class AssignVendorService
     /**
      * @throws ErrorException
      */
-    public function orderStatus(BaseModel $order, string $vendor_slug): mixed
+    public function orderStatus(BaseModel $order): mixed
     {
-        $vendor = $this->getVendorDriverInstance($vendor_slug);
+        $vendor = $this->getVendorInstance($vendor_slug);
 
-        if (! $vendor instanceof OrderInquiry) {
+        if (!$vendor instanceof OrderInquiry) {
             throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderInquiry` interface.');
         }
 
@@ -89,11 +102,22 @@ class AssignVendorService
     /**
      * @throws ErrorException
      */
-    public function cancelOrder(BaseModel $order, string $vendor_slug): mixed
+    public function cancelOrder(BaseModel $order): mixed
     {
-        $vendor = $this->getVendorDriverInstance($vendor_slug);
+        $vendor = $this->getVendorInstance($vendor_slug);
 
-        if (! $vendor instanceof OrderQuotation) {
+        if (!$vendor instanceof OrderQuotation) {
+            throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
+        }
+
+        return $vendor->requestQuote($order);
+    }
+
+    public function amendmentOrder(BaseModel $order): mixed
+    {
+        $vendor = $this->getVendorInstance($vendor_slug);
+
+        if (!$vendor instanceof OrderQuotation) {
             throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
         }
 

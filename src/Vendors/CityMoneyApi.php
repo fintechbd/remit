@@ -3,13 +3,13 @@
 namespace Fintech\Remit\Vendors;
 
 use Exception;
-use Fintech\Remit\Contracts\BankTransfer;
+use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Facades\Log;
 use MongoDB\Laravel\Eloquent\Model;
 use SimpleXMLElement;
 
-class CityBankApi implements BankTransfer, OrderQuotation
+class CityBankApi implements MoneyTransfer, OrderQuotation
 {
     /**
      * CityBank API configuration.

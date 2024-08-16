@@ -24,23 +24,18 @@ if (Config::get('fintech.remit.enabled')) {
     Route::prefix('remit')->name('remit.')
         ->middleware(config('fintech.auth.middleware'))->group(function () {
             if (Core::packageExists('Transaction')) {
-                Route::get('assign-vendors/available/{order_id}', [AssignVendorController::class, 'available'])
-                    ->name('assign-vendors.available');
-
-                Route::post('assign-vendors/quote', [AssignVendorController::class, 'vendor'])
-                    ->name('assign-vendors.quota');
-
-                Route::post('assign-vendors/process', [AssignVendorController::class, 'process'])
-                    ->name('assign-vendors.process');
-
-                Route::post('assign-vendors/status', [AssignVendorController::class, 'status'])
-                    ->name('assign-vendors.status');
-
-                Route::post('assign-vendors/release', [AssignVendorController::class, 'release'])
-                    ->name('assign-vendors.release');
-
-                Route::post('assign-vendors/cancel', [AssignVendorController::class, 'cancel'])
-                    ->name('assign-vendors.cancel');
+                Route::prefix('assign-vendors')->name('assign-vendors.')
+                    ->controller(AssignVendorController::class)
+                    ->group(function () {
+                        Route::get('available/{order_id}', 'available')->name('available');
+                        Route::post('quote', 'quotation')->name('quotation');
+                        Route::post('process', 'process')->name('process');
+                        Route::post('status', 'status')->name('status');
+                        Route::post('release', 'release')->name('release');
+                        Route::post('cancel', 'cancel')->name('cancel');
+                        Route::post('amendment', 'amendment')->name('amendment');
+                        Route::post('overwrite', 'overwrite')->name('overwrite');
+                    });
             }
             Route::apiResource('bank-transfers', BankTransferController::class)->except('update', 'destroy');
             Route::group(['prefix' => 'bank-transfers'], function () {

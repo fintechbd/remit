@@ -44,19 +44,20 @@ class RemitServiceProvider extends ServiceProvider
             __DIR__.'/../config/remit.php' => config_path('fintech/remit.php'),
         ]);
 
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-
-        $this->loadTranslationsFrom(__DIR__.'/../lang', 'remit');
-
         $this->publishes([
             __DIR__.'/../lang' => $this->app->langPath('vendor/remit'),
         ]);
 
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'remit');
-
         $this->publishes([
             __DIR__.'/../resources/views' => resource_path('views/vendor/remit'),
         ]);
+
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'remit');
+
+
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'remit');
 
         if ($this->app->runningInConsole()) {
             $this->commands([

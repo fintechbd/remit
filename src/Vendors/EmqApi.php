@@ -8,13 +8,13 @@ use App\Services\Backend\Setting\CatalogListService;
 use App\Services\Backend\Setting\CountryService;
 use Carbon\Carbon;
 use Exception;
-use Fintech\Remit\Contracts\BankTransfer;
+use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use stdClass;
 
-class EmqApi implements BankTransfer, OrderQuotation
+class EmqApi implements MoneyTransfer, OrderQuotation
 {
     const OCCUPATION = 'OCC';
 
