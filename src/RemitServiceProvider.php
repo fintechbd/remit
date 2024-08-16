@@ -56,7 +56,6 @@ class RemitServiceProvider extends ServiceProvider
 
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'remit');
 
-
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'remit');
 
         if ($this->app->runningInConsole()) {

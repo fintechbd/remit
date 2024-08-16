@@ -6,9 +6,6 @@ use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\MoneyTransfer;
-use Fintech\Remit\Contracts\OrderInquiry;
-use Fintech\Remit\Contracts\OrderQuotation;
-use Fintech\Remit\Contracts\ProceedOrder;
 use Illuminate\Support\Facades\Http;
 
 class IslamiBankApi implements MoneyTransfer
@@ -958,8 +955,6 @@ XML;
      * Method to make a request to the remittance service provider
      * for an execution of the order.
      *
-     * @param BaseModel $order
-     * @param string $vendor_slug
      *
      * @throws \ErrorException
      */
@@ -972,8 +967,6 @@ XML;
      * Method to make a request to the remittance service provider
      * for the cancellation of the order.
      *
-     * @param BaseModel $order
-     * @return mixed
      * @throws \ErrorException
      */
     public function cancelOrder(BaseModel $order): mixed
@@ -985,8 +978,6 @@ XML;
      * Method to make a request to the remittance service provider
      * for the amendment of the order.
      *
-     * @param BaseModel $order
-     * @return mixed
      * @throws \ErrorException
      */
     public function amendmentOrder(BaseModel $order): mixed

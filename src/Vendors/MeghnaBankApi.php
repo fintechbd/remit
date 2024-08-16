@@ -369,8 +369,6 @@ class MeghnaBankApi implements MoneyTransfer, OrderQuotation
      * Method to make a request to the remittance service provider
      * for an execution of the order.
      *
-     * @param BaseModel $order
-     * @param string $vendor_slug
      *
      * @throws \ErrorException
      */
@@ -383,8 +381,6 @@ class MeghnaBankApi implements MoneyTransfer, OrderQuotation
      * Method to make a request to the remittance service provider
      * for the progress status of the order.
      *
-     * @param BaseModel $order
-     * @return mixed
      * @throws \ErrorException
      */
     public function orderStatus(BaseModel $order): mixed
@@ -396,8 +392,6 @@ class MeghnaBankApi implements MoneyTransfer, OrderQuotation
      * Method to make a request to the remittance service provider
      * for the cancellation of the order.
      *
-     * @param BaseModel $order
-     * @return mixed
      * @throws \ErrorException
      */
     public function cancelOrder(BaseModel $order): mixed
@@ -409,8 +403,6 @@ class MeghnaBankApi implements MoneyTransfer, OrderQuotation
      * Method to make a request to the remittance service provider
      * for the amendment of the order.
      *
-     * @param BaseModel $order
-     * @return mixed
      * @throws \ErrorException
      */
     public function amendmentOrder(BaseModel $order): mixed
