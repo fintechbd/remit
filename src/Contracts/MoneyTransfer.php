@@ -13,22 +13,20 @@ interface MoneyTransfer
      * commission and other information related to order.
      *
      * @param BaseModel $order
-     * @param string $vendor_slug
-     *
+     * @return mixed
      * @throws \ErrorException
      */
-    public function requestQuote(BaseModel $order, string $vendor_slug): mixed;
+    public function requestQuote(BaseModel $order): mixed;
 
     /**
      * Method to make a request to the remittance service provider
      * for an execution of the order.
      *
      * @param BaseModel $order
-     * @param string $vendor_slug
-     *
+     * @return mixed
      * @throws \ErrorException
      */
-    public function executeOrder(BaseModel $order, string $vendor_slug): mixed;
+    public function executeOrder(BaseModel $order): mixed;
 
     /**
      * Method to make a request to the remittance service provider
