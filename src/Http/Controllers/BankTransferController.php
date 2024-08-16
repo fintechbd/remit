@@ -58,7 +58,7 @@ class BankTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -177,7 +177,7 @@ class BankTransferController extends Controller
             DB::rollBack();
             Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -212,7 +212,7 @@ class BankTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -242,7 +242,7 @@ class BankTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -278,7 +278,7 @@ class BankTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -300,7 +300,7 @@ class BankTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -322,7 +322,7 @@ class BankTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -355,7 +355,7 @@ class BankTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -389,7 +389,7 @@ class BankTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -422,7 +422,7 @@ class BankTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -548,7 +548,7 @@ class BankTransferController extends Controller
             DB::rollBack();
             Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 }

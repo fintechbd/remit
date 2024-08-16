@@ -56,7 +56,7 @@ class WalletTransferController extends Controller
 
         //        } catch (Exception $exception) {
         //
-        //            return response()->failed($exception->getMessage());
+        //            return response()->failed($exception);
         //        }
     }
 
@@ -176,7 +176,7 @@ class WalletTransferController extends Controller
             Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
             DB::rollBack();
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -214,7 +214,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -244,7 +244,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -282,7 +282,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -318,7 +318,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -340,7 +340,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -364,7 +364,7 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -491,7 +491,7 @@ class WalletTransferController extends Controller
             Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
             DB::rollBack();
 
-            return response()->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 }
