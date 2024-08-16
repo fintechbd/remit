@@ -18,11 +18,11 @@ class AssignableVendorCollection extends ResourceCollection
         return $this->collection->map(function ($vendor) {
             return [
                 'id' => $vendor->getKey() ?? null,
-                'service_vendor_name' => $vendor->service_vendor_name ?? null,
-                'service_vendor_slug' => $vendor->service_vendor_slug ?? null,
-                'service_vendor_data' => $vendor->service_vendor_data ?? null,
-                'service_vendor_logo_svg' => $vendor->getFirstMediaUrl('logo_svg') ?? null,
-                'service_vendor_logo_png' => $vendor->getFirstMediaUrl('logo_png') ?? null,
+                'name' => $vendor->service_vendor_name ?? null,
+                'slug' => $vendor->service_vendor_slug ?? null,
+                'data' => $vendor->service_vendor_data ?? null,
+                'logo_svg' => $vendor->getFirstMediaUrl('logo_svg') ?? null,
+                'logo_png' => $vendor->getFirstMediaUrl('logo_png') ?? null,
                 'enabled' => $vendor->enabled ?? null,
             ];
         })->toArray();
