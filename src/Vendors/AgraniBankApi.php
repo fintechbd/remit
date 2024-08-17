@@ -2,16 +2,15 @@
 
 namespace Fintech\Remit\Vendors;
 
-use App\Services\Backend\Setting\CatalogListService;
-use App\Services\Backend\Setting\CountryService;
 use Carbon\Carbon;
 use DOMDocument;
 use DOMException;
 use Exception;
+use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Facades\Log;
 use stdClass;
 
-class AgraniBankApi
+class AgraniBankApi implements OrderQuotation
 {
     const OCCUPATION = 'OCC';
 
@@ -119,7 +118,7 @@ class AgraniBankApi
      */
     public function topUp($data)
     {
-        $returnData = new stdClass();
+        $returnData = new stdClass;
 
         $reference = $data->reference_no;
 
@@ -457,7 +456,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function oldTopUp($data)
     {
-        $returnData = new stdClass();
+        $returnData = new stdClass;
 
         $reference = $data->reference_no;
 
@@ -621,5 +620,15 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
             'response' => json_decode($response, true),
         ];
 
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
+     */
+    public function requestQuote($order): mixed
+    {
+        return [
+
+        ];
     }
 }

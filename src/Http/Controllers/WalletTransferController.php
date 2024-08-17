@@ -13,7 +13,6 @@ use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\UpdateOperationException;
-use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\ImportWalletTransferRequest;
 use Fintech\Remit\Http\Requests\IndexWalletTransferRequest;
@@ -38,8 +37,6 @@ use Illuminate\Support\Facades\DB;
  */
 class WalletTransferController extends Controller
 {
-    use ApiResponseTrait;
-
     /**
      * @lrd:start
      * Return a listing of the *WalletTransfer* resource as collection.
@@ -50,17 +47,17 @@ class WalletTransferController extends Controller
      */
     public function index(IndexWalletTransferRequest $request): WalletTransferCollection|JsonResponse
     {
-        try {
-            $inputs = $request->validated();
-            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'wallet_transfer'])->first()->getKey();
-            $walletTransferPaginate = Remit::walletTransfer()->list($inputs);
+        //        try {
+        $inputs = $request->validated();
+        $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'wallet_transfer'])->first()->getKey();
+        $walletTransferPaginate = Remit::walletTransfer()->list($inputs);
 
-            return new WalletTransferCollection($walletTransferPaginate);
+        return new WalletTransferCollection($walletTransferPaginate);
 
-        } catch (Exception $exception) {
-
-            return $this->failed($exception->getMessage());
-        }
+        //        } catch (Exception $exception) {
+        //
+        //            return response()->failed($exception);
+        //        }
     }
 
     /**
@@ -136,6 +133,9 @@ class WalletTransferController extends Controller
                 $order_data = $walletTransfer->order_data;
                 $order_data['purchase_number'] = entry_number($walletTransfer->getKey(), $walletTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
                 $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($walletTransfer);
+                $service = Business::service()->find($inputs['service_id']);
+                $order_data['service_slug'] = $service->service_slug;
+                $order_data['service_name'] = $service->service_name;
                 $order_data['user_name'] = $walletTransfer->user->name;
                 $walletTransfer->order_data = $order_data;
                 $userUpdatedBalance = Remit::walletTransfer()->debitTransaction($walletTransfer);
@@ -148,8 +148,8 @@ class WalletTransferController extends Controller
                 $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
                 $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
 
-                $order_data['order_data']['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
-                $order_data['order_data']['current_amount'] = ((float) $order_data['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
+                $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
+                $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
                 if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'current_status' => $walletTransfer->currentStatus(),
@@ -158,14 +158,14 @@ class WalletTransferController extends Controller
                 }
                 //TODO ALL Beneficiary Data with bank and branch data
                 $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
-                $order_data['order_data']['beneficiary_data'] = $beneficiaryData;
+                $order_data['beneficiary_data'] = $beneficiaryData;
 
                 Remit::walletTransfer()->update($walletTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
                 DB::commit();
 
-                return $this->created([
-                    'message' => __('core::messages.resource.created', ['model' => 'Wallet Transfer']),
+                return response()->created([
+                    'message' => __('restapi::messages.resource.created', ['model' => 'Wallet Transfer']),
                     'id' => $walletTransfer->id,
                 ]);
             } else {
@@ -176,7 +176,7 @@ class WalletTransferController extends Controller
             Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
             DB::rollBack();
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -206,15 +206,15 @@ class WalletTransferController extends Controller
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return $this->updated(__('core::messages.resource.updated', ['model' => 'Wallet Transfer']));
+            return response()->updated(__('restapi::messages.resource.updated', ['model' => 'Wallet Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
-            return $this->notfound($exception->getMessage());
+            return response()->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -240,11 +240,11 @@ class WalletTransferController extends Controller
 
         } catch (ModelNotFoundException $exception) {
 
-            return $this->notfound($exception->getMessage());
+            return response()->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -271,18 +271,18 @@ class WalletTransferController extends Controller
 
             if (! Remit::walletTransfer()->destroy($id)) {
 
-                throw (new DeleteOperationException())->setModel(config('fintech.remit.wallet_transfer_model'), $id);
+                throw (new DeleteOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return $this->deleted(__('core::messages.resource.deleted', ['model' => 'Wallet Transfer']));
+            return response()->deleted(__('restapi::messages.resource.deleted', ['model' => 'Wallet Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
-            return $this->notfound($exception->getMessage());
+            return response()->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -307,18 +307,18 @@ class WalletTransferController extends Controller
 
             if (! Remit::walletTransfer()->restore($id)) {
 
-                throw (new RestoreOperationException())->setModel(config('fintech.remit.wallet_transfer_model'), $id);
+                throw (new RestoreOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return $this->restored(__('core::messages.resource.restored', ['model' => 'Wallet Transfer']));
+            return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Wallet Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
-            return $this->notfound($exception->getMessage());
+            return response()->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -336,11 +336,11 @@ class WalletTransferController extends Controller
 
             $walletTransferPaginate = Remit::walletTransfer()->export($inputs);
 
-            return $this->exported(__('core::messages.resource.exported', ['model' => 'Wallet Transfer']));
+            return response()->exported(__('restapi::messages.resource.exported', ['model' => 'Wallet Transfer']));
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
@@ -364,7 +364,134 @@ class WalletTransferController extends Controller
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception);
+        }
+    }
+
+    /**
+     * @lrd:start
+     * Create a new *WalletTransfer* resource in storage.
+     *
+     * @lrd:end
+     *
+     * @throws StoreOperationException
+     */
+    public function storeWithoutInsufficientBalance(StoreWalletTransferRequest $request): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+            $inputs = $request->validated();
+
+            if ($request->input('user_id') > 0) {
+                $user_id = $request->input('user_id');
+            }
+            $depositor = $request->user('sanctum');
+            if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
+
+                $depositAccount = Transaction::userAccount()->list([
+                    'user_id' => $user_id ?? $depositor->getKey(),
+                    'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
+                ])->first();
+
+                if (! $depositAccount) {
+                    throw new Exception("User don't have account deposit balance");
+                }
+
+                $masterUser = Auth::user()->list([
+                    'role_name' => SystemRole::MasterUser->value,
+                    'country_id' => $request->input('source_country_id', $depositor->profile?->country_id),
+                ])->first();
+
+                if (! $masterUser) {
+                    throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
+                }
+
+                //set pre defined conditions of deposit
+                $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'wallet_transfer'])->first()->getKey();
+                $inputs['user_id'] = $user_id ?? $depositor->getKey();
+                $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
+                if ($delayCheck['countValue'] > 0) {
+                    throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
+                }
+                $inputs['sender_receiver_id'] = $masterUser->getKey();
+                $inputs['is_refunded'] = false;
+                $inputs['status'] = OrderStatus::Successful->value;
+                $inputs['risk'] = RiskProfile::Low->value;
+                $inputs['reverse'] = true;
+                $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
+                unset($inputs['reverse']);
+                $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
+                $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
+                $inputs['order_data']['created_by'] = $depositor->name;
+                $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
+                $inputs['order_data']['created_at'] = now();
+                $inputs['order_data']['master_user_name'] = $masterUser['name'];
+                //$inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
+                $inputs['order_data']['assign_order'] = 'no';
+                $inputs['order_data']['system_notification_variable_success'] = 'wallet_transfer_success';
+                $inputs['order_data']['system_notification_variable_failed'] = 'wallet_transfer_failed';
+                unset($inputs['pin'], $inputs['password']);
+
+                $walletTransfer = Remit::walletTransfer()->create($inputs);
+
+                if (! $walletTransfer) {
+                    throw (new StoreOperationException)->setModel(config('fintech.remit.wallet_transfer_model'));
+                }
+
+                $order_data = $walletTransfer->order_data;
+                $order_data['purchase_number'] = entry_number($walletTransfer->getKey(), $walletTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
+                $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($walletTransfer);
+                $service = Business::service()->find($inputs['service_id']);
+                $order_data['service_slug'] = $service->service_slug;
+                $order_data['service_name'] = $service->service_name;
+                $order_data['user_name'] = $walletTransfer->user->name;
+                $walletTransfer->order_data = $order_data;
+                $userUpdatedBalance = Remit::walletTransfer()->debitTransaction($walletTransfer);
+                $depositedAccount = Transaction::userAccount()->list([
+                    'user_id' => $depositor->getKey(),
+                    'country_id' => $walletTransfer->source_country_id,
+                ])->first();
+                //update User Account
+                $depositedUpdatedAccount = $depositedAccount->toArray();
+                $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
+                $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
+
+                if (((float) $depositedUpdatedAccount['user_account_data']['available_amount']) < ((float) config('fintech.transaction.minimum_balance'))) {
+                    throw new Exception(__('Insufficient balance!', [
+                        'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
+                        'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
+                    ]));
+                }
+
+                $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
+                $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
+                if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                    throw new Exception(__('User Account Balance does not update', [
+                        'current_status' => $walletTransfer->currentStatus(),
+                        'target_status' => OrderStatus::Success->value,
+                    ]));
+                }
+                //TODO ALL Beneficiary Data with bank and branch data
+                $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
+                $order_data['beneficiary_data'] = $beneficiaryData;
+
+                Remit::walletTransfer()->update($walletTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
+                Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
+                DB::commit();
+
+                return response()->created([
+                    'message' => __('restapi::messages.resource.created', ['model' => 'Wallet Transfer']),
+                    'id' => $walletTransfer->id,
+                ]);
+            } else {
+                throw new Exception('Your another order is in process...!');
+            }
+        } catch (Exception $exception) {
+
+            Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
+            DB::rollBack();
+
+            return response()->failed($exception);
         }
     }
 }

@@ -39,7 +39,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Fintech\\Remit\\": "src/"
+            "Fintech\\Remit\\": "src/",
+            "Fintech\\Remit\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {

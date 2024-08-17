@@ -3,7 +3,6 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
-use Fintech\Core\Traits\ApiResponseTrait;
 use Fintech\Remit\Http\Requests\WalletVerificationRequest;
 use Fintech\Remit\Http\Resources\WalletVerificationResource;
 use Illuminate\Http\JsonResponse;
@@ -11,8 +10,6 @@ use Illuminate\Routing\Controller;
 
 class WalletVerificationController extends Controller
 {
-    use ApiResponseTrait;
-
     /**
      * Handle the incoming request.
      */
@@ -35,7 +32,7 @@ class WalletVerificationController extends Controller
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 }

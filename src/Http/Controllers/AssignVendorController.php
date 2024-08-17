@@ -3,133 +3,211 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use ErrorException;
 use Exception;
-use Fintech\Business\Facades\Business;
-use Fintech\Core\Traits\ApiResponseTrait;
-use Fintech\Remit\Contracts\OrderQuotation;
+use Fintech\Core\Exceptions\UpdateOperationException;
+use Fintech\Remit\Exceptions\AlreadyAssignedException;
+use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\AssignableVendorInfoRequest;
 use Fintech\Remit\Http\Resources\AssignableVendorCollection;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 
 class AssignVendorController extends Controller
 {
-    use ApiResponseTrait;
+    private function getOrder($id)
+    {
+        $order = Transaction::order()->find($id);
 
-    /**
-     * Store a newly created resource in storage.
-     */
+        if (! $order) {
+            throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
+        }
+
+        return $order;
+    }
+
     public function available(string $id): JsonResponse|AssignableVendorCollection
     {
         try {
-            $order = Transaction::order()->find($id);
 
-            if (! $order) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
-            }
+            $order = $this->getOrder($id);
 
-            $serviceVendors = Business::serviceVendor()->list([
-                'service_id_array' => [$order->service_id],
-                'enabled' => true,
-                'paginate' => false,
-            ]);
+            $serviceVendors = Remit::assignVendor()->availableVendors($order, request()->user()->id);
 
             return new AssignableVendorCollection($serviceVendors);
 
         } catch (ModelNotFoundException $exception) {
 
-            return $this->notfound($exception->getMessage());
+            return response()->notfound($exception->getMessage());
+
+        } catch (AlreadyAssignedException $exception) {
+
+            return response()->locked($exception->getMessage());
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function vendor(AssignableVendorInfoRequest $request): JsonResponse
+    public function quotation(AssignableVendorInfoRequest $request): JsonResponse
     {
         $order_id = $request->input('order_id');
 
         $service_vendor_slug = $request->input('vendor_slug');
 
         try {
-            $order = Transaction::order()->find($order_id);
 
-            if (! $order) {
-                throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $order_id);
-            }
+            $order = $this->getOrder($order_id);
 
-            $availableVendors = config('fintech.remit.providers');
+            $jsonResponse = Remit::assignVendor()->requestQuote($order, $service_vendor_slug);
 
-            if (! isset($availableVendors[$service_vendor_slug])) {
-                throw new ErrorException('Service Vendor is not available on the configuration.');
-            }
-
-            $vendor = $availableVendors[$service_vendor_slug];
-
-            $driverClass = $vendor['driver'];
-
-            $instance = App::make($driverClass);
-
-            if (! $instance instanceof OrderQuotation) {
-                throw new ErrorException('Service Vendor Class is not instance of `Fintech\Remit\Contracts\OrderQuotation` interface.');
-            }
-
-            $jsonResponse = $instance->requestQuotation($order);
-
-            return $this->success($jsonResponse);
+            return response()->success($jsonResponse);
 
         } catch (ModelNotFoundException $exception) {
 
-            return $this->notfound($exception->getMessage());
+            return response()->notfound($exception->getMessage());
 
         } catch (Exception $exception) {
 
-            return $this->failed($exception->getMessage());
+            return response()->failed($exception);
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function process(AssignableVendorInfoRequest $request): JsonResponse
     {
-        //
+        $order_id = $request->input('order_id');
+
+        $service_vendor_slug = $request->input('vendor_slug');
+
+        try {
+            $order = $this->getOrder($order_id);
+
+            $jsonResponse = Remit::assignVendor()->processOrder($order, $service_vendor_slug);
+
+            return response()->success($jsonResponse);
+
+        } catch (ModelNotFoundException $exception) {
+
+            return response()->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return response()->failed($exception);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function status(AssignableVendorInfoRequest $request): JsonResponse
     {
-        //
+        $order_id = $request->input('order_id');
+
+        try {
+
+            $order = $this->getOrder($order_id);
+
+            $jsonResponse = Remit::assignVendor()->orderStatus($order);
+
+            return response()->success($jsonResponse);
+
+        } catch (ModelNotFoundException $exception) {
+
+            return response()->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return response()->failed($exception);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function cancel(AssignableVendorInfoRequest $request): JsonResponse
     {
-        //
+        $order_id = $request->input('order_id');
+
+        try {
+
+            $order = $this->getOrder($order_id);
+
+            $jsonResponse = Remit::assignVendor()->cancelOrder($order);
+
+            return response()->success($jsonResponse);
+
+        } catch (ModelNotFoundException $exception) {
+
+            return response()->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return response()->failed($exception);
+        }
     }
 
-    private function defaultVendorData(): array
+    public function amendment(AssignableVendorInfoRequest $request): JsonResponse
     {
-        return [
-            'balance' => 'test',
-            'approved' => true,
-        ];
+        $order_id = $request->input('order_id');
+
+        try {
+
+            $order = $this->getOrder($order_id);
+
+            $jsonResponse = Remit::assignVendor()->amendmentOrder($order);
+
+            return response()->success($jsonResponse);
+
+        } catch (ModelNotFoundException $exception) {
+
+            return response()->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return response()->failed($exception);
+        }
     }
 
-    private function cityBankVendorData(): array
+    public function overwrite(AssignableVendorInfoRequest $request): JsonResponse
     {
+        $order_id = $request->input('order_id');
 
+        $service_vendor_slug = $request->input('vendor_slug');
+
+        try {
+
+            $order = $this->getOrder($order_id);
+
+            $jsonResponse = Remit::assignVendor()->amendmentOrder($order, $service_vendor_slug);
+
+            return response()->success($jsonResponse);
+
+        } catch (ModelNotFoundException $exception) {
+
+            return response()->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return response()->failed($exception);
+        }
+    }
+
+    public function release(AssignableVendorInfoRequest $request): JsonResponse
+    {
+        $order_id = $request->input('order_id');
+
+        try {
+            $order = $this->getOrder($order_id);
+
+            if (! Transaction::order()->update($order->getKey(), ['assigned_user_id' => null, 'service_vendor_id' => null, 'vendor' => null])) {
+
+                throw (new UpdateOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $order_id);
+            }
+
+            return response()->updated(__('restapi::messages.resource.updated', ['model' => 'Order']));
+
+        } catch (ModelNotFoundException $exception) {
+
+            return response()->notfound($exception->getMessage());
+
+        } catch (Exception $exception) {
+
+            return response()->failed($exception);
+        }
     }
 }

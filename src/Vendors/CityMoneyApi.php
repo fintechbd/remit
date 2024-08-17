@@ -3,13 +3,13 @@
 namespace Fintech\Remit\Vendors;
 
 use Exception;
-use Fintech\Remit\Contracts\BankTransfer;
+use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Facades\Log;
 use MongoDB\Laravel\Eloquent\Model;
 use SimpleXMLElement;
 
-class CityBankApi implements BankTransfer, OrderQuotation
+class CityBankApi implements MoneyTransfer, OrderQuotation
 {
     /**
      * CityBank API configuration.
@@ -53,10 +53,7 @@ class CityBankApi implements BankTransfer, OrderQuotation
      *
      * @throws Exception
      */
-    public function getTnxStatus($inputs_data)
-    {
-
-    }
+    public function getTnxStatus($inputs_data) {}
 
     /**
      * bKash customer validation service will help you to validate the beneficiary bkash number before send the transaction
@@ -623,7 +620,7 @@ class CityBankApi implements BankTransfer, OrderQuotation
      *
      * @throws Exception
      */
-    public function requestQuotation($order): mixed
+    public function requestQuote($order): mixed
     {
         return $this->vendorBalance();
     }

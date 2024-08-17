@@ -157,10 +157,11 @@ class WalletTransferSeeder extends Seeder
     {
         $image_svg = __DIR__.'/../../../resources/img/service/logo_svg/';
         $image_png = __DIR__.'/../../../resources/img/service/logo_png/';
+        $vendor_id = config('fintech.business.default_vendor', 1);
 
         return [
             [
-                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mfs_bkash'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'bKash',
+                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mfs_bkash'])->first()->id, 'service_vendor_id' => $vendor_id, 'service_name' => 'bKash',
                 'service_slug' => 'mfs_bkash',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'mfs_bkash.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'mfs_bkash.png')), 'service_notification' => 'yes',
                 'service_delay' => 'yes',
@@ -176,7 +177,7 @@ class WalletTransferSeeder extends Seeder
                 'enabled' => true,
             ],
             [
-                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mfs_nagad'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'Nagad',
+                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mfs_nagad'])->first()->id, 'service_vendor_id' => $vendor_id, 'service_name' => 'Nagad',
                 'service_slug' => 'mfs_nagad',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'mfs_nagad.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'mfs_nagad.png')), 'service_notification' => 'yes',
                 'service_delay' => 'yes',
@@ -192,7 +193,7 @@ class WalletTransferSeeder extends Seeder
                 'enabled' => true,
             ],
             [
-                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_rocket'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'Rocket',
+                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_rocket'])->first()->id, 'service_vendor_id' => $vendor_id, 'service_name' => 'Rocket',
                 'service_slug' => 'mbs_rocket',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'mbs_rocket.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'mbs_rocket.png')), 'service_notification' => 'yes',
                 'service_delay' => 'yes',
@@ -208,7 +209,7 @@ class WalletTransferSeeder extends Seeder
                 'enabled' => true,
             ],
             [
-                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_m_cash'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'MCash',
+                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_m_cash'])->first()->id, 'service_vendor_id' => $vendor_id, 'service_name' => 'MCash',
                 'service_slug' => 'mbs_m_cash',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'mbs_m_cash.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'mbs_m_cash.png')), 'service_notification' => 'yes',
                 'service_delay' => 'yes',
@@ -224,7 +225,7 @@ class WalletTransferSeeder extends Seeder
                 'enabled' => true,
             ],
             [
-                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_sure_cash'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'SureCash',
+                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_sure_cash'])->first()->id, 'service_vendor_id' => $vendor_id, 'service_name' => 'SureCash',
                 'service_slug' => 'mbs_sure_cash',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'mbs_sure_cash.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'mbs_sure_cash.png')), 'service_notification' => 'yes',
                 'service_delay' => 'yes',
@@ -240,7 +241,7 @@ class WalletTransferSeeder extends Seeder
                 'enabled' => true,
             ],
             [
-                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_u_pay'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'Upay',
+                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_u_pay'])->first()->id, 'service_vendor_id' => $vendor_id, 'service_name' => 'Upay',
                 'service_slug' => 'mbs_u_pay',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'mbs_u_pay.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'mbs_u_pay.png')), 'service_notification' => 'yes',
                 'service_delay' => 'yes',
@@ -256,7 +257,7 @@ class WalletTransferSeeder extends Seeder
                 'enabled' => true,
             ],
             [
-                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_i_pay'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'Ipay',
+                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_i_pay'])->first()->id, 'service_vendor_id' => $vendor_id, 'service_name' => 'Ipay',
                 'service_slug' => 'mbs_i_pay',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'mbs_i_pay.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'mbs_i_pay.png')), 'service_notification' => 'yes',
                 'service_delay' => 'yes',
@@ -272,7 +273,7 @@ class WalletTransferSeeder extends Seeder
                 'enabled' => true,
             ],
             [
-                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_trust_axiata_pay_tap'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'Trust Axiata Pay (Tap)',
+                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_trust_axiata_pay_tap'])->first()->id, 'service_vendor_id' => $vendor_id, 'service_name' => 'Trust Axiata Pay (Tap)',
                 'service_slug' => 'mbs_trust_axiata_pay_tap',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'mbs_trust_axiata_pay_tap.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'mbs_trust_axiata_pay_tap.png')), 'service_notification' => 'yes',
                 'service_delay' => 'yes',
@@ -288,7 +289,7 @@ class WalletTransferSeeder extends Seeder
                 'enabled' => true,
             ],
             [
-                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_ok_wallet'])->first()->id, 'service_vendor_id' => 1, 'service_name' => 'OK Wallet',
+                'service_type_id' => Business::serviceType()->list(['service_type_slug' => 'mbs_ok_wallet'])->first()->id, 'service_vendor_id' => $vendor_id, 'service_name' => 'OK Wallet',
                 'service_slug' => 'mbs_ok_wallet',
                 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'mbs_ok_wallet.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'mbs_ok_wallet.png')), 'service_notification' => 'yes',
                 'service_delay' => 'yes',
@@ -322,7 +323,7 @@ class WalletTransferSeeder extends Seeder
                     'service_slug' => $service->service_slug,
                     'source_country_id' => $source_countries,
                     'destination_country_id' => [19, 39, 101, 132, 133, 167, 192, 231],
-                    'service_vendor_id' => 1,
+                    'service_vendor_id' => config('fintech.business.default_vendor', 1),
                     'service_stat_data' => [
                         [
                             'lower_limit' => '10.00',

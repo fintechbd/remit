@@ -8,8 +8,6 @@ use Fintech\Transaction\Repositories\Eloquent\OrderRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use InvalidArgumentException;
 
 /**
  * Class BankTransferRepository
@@ -18,13 +16,7 @@ class BankTransferRepository extends OrderRepository implements InterfacesBankTr
 {
     public function __construct()
     {
-        $model = app(config('fintech.remit.bank_transfer_model', BankTransfer::class));
-
-        if (! $model instanceof Model) {
-            throw new InvalidArgumentException("Eloquent repository require model class to be `Illuminate\Database\Eloquent\Model` instance.");
-        }
-
-        $this->model = $model;
+        parent::__construct(config('fintech.remit.bank_transfer_model', BankTransfer::class));
     }
 
     /**
