@@ -112,7 +112,6 @@ return [
                 'session_id' => env('PACKAGE_REMIT_VALYOU_AGENT_SESSION_ID'),
             ],
         ],
-
         'agrani' => [
             'mode' => 'sandbox',
             'driver' => Fintech\Remit\Vendors\AgraniBankApi::class,
