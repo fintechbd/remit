@@ -3,6 +3,7 @@
 namespace Fintech\Remit\Commands;
 
 use Fintech\Business\Facades\Business;
+use Fintech\Core\Facades\Core;
 use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Console\Command;
 
@@ -42,9 +43,17 @@ class IslamiBankSetupCommand extends Command
     {
         try {
 
-            $this->updateIdDocType();
+            if (Core::packageExists('MetaData')) {
+                $this->updateIdDocType();
+            } else {
+                $this->info('`fintech/metadata` is not installed. Skipped');
+            }
 
-            $this->addServiceVendor();
+            if (Core::packageExists('Business')) {
+                $this->addServiceVendor();
+            } else {
+                $this->info('`fintech/business` is not installed. Skipped');
+            }
 
             $this->info('Islami Bank Remit service vendor setup completed.');
 
@@ -67,7 +76,7 @@ class IslamiBankSetupCommand extends Command
 
         foreach (self::ID_DOC_TYPES as $code => $name) {
 
-            $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
+            $idDocType = \Fintech\MetaData\Facades\MetaData::idDocType()->list(['code' => $code])->first();
 
             if (!$idDocType) {
                 continue;
@@ -85,7 +94,7 @@ class IslamiBankSetupCommand extends Command
 
             $vendor_code['remit']['citybank'] = $name;
 
-            if (MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
+            if (\Fintech\MetaData\Facades\MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
                 $this->line("ID Doc Type ID: {$idDocType->getKey()} updated successful.");
             }
 
@@ -106,7 +115,7 @@ class IslamiBankSetupCommand extends Command
 
         foreach (self::ID_DOC_TYPES as $code => $name) {
 
-            $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
+            $idDocType = \Fintech\MetaData\Facades\MetaData::idDocType()->list(['code' => $code])->first();
 
             if (!$idDocType) {
                 continue;
@@ -124,7 +133,7 @@ class IslamiBankSetupCommand extends Command
 
             $vendor_code['remit']['citybank'] = $name;
 
-            if (MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
+            if (\Fintech\MetaData\Facades\MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
                 $this->line("ID Doc Type ID: {$idDocType->getKey()} updated successful.");
             }
 
@@ -145,7 +154,7 @@ class IslamiBankSetupCommand extends Command
 
         foreach (self::ID_DOC_TYPES as $code => $name) {
 
-            $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
+            $idDocType = \Fintech\MetaData\Facades\MetaData::idDocType()->list(['code' => $code])->first();
 
             if (!$idDocType) {
                 continue;
@@ -163,7 +172,7 @@ class IslamiBankSetupCommand extends Command
 
             $vendor_code['remit']['citybank'] = $name;
 
-            if (MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
+            if (\Fintech\MetaData\Facades\MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
                 $this->line("ID Doc Type ID: {$idDocType->getKey()} updated successful.");
             }
 
@@ -188,10 +197,10 @@ class IslamiBankSetupCommand extends Command
             'enabled' => false,
         ];
 
-        if (Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
+        if (\Fintech\Business\Facades\Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
             $this->info('Service vendor already exists. Skipping');
         } else {
-            Business::serviceVendor()->create($vendor);
+            \Fintech\Business\Facades\Business::serviceVendor()->create($vendor);
             $this->info('Service vendor created successfully.');
         }
     }
