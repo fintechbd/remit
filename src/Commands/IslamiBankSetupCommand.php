@@ -2,6 +2,7 @@
 
 namespace Fintech\Remit\Commands;
 
+use Fintech\Banco\Facades\Banco;
 use Fintech\Core\Facades\Core;
 use Illuminate\Console\Command;
 
@@ -505,6 +506,8 @@ class IslamiBankSetupCommand extends Command
 
             if (Core::packageExists('Banco')) {
                 $this->updateBank();
+                $this->updateBranches();
+                $this->addBeneficiaryAccountTypeCodes();
             } else {
                 $this->info('`fintech/banco` is not installed. Skipped');
             }
@@ -656,6 +659,102 @@ class IslamiBankSetupCommand extends Command
         } else {
             \Fintech\Business\Facades\Business::serviceVendor()->create($vendor);
             $this->info('Service vendor created successfully.');
+        }
+    }
+
+    private function addBeneficiaryAccountTypeCodes(): void
+    {
+        $bank = \Fintech\Banco\Facades\Banco::bank()
+            ->list(['country_id' => 19, 'slug' => 'islami-bank-bangladesh-limited'])
+            ->first();
+
+        if (!$bank) {
+            return;
+        }
+
+        $accounts = [
+            [
+                'bank_id' => $bank->id,
+                'code' => '01',
+                'name' => 'AWCA (Current)',
+                'enabled' => true,
+            ],
+            [
+                'bank_id' => $bank->id,
+                'code' => '02',
+                'name' => 'MSA (Savings)',
+                'enabled' => true,
+            ],
+            [
+                'bank_id' => $bank->id,
+                'code' => '03',
+                'name' => 'MSSA (Scheme)',
+                'enabled' => true,
+            ],
+            [
+                'bank_id' => $bank->id,
+                'code' => '05',
+                'name' => 'MTDRA (Term Deposit)',
+                'enabled' => true,
+            ],
+            [
+                'bank_id' => $bank->id,
+                'code' => '06',
+                'name' => 'MMSA (Mohr)',
+                'enabled' => true,
+            ],
+            [
+                'bank_id' => $bank->id,
+                'code' => '07',
+                'name' => 'MHSA (Hajj)',
+                'enabled' => true,
+            ],
+            [
+                'bank_id' => $bank->id,
+                'code' => '09',
+                'name' => 'SND (Short Notice Deposit)',
+                'enabled' => true,
+            ],
+            [
+                'bank_id' => $bank->id,
+                'code' => '10',
+                'name' => 'MSA-STAFF',
+                'enabled' => true,
+            ],
+            [
+                'bank_id' => $bank->id,
+                'code' => '11',
+                'name' => 'FCA (FC Current)',
+                'enabled' => true,
+            ],
+            [
+                'bank_id' => $bank->id,
+                'code' => '12',
+                'name' => 'MFCA (FC Savings)',
+                'enabled' => true,
+            ],
+            [
+                'bank_id' => $bank->id,
+                'code' => '67',
+                'name' => 'SMSA (Student Savings)',
+                'enabled' => true,
+            ],
+            [
+                'bank_id' => $bank->id,
+                'code' => '68',
+                'name' => 'MNSBA (NRB Savings Bond)',
+                'enabled' => true,
+            ],
+            [
+                'bank_id' => $bank->id,
+                'code' => '71',
+                'name' => 'Remittance card',
+                'enabled' => true,
+            ],
+        ];
+
+        foreach ($accounts as $entry) {
+            \Fintech\Banco\Facades\Banco::beneficiaryAccountType()->create($entry);
         }
     }
 }
