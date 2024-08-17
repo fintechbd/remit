@@ -21,6 +21,19 @@ class IslamiBankSetupCommand extends Command
         'work-permit' => '7',
     ];
 
+    const BD_BANKS = [
+        'passport' => '1',
+        'driving-licence' => '6',
+        'national-identity-card' => '9',
+        'residence-permit' => '7',
+        'voter-id' => '7',
+        'tax-id' => '7',
+        'social-security-card' => '7',
+        'postal-identity-card' => '7',
+        'professional-qualification-card' => '7',
+        'work-permit' => '7',
+    ];
+
     public $signature = 'remit:islami-bank-setup';
 
     public $description = 'install/update required fields for islami bank';
@@ -46,6 +59,84 @@ class IslamiBankSetupCommand extends Command
     }
 
     private function updateIdDocType(): void
+    {
+
+        $bar = $this->output->createProgressBar(count(self::ID_DOC_TYPES));
+
+        $bar->start();
+
+        foreach (self::ID_DOC_TYPES as $code => $name) {
+
+            $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
+
+            if (!$idDocType) {
+                continue;
+            }
+
+            $vendor_code = $idDocType->vendor_code;
+
+            if ($vendor_code == null) {
+                $vendor_code = [];
+            }
+
+            if (is_string($vendor_code)) {
+                $vendor_code = json_decode($vendor_code, true);
+            }
+
+            $vendor_code['remit']['citybank'] = $name;
+
+            if (MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
+                $this->line("ID Doc Type ID: {$idDocType->getKey()} updated successful.");
+            }
+
+            $bar->advance();
+        }
+
+        $bar->finish();
+
+        $this->info('ID Doc Type metadata updated successfully.');
+    }
+
+    private function updateBank(): void
+    {
+
+        $bar = $this->output->createProgressBar(count(self::ID_DOC_TYPES));
+
+        $bar->start();
+
+        foreach (self::ID_DOC_TYPES as $code => $name) {
+
+            $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
+
+            if (!$idDocType) {
+                continue;
+            }
+
+            $vendor_code = $idDocType->vendor_code;
+
+            if ($vendor_code == null) {
+                $vendor_code = [];
+            }
+
+            if (is_string($vendor_code)) {
+                $vendor_code = json_decode($vendor_code, true);
+            }
+
+            $vendor_code['remit']['citybank'] = $name;
+
+            if (MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
+                $this->line("ID Doc Type ID: {$idDocType->getKey()} updated successful.");
+            }
+
+            $bar->advance();
+        }
+
+        $bar->finish();
+
+        $this->info('ID Doc Type metadata updated successfully.');
+    }
+
+    private function updateBranches(): void
     {
 
         $bar = $this->output->createProgressBar(count(self::ID_DOC_TYPES));

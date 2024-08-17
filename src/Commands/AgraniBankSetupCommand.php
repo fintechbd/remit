@@ -2,9 +2,7 @@
 
 namespace Fintech\Remit\Commands;
 
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
-use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Console\Command;
 
 class AgraniBankSetupCommand extends Command
@@ -284,10 +282,17 @@ class AgraniBankSetupCommand extends Command
     public function handle(): int
     {
         try {
+            if (Core::packageExists('MetaData')) {
+                $this->updateRemittancePurpose();
+            } else {
+                $this->info('`fintech/metadata` is not installed. Skipped');
+            }
 
-            $this->updateRemittancePurpose();
-
-            $this->addServiceVendor();
+            if (Core::packageExists('Business')) {
+                $this->addServiceVendor();
+            } else {
+                $this->info('`fintech/business` is not installed. Skipped');
+            }
 
             $this->info('Agrani Bank Remit service vendor setup completed.');
 
@@ -310,7 +315,7 @@ class AgraniBankSetupCommand extends Command
 
         foreach (self::PURPOSE_OF_REMITTANCES as $code => $name) {
 
-            $purposeOfRemittance = MetaData::remittancePurpose()
+            $purposeOfRemittance = \Fintech\MetaData\Facades\MetaData::remittancePurpose()
                 ->list(['code' => $code])->first();
 
             if (!$purposeOfRemittance) {
@@ -329,7 +334,10 @@ class AgraniBankSetupCommand extends Command
 
             $vendor_code['remit']['argani'] = $name;
 
-            if (MetaData::remittancePurpose()->update($purposeOfRemittance->getKey(), ['vendor_code' => $vendor_code])) {
+            if (\Fintech\MetaData\Facades\MetaData::remittancePurpose()->update(
+                $purposeOfRemittance->getKey(),
+                ['vendor_code' => $vendor_code])
+            ) {
                 $this->line("Purpose of Remittance ID: {$purposeOfRemittance->getKey()} updated successful.");
             }
 
@@ -354,10 +362,10 @@ class AgraniBankSetupCommand extends Command
             'enabled' => false,
         ];
 
-        if (Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
+        if (\Fintech\Business\Facades\Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
             $this->info('Service vendor already exists. Skipping');
         } else {
-            Business::serviceVendor()->create($vendor);
+            \Fintech\Business\Facades\Business::serviceVendor()->create($vendor);
             $this->info('Service vendor created successfully.');
         }
     }

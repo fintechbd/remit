@@ -2,8 +2,7 @@
 
 namespace Fintech\Remit\Commands;
 
-use Fintech\Business\Facades\Business;
-use Fintech\MetaData\Facades\MetaData;
+use Fintech\Core\Facades\Core;
 use Illuminate\Console\Command;
 
 class CityBankSetupCommand extends Command
@@ -29,9 +28,17 @@ class CityBankSetupCommand extends Command
     {
         try {
 
-            $this->updateIdDocType();
+            if (Core::packageExists('MetaData')) {
+                $this->updateIdDocType();
+            } else {
+                $this->info('`fintech/metadata` is not installed. Skipped');
+            }
 
-            $this->addServiceVendor();
+            if (Core::packageExists('Business')) {
+                $this->addServiceVendor();
+            } else {
+                $this->info('`fintech/business` is not installed. Skipped');
+            }
 
             $this->info('City Bank Remit service vendor setup completed.');
 
@@ -54,7 +61,7 @@ class CityBankSetupCommand extends Command
 
         foreach (self::ID_DOC_TYPES as $code => $name) {
 
-            $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
+            $idDocType = \Fintech\MetaData\Facades\MetaData::idDocType()->list(['code' => $code])->first();
 
             if (!$idDocType) {
                 continue;
@@ -72,7 +79,7 @@ class CityBankSetupCommand extends Command
 
             $vendor_code['remit']['citybank'] = $name;
 
-            if (MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
+            if (\Fintech\MetaData\Facades\MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
                 $this->line("ID Doc Type ID: {$idDocType->getKey()} updated successful.");
             }
 
@@ -97,10 +104,10 @@ class CityBankSetupCommand extends Command
             'enabled' => false,
         ];
 
-        if (Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
+        if (\Fintech\Business\Facades\Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
             $this->info('Service vendor already exists. Skipping');
         } else {
-            Business::serviceVendor()->create($vendor);
+            \Fintech\Business\Facades\Business::serviceVendor()->create($vendor);
             $this->info('Service vendor created successfully.');
         }
     }
