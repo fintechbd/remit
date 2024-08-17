@@ -3,8 +3,11 @@
 namespace Fintech\Remit;
 
 use Fintech\Core\Traits\RegisterPackageTrait;
-use Fintech\Remit\Commands\AgraniInstallCommand;
+use Fintech\Remit\Commands\AgraniBankSetupCommand;
+use Fintech\Remit\Commands\CityBankSetupCommand;
 use Fintech\Remit\Commands\InstallCommand;
+use Fintech\Remit\Commands\IslamiBankSetupCommand;
+use Fintech\Remit\Commands\MeghnaBankSetupCommand;
 use Fintech\Remit\Commands\RemitCommand;
 use Fintech\Remit\Providers\EventServiceProvider;
 use Fintech\Remit\Providers\RepositoryServiceProvider;
@@ -60,8 +63,11 @@ class RemitServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([
+                AgraniBankSetupCommand::class,
+                CityBankSetupCommand::class,
+                IslamiBankSetupCommand::class,
+                MeghnaBankSetupCommand::class,
                 InstallCommand::class,
-                AgraniInstallCommand::class,
                 RemitCommand::class,
             ]);
         }

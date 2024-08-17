@@ -6,7 +6,7 @@ use Fintech\Core\Facades\Core;
 use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Console\Command;
 
-class AgraniInstallCommand extends Command
+class MeghnaBankSetupCommand extends Command
 {
     const AGRANI_CODES = [
         'AFG' => ['name' => 'Afghanistan', 'agrani_code' => 'AF'],
