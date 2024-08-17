@@ -239,7 +239,6 @@ class AgraniBankSetupCommand extends Command
         'JE1' => ['name' => 'Jersey', 'agrani_code' => 'JE'],
         'IM1' => ['name' => 'Man (isle Of)', 'agrani_code' => 'IM'],
     ];
-
     const PURPOSE_OF_REMITTANCES = [
         'build-acquisition-renovation-property' => null,
         'business-travel' => '13',

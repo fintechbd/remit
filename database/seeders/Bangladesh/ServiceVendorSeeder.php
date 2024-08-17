@@ -18,26 +18,4 @@ class ServiceVendorSeeder extends Seeder
         Artisan::call('remit:islami-bank-setup');
         Artisan::call('remit:meghna-bank-setup');
     }
-
-    private function data()
-    {
-        return [
-            [
-                'service_vendor_name' => 'Islami Bank',
-                'service_vendor_slug' => 'islamibank',
-                'service_vendor_data' => [],
-                'logo_svg' => 'islamibank.svg',
-                'logo_png' => 'islamibank.png',
-                'enabled' => false,
-            ],
-            [
-                'service_vendor_name' => 'Meghna Bank',
-                'service_vendor_slug' => 'meghnabank',
-                'service_vendor_data' => [],
-                'logo_svg' => 'meghnabank.svg',
-                'logo_png' => 'meghnabank.png',
-                'enabled' => false,
-            ],
-        ];
-    }
 }
