@@ -5,10 +5,9 @@ namespace Fintech\Remit\Vendors;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Contracts\MoneyTransfer;
-use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Facades\Log;
 
-class MeghnaBankApi implements MoneyTransfer, OrderQuotation
+class MeghnaBankApi implements MoneyTransfer
 {
     /**
      * MeghnaBankApiService constructor.

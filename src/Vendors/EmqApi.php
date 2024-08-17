@@ -8,13 +8,13 @@ use App\Services\Backend\Setting\CatalogListService;
 use App\Services\Backend\Setting\CountryService;
 use Carbon\Carbon;
 use Exception;
+use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Contracts\MoneyTransfer;
-use Fintech\Remit\Contracts\OrderQuotation;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use stdClass;
 
-class EmqApi implements MoneyTransfer, OrderQuotation
+class EmqApi implements MoneyTransfer
 {
     const OCCUPATION = 'OCC';
 
@@ -1359,4 +1359,48 @@ class EmqApi implements MoneyTransfer, OrderQuotation
     }
 
     protected function getBalanceFromCurrency(string $currency, $response) {}
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for an execution of the order.
+     *
+     * @throws \ErrorException
+     */
+    public function executeOrder(BaseModel $order): mixed
+    {
+        // TODO: Implement executeOrder() method.
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for the progress status of the order.
+     *
+     * @throws \ErrorException
+     */
+    public function orderStatus(BaseModel $order): mixed
+    {
+        // TODO: Implement orderStatus() method.
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for the cancellation of the order.
+     *
+     * @throws \ErrorException
+     */
+    public function cancelOrder(BaseModel $order): mixed
+    {
+        // TODO: Implement cancelOrder() method.
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for the amendment of the order.
+     *
+     * @throws \ErrorException
+     */
+    public function amendmentOrder(BaseModel $order): mixed
+    {
+        // TODO: Implement amendmentOrder() method.
+    }
 }
