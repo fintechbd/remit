@@ -68,36 +68,6 @@ return [
     | This value will be used across systems where a repository instance is needed
     */
     'providers' => [
-        'agrani' => [
-            'mode' => 'sandbox',
-            'driver' => Fintech\Remit\Vendors\AgraniBankApi::class,
-            'live' => [
-                'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => env('PACKAGE_REMIT_AGRANI_BANK_USERNAME'),
-                'password' => env('PACKAGE_REMIT_AGRANI_BANK_PASSWORD'),
-                'excode' => '7106',
-            ],
-            'sandbox' => [
-                'endpoint' => 'https://fex.agranibank.org/remapiuat',
-                'username' => env('PACKAGE_REMIT_AGRANI_BANK_USERNAME'),
-                'password' => env('PACKAGE_REMIT_AGRANI_BANK_PASSWORD'),
-                'excode' => '7086',
-            ],
-        ],
-        'citybank' => [
-            'mode' => 'sandbox',
-            'driver' => Fintech\Remit\Vendors\CityBankApi::class,
-            'live' => [
-                'endpoint' => 'http://nrbms.thecitybank.com/nrb_api_test/dynamicApi.php?wsdl',
-                'username' => env('PACKAGE_REMIT_CITY_BANK_USERNAME'),
-                'password' => env('PACKAGE_REMIT_CITY_BANK_PASSWORD'),
-            ],
-            'sandbox' => [
-                'endpoint' => 'http://nrbms.thecitybank.com/dynamicApi.php?wsdl',
-                'username' => env('PACKAGE_REMIT_CITY_BANK_USERNAME'),
-                'password' => env('PACKAGE_REMIT_CITY_BANK_PASSWORD'),
-            ],
-        ],
         'emqapi' => [
             'mode' => 'sandbox',
             'driver' => Fintech\Remit\Vendors\EmqApi::class,
@@ -140,6 +110,37 @@ return [
                 'password' => env('PACKAGE_REMIT_VALYOU_PASSWORD'),
                 'agent_code' => env('PACKAGE_REMIT_VALYOU_AGENT_CODE'),
                 'session_id' => env('PACKAGE_REMIT_VALYOU_AGENT_SESSION_ID'),
+            ],
+        ],
+
+        'agrani' => [
+            'mode' => 'sandbox',
+            'driver' => Fintech\Remit\Vendors\AgraniBankApi::class,
+            'live' => [
+                'endpoint' => 'https://fex.agranibank.org/remapiuat',
+                'username' => env('PACKAGE_REMIT_AGRANI_BANK_USERNAME'),
+                'password' => env('PACKAGE_REMIT_AGRANI_BANK_PASSWORD'),
+                'excode' => '7106',
+            ],
+            'sandbox' => [
+                'endpoint' => 'https://fex.agranibank.org/remapiuat',
+                'username' => env('PACKAGE_REMIT_AGRANI_BANK_USERNAME'),
+                'password' => env('PACKAGE_REMIT_AGRANI_BANK_PASSWORD'),
+                'excode' => '7086',
+            ],
+        ],
+        'citybank' => [
+            'mode' => 'sandbox',
+            'driver' => Fintech\Remit\Vendors\CityBankApi::class,
+            'live' => [
+                'endpoint' => 'http://nrbms.thecitybank.com/nrb_api_test/dynamicApi.php?wsdl',
+                'username' => env('PACKAGE_REMIT_CITY_BANK_USERNAME'),
+                'password' => env('PACKAGE_REMIT_CITY_BANK_PASSWORD'),
+            ],
+            'sandbox' => [
+                'endpoint' => 'http://nrbms.thecitybank.com/dynamicApi.php?wsdl',
+                'username' => env('PACKAGE_REMIT_CITY_BANK_USERNAME'),
+                'password' => env('PACKAGE_REMIT_CITY_BANK_PASSWORD'),
             ],
         ],
         'islamibank' => [
