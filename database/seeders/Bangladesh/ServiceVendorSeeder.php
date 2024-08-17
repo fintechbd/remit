@@ -23,14 +23,6 @@ class ServiceVendorSeeder extends Seeder
     {
         return [
             [
-                'service_vendor_name' => 'City Bank',
-                'service_vendor_slug' => 'citybank',
-                'service_vendor_data' => [],
-                'logo_svg' => 'citybank.svg',
-                'logo_png' => 'citybank.png',
-                'enabled' => false,
-            ],
-            [
                 'service_vendor_name' => 'Islami Bank',
                 'service_vendor_slug' => 'islamibank',
                 'service_vendor_data' => [],
