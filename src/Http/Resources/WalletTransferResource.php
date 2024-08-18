@@ -28,9 +28,12 @@ class WalletTransferResource extends JsonResource
             'sender_receiver_name' => null,
             'user_id' => $this->user_id ?? null,
             'user_name' => null,
+            'assigned_user_id' => $this->assigned_user_id ?? null,
+            'assigned_user_name' => null,
             'service_id' => $this->service_id ?? null,
             'service_name' => null,
             'transaction_form_id' => $this->transaction_form_id ?? null,
+            'transaction_form_name' => $this->transaction_form_name ?? null,
             'ordered_at' => $this->ordered_at ?? null,
             'amount' => $this->amount ?? null,
             'currency' => $this->currency ?? null,
@@ -53,9 +56,16 @@ class WalletTransferResource extends JsonResource
         if (Core::packageExists('Auth')) {
             $data['user_name'] = $this->user?->name ?? null;
             $data['sender_receiver_name'] = $this->senderReceiver?->name ?? null;
+            $data['assigned_user_name'] = $this->assignedUser?->name ?? null;
         }
         if (Core::packageExists('Business')) {
             $data['service_name'] = $this->service?->service_name ?? null;
+        }
+        if (Core::packageExists('Business')) {
+            $data['service_name'] = $this->service?->service_name ?? null;
+        }
+        if (Core::packageExists('Transaction')) {
+            $data['transaction_form_name'] = $this->transactionForm?->name ?? null;
         }
 
         return $data;

@@ -18,53 +18,56 @@ class WalletTransferCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return $this->collection->map(function ($deposit) {
+        return $this->collection->map(function ($walletTransfer) {
             $data = [
-                'id' => $deposit->getKey(),
-                'source_country_id' => $deposit->source_country_id ?? null,
+                'id' => $walletTransfer->getKey(),
+                'source_country_id' => $walletTransfer->source_country_id ?? null,
                 'source_country_name' => null,
-                'destination_country_id' => $deposit->destination_country_id ?? null,
+                'destination_country_id' => $walletTransfer->destination_country_id ?? null,
                 'destination_country_name' => null,
-                'parent_id' => $deposit->parent_id ?? null,
-                'sender_receiver_id' => $deposit->sender_receiver_id ?? null,
+                'parent_id' => $walletTransfer->parent_id ?? null,
+                'sender_receiver_id' => $walletTransfer->sender_receiver_id ?? null,
                 'sender_receiver_name' => null,
-                'user_id' => $deposit->user_id ?? null,
+                'user_id' => $walletTransfer->user_id ?? null,
                 'user_name' => null,
-                'service_id' => $deposit->service_id ?? null,
+                'assigned_user_id' => $walletTransfer->assigned_user_id ?? null,
+                'assigned_user_name' => null,
+                'service_id' => $walletTransfer->service_id ?? null,
                 'service_name' => null,
-                'transaction_form_id' => $deposit->transaction_form_id ?? null,
-                'transaction_form_name' => $deposit->transaction_form_name ?? null,
-                'ordered_at' => $deposit->ordered_at ?? null,
-                'amount' => $deposit->amount ?? null,
-                'currency' => $deposit->currency ?? null,
-                'converted_amount' => $deposit->converted_amount ?? null,
-                'converted_currency' => $deposit->converted_currency ?? null,
-                'order_number' => $deposit->order_number ?? null,
-                'risk_profile' => $deposit->risk_profile ?? null,
-                'notes' => $deposit->notes ?? null,
-                'is_refunded' => $deposit->is_refunded ?? null,
-                'order_data' => $deposit->order_data ?? new stdClass,
-                'status' => $deposit->status ?? null,
-                'created_at' => $deposit->created_at ?? null,
-                'updated_at' => $deposit->updated_at ?? null,
+                'transaction_form_id' => $walletTransfer->transaction_form_id ?? null,
+                'transaction_form_name' => $walletTransfer->transaction_form_name ?? null,
+                'ordered_at' => $walletTransfer->ordered_at ?? null,
+                'amount' => $walletTransfer->amount ?? null,
+                'currency' => $walletTransfer->currency ?? null,
+                'converted_amount' => $walletTransfer->converted_amount ?? null,
+                'converted_currency' => $walletTransfer->converted_currency ?? null,
+                'order_number' => $walletTransfer->order_number ?? null,
+                'risk_profile' => $walletTransfer->risk_profile ?? null,
+                'notes' => $walletTransfer->notes ?? null,
+                'is_refunded' => $walletTransfer->is_refunded ?? null,
+                'order_data' => $walletTransfer->order_data ?? new stdClass,
+                'status' => $walletTransfer->status ?? null,
+                'created_at' => $walletTransfer->created_at ?? null,
+                'updated_at' => $walletTransfer->updated_at ?? null,
             ];
 
             if (Core::packageExists('MetaData')) {
-                $data['source_country_name'] = $deposit->sourceCountry?->name ?? null;
-                $data['destination_country_name'] = $deposit->destinationCountry?->name ?? null;
+                $data['source_country_name'] = $walletTransfer->sourceCountry?->name ?? null;
+                $data['destination_country_name'] = $walletTransfer->destinationCountry?->name ?? null;
             }
             if (Core::packageExists('Auth')) {
-                $data['user_name'] = $deposit->user?->name ?? null;
-                $data['sender_receiver_name'] = $deposit->senderReceiver?->name ?? null;
+                $data['user_name'] = $walletTransfer->user?->name ?? null;
+                $data['sender_receiver_name'] = $walletTransfer->senderReceiver?->name ?? null;
+                $data['assigned_user_name'] = $walletTransfer->assignedUser?->name ?? null;
             }
             if (Core::packageExists('Business')) {
-                $data['service_name'] = $deposit->service?->service_name ?? null;
+                $data['service_name'] = $walletTransfer->service?->service_name ?? null;
             }
             if (Core::packageExists('Business')) {
-                $data['service_name'] = $deposit->service?->service_name ?? null;
+                $data['service_name'] = $walletTransfer->service?->service_name ?? null;
             }
             if (Core::packageExists('Transaction')) {
-                $data['transaction_form_name'] = $deposit->transactionForm?->name ?? null;
+                $data['transaction_form_name'] = $walletTransfer->transactionForm?->name ?? null;
             }
 
             return $data;
