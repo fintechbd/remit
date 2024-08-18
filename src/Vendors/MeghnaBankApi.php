@@ -4,11 +4,32 @@ namespace Fintech\Remit\Vendors;
 
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class MeghnaBankApi implements MoneyTransfer
 {
+    /**
+     * MeghnaBank API configuration.
+     *
+     * @var array
+     */
+    private mixed $config;
+
+    /**
+     * MeghnaBank API Url.
+     *
+     * @var string
+     */
+    private mixed $apiUrl;
+
+    private string $status = 'sandbox';
+
+    private PendingRequest $client;
+
     /**
      * MeghnaBankApiService constructor.
      */
@@ -24,57 +45,37 @@ class MeghnaBankApi implements MoneyTransfer
             $this->apiUrl = $this->config[$this->status]['endpoint'];
             $this->status = 'live';
         }
+
+        $this->client = Http::withoutVerifying()
+            ->baseUrl($this->apiUrl)
+            ->acceptJson()
+            ->contentType('application/json')
+            ->withBasicAuth($this->config[$this->status]['user'], $this->config[$this->status]['password'])
+            ->withHeaders([
+                'bankid' => $this->config[$this->status]['bankid'],
+                'agent' => $this->config[$this->status]['agent'],
+            ]);
     }
 
-    /**
-     * Base function that is responsible for interacting directly with the Remit Webservice api to obtain data
-     *
-     * @param  array  $params
-     * @return array
-     *
-     * @throws Exception
-     */
-    public function getData($url, $params = [])
+    private function get(string $url, array $params = []): array
     {
-        $apiUrl = $this->apiUrl.$url;
-        $apiUrl .= http_build_query($params);
-        Log::info($apiUrl);
-
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $apiUrl);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
-        curl_setopt($curl, CURLOPT_ENCODING, '');
-        curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 0);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($curl, CURLOPT_USERPWD, "'".$this->config[$this->status]['user'].':'.$this->config[$this->status]['password']."'");
-        curl_setopt($curl, CURLOPT_HTTPHEADER, [
-            "'bankid: ".$this->config[$this->status]['user']."'",
-            "'agent: ".$this->config[$this->status]['agent']."'",
-        ]
-        );
-
-        $response = curl_exec($curl);
-        $info = curl_getinfo($curl);
-        $error = curl_error($curl);
-
-        if ($response === false) {
-            Log::info($info);
-            Log::info($error);
-            throw new Exception(curl_error($curl), curl_errno($curl));
-        }
-
-        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        curl_close($curl);
-        Log::info(json_decode($response, true));
+        $response = $this->client->get($url, $params)->json();
 
         return [
-            'status' => $status,
-            'response' => json_decode($response, true),
+            'status' => $response['status'] ?? true,
+            'message' => $response,
         ];
+    }
 
+    private function post(string $url, array $params = []): array
+    {
+        $response = $this->client->withBody(base64_encode(json_encode($params)))
+            ->post($url)->json();
+
+        return [
+            'status' => $response['status'] ?? true,
+            'message' => $response,
+        ];
     }
 
     /**
@@ -184,7 +185,7 @@ class MeghnaBankApi implements MoneyTransfer
     {
         $url = 'routings?';
         $params['bankCode'] = $bankCode;
-        $response = $this->getData($url, $params);
+        $response = $this->get($url, $params);
 
         return $response;
     }
@@ -268,26 +269,38 @@ class MeghnaBankApi implements MoneyTransfer
         return $return[$code];
     }
 
-    /**
-     * Account Credit
-     *
-     * @throws Exception
-     */
-    public function accountCredit(array $data): array
-    {
-        $url = 'remitAccCrTransfer';
 
-        $params['ORDER_NO'] = ($data['beneficiary_data']['reference_no'] ?? null);
-        $params['TRANSACTION_PIN'] = ($data['beneficiary_data']['reference_no'] ?? null);
+    /**
+     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     */
+    public function requestQuote($order): mixed
+    {
+        return $this->get('/remitEnquiry', [
+            'queryType' => 2
+        ]);
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for an execution of the order.
+     *
+     *
+     * @throws \ErrorException
+     */
+    public function executeOrder(BaseModel $order): mixed
+    {
+        $data = $order->order_data ?? [];
+
+        $params['ORDER_NO'] = $data['beneficiary_data']['reference_no'] ?? null;
+        $params['TRANSACTION_PIN'] = $data['beneficiary_data']['reference_no'] ?? null;
         $params['TRN_DATE'] = (date('Y-m-d', strtotime($data['created_at'])) ?? null);
-        $params['TRNTP'] = $data[''];
-        $params['AMOUNT'] = ($data['sending_amount'] ?? null);
+        $params['AMOUNT'] = floatval($order->converted_amount ?? ($data['sending_amount'] ?? null));
         //RECEIVER
         $params['RECEIVER_NAME'] = ($data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
         $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
-        $params['RECEIVER_AND_SENDER_RELATION'] = $data[''];
-        $params['RECEIVER_CONTACT'] = ($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $params['RECEIVER_AND_SENDER_RELATION'] = $data['trest'] ?? null;
+        $params['RECEIVER_CONTACT'] = str_replace("+880", "", ($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
         $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = ($data['beneficiary_data']['branch_information']['branch_data']['location_no'] ?? '');
         $params['RECEIVER_BANK'] = ($data['beneficiary_data']['bank_information']['bank_name'] ?? null);
         $params['RECEIVER_BANK_BRANCH'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? null);
@@ -301,7 +314,7 @@ class MeghnaBankApi implements MoneyTransfer
         $params['SENDER_SUB_COUNTRY_LEVEL_2'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null);
         $params['SENDER_ADDRESS_LINE'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
         $params['SENDER_CONTACT'] = ($data['beneficiary_data']['sender_information']['mobile'] ?? null);
-        $params['PURPOSE'] = ($data['beneficiary_data']['sender_information']['profile']['remittance_purpose']['name'] ?? '');
+        $params['PURPOSE'] = ($data['beneficiary_data']['sender_information']['profile']['remittance_purpose']['name'] ?? 'Testing');
 
         //Transaction Type(A=Account,C=Cash)
         switch ($data['service_slug']) {
@@ -313,67 +326,8 @@ class MeghnaBankApi implements MoneyTransfer
             default:
                 //code block
         }
+        return $this->post('/remitAccCrTransfer', $params);
 
-        $response = $this->getData($url, $params);
-
-        return $response;
-    }
-
-    public function makeTransfer(array $orderInfo = []): mixed
-    {
-        return [
-
-        ];
-    }
-
-    public function transferStatus(array $orderInfo = []): mixed
-    {
-        return [
-
-        ];
-    }
-
-    public function cancelTransfer(array $orderInfo = []): mixed
-    {
-        return [
-
-        ];
-    }
-
-    public function verifyAccount(array $accountInfo = []): mixed
-    {
-        return [
-
-        ];
-    }
-
-    public function vendorBalance(array $accountInfo = []): mixed
-    {
-        return [
-
-        ];
-    }
-
-    /**
-     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
-     */
-    public function requestQuote($order): mixed
-    {
-        return [
-
-        ];
-    }
-
-    /**
-     * Method to make a request to the remittance service provider
-     * for an execution of the order.
-     *
-     *
-     * @throws \ErrorException
-     */
-    public function executeOrder(BaseModel $order): mixed
-    {
-        // TODO: Implement executeOrder() method.
     }
 
     /**
@@ -384,7 +338,9 @@ class MeghnaBankApi implements MoneyTransfer
      */
     public function orderStatus(BaseModel $order): mixed
     {
-        // TODO: Implement orderStatus() method.
+        return $this->get('/remitReport', [
+            'ordpinNo' => $order->order_data['beneficiary_data']['reference_no'] ?? null,
+        ]);
     }
 
     /**
@@ -395,7 +351,11 @@ class MeghnaBankApi implements MoneyTransfer
      */
     public function cancelOrder(BaseModel $order): mixed
     {
-        // TODO: Implement cancelOrder() method.
+        return $this->get('/transactionTracker', [
+            'orderNo' => $order->order_data['beneficiary_data']['reference_no'] ?? null,
+            'queryCode' => 2,
+            'info' => 'Cancelled By User'
+        ]);
     }
 
     /**
@@ -406,6 +366,10 @@ class MeghnaBankApi implements MoneyTransfer
      */
     public function amendmentOrder(BaseModel $order): mixed
     {
-        // TODO: Implement amendmentOrder() method.
+        return $this->get('/transactionTracker', [
+            'orderNo' => $order->order_data['beneficiary_data']['reference_no'] ?? null,
+            'queryCode' => 1,
+            'info' => 'Cancelled By User'
+        ]);
     }
 }

@@ -958,7 +958,7 @@ XML;
      *
      * @throws \ErrorException
      */
-    public function executeOrder(BaseModel $order, string $vendor_slug): mixed
+    public function executeOrder(BaseModel $order): mixed
     {
         // TODO: Implement executeOrder() method.
     }
