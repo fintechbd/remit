@@ -163,7 +163,7 @@ class MeghnaBankSetupCommand extends Command
 
     private function addServiceVendor(): void
     {
-        $dir = __DIR__.'/../../resources/img/service_vendor/';
+        $dir = __DIR__.'/../../resources/img/service_vendor';
 
         $vendor = [
             'service_vendor_name' => 'Meghna Bank',
@@ -210,7 +210,7 @@ class MeghnaBankSetupCommand extends Command
             $vendor_code['remit']['meghnabank'] = $name;
 
             if (\Fintech\Banco\Facades\Banco::bank()->update($bank->getKey(), ['vendor_code' => $vendor_code])) {
-                $this->line("Bank ID: {$bank->getKey()} updated successful.");
+                $this->info("Bank ID: {$bank->getKey()} updated successful.");
             }
 
             $bar->advance();
