@@ -77,7 +77,6 @@ class MeghnaBankApi implements MoneyTransfer
 
     }
 
-
     /**
      * @throws Exception
      */

@@ -239,6 +239,7 @@ class AgraniBankSetupCommand extends Command
         'JE1' => ['name' => 'Jersey', 'agrani_code' => 'JE'],
         'IM1' => ['name' => 'Man (isle Of)', 'agrani_code' => 'IM'],
     ];
+
     const PURPOSE_OF_REMITTANCES = [
         'build-acquisition-renovation-property' => null,
         'business-travel' => '13',
@@ -317,7 +318,7 @@ class AgraniBankSetupCommand extends Command
             $purposeOfRemittance = \Fintech\MetaData\Facades\MetaData::remittancePurpose()
                 ->list(['code' => $code])->first();
 
-            if (!$purposeOfRemittance) {
+            if (! $purposeOfRemittance) {
                 continue;
             }
 
@@ -350,14 +351,14 @@ class AgraniBankSetupCommand extends Command
 
     private function addServiceVendor(): void
     {
-        $dir = __DIR__ . "/../../resources/img/service_vendor/";
+        $dir = __DIR__.'/../../resources/img/service_vendor/';
 
         $vendor = [
             'service_vendor_name' => 'Agrani Bank',
             'service_vendor_slug' => 'agrani',
             'service_vendor_data' => [],
-            'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents("{$dir}/logo_png/agrani.png")),
-            'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents("{$dir}/logo_svg/agrani.svg")),
+            'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents("{$dir}/logo_png/agrani.png")),
+            'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents("{$dir}/logo_svg/agrani.svg")),
             'enabled' => false,
         ];
 
@@ -383,5 +384,4 @@ class AgraniBankSetupCommand extends Command
                 });
         }
     }
-
 }

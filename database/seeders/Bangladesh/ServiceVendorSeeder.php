@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Seeders\Bangladesh;
 
-use Fintech\Business\Facades\Business;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 

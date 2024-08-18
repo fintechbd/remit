@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Commands;
 
-use Fintech\Banco\Facades\Banco;
 use Fintech\Core\Facades\Core;
 use Illuminate\Console\Command;
 
@@ -82,7 +81,7 @@ class IslamiBankSetupCommand extends Command
         'bangladesh-commerce-bank-limited' => '64',
         'nrb-global-bank-limited' => '',
         'uttara-bank-limited' => '48',
-        'bangladesh-bank' => '10'
+        'bangladesh-bank' => '10',
     ];
 
     const ISLAMI_BRANCHES = [
@@ -481,7 +480,7 @@ class IslamiBankSetupCommand extends Command
         125360346 => '473',
         125690287 => '474',
         125100885 => '475',
-        125390761 => '476'
+        125390761 => '476',
     ];
 
     public $signature = 'remit:islami-bank-setup';
@@ -535,7 +534,7 @@ class IslamiBankSetupCommand extends Command
 
             $idDocType = \Fintech\MetaData\Facades\MetaData::idDocType()->list(['code' => $code])->first();
 
-            if (!$idDocType) {
+            if (! $idDocType) {
                 continue;
             }
 
@@ -574,7 +573,7 @@ class IslamiBankSetupCommand extends Command
 
             $bank = \Fintech\Banco\Facades\Banco::bank()->list(['slug' => $code])->first();
 
-            if (!$bank) {
+            if (! $bank) {
                 continue;
             }
 
@@ -613,7 +612,7 @@ class IslamiBankSetupCommand extends Command
 
             $branch = \Fintech\Banco\Facades\Banco::bankBranch()->list(['location_no' => $code])->first();
 
-            if (!$branch) {
+            if (! $branch) {
                 continue;
             }
 
@@ -643,14 +642,14 @@ class IslamiBankSetupCommand extends Command
 
     private function addServiceVendor(): void
     {
-        $dir = __DIR__ . "/../../resources/img/service_vendor/";
+        $dir = __DIR__.'/../../resources/img/service_vendor/';
 
         $vendor = [
             'service_vendor_name' => 'Islami Bank',
             'service_vendor_slug' => 'islamibank',
             'service_vendor_data' => [],
-            'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents("{$dir}/logo_png/islamibank.png")),
-            'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents("{$dir}/logo_svg/islamibank.svg")),
+            'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents("{$dir}/logo_png/islamibank.png")),
+            'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents("{$dir}/logo_svg/islamibank.svg")),
             'enabled' => false,
         ];
 
@@ -668,7 +667,7 @@ class IslamiBankSetupCommand extends Command
             ->list(['country_id' => 19, 'slug' => 'islami-bank-bangladesh-limited'])
             ->first();
 
-        if (!$bank) {
+        if (! $bank) {
             return;
         }
 
