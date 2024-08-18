@@ -4,10 +4,8 @@ namespace Fintech\Remit\Vendors;
 
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
-use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 
 class MeghnaBankApi implements MoneyTransfer
@@ -269,14 +267,13 @@ class MeghnaBankApi implements MoneyTransfer
         return $return[$code];
     }
 
-
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
      */
     public function requestQuote($order): mixed
     {
         return $this->get('/remitEnquiry', [
-            'queryType' => 2
+            'queryType' => 2,
         ]);
     }
 
@@ -298,9 +295,9 @@ class MeghnaBankApi implements MoneyTransfer
         //RECEIVER
         $params['RECEIVER_NAME'] = ($data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
         $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $data['trest'] ?? null;
-        $params['RECEIVER_CONTACT'] = str_replace("+880", "", ($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
+        $params['RECEIVER_CONTACT'] = str_replace('+880', '', ($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
         $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = ($data['beneficiary_data']['branch_information']['branch_data']['location_no'] ?? '');
         $params['RECEIVER_BANK'] = ($data['beneficiary_data']['bank_information']['bank_name'] ?? null);
         $params['RECEIVER_BANK_BRANCH'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? null);
@@ -326,6 +323,7 @@ class MeghnaBankApi implements MoneyTransfer
             default:
                 //code block
         }
+
         return $this->post('/remitAccCrTransfer', $params);
 
     }
@@ -354,7 +352,7 @@ class MeghnaBankApi implements MoneyTransfer
         return $this->get('/transactionTracker', [
             'orderNo' => $order->order_data['beneficiary_data']['reference_no'] ?? null,
             'queryCode' => 2,
-            'info' => 'Cancelled By User'
+            'info' => 'Cancelled By User',
         ]);
     }
 
@@ -369,7 +367,7 @@ class MeghnaBankApi implements MoneyTransfer
         return $this->get('/transactionTracker', [
             'orderNo' => $order->order_data['beneficiary_data']['reference_no'] ?? null,
             'queryCode' => 1,
-            'info' => 'Cancelled By User'
+            'info' => 'Cancelled By User',
         ]);
     }
 }
