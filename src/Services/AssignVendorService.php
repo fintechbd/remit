@@ -63,7 +63,7 @@ class AssignVendorService
     }
 
     /**
-     * @throws ErrorException
+     * @throws RemitException|ErrorException
      */
     public function requestQuote(BaseModel $order, string $vendor_slug): mixed
     {
@@ -74,7 +74,7 @@ class AssignVendorService
 
     /**
      * @throws ErrorException
-     * @throws UpdateOperationException
+     * @throws UpdateOperationException|RemitException
      */
     public function processOrder(BaseModel $order, string $vendor_slug): mixed
     {

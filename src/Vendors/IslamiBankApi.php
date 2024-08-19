@@ -26,6 +26,8 @@ class IslamiBankApi implements MoneyTransfer
 
     private string $status = 'sandbox';
 
+    private $xml;
+
     /**
      * IslamiBankApiService constructor.
      */
@@ -41,6 +43,72 @@ class IslamiBankApi implements MoneyTransfer
             $this->apiUrl = $this->config[$this->status]['endpoint'];
             $this->status = 'live';
         }
+
+        $this->xml = new DOMDocument('1.0', 'utf-8');
+        $this->xml->preserveWhiteSpace = false;
+        $this->xml->formatOutput = true;
+        $envelope = $this->xml->createElement('soapenv:Envelope');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:ser', 'http://service.ws.mt.ibbl');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xsd', 'http://bean.ws.mt.ibbl/xsd');
+        $envelope->appendChild($this->xml->createElement('soapenv:Header'));
+
+    }
+
+
+    private function initRequest($method)
+    {
+        $envelopeBody = $xml->createElement('soapenv:Body');
+        $service = $xml->createElement('ser:directCreditWSMessage');
+        $service->appendChild($xml->createElement('ser:userID', 'username'));
+        $service->appendChild($xml->createElement('ser:password', 'password'));
+        $wsMessage = $xml->createElement('ser:wsMessage');
+        $wsMessage->appendChild($xml->createElement('xsd:additionalField1', '1'));
+        $wsMessage->appendChild($xml->createElement('xsd:additionalField2', '2'));
+        $wsMessage->appendChild($xml->createElement('xsd:additionalField3', '3'));
+        $wsMessage->appendChild($xml->createElement('xsd:additionalField4', '4'));
+        $wsMessage->appendChild($xml->createElement('xsd:additionalField5', '5'));
+        $wsMessage->appendChild($xml->createElement('xsd:additionalField6', '6'));
+        $wsMessage->appendChild($xml->createElement('xsd:additionalField7', '7'));
+        $wsMessage->appendChild($xml->createElement('xsd:additionalField8', '8'));
+        $wsMessage->appendChild($xml->createElement('xsd:additionalField9', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:amount', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:batchID', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryAccNo', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryAccType', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryAddress', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryBankCode', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryBankName', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryBranchCode', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryBranchName', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryName', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryPassportNo', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryPhoneNo', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryRoutingNo', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:exHouseTxID', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:exchHouseBranchCode', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:exchHouseSwiftCode', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:identityDescription', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:identityType', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:isoCode', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:issueDate', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:note', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:orderNo', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:paymentType', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:remittancePurpose', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:remitterAddress', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:remitterCountry', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:remitterIdentificationNo', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:remitterName', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:remitterPassportNo', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:remitterPhoneNo', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:secretKey', '9'));
+        $wsMessage->appendChild($xml->createElement('xsd:transReferenceNo', '9'));
+        $service->appendChild($wsMessage);
+        $envelopeBody->appendChild($service);
+        $envelope->appendChild($envelopeBody);
+        $xml->appendChild($envelope);
+        echo $xml->saveXML();
     }
 
     /**
@@ -136,7 +204,9 @@ class IslamiBankApi implements MoneyTransfer
     {
         return <<<XML
 <?xml version="1.0" encoding="utf-8"?>
-    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://service.ws.mt.ibbl" xmlns:xsd="http://bean.ws.mt.ibbl/xsd">
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+     xmlns:ser="http://service.ws.mt.ibbl"
+     xmlns:xsd="http://bean.ws.mt.ibbl/xsd">
         <soapenv:Header/>
         <soapenv:Body>
             <ser:{$method}>
@@ -984,4 +1054,6 @@ XML;
     {
         // TODO: Implement amendmentOrder() method.
     }
+
+
 }
