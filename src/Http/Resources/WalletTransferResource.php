@@ -72,7 +72,7 @@ class WalletTransferResource extends JsonResource
         }
 
         $data['assignable'] = !is_integer($data['assigned_user_id']);
-        $data['trackable'] = is_string($data['vendor']);
+        $data['trackable'] = $data['service_vendor_id'] != config('fintech.business.default_vendor');
 
         return $data;
     }

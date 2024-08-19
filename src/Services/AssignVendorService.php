@@ -7,6 +7,7 @@ use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Fintech\Remit\Exceptions\RemitException;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\App;
@@ -18,14 +19,14 @@ class AssignVendorService
     private MoneyTransfer $serviceVendorDriver;
 
     /**
-     * @throws ErrorException
+     * @throws RemitException
      */
     private function initiateVendor(string $slug): void
     {
         $availableVendors = config('fintech.remit.providers', []);
 
         if (! isset($availableVendors[$slug])) {
-            throw new ErrorException(__('remit::message.assign_vendor.not_found', ['slug' => ucfirst($slug)]));
+            throw new RemitException(__('remit::messages.assign_vendor.not_found', ['slug' => ucfirst($slug)]));
         }
 
         $this->serviceVendorModel = \Fintech\Business\Facades\Business::serviceVendor()->list(['service_vendor_slug' => $slug, 'enabled'])->first();
@@ -45,12 +46,12 @@ class AssignVendorService
     {
         if ($order->assigned_user_id != null
             && $order->assigned_user_id != $requestingUserId) {
-            throw new \Fintech\Remit\Exceptions\AlreadyAssignedException(__('remit::assign_vendor.already_assigned'));
+            throw new \Fintech\Remit\Exceptions\AlreadyAssignedException(__('remit::messages.assign_vendor.already_assigned'));
         }
 
         if ($order->assigned_user_id == null
             && ! Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId])) {
-            throw new UpdateOperationException(__('remit::assign_vendor.assigned_user_failed'));
+            throw new UpdateOperationException(__('remit::messages.assign_vendor.assigned_user_failed'));
         }
 
         return Business::serviceVendor()->list([
@@ -88,10 +89,15 @@ class AssignVendorService
     }
 
     /**
-     * @throws ErrorException
+     * @throws RemitException
      */
     public function orderStatus(BaseModel $order): mixed
     {
+
+        if ($order->service_vendor_id == config('fintech.business.default_vendor')) {
+            throw new RemitException(__('remit::messages.assign_vendor.not_assigned'));
+        }
+
         $this->initiateVendor($order->vendor);
 
         return $this->serviceVendorDriver->orderStatus($order);
