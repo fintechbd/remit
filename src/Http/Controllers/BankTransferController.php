@@ -116,7 +116,7 @@ class BankTransferController extends Controller
                 $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
                 $inputs['order_data']['created_at'] = now();
                 $inputs['order_data']['master_user_name'] = $masterUser['name'];
-                //$inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
+                $inputs['order_data']['sending_amount'] = $inputs['converted_amount'];
                 $inputs['order_data']['assign_order'] = 'no';
                 $inputs['order_data']['system_notification_variable_success'] = 'bank_transfer_success';
                 $inputs['order_data']['system_notification_variable_failed'] = 'bank_transfer_failed';

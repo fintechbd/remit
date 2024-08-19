@@ -86,9 +86,11 @@ class AssignVendorController extends Controller
         try {
             $order = $this->getOrder($order_id);
 
-            $jsonResponse = Remit::assignVendor()->processOrder($order, $service_vendor_slug);
+            if (!Remit::assignVendor()->processOrder($order, $service_vendor_slug)) {
+                throw new UpdateOperationException(__('remit::messages.assign_vendor.failed', ['slug' => $service_vendor_slug]));
+            }
 
-            return response()->success($jsonResponse);
+            return response()->success(__('remit::messages.assign_vendor.success', ['slug' => ucfirst($service_vendor_slug)]));
 
         } catch (ModelNotFoundException $exception) {
 

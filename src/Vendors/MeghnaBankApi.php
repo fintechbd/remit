@@ -4,7 +4,10 @@ namespace Fintech\Remit\Vendors;
 
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Fintech\Transaction\Facades\Transaction;
+use Fintech\Transaction\Models\Order;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
@@ -47,7 +50,6 @@ class MeghnaBankApi implements MoneyTransfer
         $this->client = Http::withoutVerifying()
             ->baseUrl($this->apiUrl)
             ->acceptJson()
-            ->contentType('application/json')
             ->withBasicAuth($this->config[$this->status]['user'], $this->config[$this->status]['password'])
             ->withHeaders([
                 'bankid' => $this->config[$this->status]['bankid'],
@@ -57,51 +59,18 @@ class MeghnaBankApi implements MoneyTransfer
 
     private function get(string $url, array $params = []): array
     {
-        $response = $this->client->get($url, $params)->json();
+        return $this->client
+            ->contentType('application/json')
+            ->get($url, $params)
+            ->json();
 
-        return [
-            'status' => $response['status'] ?? true,
-            'message' => $response,
-        ];
     }
 
     private function post(string $url, array $params = []): array
     {
-        $response = $this->client->withBody(base64_encode(json_encode($params)))
+        return $this->client->withBody(base64_encode(json_encode($params)))
+            ->contentType('text/plain')
             ->post($url)->json();
-
-        return [
-            'status' => $response['status'] ?? true,
-            'message' => $response,
-        ];
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function amendment(array $data): array
-    {
-        $url = 'transactionTracker?';
-        $params['orderNo'] = ($data['beneficiary_data']['reference_no'] ?? null);
-        $params['queryCode'] = 1;
-        $params['info'] = 'AMENDMENT INFO';
-        $response = $this->getData($url, $params);
-
-        return $response;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function cancellation(array $data): array
-    {
-        $url = 'transactionTracker?';
-        $params['orderNo'] = ($data['beneficiary_data']['reference_no'] ?? null);
-        $params['queryCode'] = 2;
-        $params['info'] = 'CANCELLATION PURPOSE';
-        $response = $this->getData($url, $params);
-
-        return $response;
     }
 
     /**
@@ -189,25 +158,6 @@ class MeghnaBankApi implements MoneyTransfer
     }
 
     /**
-     * Beneficiary Identity Type Code
-     */
-    private function __beneficiaryIdentityTypeCode(int $code): string
-    {
-        $return = [
-            1 => 'National ID',
-            2 => 'Passport',
-            3 => 'Driving License',
-            4 => 'Government Official ID',
-            5 => 'Birth Certificate & Other ID',
-            6 => 'Arm force ID',
-            7 => 'Work Permit',
-            8 => 'Other ID',
-        ];
-
-        return $return[$code];
-    }
-
-    /**
      * Status Code List
      */
     private function __statusCodeList(string $code): string
@@ -268,7 +218,7 @@ class MeghnaBankApi implements MoneyTransfer
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
+     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
      */
     public function requestQuote($order): mixed
     {
@@ -286,46 +236,56 @@ class MeghnaBankApi implements MoneyTransfer
      */
     public function executeOrder(BaseModel $order): mixed
     {
-        $data = $order->order_data ?? [];
+        $order_data = $order->order_data ?? [];
 
-        $params['ORDER_NO'] = $data['beneficiary_data']['reference_no'] ?? null;
-        $params['TRANSACTION_PIN'] = $data['beneficiary_data']['reference_no'] ?? null;
-        $params['TRN_DATE'] = (date('Y-m-d', strtotime($data['created_at'])) ?? null);
-        $params['AMOUNT'] = floatval($order->converted_amount ?? ($data['sending_amount'] ?? null));
+        $params['ORDER_NO'] = $order_data['beneficiary_data']['reference_no'] ?? null;
+        $params['TRANSACTION_PIN'] = $order_data['beneficiary_data']['reference_no'] ?? null;
+        $params['TRN_DATE'] = (date('Y-m-d', strtotime($order_data['created_at'])) ?? null);
+        $params['AMOUNT'] = round(floatval($order_data['sending_amount'] ?? $order->converted_amount), 2);
         //RECEIVER
-        $params['RECEIVER_NAME'] = ($data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
-        $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
-        $params['RECEIVER_AND_SENDER_RELATION'] = $data['trest'] ?? null;
-        $params['RECEIVER_CONTACT'] = str_replace('+880', '', ($data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
-        $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = ($data['beneficiary_data']['branch_information']['branch_data']['location_no'] ?? '');
-        $params['RECEIVER_BANK'] = ($data['beneficiary_data']['bank_information']['bank_name'] ?? null);
-        $params['RECEIVER_BANK_BRANCH'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? null);
-        $params['RECEIVER_ACCOUNT_NUMBER'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number']);
+        $params['RECEIVER_NAME'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
+        $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $params['RECEIVER_AND_SENDER_RELATION'] = $order_data['beneficiary_data']['receiver_information']['relation_name'] ?? 'Relatives';
+        $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($order_data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
+        $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = ($order_data['beneficiary_data']['branch_information']['branch_data']['location_no'] ?? '');
+        $params['RECEIVER_BANK'] = ($order_data['beneficiary_data']['bank_information']['bank_name'] ?? null);
+        $params['RECEIVER_BANK_BRANCH'] = ($order_data['beneficiary_data']['branch_information']['branch_name'] ?? null);
+        $params['RECEIVER_ACCOUNT_NUMBER'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number']);
 
         //SENDER
-        $params['SENDER_NAME'] = ($data['beneficiary_data']['sender_information']['name'] ?? null);
-        $params['SENDER_PASSPORT_NO'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
-        $params['SENDER_OTHER_ID_TYPE'] = ($data['beneficiary_data']['sender_information']['profile']['id_doc']['id_vendor']['remit']['meghna_bank'] ?? null);
-        $params['SENDER_COUNTRY'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
-        $params['SENDER_SUB_COUNTRY_LEVEL_2'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null);
-        $params['SENDER_ADDRESS_LINE'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
-        $params['SENDER_CONTACT'] = ($data['beneficiary_data']['sender_information']['mobile'] ?? null);
-        $params['PURPOSE'] = ($data['beneficiary_data']['sender_information']['profile']['remittance_purpose']['name'] ?? 'Testing');
+        $params['SENDER_NAME'] = ($order_data['beneficiary_data']['sender_information']['name'] ?? null);
+        $params['SENDER_PASSPORT_NO'] = ($order_data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
+        $params['SENDER_OTHER_ID_TYPE'] = ($order_data['beneficiary_data']['sender_information']['profile']['id_doc']['id_vendor']['remit']['meghnabank'] ?? '8');
+        $params['SENDER_OTHER_ID_NO'] = ($order_data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
+        $params['SENDER_COUNTRY'] = ($order_data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
+        $params['SENDER_SUB_COUNTRY_LEVEL_2'] = ($order_data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null);
+//        $params['SENDER_ADDRESS_LINE'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
+        $params['SENDER_CONTACT'] = ($order_data['beneficiary_data']['sender_information']['mobile'] ?? null);
+        $params['PURPOSE'] = ($order_data['beneficiary_data']['sender_information']['profile']['remittance_purpose']['name'] ?? 'Compensation');
 
-        //Transaction Type(A=Account,C=Cash)
-        switch ($data['service_slug']) {
-            case 'cash_pickup':
-                $params['TRNTP'] = 'C';
-                break;
-            case 'bank_transfer':
-                $params['TRNTP'] = 'A';
-            default:
-                //code block
+        $params['TRNTP'] = match ($order_data['service_slug']) {
+            'cash_pickup' => 'C',
+            'bank_transfer' => 'A',
+            default => null
+        };
+
+        $response = $this->post('/remitAccCrTransfer', $params);
+
+        $response = array_shift($response);
+
+        $status = (in_array($response['Code'], ['0001', '0002']))
+            ? OrderStatus::Accepted->value
+            : OrderStatus::AdminVerification->value;
+
+        $order_data['vendor_data'] = $response;
+
+        if (Transaction::order()->update($order->getKey(), ['status' => $status, 'order_data' => $order_data])) {
+            $order->fresh();
+            return $order;
         }
 
-        return $this->post('/remitAccCrTransfer', $params);
-
+        return false;
     }
 
     /**
@@ -336,9 +296,11 @@ class MeghnaBankApi implements MoneyTransfer
      */
     public function orderStatus(BaseModel $order): mixed
     {
-        return $this->get('/remitReport', [
-            'ordpinNo' => $order->order_data['beneficiary_data']['reference_no'] ?? null,
+        $response = $this->get('/remitReport', [
+            'ordpinNo' => $order->order_data['beneficiary_data']['reference_no'] . '8' ?? null,
         ]);
+
+        return array_shift($response);
     }
 
     /**
