@@ -107,7 +107,7 @@ class WalletTransferController extends Controller
                 }
                 $inputs['sender_receiver_id'] = $masterUser->getKey();
                 $inputs['is_refunded'] = false;
-                $inputs['status'] = OrderStatus::Successful->value;
+                $inputs['status'] = OrderStatus::Pending->value;
                 $inputs['risk'] = RiskProfile::Low->value;
                 $inputs['reverse'] = true;
                 $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);

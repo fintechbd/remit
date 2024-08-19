@@ -5,6 +5,7 @@ namespace Fintech\Remit\Services;
 use ErrorException;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Exceptions\RemitException;
@@ -50,7 +51,7 @@ class AssignVendorService
         }
 
         if ($order->assigned_user_id == null
-            && ! Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId])) {
+            && ! Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId, 'status' => OrderStatus::Processing->value])) {
             throw new UpdateOperationException(__('remit::messages.assign_vendor.assigned_user_failed'));
         }
 
