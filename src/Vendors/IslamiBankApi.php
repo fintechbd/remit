@@ -55,7 +55,6 @@ class IslamiBankApi implements MoneyTransfer
 
     }
 
-
     private function initRequest($method)
     {
         $envelopeBody = $xml->createElement('soapenv:Body');
@@ -1054,6 +1053,4 @@ XML;
     {
         // TODO: Implement amendmentOrder() method.
     }
-
-
 }
