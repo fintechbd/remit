@@ -218,7 +218,7 @@ class MeghnaBankApi implements MoneyTransfer
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
      */
     public function requestQuote($order): mixed
     {
@@ -245,7 +245,7 @@ class MeghnaBankApi implements MoneyTransfer
         //RECEIVER
         $params['RECEIVER_NAME'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
         $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $order_data['beneficiary_data']['receiver_information']['relation_name'] ?? 'Relatives';
         $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($order_data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
         $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = ($order_data['beneficiary_data']['branch_information']['branch_data']['location_no'] ?? '');
@@ -260,7 +260,7 @@ class MeghnaBankApi implements MoneyTransfer
         $params['SENDER_OTHER_ID_NO'] = ($order_data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
         $params['SENDER_COUNTRY'] = ($order_data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
         $params['SENDER_SUB_COUNTRY_LEVEL_2'] = ($order_data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null);
-//        $params['SENDER_ADDRESS_LINE'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
+        //        $params['SENDER_ADDRESS_LINE'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
         $params['SENDER_CONTACT'] = ($order_data['beneficiary_data']['sender_information']['mobile'] ?? null);
         $params['PURPOSE'] = ($order_data['beneficiary_data']['sender_information']['profile']['remittance_purpose']['name'] ?? 'Compensation');
 
@@ -282,6 +282,7 @@ class MeghnaBankApi implements MoneyTransfer
 
         if (Transaction::order()->update($order->getKey(), ['status' => $status, 'order_data' => $order_data])) {
             $order->fresh();
+
             return $order;
         }
 
@@ -297,7 +298,7 @@ class MeghnaBankApi implements MoneyTransfer
     public function orderStatus(BaseModel $order): mixed
     {
         $response = $this->get('/remitReport', [
-            'ordpinNo' => $order->order_data['beneficiary_data']['reference_no'] . '8' ?? null,
+            'ordpinNo' => $order->order_data['beneficiary_data']['reference_no'].'8' ?? null,
         ]);
 
         return array_shift($response);

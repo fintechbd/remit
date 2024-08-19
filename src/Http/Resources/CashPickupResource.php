@@ -70,7 +70,7 @@ class CashPickupResource extends JsonResource
             $data['service_vendor_name'] = $this->serviceVendor?->service_vendor_name ?? null;
             $data['service_name'] = $this->service?->service_name ?? null;
         }
-        $data['assignable'] = !is_integer($data['assigned_user_id']);
+        $data['assignable'] = ! is_int($data['assigned_user_id']);
         $data['trackable'] = $data['service_vendor_id'] != config('fintech.business.default_vendor');
 
         return $data;

@@ -86,7 +86,7 @@ class AssignVendorController extends Controller
         try {
             $order = $this->getOrder($order_id);
 
-            if (!Remit::assignVendor()->processOrder($order, $service_vendor_slug)) {
+            if (! Remit::assignVendor()->processOrder($order, $service_vendor_slug)) {
                 throw new UpdateOperationException(__('remit::messages.assign_vendor.failed', ['slug' => $service_vendor_slug]));
             }
 
