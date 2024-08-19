@@ -8,7 +8,10 @@ use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Exceptions\AlreadyAssignedException;
 use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\AssignableVendorInfoRequest;
+use Fintech\Remit\Http\Requests\RemitCancelAmendmentRequest;
 use Fintech\Remit\Http\Resources\AssignableVendorCollection;
+use Fintech\Remit\Http\Resources\AssignVendorQuotaResource;
+use Fintech\Remit\Http\Resources\AssignVendorStatusResource;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -26,11 +29,11 @@ class AssignVendorController extends Controller
         return $order;
     }
 
-    public function available(string $id): JsonResponse|AssignableVendorCollection
+    public function available(string $order_Id): JsonResponse|AssignableVendorCollection
     {
         try {
 
-            $order = $this->getOrder($id);
+            $order = $this->getOrder($order_Id);
 
             $serviceVendors = Remit::assignVendor()->availableVendors($order, request()->user()->id);
 
@@ -50,7 +53,7 @@ class AssignVendorController extends Controller
         }
     }
 
-    public function quotation(AssignableVendorInfoRequest $request): JsonResponse
+    public function quotation(AssignableVendorInfoRequest $request): JsonResponse|AssignVendorQuotaResource
     {
         $order_id = $request->input('order_id');
 
@@ -62,7 +65,7 @@ class AssignVendorController extends Controller
 
             $jsonResponse = Remit::assignVendor()->requestQuote($order, $service_vendor_slug);
 
-            return response()->success($jsonResponse);
+            return new AssignVendorQuotaResource($jsonResponse);
 
         } catch (ModelNotFoundException $exception) {
 
@@ -97,17 +100,15 @@ class AssignVendorController extends Controller
         }
     }
 
-    public function status(AssignableVendorInfoRequest $request): JsonResponse
+    public function status(string $order_id): JsonResponse|AssignVendorStatusResource
     {
-        $order_id = $request->input('order_id');
-
         try {
 
             $order = $this->getOrder($order_id);
 
             $jsonResponse = Remit::assignVendor()->orderStatus($order);
 
-            return response()->success($jsonResponse);
+            return new AssignVendorStatusResource($jsonResponse);
 
         } catch (ModelNotFoundException $exception) {
 
@@ -119,7 +120,7 @@ class AssignVendorController extends Controller
         }
     }
 
-    public function cancel(AssignableVendorInfoRequest $request): JsonResponse
+    public function cancel(RemitCancelAmendmentRequest $request): JsonResponse
     {
         $order_id = $request->input('order_id');
 
@@ -141,7 +142,7 @@ class AssignVendorController extends Controller
         }
     }
 
-    public function amendment(AssignableVendorInfoRequest $request): JsonResponse
+    public function amendment(RemitCancelAmendmentRequest $request): JsonResponse
     {
         $order_id = $request->input('order_id');
 
