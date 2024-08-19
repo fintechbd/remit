@@ -36,6 +36,7 @@ class AssignVendorQuotaResource extends JsonResource
         return parent::toArray($request);
     }
 
+
     private function formatTransFast(Request $request): array
     {
         return parent::toArray($request);
