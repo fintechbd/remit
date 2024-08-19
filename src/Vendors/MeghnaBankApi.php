@@ -297,7 +297,7 @@ class MeghnaBankApi implements MoneyTransfer
     public function orderStatus(BaseModel $order): mixed
     {
         $response = $this->get('/remitReport', [
-            'ordpinNo' => $order->order_data['beneficiary_data']['reference_no'] . '8' ?? null,
+            'ordpinNo' => $order->order_data['beneficiary_data']['reference_no'] ?? null,
         ]);
 
         return array_shift($response);
