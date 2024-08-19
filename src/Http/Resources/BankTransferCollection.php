@@ -71,7 +71,7 @@ class BankTransferCollection extends ResourceCollection
                 $data['transaction_form_name'] = $bankTransfer->transactionForm?->name ?? null;
             }
 
-            $data['assignable'] = !is_integer($data['assigned_user_id']);
+            $data['assignable'] = ! is_int($data['assigned_user_id']);
 
             $data['trackable'] = $data['service_vendor_id'] != config('fintech.business.default_vendor');
 
