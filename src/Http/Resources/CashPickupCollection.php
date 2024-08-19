@@ -34,6 +34,9 @@ class CashPickupCollection extends ResourceCollection
                 'assigned_user_name' => null,
                 'service_id' => $cashPickup->service_id ?? null,
                 'service_name' => null,
+                'service_vendor_id' => $cashPickup->service_vendor_id ?? config('fintech.business.default_vendor'),
+                'service_vendor_name' => null,
+                'vendor' => $cashPickup->vendor ?? config('fintech.business.default_vendor_name'),
                 'transaction_form_id' => $cashPickup->transaction_form_id ?? null,
                 'transaction_form_name' => $cashPickup->transaction_form_name ?? null,
                 'ordered_at' => $cashPickup->ordered_at ?? null,
@@ -60,15 +63,17 @@ class CashPickupCollection extends ResourceCollection
                 $data['sender_receiver_name'] = $cashPickup->senderReceiver?->name ?? null;
                 $data['assigned_user_name'] = $cashPickup->assignedUser?->name ?? null;
             }
-            if (Core::packageExists('Business')) {
-                $data['service_name'] = $cashPickup->service?->service_name ?? null;
-            }
-            if (Core::packageExists('Business')) {
-                $data['service_name'] = $cashPickup->service?->service_name ?? null;
-            }
+
             if (Core::packageExists('Transaction')) {
                 $data['transaction_form_name'] = $cashPickup->transactionForm?->name ?? null;
             }
+
+            if (Core::packageExists('Business')) {
+                $data['service_vendor_name'] = $cashPickup->serviceVendor?->service_vendor_name ?? null;
+                $data['service_name'] = $cashPickup->service?->service_name ?? null;
+            }
+            $data['assignable'] = !is_integer($data['assigned_user_id']);
+            $data['trackable'] = is_string($data['vendor']);
 
             return $data;
         })->toArray();

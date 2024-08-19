@@ -34,6 +34,9 @@ class WalletTransferCollection extends ResourceCollection
                 'assigned_user_name' => null,
                 'service_id' => $walletTransfer->service_id ?? null,
                 'service_name' => null,
+                'service_vendor_id' => $walletTransfer->service_vendor_id ?? config('fintech.business.default_vendor'),
+                'service_vendor_name' => null,
+                'vendor' => $walletTransfer->vendor ?? config('fintech.business.default_vendor_name'),
                 'transaction_form_id' => $walletTransfer->transaction_form_id ?? null,
                 'transaction_form_name' => $walletTransfer->transaction_form_name ?? null,
                 'ordered_at' => $walletTransfer->ordered_at ?? null,
@@ -60,15 +63,17 @@ class WalletTransferCollection extends ResourceCollection
                 $data['sender_receiver_name'] = $walletTransfer->senderReceiver?->name ?? null;
                 $data['assigned_user_name'] = $walletTransfer->assignedUser?->name ?? null;
             }
-            if (Core::packageExists('Business')) {
-                $data['service_name'] = $walletTransfer->service?->service_name ?? null;
-            }
-            if (Core::packageExists('Business')) {
-                $data['service_name'] = $walletTransfer->service?->service_name ?? null;
-            }
+
             if (Core::packageExists('Transaction')) {
                 $data['transaction_form_name'] = $walletTransfer->transactionForm?->name ?? null;
             }
+
+            if (Core::packageExists('Business')) {
+                $data['service_vendor_name'] = $this->serviceVendor?->service_vendor_name ?? null;
+                $data['service_name'] = $this->service?->service_name ?? null;
+            }
+            $data['assignable'] = !is_integer($data['assigned_user_id']);
+            $data['trackable'] = is_string($data['vendor']);
 
             return $data;
         })->toArray();
