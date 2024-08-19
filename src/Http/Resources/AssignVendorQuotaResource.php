@@ -61,4 +61,6 @@ class AssignVendorQuotaResource extends JsonResource
     {
         return parent::toArray($request);
     }
+
+
 }
