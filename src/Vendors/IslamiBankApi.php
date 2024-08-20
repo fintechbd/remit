@@ -599,10 +599,12 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         $service->appendChild($this->xml->createElement('ser:currency', $currency));
 
         $balanceInfo = $this->callApi($method, $service);
-        if ($balanceInfo['Fault']) {
+
+        if (is_array($balanceInfo) && isset($balanceInfo['Fault'])) {
             return [
                 'status' => "FALSE",
                 'balance' => 0,
+                'currency' => $currency,
                 'origin_response' => $balanceInfo,
             ];
         }
