@@ -46,7 +46,7 @@ class IslamiBankApi implements MoneyTransfer
 
         $this->xml = new \DOMDocument('1.0', 'utf-8');
         $this->xml->preserveWhiteSpace = false;
-//        $this->xml->formatOutput = true;
+        //        $this->xml->formatOutput = true;
     }
 
     private function initRequest($method)
