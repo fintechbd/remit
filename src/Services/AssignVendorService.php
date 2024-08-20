@@ -108,6 +108,22 @@ class AssignVendorService
     }
 
     /**
+     * @throws RemitException
+     * @throws ErrorException
+     */
+    public function trackOrder(BaseModel $order): mixed
+    {
+
+        if ($order->service_vendor_id == config('fintech.business.default_vendor')) {
+            throw new RemitException(__('remit::messages.assign_vendor.not_assigned'));
+        }
+
+        $this->initiateVendor($order->vendor);
+
+        return $this->serviceVendorDriver->trackOrder($order);
+    }
+
+    /**
      * @throws ErrorException
      */
     public function cancelOrder(BaseModel $order): mixed

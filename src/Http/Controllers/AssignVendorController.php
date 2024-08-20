@@ -102,13 +102,13 @@ class AssignVendorController extends Controller
         }
     }
 
-    public function status(string $order_id): JsonResponse|AssignVendorStatusResource
+    public function tracker(string $order_id): JsonResponse|AssignVendorStatusResource
     {
         try {
 
             $order = $this->getOrder($order_id);
 
-            $jsonResponse = Remit::assignVendor()->orderStatus($order);
+            $jsonResponse = Remit::assignVendor()->trackOrder($order);
 
             return new AssignVendorStatusResource($jsonResponse);
 

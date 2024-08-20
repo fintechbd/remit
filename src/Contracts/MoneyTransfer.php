@@ -33,6 +33,14 @@ interface MoneyTransfer
 
     /**
      * Method to make a request to the remittance service provider
+     * for the track real-time progress of the order.
+     *
+     * @throws \ErrorException
+     */
+    public function trackOrder(BaseModel $order): mixed;
+
+    /**
+     * Method to make a request to the remittance service provider
      * for the cancellation of the order.
      *
      * @throws \ErrorException

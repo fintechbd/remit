@@ -306,6 +306,21 @@ class MeghnaBankApi implements MoneyTransfer
 
     /**
      * Method to make a request to the remittance service provider
+     * for the progress status of the order.
+     *
+     * @throws \ErrorException
+     */
+    public function trackOrder(BaseModel $order): mixed
+    {
+        $response = $this->get('/remitReport', [
+            'ordpinNo' => $order->order_data['beneficiary_data']['reference_no'] ?? null,
+        ]);
+
+        return array_shift($response);
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
      * for the cancellation of the order.
      *
      * @throws \ErrorException
