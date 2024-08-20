@@ -18,7 +18,7 @@ class BankTransferCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return $this->collection->map(function ($bankTransfer) {
+        return $this->collection->map(function ($bankTransfer) use($request) {
             $data = [
                 'id' => $bankTransfer->getKey(),
                 'source_country_id' => $bankTransfer->source_country_id ?? null,
@@ -71,7 +71,7 @@ class BankTransferCollection extends ResourceCollection
                 $data['transaction_form_name'] = $bankTransfer->transactionForm?->name ?? null;
             }
 
-            $data['assignable'] = ! is_int($data['assigned_user_id']);
+            $data['assignable'] = ($data['assigned_user_id'] == null || $data['assigned_user_id'] == $request->user()->getKey());
 
             $data['trackable'] = $data['service_vendor_id'] != config('fintech.business.default_vendor');
 

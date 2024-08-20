@@ -18,7 +18,7 @@ class WalletTransferCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return $this->collection->map(function ($walletTransfer) {
+        return $this->collection->map(function ($walletTransfer)  use($request) {
             $data = [
                 'id' => $walletTransfer->getKey(),
                 'source_country_id' => $walletTransfer->source_country_id ?? null,
@@ -72,7 +72,7 @@ class WalletTransferCollection extends ResourceCollection
                 $data['service_vendor_name'] = $this->serviceVendor?->service_vendor_name ?? null;
                 $data['service_name'] = $this->service?->service_name ?? null;
             }
-            $data['assignable'] = ! is_int($data['assigned_user_id']);
+                        $data['assignable'] = ($data['assigned_user_id'] == null || $data['assigned_user_id'] == $request->user()->getKey());
             $data['trackable'] = $data['service_vendor_id'] != config('fintech.business.default_vendor');
 
             return $data;
