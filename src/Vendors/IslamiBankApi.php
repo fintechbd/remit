@@ -895,7 +895,7 @@ XML;
 
         $this->xml->appendChild($envelope);
 
-        dd($this->xml->saveXML());
+        dump($this->xml->saveXML());
 
         $xmlResponse = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
 
