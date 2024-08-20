@@ -71,7 +71,7 @@ class WalletTransferResource extends JsonResource
             $data['service_name'] = $this->service?->service_name ?? null;
         }
 
-                    $data['assignable'] = ($data['assigned_user_id'] == null || $data['assigned_user_id'] == $request->user()->getKey());
+        $data['assignable'] = ($data['assigned_user_id'] == null || $data['assigned_user_id'] == $request->user()->getKey());
         $data['trackable'] = $data['service_vendor_id'] != config('fintech.business.default_vendor');
 
         return $data;

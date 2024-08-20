@@ -18,7 +18,7 @@ class BankTransferCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return $this->collection->map(function ($bankTransfer) use($request) {
+        return $this->collection->map(function ($bankTransfer) use ($request) {
             $data = [
                 'id' => $bankTransfer->getKey(),
                 'source_country_id' => $bankTransfer->source_country_id ?? null,

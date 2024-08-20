@@ -18,7 +18,7 @@ class CashPickupCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return $this->collection->map(function ($cashPickup)  use($request) {
+        return $this->collection->map(function ($cashPickup) use ($request) {
             $data = [
                 'id' => $cashPickup->getKey(),
                 'source_country_id' => $cashPickup->source_country_id ?? null,
@@ -72,7 +72,7 @@ class CashPickupCollection extends ResourceCollection
                 $data['service_vendor_name'] = $cashPickup->serviceVendor?->service_vendor_name ?? null;
                 $data['service_name'] = $cashPickup->service?->service_name ?? null;
             }
-                        $data['assignable'] = ($data['assigned_user_id'] == null || $data['assigned_user_id'] == $request->user()->getKey());
+            $data['assignable'] = ($data['assigned_user_id'] == null || $data['assigned_user_id'] == $request->user()->getKey());
             $data['trackable'] = $data['service_vendor_id'] != config('fintech.business.default_vendor');
 
             return $data;
