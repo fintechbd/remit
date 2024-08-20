@@ -727,7 +727,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         $orderInfo['message'] = isset($orderInfo['code']) ? self::ERROR_MESSAGES[$orderInfo['code']] : $response;
 
-        $status = (in_array($orderInfo['Code'], ['0001', '0002']))
+        $status = (in_array($orderInfo['code'], ['5003']))
             ? OrderStatus::Accepted->value
             : OrderStatus::AdminVerification->value;
 
