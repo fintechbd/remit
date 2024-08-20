@@ -716,7 +716,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         $response = $this->callApi($method, $service);
 
-        logger("RAW Response", [$response]);
+        logger('RAW Response', [$response]);
 
         $orderInfo = json_decode(
             preg_replace(
@@ -733,7 +733,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         $data['vendor_data'] = $orderInfo;
 
-        logger("Formatted Response", [$orderInfo]);
+        logger('Formatted Response', [$orderInfo]);
 
         if (Transaction::order()->update($order->getKey(), ['status' => $status, 'order_data' => $data])) {
             $order->fresh();
