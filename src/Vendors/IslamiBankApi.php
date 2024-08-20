@@ -317,116 +317,116 @@ XML;
     {
         $directCreditRemittance = $this->__transferData($data);
         $xmlString = '
-            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
-            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
+            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
+            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
         ';
         $xmlString .= '<ser:wsMessage>';
         $xmlString .= '
-            <xsd:additionalField1>' . $directCreditRemittance['additionalField1'] . '</xsd:additionalField1>
-            <xsd:additionalField2>' . $directCreditRemittance['additionalField2'] . '</xsd:additionalField2>
-            <xsd:additionalField3>' . $directCreditRemittance['additionalField3'] . '</xsd:additionalField3>
-            <xsd:additionalField4>' . $directCreditRemittance['additionalField4'] . '</xsd:additionalField4>
-            <xsd:additionalField5>' . $directCreditRemittance['additionalField5'] . '</xsd:additionalField5>
-            <xsd:additionalField6>' . $directCreditRemittance['additionalField6'] . '</xsd:additionalField6>
-            <xsd:additionalField7>' . $directCreditRemittance['additionalField7'] . '</xsd:additionalField7>
-            <xsd:additionalField8>' . $directCreditRemittance['additionalField8'] . '</xsd:additionalField8>
-            <xsd:additionalField9>' . $directCreditRemittance['additionalField9'] . '</xsd:additionalField9>
+            <xsd:additionalField1>'.$directCreditRemittance['additionalField1'].'</xsd:additionalField1>
+            <xsd:additionalField2>'.$directCreditRemittance['additionalField2'].'</xsd:additionalField2>
+            <xsd:additionalField3>'.$directCreditRemittance['additionalField3'].'</xsd:additionalField3>
+            <xsd:additionalField4>'.$directCreditRemittance['additionalField4'].'</xsd:additionalField4>
+            <xsd:additionalField5>'.$directCreditRemittance['additionalField5'].'</xsd:additionalField5>
+            <xsd:additionalField6>'.$directCreditRemittance['additionalField6'].'</xsd:additionalField6>
+            <xsd:additionalField7>'.$directCreditRemittance['additionalField7'].'</xsd:additionalField7>
+            <xsd:additionalField8>'.$directCreditRemittance['additionalField8'].'</xsd:additionalField8>
+            <xsd:additionalField9>'.$directCreditRemittance['additionalField9'].'</xsd:additionalField9>
         ';
         $xmlString .= '
-            <xsd:amount>' . $directCreditRemittance['amount'] . '</xsd:amount>
+            <xsd:amount>'.$directCreditRemittance['amount'].'</xsd:amount>
         ';
         $xmlString .= '
-            <xsd:batchID>' . $directCreditRemittance['batchID'] . '</xsd:batchID>
+            <xsd:batchID>'.$directCreditRemittance['batchID'].'</xsd:batchID>
         ';
         $xmlString .= '
-            <xsd:beneficiaryAccNo>' . $directCreditRemittance['beneficiaryAccNo'] . '</xsd:beneficiaryAccNo>
+            <xsd:beneficiaryAccNo>'.$directCreditRemittance['beneficiaryAccNo'].'</xsd:beneficiaryAccNo>
         ';
         $xmlString .= '
-            <xsd:beneficiaryAccType>' . $directCreditRemittance['beneficiaryAccType'] . '</xsd:beneficiaryAccType>
+            <xsd:beneficiaryAccType>'.$directCreditRemittance['beneficiaryAccType'].'</xsd:beneficiaryAccType>
         ';
         $xmlString .= '
-            <xsd:beneficiaryAddress>' . $directCreditRemittance['beneficiaryAddress'] . '</xsd:beneficiaryAddress>
+            <xsd:beneficiaryAddress>'.$directCreditRemittance['beneficiaryAddress'].'</xsd:beneficiaryAddress>
         ';
         $xmlString .= '
-            <xsd:beneficiaryBankCode>' . $directCreditRemittance['beneficiaryBankCode'] . '</xsd:beneficiaryBankCode>
+            <xsd:beneficiaryBankCode>'.$directCreditRemittance['beneficiaryBankCode'].'</xsd:beneficiaryBankCode>
         ';
         $xmlString .= '
-            <xsd:beneficiaryBankName>' . $directCreditRemittance['beneficiaryBankName'] . '</xsd:beneficiaryBankName>
+            <xsd:beneficiaryBankName>'.$directCreditRemittance['beneficiaryBankName'].'</xsd:beneficiaryBankName>
         ';
         $xmlString .= '
-            <xsd:beneficiaryBranchCode>' . $directCreditRemittance['beneficiaryBranchCode'] . '</xsd:beneficiaryBranchCode>
+            <xsd:beneficiaryBranchCode>'.$directCreditRemittance['beneficiaryBranchCode'].'</xsd:beneficiaryBranchCode>
         ';
         $xmlString .= '
-            <xsd:beneficiaryBranchName>' . $directCreditRemittance['beneficiaryBranchName'] . '</xsd:beneficiaryBranchName>
+            <xsd:beneficiaryBranchName>'.$directCreditRemittance['beneficiaryBranchName'].'</xsd:beneficiaryBranchName>
         ';
         $xmlString .= '
-            <xsd:beneficiaryName>' . $directCreditRemittance['beneficiaryName'] . '</xsd:beneficiaryName>
+            <xsd:beneficiaryName>'.$directCreditRemittance['beneficiaryName'].'</xsd:beneficiaryName>
         ';
         $xmlString .= '
-            <xsd:beneficiaryPassportNo>' . $directCreditRemittance['beneficiaryPassportNo'] . '</xsd:beneficiaryPassportNo>
+            <xsd:beneficiaryPassportNo>'.$directCreditRemittance['beneficiaryPassportNo'].'</xsd:beneficiaryPassportNo>
         ';
         $xmlString .= '
-            <xsd:beneficiaryPhoneNo>' . $directCreditRemittance['beneficiaryPhoneNo'] . '</xsd:beneficiaryPhoneNo>
+            <xsd:beneficiaryPhoneNo>'.$directCreditRemittance['beneficiaryPhoneNo'].'</xsd:beneficiaryPhoneNo>
         ';
         $xmlString .= '
-            <xsd:beneficiaryRoutingNo>' . $directCreditRemittance['beneficiaryRoutingNo'] . '</xsd:beneficiaryRoutingNo>
+            <xsd:beneficiaryRoutingNo>'.$directCreditRemittance['beneficiaryRoutingNo'].'</xsd:beneficiaryRoutingNo>
         ';
         $xmlString .= '
-            <xsd:exHouseTxID>' . $directCreditRemittance['exHouseTxID'] . '</xsd:exHouseTxID>
+            <xsd:exHouseTxID>'.$directCreditRemittance['exHouseTxID'].'</xsd:exHouseTxID>
         ';
         $xmlString .= '
-            <xsd:exchHouseBranchCode>' . $directCreditRemittance['exchHouseBranchCode'] . '</xsd:exchHouseBranchCode>
+            <xsd:exchHouseBranchCode>'.$directCreditRemittance['exchHouseBranchCode'].'</xsd:exchHouseBranchCode>
         ';
         $xmlString .= '
-            <xsd:exchHouseSwiftCode>' . $directCreditRemittance['exchHouseSwiftCode'] . '</xsd:exchHouseSwiftCode>
+            <xsd:exchHouseSwiftCode>'.$directCreditRemittance['exchHouseSwiftCode'].'</xsd:exchHouseSwiftCode>
         ';
         $xmlString .= '
-            <xsd:identityDescription>' . $directCreditRemittance['identityDescription'] . '</xsd:identityDescription>
+            <xsd:identityDescription>'.$directCreditRemittance['identityDescription'].'</xsd:identityDescription>
         ';
         $xmlString .= '
-            <xsd:identityType>' . $directCreditRemittance['identityType'] . '</xsd:identityType>
+            <xsd:identityType>'.$directCreditRemittance['identityType'].'</xsd:identityType>
         ';
         $xmlString .= '
-            <xsd:isoCode>' . ($directCreditRemittance['isoCode'] ?? null) . '</xsd:isoCode>
+            <xsd:isoCode>'.($directCreditRemittance['isoCode'] ?? null).'</xsd:isoCode>
         ';
         $xmlString .= '
-            <xsd:issueDate>' . $directCreditRemittance['issueDate'] . '</xsd:issueDate>
+            <xsd:issueDate>'.$directCreditRemittance['issueDate'].'</xsd:issueDate>
         ';
         $xmlString .= '
-            <xsd:note>' . $directCreditRemittance['note'] . '</xsd:note>
+            <xsd:note>'.$directCreditRemittance['note'].'</xsd:note>
         ';
         $xmlString .= '
-            <xsd:orderNo>' . $directCreditRemittance['orderNo'] . '</xsd:orderNo>
+            <xsd:orderNo>'.$directCreditRemittance['orderNo'].'</xsd:orderNo>
         ';
         $xmlString .= '
-            <xsd:paymentType>' . $directCreditRemittance['paymentType'] . '</xsd:paymentType>
+            <xsd:paymentType>'.$directCreditRemittance['paymentType'].'</xsd:paymentType>
         ';
         $xmlString .= '
-            <xsd:remittancePurpose>' . $directCreditRemittance['remittancePurpose'] . '</xsd:remittancePurpose>
+            <xsd:remittancePurpose>'.$directCreditRemittance['remittancePurpose'].'</xsd:remittancePurpose>
         ';
         $xmlString .= '
-            <xsd:remitterAddress>' . $directCreditRemittance['remitterAddress'] . '</xsd:remitterAddress>
+            <xsd:remitterAddress>'.$directCreditRemittance['remitterAddress'].'</xsd:remitterAddress>
         ';
         $xmlString .= '
-            <xsd:remitterCountry>' . $directCreditRemittance['remitterCountry'] . '</xsd:remitterCountry>
+            <xsd:remitterCountry>'.$directCreditRemittance['remitterCountry'].'</xsd:remitterCountry>
         ';
         $xmlString .= '
-            <xsd:remitterIdentificationNo>' . $directCreditRemittance['remitterIdentificationNo'] . '</xsd:remitterIdentificationNo>
+            <xsd:remitterIdentificationNo>'.$directCreditRemittance['remitterIdentificationNo'].'</xsd:remitterIdentificationNo>
         ';
         $xmlString .= '
-            <xsd:remitterName>' . $directCreditRemittance['remitterName'] . '</xsd:remitterName>
+            <xsd:remitterName>'.$directCreditRemittance['remitterName'].'</xsd:remitterName>
         ';
         $xmlString .= '
-            <xsd:remitterPassportNo>' . $directCreditRemittance['remitterPassportNo'] . '</xsd:remitterPassportNo>
+            <xsd:remitterPassportNo>'.$directCreditRemittance['remitterPassportNo'].'</xsd:remitterPassportNo>
         ';
         $xmlString .= '
-            <xsd:remitterPhoneNo>' . $directCreditRemittance['remitterPhoneNo'] . '</xsd:remitterPhoneNo>
+            <xsd:remitterPhoneNo>'.$directCreditRemittance['remitterPhoneNo'].'</xsd:remitterPhoneNo>
         ';
         $xmlString .= '
-            <xsd:secretKey>' . ($directCreditRemittance['secretKey'] ?? null) . '</xsd:secretKey>
+            <xsd:secretKey>'.($directCreditRemittance['secretKey'] ?? null).'</xsd:secretKey>
         ';
         $xmlString .= '
-            <xsd:transReferenceNo>' . ($directCreditRemittance['transReferenceNo'] ?? null) . '</xsd:transReferenceNo>
+            <xsd:transReferenceNo>'.($directCreditRemittance['transReferenceNo'] ?? null).'</xsd:transReferenceNo>
         ';
         $xmlString .= '</ser:wsMessage>';
         $soapMethod = 'directCreditWSMessage';
@@ -459,7 +459,7 @@ XML;
         $transferData['batchID'] = '?';
         $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number'] ?? $data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
         $transferData['beneficiaryAccType'] = '';
-        $transferData['beneficiaryAddress'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $transferData['beneficiaryAddress'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['bank_information']['vendor_code']['remit']['islamibank'] ?? null);
         $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['bank_information']['bank_name'] ?? null);
         $transferData['beneficiaryBranchCode'] = '';
@@ -601,36 +601,36 @@ XML;
     {
         $importOrPushRemittance = $this->__transferData($data);
         $xmlString = '
-            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
-            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
+            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
+            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
         ';
         //$xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
         $xmlString .= '<ser:wsMessage>';
-        $xmlString .= '<xsd:amount>' . ($importOrPushRemittance['amount'] ?? null) . '</xsd:amount>';
-        $xmlString .= '<xsd:isoCode>' . ($importOrPushRemittance['isoCode'] ?? null) . '</xsd:isoCode>';
-        $xmlString .= '<xsd:beneficiaryAddress>' . ($importOrPushRemittance['beneficiaryAddress'] ?? null) . '</xsd:beneficiaryAddress>';
-        $xmlString .= '<xsd:beneficiaryBankCode>' . ($importOrPushRemittance['beneficiaryBankCode'] ?? null) . '</xsd:beneficiaryBankCode>';
-        $xmlString .= '<xsd:beneficiaryBankName>' . ($importOrPushRemittance['beneficiaryBankName'] ?? null) . '</xsd:beneficiaryBankName>';
-        $xmlString .= '<xsd:beneficiaryBranchCode>' . ($importOrPushRemittance['beneficiaryBranchCode'] ?? null) . '</xsd:beneficiaryBranchCode>';
-        $xmlString .= '<xsd:beneficiaryBranchName>' . ($importOrPushRemittance['beneficiaryBranchName'] ?? null) . '</xsd:beneficiaryBranchName>';
-        $xmlString .= '<xsd:beneficiaryName>' . ($importOrPushRemittance['beneficiaryName'] ?? null) . '</xsd:beneficiaryName>';
-        $xmlString .= '<xsd:beneficiaryPassportNo>' . ($importOrPushRemittance['beneficiaryPassportNo'] ?? null) . '</xsd:beneficiaryPassportNo>';
-        $xmlString .= '<xsd:beneficiaryPhoneNo>' . ($importOrPushRemittance['beneficiaryPhoneNo'] ?? null) . '</xsd:beneficiaryPhoneNo>';
-        $xmlString .= '<xsd:creatorID>' . ($importOrPushRemittance['creatorID'] ?? null) . '</xsd:creatorID>';
-        $xmlString .= '<xsd:exchHouseSwiftCode>' . ($importOrPushRemittance['exchHouseSwiftCode'] ?? null) . '</xsd:exchHouseSwiftCode>';
-        $xmlString .= '<xsd:identityDescription>' . ($importOrPushRemittance['identityDescription'] ?? null) . '</xsd:identityDescription>';
-        $xmlString .= '<xsd:identityType>' . ($importOrPushRemittance['identityType'] ?? null) . '</xsd:identityType>';
-        $xmlString .= '<xsd:issueDate>' . ($importOrPushRemittance['issueDate'] ?? null) . '</xsd:issueDate>';
-        $xmlString .= '<xsd:note>' . ($importOrPushRemittance['note'] ?? null) . '</xsd:note>';
-        $xmlString .= '<xsd:paymentType>' . ($importOrPushRemittance['paymentType'] ?? null) . '</xsd:paymentType>';
-        $xmlString .= '<xsd:remitterAddress>' . ($importOrPushRemittance['remitterAddress'] ?? null) . '</xsd:remitterAddress>';
-        $xmlString .= '<xsd:remitterIdentificationNo>' . ($importOrPushRemittance['remitterIdentificationNo'] ?? null) . '</xsd:remitterIdentificationNo>';
-        $xmlString .= '<xsd:remitterName' . ($importOrPushRemittance['remitterName'] ?? null) . '</xsd:remitterName>';
-        $xmlString .= '<xsd:remitterPhoneNo>' . ($importOrPushRemittance['remitterPhoneNo'] ?? null) . '</xsd:remitterPhoneNo>';
-        $xmlString .= '<xsd:secretKey>' . ($importOrPushRemittance['secretKey'] ?? null) . '</xsd:secretKey>';
-        $xmlString .= '<xsd:transReferenceNo>' . ($importOrPushRemittance['transReferenceNo'] ?? null) . '</xsd:transReferenceNo>';
-        $xmlString .= '<xsd:transferDate>' . ($importOrPushRemittance['transferDate'] ?? null) . '</xsd:transferDate>';
-        $xmlString .= '<xsd: remittancePurpose>' . ($importOrPushRemittance['remittancePurpose'] ?? null) . '</xsd: remittancePurpose >';
+        $xmlString .= '<xsd:amount>'.($importOrPushRemittance['amount'] ?? null).'</xsd:amount>';
+        $xmlString .= '<xsd:isoCode>'.($importOrPushRemittance['isoCode'] ?? null).'</xsd:isoCode>';
+        $xmlString .= '<xsd:beneficiaryAddress>'.($importOrPushRemittance['beneficiaryAddress'] ?? null).'</xsd:beneficiaryAddress>';
+        $xmlString .= '<xsd:beneficiaryBankCode>'.($importOrPushRemittance['beneficiaryBankCode'] ?? null).'</xsd:beneficiaryBankCode>';
+        $xmlString .= '<xsd:beneficiaryBankName>'.($importOrPushRemittance['beneficiaryBankName'] ?? null).'</xsd:beneficiaryBankName>';
+        $xmlString .= '<xsd:beneficiaryBranchCode>'.($importOrPushRemittance['beneficiaryBranchCode'] ?? null).'</xsd:beneficiaryBranchCode>';
+        $xmlString .= '<xsd:beneficiaryBranchName>'.($importOrPushRemittance['beneficiaryBranchName'] ?? null).'</xsd:beneficiaryBranchName>';
+        $xmlString .= '<xsd:beneficiaryName>'.($importOrPushRemittance['beneficiaryName'] ?? null).'</xsd:beneficiaryName>';
+        $xmlString .= '<xsd:beneficiaryPassportNo>'.($importOrPushRemittance['beneficiaryPassportNo'] ?? null).'</xsd:beneficiaryPassportNo>';
+        $xmlString .= '<xsd:beneficiaryPhoneNo>'.($importOrPushRemittance['beneficiaryPhoneNo'] ?? null).'</xsd:beneficiaryPhoneNo>';
+        $xmlString .= '<xsd:creatorID>'.($importOrPushRemittance['creatorID'] ?? null).'</xsd:creatorID>';
+        $xmlString .= '<xsd:exchHouseSwiftCode>'.($importOrPushRemittance['exchHouseSwiftCode'] ?? null).'</xsd:exchHouseSwiftCode>';
+        $xmlString .= '<xsd:identityDescription>'.($importOrPushRemittance['identityDescription'] ?? null).'</xsd:identityDescription>';
+        $xmlString .= '<xsd:identityType>'.($importOrPushRemittance['identityType'] ?? null).'</xsd:identityType>';
+        $xmlString .= '<xsd:issueDate>'.($importOrPushRemittance['issueDate'] ?? null).'</xsd:issueDate>';
+        $xmlString .= '<xsd:note>'.($importOrPushRemittance['note'] ?? null).'</xsd:note>';
+        $xmlString .= '<xsd:paymentType>'.($importOrPushRemittance['paymentType'] ?? null).'</xsd:paymentType>';
+        $xmlString .= '<xsd:remitterAddress>'.($importOrPushRemittance['remitterAddress'] ?? null).'</xsd:remitterAddress>';
+        $xmlString .= '<xsd:remitterIdentificationNo>'.($importOrPushRemittance['remitterIdentificationNo'] ?? null).'</xsd:remitterIdentificationNo>';
+        $xmlString .= '<xsd:remitterName'.($importOrPushRemittance['remitterName'] ?? null).'</xsd:remitterName>';
+        $xmlString .= '<xsd:remitterPhoneNo>'.($importOrPushRemittance['remitterPhoneNo'] ?? null).'</xsd:remitterPhoneNo>';
+        $xmlString .= '<xsd:secretKey>'.($importOrPushRemittance['secretKey'] ?? null).'</xsd:secretKey>';
+        $xmlString .= '<xsd:transReferenceNo>'.($importOrPushRemittance['transReferenceNo'] ?? null).'</xsd:transReferenceNo>';
+        $xmlString .= '<xsd:transferDate>'.($importOrPushRemittance['transferDate'] ?? null).'</xsd:transferDate>';
+        $xmlString .= '<xsd: remittancePurpose>'.($importOrPushRemittance['remittancePurpose'] ?? null).'</xsd: remittancePurpose >';
         $xmlString .= '</ser:wsMessage>';
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
@@ -657,36 +657,36 @@ XML;
     {
         $verifyRemittance = $this->__transferData($data);
         $xmlString = '
-            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
-            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
+            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
+            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
         ';
         //$xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
         $xmlString .= '<ser:wsMessage>';
-        $xmlString .= '<xsd:amount>' . ($verifyRemittance['amount'] ?? null) . '</xsd:amount>';
-        $xmlString .= '<xsd:isoCode>' . ($verifyRemittance['isoCode'] ?? null) . '</xsd:isoCode>';
-        $xmlString .= '<xsd:beneficiaryAddress>' . ($verifyRemittance['beneficiaryAddress'] ?? null) . '</xsd:beneficiaryAddress>';
-        $xmlString .= '<xsd:beneficiaryBankCode>' . ($verifyRemittance['beneficiaryBankCode'] ?? null) . '</xsd:beneficiaryBankCode>';
-        $xmlString .= '<xsd:beneficiaryBankName>' . ($verifyRemittance['beneficiaryBankName'] ?? null) . '</xsd:beneficiaryBankName>';
-        $xmlString .= '<xsd:beneficiaryBranchCode>' . ($verifyRemittance['beneficiaryBranchCode'] ?? null) . '</xsd:beneficiaryBranchCode>';
-        $xmlString .= '<xsd:beneficiaryBranchName>' . ($verifyRemittance['beneficiaryBranchName'] ?? null) . '</xsd:beneficiaryBranchName>';
-        $xmlString .= '<xsd:beneficiaryName>' . ($verifyRemittance['beneficiaryName'] ?? null) . '</xsd:beneficiaryName>';
-        $xmlString .= '<xsd:beneficiaryPassportNo>' . ($verifyRemittance['beneficiaryPassportNo'] ?? null) . '</xsd:beneficiaryPassportNo>';
-        $xmlString .= '<xsd:beneficiaryPhoneNo>' . ($verifyRemittance['beneficiaryPhoneNo'] ?? null) . '</xsd:beneficiaryPhoneNo>';
-        $xmlString .= '<xsd:creatorID>' . ($verifyRemittance['creatorID'] ?? null) . '</xsd:creatorID>';
-        $xmlString .= '<xsd:exchHouseSwiftCode>' . ($verifyRemittance['exchHouseSwiftCode'] ?? null) . '</xsd:exchHouseSwiftCode>';
-        $xmlString .= '<xsd:identityDescription>' . ($verifyRemittance['identityDescription'] ?? null) . '</xsd:identityDescription>';
-        $xmlString .= '<xsd:identityType>' . ($verifyRemittance['identityType'] ?? null) . '</xsd:identityType>';
-        $xmlString .= '<xsd:issueDate>' . ($verifyRemittance['issueDate'] ?? null) . '</xsd:issueDate>';
-        $xmlString .= '<xsd:note>' . ($verifyRemittance['note'] ?? null) . '</xsd:note>';
-        $xmlString .= '<xsd:paymentType>' . ($verifyRemittance['paymentType'] ?? null) . '</xsd:paymentType>';
-        $xmlString .= '<xsd:remitterAddress>' . ($verifyRemittance['remitterAddress'] ?? null) . '</xsd:remitterAddress>';
-        $xmlString .= '<xsd:remitterIdentificationNo>' . ($verifyRemittance['remitterIdentificationNo'] ?? null) . '</xsd:remitterIdentificationNo>';
-        $xmlString .= '<xsd:remitterName' . ($verifyRemittance['remitterName'] ?? null) . '</xsd:remitterName>';
-        $xmlString .= '<xsd:remitterPhoneNo>' . ($verifyRemittance['remitterPhoneNo'] ?? null) . '</xsd:remitterPhoneNo>';
-        $xmlString .= '<xsd:secretKey>' . ($verifyRemittance['secretKey'] ?? null) . '</xsd:secretKey>';
-        $xmlString .= '<xsd:transReferenceNo>' . ($verifyRemittance['transReferenceNo'] ?? null) . '</xsd:transReferenceNo>';
-        $xmlString .= '<xsd:transferDate>' . ($verifyRemittance['transferDate'] ?? null) . '</xsd:transferDate>';
-        $xmlString .= '<xsd: remittancePurpose>' . ($verifyRemittance['remittancePurpose'] ?? null) . '</xsd: remittancePurpose >';
+        $xmlString .= '<xsd:amount>'.($verifyRemittance['amount'] ?? null).'</xsd:amount>';
+        $xmlString .= '<xsd:isoCode>'.($verifyRemittance['isoCode'] ?? null).'</xsd:isoCode>';
+        $xmlString .= '<xsd:beneficiaryAddress>'.($verifyRemittance['beneficiaryAddress'] ?? null).'</xsd:beneficiaryAddress>';
+        $xmlString .= '<xsd:beneficiaryBankCode>'.($verifyRemittance['beneficiaryBankCode'] ?? null).'</xsd:beneficiaryBankCode>';
+        $xmlString .= '<xsd:beneficiaryBankName>'.($verifyRemittance['beneficiaryBankName'] ?? null).'</xsd:beneficiaryBankName>';
+        $xmlString .= '<xsd:beneficiaryBranchCode>'.($verifyRemittance['beneficiaryBranchCode'] ?? null).'</xsd:beneficiaryBranchCode>';
+        $xmlString .= '<xsd:beneficiaryBranchName>'.($verifyRemittance['beneficiaryBranchName'] ?? null).'</xsd:beneficiaryBranchName>';
+        $xmlString .= '<xsd:beneficiaryName>'.($verifyRemittance['beneficiaryName'] ?? null).'</xsd:beneficiaryName>';
+        $xmlString .= '<xsd:beneficiaryPassportNo>'.($verifyRemittance['beneficiaryPassportNo'] ?? null).'</xsd:beneficiaryPassportNo>';
+        $xmlString .= '<xsd:beneficiaryPhoneNo>'.($verifyRemittance['beneficiaryPhoneNo'] ?? null).'</xsd:beneficiaryPhoneNo>';
+        $xmlString .= '<xsd:creatorID>'.($verifyRemittance['creatorID'] ?? null).'</xsd:creatorID>';
+        $xmlString .= '<xsd:exchHouseSwiftCode>'.($verifyRemittance['exchHouseSwiftCode'] ?? null).'</xsd:exchHouseSwiftCode>';
+        $xmlString .= '<xsd:identityDescription>'.($verifyRemittance['identityDescription'] ?? null).'</xsd:identityDescription>';
+        $xmlString .= '<xsd:identityType>'.($verifyRemittance['identityType'] ?? null).'</xsd:identityType>';
+        $xmlString .= '<xsd:issueDate>'.($verifyRemittance['issueDate'] ?? null).'</xsd:issueDate>';
+        $xmlString .= '<xsd:note>'.($verifyRemittance['note'] ?? null).'</xsd:note>';
+        $xmlString .= '<xsd:paymentType>'.($verifyRemittance['paymentType'] ?? null).'</xsd:paymentType>';
+        $xmlString .= '<xsd:remitterAddress>'.($verifyRemittance['remitterAddress'] ?? null).'</xsd:remitterAddress>';
+        $xmlString .= '<xsd:remitterIdentificationNo>'.($verifyRemittance['remitterIdentificationNo'] ?? null).'</xsd:remitterIdentificationNo>';
+        $xmlString .= '<xsd:remitterName'.($verifyRemittance['remitterName'] ?? null).'</xsd:remitterName>';
+        $xmlString .= '<xsd:remitterPhoneNo>'.($verifyRemittance['remitterPhoneNo'] ?? null).'</xsd:remitterPhoneNo>';
+        $xmlString .= '<xsd:secretKey>'.($verifyRemittance['secretKey'] ?? null).'</xsd:secretKey>';
+        $xmlString .= '<xsd:transReferenceNo>'.($verifyRemittance['transReferenceNo'] ?? null).'</xsd:transReferenceNo>';
+        $xmlString .= '<xsd:transferDate>'.($verifyRemittance['transferDate'] ?? null).'</xsd:transferDate>';
+        $xmlString .= '<xsd: remittancePurpose>'.($verifyRemittance['remittancePurpose'] ?? null).'</xsd: remittancePurpose >';
         $xmlString .= '</ser:wsMessage>';
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
@@ -724,11 +724,11 @@ XML;
     public function fetchRemittanceStatus(array $data): array
     {
         $xmlString = '
-            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
-            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
+            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
+            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
         ';
-        $xmlString .= '<ser:transRefNo>' . ($data['transaction_reference_number'] ?? null) . '</ser:transRefNo>';
-        $xmlString .= '<ser:secretKey>' . ($data['secret_key'] ?? null) . '</ser:secretKey>';
+        $xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
+        $xmlString .= '<ser:secretKey>'.($data['secret_key'] ?? null).'</ser:secretKey>';
         $soapMethod = 'fetchWSMessageStatusResponse';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
@@ -809,11 +809,11 @@ XML;
     {
         $validateBeneficiaryWallet = $this->__transferData($data);
         $xmlString = '
-            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
-            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
+            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
+            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
         ';
-        $xmlString .= '<ser:walletNo>' . ($validateBeneficiaryWallet['beneficiaryAccNo']) . '</ser:walletNo>';
-        $xmlString .= '<ser:paymentType>' . ($validateBeneficiaryWallet['paymentType']) . '</ser:paymentType>';
+        $xmlString .= '<ser:walletNo>'.($validateBeneficiaryWallet['beneficiaryAccNo']).'</ser:walletNo>';
+        $xmlString .= '<ser:paymentType>'.($validateBeneficiaryWallet['paymentType']).'</ser:paymentType>';
         $soapMethod = 'validateBeneficiaryWallet';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
@@ -1002,7 +1002,7 @@ XML;
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
      *
      * @throws Exception
      */
@@ -1012,7 +1012,7 @@ XML;
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
      *
      * @throws Exception
      */
@@ -1028,7 +1028,7 @@ XML;
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
+     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
      *
      * @throws Exception
      */
