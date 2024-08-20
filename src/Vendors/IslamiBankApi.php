@@ -210,7 +210,6 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         //        return $return;
     }
 
-
     private function __transferData(array $data): array
     {
         $transferData['additionalField1'] = '?';
