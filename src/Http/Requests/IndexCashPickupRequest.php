@@ -44,7 +44,7 @@ class IndexCashPickupRequest extends FormRequest
             'service_id_in' => ['array', 'nullable'],
             'service_id_in.*' => ['integer', 'nullable'],
             'sender_receiver_id' => ['integer', 'nullable'],
-            'user_id_sender_receiver_id'=> ['integer', 'nullable'],
+            'user_id_sender_receiver_id' => ['integer', 'nullable'],
             'service_type_slug' => ['string', 'nullable'],
             'status' => ['string', 'nullable'],
             'service_slug' => ['string', 'nullable'],
