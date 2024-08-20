@@ -897,6 +897,8 @@ XML;
 
         $response = Utility::parseXml($xmlResponse);
 
+        dump($response);
+
         return $response['Envelope']['Body'];
     }
 
