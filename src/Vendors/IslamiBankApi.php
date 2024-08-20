@@ -589,7 +589,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
      *
      * @throws Exception
      */
-    public function vendorBalance(string $currency): mixed
+    private function vendorBalance(string $currency): mixed
     {
         $currency = trim($currency);
         $method = 'fetchBalance';
@@ -646,7 +646,10 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
      */
     public function requestQuote($order): mixed
     {
-        return ['balance' => $this->vendorBalance('BDT'), 'account' => $this->fetchAccountDetail($order->order_data)];
+        return [
+            'balance' => $this->vendorBalance(($order->currency ?? 'BDT')),
+            'account' => $this->fetchAccountDetail($order->order_data)
+        ];
     }
 
     /**
