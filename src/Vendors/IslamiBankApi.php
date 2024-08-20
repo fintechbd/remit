@@ -47,7 +47,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         $this->xml = new \DOMDocument('1.0', 'utf-8');
         $this->xml->preserveWhiteSpace = false;
-                $this->xml->formatOutput = true;
+        $this->xml->formatOutput = true;
     }
 
     private function initRequest($method)
@@ -123,7 +123,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
             'beneficiaryAccType' => 10,
             'beneficiaryBankCode' => 213,
         ];
-//        $accountDetail = $this->__transferData($data);
+        //        $accountDetail = $this->__transferData($data);
 
         $method = 'fetchAccountDetail';
 
@@ -136,80 +136,79 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         return $this->callApi($method, $service);
 
-
-//        $xmlString = '
-//            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
-//            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
-//        ';
-//        $xmlString .= '<ser:accNo>'.($accountDetail['beneficiaryAccNo'] ?? null).'</ser:accNo>';
-//        $xmlString .= '<ser:accType>'.($accountDetail['beneficiaryAccType'] ?? null).'</ser:accType>';
-//        $xmlString .= '<ser:branchCode>'.($accountDetail['beneficiaryBankCode'] ?? null).'</ser:branchCode>';
-//        $soapMethod = 'fetchAccountDetail';
-//        $response = $this->connectionCheck($xmlString, $soapMethod);
-//
-//        $explodeValue = explode('|', $response['Envelope']['Body']);
-//        $explodeValueCount = count($explodeValue) - 1;
-//        $return['origin_response'] = $response['Envelope']['Body'];
-//        if ($explodeValueCount > 0) {
-//            $return['status'] = $explodeValue[0];
-//            if ($explodeValue[0] == 'FALSE') {
-//                $return['status_code'] = $explodeValue[$explodeValueCount];
-//                $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
-//            } else {
-//                $return['account_number'] = $explodeValue[1];
-//                $return['account_title'] = $explodeValue[2];
-//                if ($data['branch_code'] != 358) {
-//                    $return['account_holder_father_name'] = $explodeValue[3];
-//                }
-//            }
-//        }
-//
-//        return $return;
+        //        $xmlString = '
+        //            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
+        //            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
+        //        ';
+        //        $xmlString .= '<ser:accNo>'.($accountDetail['beneficiaryAccNo'] ?? null).'</ser:accNo>';
+        //        $xmlString .= '<ser:accType>'.($accountDetail['beneficiaryAccType'] ?? null).'</ser:accType>';
+        //        $xmlString .= '<ser:branchCode>'.($accountDetail['beneficiaryBankCode'] ?? null).'</ser:branchCode>';
+        //        $soapMethod = 'fetchAccountDetail';
+        //        $response = $this->connectionCheck($xmlString, $soapMethod);
+        //
+        //        $explodeValue = explode('|', $response['Envelope']['Body']);
+        //        $explodeValueCount = count($explodeValue) - 1;
+        //        $return['origin_response'] = $response['Envelope']['Body'];
+        //        if ($explodeValueCount > 0) {
+        //            $return['status'] = $explodeValue[0];
+        //            if ($explodeValue[0] == 'FALSE') {
+        //                $return['status_code'] = $explodeValue[$explodeValueCount];
+        //                $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+        //            } else {
+        //                $return['account_number'] = $explodeValue[1];
+        //                $return['account_title'] = $explodeValue[2];
+        //                if ($data['branch_code'] != 358) {
+        //                    $return['account_holder_father_name'] = $explodeValue[3];
+        //                }
+        //            }
+        //        }
+        //
+        //        return $return;
     }
 
-//    /**
-//     * @throws Exception
-//     */
-//    private function connectionCheck($xml_post_string, $method): array
-//    {
-//        $xml_string = $this->xmlGenerate($xml_post_string, $method);
-//
-//        $response = Http::soap($this->apiUrl, $method, $xml_string);
-//
-//        //        $headers = [
-//        //            'Host: '.parse_url($this->apiUrl, PHP_URL_HOST),
-//        //            'Content-type: text/xml;charset="utf-8"',
-//        //            'Content-length: '.strlen($xml_string),
-//        //            'SOAPAction: '.$method,
-//        //        ];
-//        //
-//        //        // PHP cURL  for connection
-//        //        $ch = curl_init();
-//        //        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-//        //        curl_setopt($ch, CURLOPT_URL, $this->apiUrl);
-//        //        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-//        //        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-//        //        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
-//        //        curl_setopt($ch, CURLOPT_POST, true);
-//        //        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_string); // the SOAP request
-//        //        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-//        //        // execution
-//        //        $response = curl_exec($ch);
-//        //        Log::error($method.' CURL reported error: ');
-//        //        if ($response === false) {
-//        //            throw new Exception(curl_error($ch), curl_errno($ch));
-//        //        }
-//        //        curl_close($ch);
-//        //        Log::info('Raw Response'.PHP_EOL.$response);
-//        //        //        $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
-//        //        //        $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
-//        //        //        $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
-//        //        //        $response = str_replace('ns:', '', $response); //dd($response);
-//        //        //        Log::info($method . '<br>' . $response);
-//        //
-//        //        return simplexml_load_string($response);
-//        return Utility::parseXml($response->body());
-//    }
+    //    /**
+    //     * @throws Exception
+    //     */
+    //    private function connectionCheck($xml_post_string, $method): array
+    //    {
+    //        $xml_string = $this->xmlGenerate($xml_post_string, $method);
+    //
+    //        $response = Http::soap($this->apiUrl, $method, $xml_string);
+    //
+    //        //        $headers = [
+    //        //            'Host: '.parse_url($this->apiUrl, PHP_URL_HOST),
+    //        //            'Content-type: text/xml;charset="utf-8"',
+    //        //            'Content-length: '.strlen($xml_string),
+    //        //            'SOAPAction: '.$method,
+    //        //        ];
+    //        //
+    //        //        // PHP cURL  for connection
+    //        //        $ch = curl_init();
+    //        //        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+    //        //        curl_setopt($ch, CURLOPT_URL, $this->apiUrl);
+    //        //        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    //        //        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+    //        //        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
+    //        //        curl_setopt($ch, CURLOPT_POST, true);
+    //        //        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_string); // the SOAP request
+    //        //        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    //        //        // execution
+    //        //        $response = curl_exec($ch);
+    //        //        Log::error($method.' CURL reported error: ');
+    //        //        if ($response === false) {
+    //        //            throw new Exception(curl_error($ch), curl_errno($ch));
+    //        //        }
+    //        //        curl_close($ch);
+    //        //        Log::info('Raw Response'.PHP_EOL.$response);
+    //        //        //        $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
+    //        //        //        $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
+    //        //        //        $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
+    //        //        //        $response = str_replace('ns:', '', $response); //dd($response);
+    //        //        //        Log::info($method . '<br>' . $response);
+    //        //
+    //        //        return simplexml_load_string($response);
+    //        return Utility::parseXml($response->body());
+    //    }
 
     public function xmlGenerate($string, $method): string
     {
