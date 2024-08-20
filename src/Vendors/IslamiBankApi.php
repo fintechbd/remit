@@ -87,7 +87,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
      *
      * @throws Exception
      */
-    private function fetchAccountDetail(array $data): array
+    private function fetchAccountDetail(array $data): mixed
     {
         $accountDetail = $this->__transferData($data);
 
