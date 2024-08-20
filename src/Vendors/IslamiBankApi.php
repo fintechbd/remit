@@ -6,9 +6,10 @@ use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Fintech\Remit\Contracts\WalletTransfer;
 use Illuminate\Support\Facades\Http;
 
-class IslamiBankApi implements MoneyTransfer
+class IslamiBankApi implements MoneyTransfer, WalletTransfer
 {
     /**
      * IslamiBank API configuration.
@@ -46,7 +47,7 @@ class IslamiBankApi implements MoneyTransfer
 
         $this->xml = new \DOMDocument('1.0', 'utf-8');
         $this->xml->preserveWhiteSpace = false;
-        //        $this->xml->formatOutput = true;
+                $this->xml->formatOutput = true;
     }
 
     private function initRequest($method)
@@ -115,82 +116,95 @@ class IslamiBankApi implements MoneyTransfer
      *
      * @throws Exception
      */
-    /*public function fetchAccountDetail(array $data): array
+    public function fetchAccountDetail(array $data): array
     {
         $accountDetail = $this->__transferData($data);
-        $xmlString = '
-            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
-            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
-        ';
-        $xmlString .= '<ser:accNo>'.($accountDetail['beneficiaryAccNo'] ?? null).'</ser:accNo>';
-        $xmlString .= '<ser:accType>'.($accountDetail['beneficiaryAccType'] ?? null).'</ser:accType>';
-        $xmlString .= '<ser:branchCode>'.($accountDetail['beneficiaryBankCode'] ?? null).'</ser:branchCode>';
-        $soapMethod = 'fetchAccountDetail';
-        $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        $explodeValue = explode('|', $response['Envelope']['Body']);
-        $explodeValueCount = count($explodeValue) - 1;
-        $return['origin_response'] = $response['Envelope']['Body'];
-        if ($explodeValueCount > 0) {
-            $return['status'] = $explodeValue[0];
-            if ($explodeValue[0] == 'FALSE') {
-                $return['status_code'] = $explodeValue[$explodeValueCount];
-                $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
-            } else {
-                $return['account_number'] = $explodeValue[1];
-                $return['account_title'] = $explodeValue[2];
-                if ($data['branch_code'] != 358) {
-                    $return['account_holder_father_name'] = $explodeValue[3];
-                }
-            }
-        }
+        $method = 'fetchAccountDetail';
 
-        return $return;
-    }*/
+        $service = $this->xml->createElement("ser:{$method}");
+        $service->appendChild($this->xml->createElement('ser:userID', $this->config[$this->status]['username']));
+        $service->appendChild($this->xml->createElement('ser:password', $this->config[$this->status]['password']));
+        $service->appendChild($this->xml->createElement('ser:accNo', $accountDetail['beneficiaryAccNo'] ?? '?'));
+        $service->appendChild($this->xml->createElement('ser:accType', $accountDetail['beneficiaryAccType'] ?? '?'));
+        $service->appendChild($this->xml->createElement('ser:branchCode', $accountDetail['beneficiaryBankCode'] ?? '?'));
 
-    /**
-     * @throws Exception
-     */
-    private function connectionCheck($xml_post_string, $method): array
-    {
-        $xml_string = $this->xmlGenerate($xml_post_string, $method);
+        return $this->callApi($method, $service);
 
-        $response = Http::soap($this->apiUrl, $method, $xml_string);
 
-        //        $headers = [
-        //            'Host: '.parse_url($this->apiUrl, PHP_URL_HOST),
-        //            'Content-type: text/xml;charset="utf-8"',
-        //            'Content-length: '.strlen($xml_string),
-        //            'SOAPAction: '.$method,
-        //        ];
-        //
-        //        // PHP cURL  for connection
-        //        $ch = curl_init();
-        //        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        //        curl_setopt($ch, CURLOPT_URL, $this->apiUrl);
-        //        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        //        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-        //        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
-        //        curl_setopt($ch, CURLOPT_POST, true);
-        //        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_string); // the SOAP request
-        //        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        //        // execution
-        //        $response = curl_exec($ch);
-        //        Log::error($method.' CURL reported error: ');
-        //        if ($response === false) {
-        //            throw new Exception(curl_error($ch), curl_errno($ch));
-        //        }
-        //        curl_close($ch);
-        //        Log::info('Raw Response'.PHP_EOL.$response);
-        //        //        $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
-        //        //        $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
-        //        //        $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
-        //        //        $response = str_replace('ns:', '', $response); //dd($response);
-        //        //        Log::info($method . '<br>' . $response);
-        //
-        //        return simplexml_load_string($response);
-        return Utility::parseXml($response->body());
+//        $xmlString = '
+//            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
+//            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
+//        ';
+//        $xmlString .= '<ser:accNo>'.($accountDetail['beneficiaryAccNo'] ?? null).'</ser:accNo>';
+//        $xmlString .= '<ser:accType>'.($accountDetail['beneficiaryAccType'] ?? null).'</ser:accType>';
+//        $xmlString .= '<ser:branchCode>'.($accountDetail['beneficiaryBankCode'] ?? null).'</ser:branchCode>';
+//        $soapMethod = 'fetchAccountDetail';
+//        $response = $this->connectionCheck($xmlString, $soapMethod);
+//
+//        $explodeValue = explode('|', $response['Envelope']['Body']);
+//        $explodeValueCount = count($explodeValue) - 1;
+//        $return['origin_response'] = $response['Envelope']['Body'];
+//        if ($explodeValueCount > 0) {
+//            $return['status'] = $explodeValue[0];
+//            if ($explodeValue[0] == 'FALSE') {
+//                $return['status_code'] = $explodeValue[$explodeValueCount];
+//                $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+//            } else {
+//                $return['account_number'] = $explodeValue[1];
+//                $return['account_title'] = $explodeValue[2];
+//                if ($data['branch_code'] != 358) {
+//                    $return['account_holder_father_name'] = $explodeValue[3];
+//                }
+//            }
+//        }
+//
+//        return $return;
     }
+
+//    /**
+//     * @throws Exception
+//     */
+//    private function connectionCheck($xml_post_string, $method): array
+//    {
+//        $xml_string = $this->xmlGenerate($xml_post_string, $method);
+//
+//        $response = Http::soap($this->apiUrl, $method, $xml_string);
+//
+//        //        $headers = [
+//        //            'Host: '.parse_url($this->apiUrl, PHP_URL_HOST),
+//        //            'Content-type: text/xml;charset="utf-8"',
+//        //            'Content-length: '.strlen($xml_string),
+//        //            'SOAPAction: '.$method,
+//        //        ];
+//        //
+//        //        // PHP cURL  for connection
+//        //        $ch = curl_init();
+//        //        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+//        //        curl_setopt($ch, CURLOPT_URL, $this->apiUrl);
+//        //        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+//        //        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+//        //        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
+//        //        curl_setopt($ch, CURLOPT_POST, true);
+//        //        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_string); // the SOAP request
+//        //        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+//        //        // execution
+//        //        $response = curl_exec($ch);
+//        //        Log::error($method.' CURL reported error: ');
+//        //        if ($response === false) {
+//        //            throw new Exception(curl_error($ch), curl_errno($ch));
+//        //        }
+//        //        curl_close($ch);
+//        //        Log::info('Raw Response'.PHP_EOL.$response);
+//        //        //        $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
+//        //        //        $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
+//        //        //        $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
+//        //        //        $response = str_replace('ns:', '', $response); //dd($response);
+//        //        //        Log::info($method . '<br>' . $response);
+//        //
+//        //        return simplexml_load_string($response);
+//        return Utility::parseXml($response->body());
+//    }
 
     public function xmlGenerate($string, $method): string
     {
@@ -857,22 +871,6 @@ XML;
 
         return $this->callApi($method, $service);
 
-        //        $response = $this->connectionCheck($xmlString, $soapMethod);
-        //
-        //        $explodeValue = explode('|', $response['Envelope']['Body']);
-        //        $explodeValueCount = count($explodeValue) - 1;
-        //        $return['origin_response'] = $response['Envelope']['Body'];
-        //        if ($explodeValueCount > 0) {
-        //            $return['status'] = $explodeValue[0];
-        //            if ($explodeValue[0] == 'FALSE') {
-        //                $return['status_code'] = $explodeValue[$explodeValueCount];
-        //                $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
-        //            } else {
-        //                $return['message'] = $explodeValue[$explodeValueCount];
-        //            }
-        //        }
-        //
-        //        return $return;
     }
 
     /**
@@ -893,11 +891,11 @@ XML;
 
         $this->xml->appendChild($envelope);
 
+        dd($this->xml->saveXML());
+
         $xmlResponse = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
 
         $response = Utility::parseXml($xmlResponse);
-
-        dump($response);
 
         return $response['Envelope']['Body'];
     }
@@ -1084,6 +1082,18 @@ XML;
      * @throws \ErrorException
      */
     public function trackOrder(BaseModel $order): mixed
+    {
+        return [];
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for a quotation of the order. that include charge, fee,
+     * commission and other information related to order.
+     *
+     * @throws \ErrorException
+     */
+    public function validateWallet(BaseModel $order): mixed
     {
         return [];
     }
