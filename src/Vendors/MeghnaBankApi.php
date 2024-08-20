@@ -7,7 +7,6 @@ use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Transaction\Facades\Transaction;
-use Fintech\Transaction\Models\Order;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 

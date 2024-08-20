@@ -676,4 +676,15 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     {
         // TODO: Implement amendmentOrder() method.
     }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for the track real-time progress of the order.
+     *
+     * @throws \ErrorException
+     */
+    public function trackOrder(BaseModel $order): mixed
+    {
+        // TODO: Implement trackOrder() method.
+    }
 }
