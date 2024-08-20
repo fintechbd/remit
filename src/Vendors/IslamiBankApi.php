@@ -882,7 +882,7 @@ XML;
     {
         $envelope = $this->xml->createElement('soapenv:Envelope');
         $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope/');
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:ser', 'http://service.ws.mt.ibbl/');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:ser', 'http://service.ws.mt.ibbl');
         $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xsd', 'http://bean.ws.mt.ibbl/xsd');
         $envelope->appendChild($this->xml->createElement('soapenv:Header'));
 
@@ -893,11 +893,11 @@ XML;
 
         $this->xml->appendChild($envelope);
 
-        $response = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
+        $xmlResponse = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
 
-        dump($response);
+        $response = Utility::parseXml($xmlResponse);
 
-        return Utility::parseXml($response);
+        return $response['Envelope']['Body'];
     }
 
     /**
