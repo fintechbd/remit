@@ -47,61 +47,32 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         $this->xml = new \DOMDocument('1.0', 'utf-8');
         $this->xml->preserveWhiteSpace = false;
-        $this->xml->formatOutput = true;
+        $this->xml->formatOutput = false;
     }
 
-    private function initRequest($method)
+    /**
+     * @throws \DOMException
+     */
+    private function callApi($method, $payload)
     {
-        /*$service = $xml->createElement('ser:directCreditWSMessage');
-        $service->appendChild($xml->createElement('ser:userID', 'username'));
-        $service->appendChild($xml->createElement('ser:password', 'password'));
-        $wsMessage = $xml->createElement('ser:wsMessage');
-        $wsMessage->appendChild($xml->createElement('xsd:additionalField1', '1'));
-        $wsMessage->appendChild($xml->createElement('xsd:additionalField2', '2'));
-        $wsMessage->appendChild($xml->createElement('xsd:additionalField3', '3'));
-        $wsMessage->appendChild($xml->createElement('xsd:additionalField4', '4'));
-        $wsMessage->appendChild($xml->createElement('xsd:additionalField5', '5'));
-        $wsMessage->appendChild($xml->createElement('xsd:additionalField6', '6'));
-        $wsMessage->appendChild($xml->createElement('xsd:additionalField7', '7'));
-        $wsMessage->appendChild($xml->createElement('xsd:additionalField8', '8'));
-        $wsMessage->appendChild($xml->createElement('xsd:additionalField9', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:amount', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:batchID', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryAccNo', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryAccType', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryAddress', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryBankCode', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryBankName', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryBranchCode', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryBranchName', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryName', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryPassportNo', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryPhoneNo', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:beneficiaryRoutingNo', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:exHouseTxID', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:exchHouseBranchCode', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:exchHouseSwiftCode', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:identityDescription', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:identityType', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:isoCode', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:issueDate', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:note', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:orderNo', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:paymentType', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:remittancePurpose', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:remitterAddress', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:remitterCountry', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:remitterIdentificationNo', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:remitterName', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:remitterPassportNo', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:remitterPhoneNo', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:secretKey', '9'));
-        $wsMessage->appendChild($xml->createElement('xsd:transReferenceNo', '9'));
-        $service->appendChild($wsMessage);
-        $envelopeBody->appendChild($service);
+        $envelope = $this->xml->createElement('soapenv:Envelope');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope/');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:ser', 'http://service.ws.mt.ibbl');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xsd', 'http://bean.ws.mt.ibbl/xsd');
+        $envelope->appendChild($this->xml->createElement('soapenv:Header'));
+
+        $envelopeBody = $this->xml->createElement('soapenv:Body');
+        $envelopeBody->appendChild($payload);
+
         $envelope->appendChild($envelopeBody);
-        $xml->appendChild($envelope);
-        echo $xml->saveXML();*/
+
+        $this->xml->appendChild($envelope);
+
+        $xmlResponse = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
+
+        $response = Utility::parseXml($xmlResponse);
+
+        return $response['Envelope']['Body'] ?? null;
     }
 
     /**
@@ -116,14 +87,9 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
      *
      * @throws Exception
      */
-    public function fetchAccountDetail(array $data): array
+    private function fetchAccountDetail(array $data): array
     {
-        $accountDetail = [
-            'beneficiaryAccNo' => 11052,
-            'beneficiaryAccType' => 10,
-            'beneficiaryBankCode' => 213,
-        ];
-        //        $accountDetail = $this->__transferData($data);
+        $accountDetail = $this->__transferData($data);
 
         $method = 'fetchAccountDetail';
 
@@ -164,67 +130,6 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         //        }
         //
         //        return $return;
-    }
-
-    //    /**
-    //     * @throws Exception
-    //     */
-    //    private function connectionCheck($xml_post_string, $method): array
-    //    {
-    //        $xml_string = $this->xmlGenerate($xml_post_string, $method);
-    //
-    //        $response = Http::soap($this->apiUrl, $method, $xml_string);
-    //
-    //        //        $headers = [
-    //        //            'Host: '.parse_url($this->apiUrl, PHP_URL_HOST),
-    //        //            'Content-type: text/xml;charset="utf-8"',
-    //        //            'Content-length: '.strlen($xml_string),
-    //        //            'SOAPAction: '.$method,
-    //        //        ];
-    //        //
-    //        //        // PHP cURL  for connection
-    //        //        $ch = curl_init();
-    //        //        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-    //        //        curl_setopt($ch, CURLOPT_URL, $this->apiUrl);
-    //        //        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    //        //        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-    //        //        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
-    //        //        curl_setopt($ch, CURLOPT_POST, true);
-    //        //        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml_string); // the SOAP request
-    //        //        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    //        //        // execution
-    //        //        $response = curl_exec($ch);
-    //        //        Log::error($method.' CURL reported error: ');
-    //        //        if ($response === false) {
-    //        //            throw new Exception(curl_error($ch), curl_errno($ch));
-    //        //        }
-    //        //        curl_close($ch);
-    //        //        Log::info('Raw Response'.PHP_EOL.$response);
-    //        //        //        $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
-    //        //        //        $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
-    //        //        //        $response = str_replace('xmlns:ns="http://service.ws.mt.ibbl"', '', $response2);
-    //        //        //        $response = str_replace('ns:', '', $response); //dd($response);
-    //        //        //        Log::info($method . '<br>' . $response);
-    //        //
-    //        //        return simplexml_load_string($response);
-    //        return Utility::parseXml($response->body());
-    //    }
-
-    public function xmlGenerate($string, $method): string
-    {
-        return <<<XML
-<?xml version="1.0" encoding="utf-8"?>
-    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-     xmlns:ser="http://service.ws.mt.ibbl"
-     xmlns:xsd="http://bean.ws.mt.ibbl/xsd">
-        <soapenv:Header/>
-        <soapenv:Body>
-            <ser:{$method}>
-                {$string}
-            </ser:{$method}>
-        </soapenv:Body>
-    </soapenv:Envelope>
-XML;
     }
 
     /**
@@ -314,154 +219,6 @@ XML;
         return $return[$code];
     }
 
-    /**
-     * Direct Credit Remittance (directCreditWSMessage)
-     *
-     * Direct Credit Remittance : In case of Account payee, you can instantly credit to beneficiary account
-     * then transaction will be :
-     * Debit: Exchange House Account
-     * Credit: Beneficiary (receiver) account
-     * In case of instant cash, you can also directly debit your account and will be available for any branch payment:
-     * Debit: Exchange House Account
-     * Credit: Available for any branch payment.
-     *
-     * Parameters: userID, password, accNo, wsMessage
-     *
-     * @reference directCreditRemittance
-     *
-     * @throws Exception
-     */
-    public function directCreditRemittance(array $data): array
-    {
-        $directCreditRemittance = $this->__transferData($data);
-        $xmlString = '
-            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
-            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
-        ';
-        $xmlString .= '<ser:wsMessage>';
-        $xmlString .= '
-            <xsd:additionalField1>'.$directCreditRemittance['additionalField1'].'</xsd:additionalField1>
-            <xsd:additionalField2>'.$directCreditRemittance['additionalField2'].'</xsd:additionalField2>
-            <xsd:additionalField3>'.$directCreditRemittance['additionalField3'].'</xsd:additionalField3>
-            <xsd:additionalField4>'.$directCreditRemittance['additionalField4'].'</xsd:additionalField4>
-            <xsd:additionalField5>'.$directCreditRemittance['additionalField5'].'</xsd:additionalField5>
-            <xsd:additionalField6>'.$directCreditRemittance['additionalField6'].'</xsd:additionalField6>
-            <xsd:additionalField7>'.$directCreditRemittance['additionalField7'].'</xsd:additionalField7>
-            <xsd:additionalField8>'.$directCreditRemittance['additionalField8'].'</xsd:additionalField8>
-            <xsd:additionalField9>'.$directCreditRemittance['additionalField9'].'</xsd:additionalField9>
-        ';
-        $xmlString .= '
-            <xsd:amount>'.$directCreditRemittance['amount'].'</xsd:amount>
-        ';
-        $xmlString .= '
-            <xsd:batchID>'.$directCreditRemittance['batchID'].'</xsd:batchID>
-        ';
-        $xmlString .= '
-            <xsd:beneficiaryAccNo>'.$directCreditRemittance['beneficiaryAccNo'].'</xsd:beneficiaryAccNo>
-        ';
-        $xmlString .= '
-            <xsd:beneficiaryAccType>'.$directCreditRemittance['beneficiaryAccType'].'</xsd:beneficiaryAccType>
-        ';
-        $xmlString .= '
-            <xsd:beneficiaryAddress>'.$directCreditRemittance['beneficiaryAddress'].'</xsd:beneficiaryAddress>
-        ';
-        $xmlString .= '
-            <xsd:beneficiaryBankCode>'.$directCreditRemittance['beneficiaryBankCode'].'</xsd:beneficiaryBankCode>
-        ';
-        $xmlString .= '
-            <xsd:beneficiaryBankName>'.$directCreditRemittance['beneficiaryBankName'].'</xsd:beneficiaryBankName>
-        ';
-        $xmlString .= '
-            <xsd:beneficiaryBranchCode>'.$directCreditRemittance['beneficiaryBranchCode'].'</xsd:beneficiaryBranchCode>
-        ';
-        $xmlString .= '
-            <xsd:beneficiaryBranchName>'.$directCreditRemittance['beneficiaryBranchName'].'</xsd:beneficiaryBranchName>
-        ';
-        $xmlString .= '
-            <xsd:beneficiaryName>'.$directCreditRemittance['beneficiaryName'].'</xsd:beneficiaryName>
-        ';
-        $xmlString .= '
-            <xsd:beneficiaryPassportNo>'.$directCreditRemittance['beneficiaryPassportNo'].'</xsd:beneficiaryPassportNo>
-        ';
-        $xmlString .= '
-            <xsd:beneficiaryPhoneNo>'.$directCreditRemittance['beneficiaryPhoneNo'].'</xsd:beneficiaryPhoneNo>
-        ';
-        $xmlString .= '
-            <xsd:beneficiaryRoutingNo>'.$directCreditRemittance['beneficiaryRoutingNo'].'</xsd:beneficiaryRoutingNo>
-        ';
-        $xmlString .= '
-            <xsd:exHouseTxID>'.$directCreditRemittance['exHouseTxID'].'</xsd:exHouseTxID>
-        ';
-        $xmlString .= '
-            <xsd:exchHouseBranchCode>'.$directCreditRemittance['exchHouseBranchCode'].'</xsd:exchHouseBranchCode>
-        ';
-        $xmlString .= '
-            <xsd:exchHouseSwiftCode>'.$directCreditRemittance['exchHouseSwiftCode'].'</xsd:exchHouseSwiftCode>
-        ';
-        $xmlString .= '
-            <xsd:identityDescription>'.$directCreditRemittance['identityDescription'].'</xsd:identityDescription>
-        ';
-        $xmlString .= '
-            <xsd:identityType>'.$directCreditRemittance['identityType'].'</xsd:identityType>
-        ';
-        $xmlString .= '
-            <xsd:isoCode>'.($directCreditRemittance['isoCode'] ?? null).'</xsd:isoCode>
-        ';
-        $xmlString .= '
-            <xsd:issueDate>'.$directCreditRemittance['issueDate'].'</xsd:issueDate>
-        ';
-        $xmlString .= '
-            <xsd:note>'.$directCreditRemittance['note'].'</xsd:note>
-        ';
-        $xmlString .= '
-            <xsd:orderNo>'.$directCreditRemittance['orderNo'].'</xsd:orderNo>
-        ';
-        $xmlString .= '
-            <xsd:paymentType>'.$directCreditRemittance['paymentType'].'</xsd:paymentType>
-        ';
-        $xmlString .= '
-            <xsd:remittancePurpose>'.$directCreditRemittance['remittancePurpose'].'</xsd:remittancePurpose>
-        ';
-        $xmlString .= '
-            <xsd:remitterAddress>'.$directCreditRemittance['remitterAddress'].'</xsd:remitterAddress>
-        ';
-        $xmlString .= '
-            <xsd:remitterCountry>'.$directCreditRemittance['remitterCountry'].'</xsd:remitterCountry>
-        ';
-        $xmlString .= '
-            <xsd:remitterIdentificationNo>'.$directCreditRemittance['remitterIdentificationNo'].'</xsd:remitterIdentificationNo>
-        ';
-        $xmlString .= '
-            <xsd:remitterName>'.$directCreditRemittance['remitterName'].'</xsd:remitterName>
-        ';
-        $xmlString .= '
-            <xsd:remitterPassportNo>'.$directCreditRemittance['remitterPassportNo'].'</xsd:remitterPassportNo>
-        ';
-        $xmlString .= '
-            <xsd:remitterPhoneNo>'.$directCreditRemittance['remitterPhoneNo'].'</xsd:remitterPhoneNo>
-        ';
-        $xmlString .= '
-            <xsd:secretKey>'.($directCreditRemittance['secretKey'] ?? null).'</xsd:secretKey>
-        ';
-        $xmlString .= '
-            <xsd:transReferenceNo>'.($directCreditRemittance['transReferenceNo'] ?? null).'</xsd:transReferenceNo>
-        ';
-        $xmlString .= '</ser:wsMessage>';
-        $soapMethod = 'directCreditWSMessage';
-        $response = $this->connectionCheck($xmlString, $soapMethod);
-
-        $explodeValue = explode('|', $response['Envelope']['Body']);
-        $explodeValueCount = count($explodeValue) - 1;
-        $return['origin_response'] = $response['Envelope']['Body'];
-        if ($explodeValueCount > 0) {
-            $return['status'] = $explodeValue[0];
-            $return['status_code'] = $explodeValue[$explodeValueCount];
-            $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
-        }
-
-        return $return;
-    }
-
     private function __transferData(array $data): array
     {
         $transferData['additionalField1'] = '?';
@@ -477,7 +234,7 @@ XML;
         $transferData['batchID'] = '?';
         $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number'] ?? $data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
         $transferData['beneficiaryAccType'] = '';
-        $transferData['beneficiaryAddress'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $transferData['beneficiaryAddress'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['bank_information']['vendor_code']['remit']['islamibank'] ?? null);
         $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['bank_information']['bank_name'] ?? null);
         $transferData['beneficiaryBranchCode'] = '';
@@ -619,36 +376,36 @@ XML;
     {
         $importOrPushRemittance = $this->__transferData($data);
         $xmlString = '
-            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
-            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
+            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
+            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
         ';
         //$xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
         $xmlString .= '<ser:wsMessage>';
-        $xmlString .= '<xsd:amount>'.($importOrPushRemittance['amount'] ?? null).'</xsd:amount>';
-        $xmlString .= '<xsd:isoCode>'.($importOrPushRemittance['isoCode'] ?? null).'</xsd:isoCode>';
-        $xmlString .= '<xsd:beneficiaryAddress>'.($importOrPushRemittance['beneficiaryAddress'] ?? null).'</xsd:beneficiaryAddress>';
-        $xmlString .= '<xsd:beneficiaryBankCode>'.($importOrPushRemittance['beneficiaryBankCode'] ?? null).'</xsd:beneficiaryBankCode>';
-        $xmlString .= '<xsd:beneficiaryBankName>'.($importOrPushRemittance['beneficiaryBankName'] ?? null).'</xsd:beneficiaryBankName>';
-        $xmlString .= '<xsd:beneficiaryBranchCode>'.($importOrPushRemittance['beneficiaryBranchCode'] ?? null).'</xsd:beneficiaryBranchCode>';
-        $xmlString .= '<xsd:beneficiaryBranchName>'.($importOrPushRemittance['beneficiaryBranchName'] ?? null).'</xsd:beneficiaryBranchName>';
-        $xmlString .= '<xsd:beneficiaryName>'.($importOrPushRemittance['beneficiaryName'] ?? null).'</xsd:beneficiaryName>';
-        $xmlString .= '<xsd:beneficiaryPassportNo>'.($importOrPushRemittance['beneficiaryPassportNo'] ?? null).'</xsd:beneficiaryPassportNo>';
-        $xmlString .= '<xsd:beneficiaryPhoneNo>'.($importOrPushRemittance['beneficiaryPhoneNo'] ?? null).'</xsd:beneficiaryPhoneNo>';
-        $xmlString .= '<xsd:creatorID>'.($importOrPushRemittance['creatorID'] ?? null).'</xsd:creatorID>';
-        $xmlString .= '<xsd:exchHouseSwiftCode>'.($importOrPushRemittance['exchHouseSwiftCode'] ?? null).'</xsd:exchHouseSwiftCode>';
-        $xmlString .= '<xsd:identityDescription>'.($importOrPushRemittance['identityDescription'] ?? null).'</xsd:identityDescription>';
-        $xmlString .= '<xsd:identityType>'.($importOrPushRemittance['identityType'] ?? null).'</xsd:identityType>';
-        $xmlString .= '<xsd:issueDate>'.($importOrPushRemittance['issueDate'] ?? null).'</xsd:issueDate>';
-        $xmlString .= '<xsd:note>'.($importOrPushRemittance['note'] ?? null).'</xsd:note>';
-        $xmlString .= '<xsd:paymentType>'.($importOrPushRemittance['paymentType'] ?? null).'</xsd:paymentType>';
-        $xmlString .= '<xsd:remitterAddress>'.($importOrPushRemittance['remitterAddress'] ?? null).'</xsd:remitterAddress>';
-        $xmlString .= '<xsd:remitterIdentificationNo>'.($importOrPushRemittance['remitterIdentificationNo'] ?? null).'</xsd:remitterIdentificationNo>';
-        $xmlString .= '<xsd:remitterName'.($importOrPushRemittance['remitterName'] ?? null).'</xsd:remitterName>';
-        $xmlString .= '<xsd:remitterPhoneNo>'.($importOrPushRemittance['remitterPhoneNo'] ?? null).'</xsd:remitterPhoneNo>';
-        $xmlString .= '<xsd:secretKey>'.($importOrPushRemittance['secretKey'] ?? null).'</xsd:secretKey>';
-        $xmlString .= '<xsd:transReferenceNo>'.($importOrPushRemittance['transReferenceNo'] ?? null).'</xsd:transReferenceNo>';
-        $xmlString .= '<xsd:transferDate>'.($importOrPushRemittance['transferDate'] ?? null).'</xsd:transferDate>';
-        $xmlString .= '<xsd: remittancePurpose>'.($importOrPushRemittance['remittancePurpose'] ?? null).'</xsd: remittancePurpose >';
+        $xmlString .= '<xsd:amount>' . ($importOrPushRemittance['amount'] ?? null) . '</xsd:amount>';
+        $xmlString .= '<xsd:isoCode>' . ($importOrPushRemittance['isoCode'] ?? null) . '</xsd:isoCode>';
+        $xmlString .= '<xsd:beneficiaryAddress>' . ($importOrPushRemittance['beneficiaryAddress'] ?? null) . '</xsd:beneficiaryAddress>';
+        $xmlString .= '<xsd:beneficiaryBankCode>' . ($importOrPushRemittance['beneficiaryBankCode'] ?? null) . '</xsd:beneficiaryBankCode>';
+        $xmlString .= '<xsd:beneficiaryBankName>' . ($importOrPushRemittance['beneficiaryBankName'] ?? null) . '</xsd:beneficiaryBankName>';
+        $xmlString .= '<xsd:beneficiaryBranchCode>' . ($importOrPushRemittance['beneficiaryBranchCode'] ?? null) . '</xsd:beneficiaryBranchCode>';
+        $xmlString .= '<xsd:beneficiaryBranchName>' . ($importOrPushRemittance['beneficiaryBranchName'] ?? null) . '</xsd:beneficiaryBranchName>';
+        $xmlString .= '<xsd:beneficiaryName>' . ($importOrPushRemittance['beneficiaryName'] ?? null) . '</xsd:beneficiaryName>';
+        $xmlString .= '<xsd:beneficiaryPassportNo>' . ($importOrPushRemittance['beneficiaryPassportNo'] ?? null) . '</xsd:beneficiaryPassportNo>';
+        $xmlString .= '<xsd:beneficiaryPhoneNo>' . ($importOrPushRemittance['beneficiaryPhoneNo'] ?? null) . '</xsd:beneficiaryPhoneNo>';
+        $xmlString .= '<xsd:creatorID>' . ($importOrPushRemittance['creatorID'] ?? null) . '</xsd:creatorID>';
+        $xmlString .= '<xsd:exchHouseSwiftCode>' . ($importOrPushRemittance['exchHouseSwiftCode'] ?? null) . '</xsd:exchHouseSwiftCode>';
+        $xmlString .= '<xsd:identityDescription>' . ($importOrPushRemittance['identityDescription'] ?? null) . '</xsd:identityDescription>';
+        $xmlString .= '<xsd:identityType>' . ($importOrPushRemittance['identityType'] ?? null) . '</xsd:identityType>';
+        $xmlString .= '<xsd:issueDate>' . ($importOrPushRemittance['issueDate'] ?? null) . '</xsd:issueDate>';
+        $xmlString .= '<xsd:note>' . ($importOrPushRemittance['note'] ?? null) . '</xsd:note>';
+        $xmlString .= '<xsd:paymentType>' . ($importOrPushRemittance['paymentType'] ?? null) . '</xsd:paymentType>';
+        $xmlString .= '<xsd:remitterAddress>' . ($importOrPushRemittance['remitterAddress'] ?? null) . '</xsd:remitterAddress>';
+        $xmlString .= '<xsd:remitterIdentificationNo>' . ($importOrPushRemittance['remitterIdentificationNo'] ?? null) . '</xsd:remitterIdentificationNo>';
+        $xmlString .= '<xsd:remitterName' . ($importOrPushRemittance['remitterName'] ?? null) . '</xsd:remitterName>';
+        $xmlString .= '<xsd:remitterPhoneNo>' . ($importOrPushRemittance['remitterPhoneNo'] ?? null) . '</xsd:remitterPhoneNo>';
+        $xmlString .= '<xsd:secretKey>' . ($importOrPushRemittance['secretKey'] ?? null) . '</xsd:secretKey>';
+        $xmlString .= '<xsd:transReferenceNo>' . ($importOrPushRemittance['transReferenceNo'] ?? null) . '</xsd:transReferenceNo>';
+        $xmlString .= '<xsd:transferDate>' . ($importOrPushRemittance['transferDate'] ?? null) . '</xsd:transferDate>';
+        $xmlString .= '<xsd: remittancePurpose>' . ($importOrPushRemittance['remittancePurpose'] ?? null) . '</xsd: remittancePurpose >';
         $xmlString .= '</ser:wsMessage>';
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
@@ -675,36 +432,36 @@ XML;
     {
         $verifyRemittance = $this->__transferData($data);
         $xmlString = '
-            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
-            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
+            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
+            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
         ';
         //$xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
         $xmlString .= '<ser:wsMessage>';
-        $xmlString .= '<xsd:amount>'.($verifyRemittance['amount'] ?? null).'</xsd:amount>';
-        $xmlString .= '<xsd:isoCode>'.($verifyRemittance['isoCode'] ?? null).'</xsd:isoCode>';
-        $xmlString .= '<xsd:beneficiaryAddress>'.($verifyRemittance['beneficiaryAddress'] ?? null).'</xsd:beneficiaryAddress>';
-        $xmlString .= '<xsd:beneficiaryBankCode>'.($verifyRemittance['beneficiaryBankCode'] ?? null).'</xsd:beneficiaryBankCode>';
-        $xmlString .= '<xsd:beneficiaryBankName>'.($verifyRemittance['beneficiaryBankName'] ?? null).'</xsd:beneficiaryBankName>';
-        $xmlString .= '<xsd:beneficiaryBranchCode>'.($verifyRemittance['beneficiaryBranchCode'] ?? null).'</xsd:beneficiaryBranchCode>';
-        $xmlString .= '<xsd:beneficiaryBranchName>'.($verifyRemittance['beneficiaryBranchName'] ?? null).'</xsd:beneficiaryBranchName>';
-        $xmlString .= '<xsd:beneficiaryName>'.($verifyRemittance['beneficiaryName'] ?? null).'</xsd:beneficiaryName>';
-        $xmlString .= '<xsd:beneficiaryPassportNo>'.($verifyRemittance['beneficiaryPassportNo'] ?? null).'</xsd:beneficiaryPassportNo>';
-        $xmlString .= '<xsd:beneficiaryPhoneNo>'.($verifyRemittance['beneficiaryPhoneNo'] ?? null).'</xsd:beneficiaryPhoneNo>';
-        $xmlString .= '<xsd:creatorID>'.($verifyRemittance['creatorID'] ?? null).'</xsd:creatorID>';
-        $xmlString .= '<xsd:exchHouseSwiftCode>'.($verifyRemittance['exchHouseSwiftCode'] ?? null).'</xsd:exchHouseSwiftCode>';
-        $xmlString .= '<xsd:identityDescription>'.($verifyRemittance['identityDescription'] ?? null).'</xsd:identityDescription>';
-        $xmlString .= '<xsd:identityType>'.($verifyRemittance['identityType'] ?? null).'</xsd:identityType>';
-        $xmlString .= '<xsd:issueDate>'.($verifyRemittance['issueDate'] ?? null).'</xsd:issueDate>';
-        $xmlString .= '<xsd:note>'.($verifyRemittance['note'] ?? null).'</xsd:note>';
-        $xmlString .= '<xsd:paymentType>'.($verifyRemittance['paymentType'] ?? null).'</xsd:paymentType>';
-        $xmlString .= '<xsd:remitterAddress>'.($verifyRemittance['remitterAddress'] ?? null).'</xsd:remitterAddress>';
-        $xmlString .= '<xsd:remitterIdentificationNo>'.($verifyRemittance['remitterIdentificationNo'] ?? null).'</xsd:remitterIdentificationNo>';
-        $xmlString .= '<xsd:remitterName'.($verifyRemittance['remitterName'] ?? null).'</xsd:remitterName>';
-        $xmlString .= '<xsd:remitterPhoneNo>'.($verifyRemittance['remitterPhoneNo'] ?? null).'</xsd:remitterPhoneNo>';
-        $xmlString .= '<xsd:secretKey>'.($verifyRemittance['secretKey'] ?? null).'</xsd:secretKey>';
-        $xmlString .= '<xsd:transReferenceNo>'.($verifyRemittance['transReferenceNo'] ?? null).'</xsd:transReferenceNo>';
-        $xmlString .= '<xsd:transferDate>'.($verifyRemittance['transferDate'] ?? null).'</xsd:transferDate>';
-        $xmlString .= '<xsd: remittancePurpose>'.($verifyRemittance['remittancePurpose'] ?? null).'</xsd: remittancePurpose >';
+        $xmlString .= '<xsd:amount>' . ($verifyRemittance['amount'] ?? null) . '</xsd:amount>';
+        $xmlString .= '<xsd:isoCode>' . ($verifyRemittance['isoCode'] ?? null) . '</xsd:isoCode>';
+        $xmlString .= '<xsd:beneficiaryAddress>' . ($verifyRemittance['beneficiaryAddress'] ?? null) . '</xsd:beneficiaryAddress>';
+        $xmlString .= '<xsd:beneficiaryBankCode>' . ($verifyRemittance['beneficiaryBankCode'] ?? null) . '</xsd:beneficiaryBankCode>';
+        $xmlString .= '<xsd:beneficiaryBankName>' . ($verifyRemittance['beneficiaryBankName'] ?? null) . '</xsd:beneficiaryBankName>';
+        $xmlString .= '<xsd:beneficiaryBranchCode>' . ($verifyRemittance['beneficiaryBranchCode'] ?? null) . '</xsd:beneficiaryBranchCode>';
+        $xmlString .= '<xsd:beneficiaryBranchName>' . ($verifyRemittance['beneficiaryBranchName'] ?? null) . '</xsd:beneficiaryBranchName>';
+        $xmlString .= '<xsd:beneficiaryName>' . ($verifyRemittance['beneficiaryName'] ?? null) . '</xsd:beneficiaryName>';
+        $xmlString .= '<xsd:beneficiaryPassportNo>' . ($verifyRemittance['beneficiaryPassportNo'] ?? null) . '</xsd:beneficiaryPassportNo>';
+        $xmlString .= '<xsd:beneficiaryPhoneNo>' . ($verifyRemittance['beneficiaryPhoneNo'] ?? null) . '</xsd:beneficiaryPhoneNo>';
+        $xmlString .= '<xsd:creatorID>' . ($verifyRemittance['creatorID'] ?? null) . '</xsd:creatorID>';
+        $xmlString .= '<xsd:exchHouseSwiftCode>' . ($verifyRemittance['exchHouseSwiftCode'] ?? null) . '</xsd:exchHouseSwiftCode>';
+        $xmlString .= '<xsd:identityDescription>' . ($verifyRemittance['identityDescription'] ?? null) . '</xsd:identityDescription>';
+        $xmlString .= '<xsd:identityType>' . ($verifyRemittance['identityType'] ?? null) . '</xsd:identityType>';
+        $xmlString .= '<xsd:issueDate>' . ($verifyRemittance['issueDate'] ?? null) . '</xsd:issueDate>';
+        $xmlString .= '<xsd:note>' . ($verifyRemittance['note'] ?? null) . '</xsd:note>';
+        $xmlString .= '<xsd:paymentType>' . ($verifyRemittance['paymentType'] ?? null) . '</xsd:paymentType>';
+        $xmlString .= '<xsd:remitterAddress>' . ($verifyRemittance['remitterAddress'] ?? null) . '</xsd:remitterAddress>';
+        $xmlString .= '<xsd:remitterIdentificationNo>' . ($verifyRemittance['remitterIdentificationNo'] ?? null) . '</xsd:remitterIdentificationNo>';
+        $xmlString .= '<xsd:remitterName' . ($verifyRemittance['remitterName'] ?? null) . '</xsd:remitterName>';
+        $xmlString .= '<xsd:remitterPhoneNo>' . ($verifyRemittance['remitterPhoneNo'] ?? null) . '</xsd:remitterPhoneNo>';
+        $xmlString .= '<xsd:secretKey>' . ($verifyRemittance['secretKey'] ?? null) . '</xsd:secretKey>';
+        $xmlString .= '<xsd:transReferenceNo>' . ($verifyRemittance['transReferenceNo'] ?? null) . '</xsd:transReferenceNo>';
+        $xmlString .= '<xsd:transferDate>' . ($verifyRemittance['transferDate'] ?? null) . '</xsd:transferDate>';
+        $xmlString .= '<xsd: remittancePurpose>' . ($verifyRemittance['remittancePurpose'] ?? null) . '</xsd: remittancePurpose >';
         $xmlString .= '</ser:wsMessage>';
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
@@ -722,14 +479,6 @@ XML;
     }
 
     /**
-     * @throws Exception
-     */
-    public function transferStatus(array $orderInfo = []): array
-    {
-        return $this->fetchRemittanceStatus($orderInfo);
-    }
-
-    /**
      * Fetch Remittance Status (fetchWSMessageStatus)
      *
      * Fetch Remittance Status. You can also check the current status of your
@@ -739,14 +488,14 @@ XML;
      *
      * @throws Exception
      */
-    public function fetchRemittanceStatus(array $data): array
+    public function orderStatus(BaseModel $order): mixed
     {
         $xmlString = '
-            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
-            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
+            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
+            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
         ';
-        $xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
-        $xmlString .= '<ser:secretKey>'.($data['secret_key'] ?? null).'</ser:secretKey>';
+        $xmlString .= '<ser:transRefNo>' . ($data['transaction_reference_number'] ?? null) . '</ser:transRefNo>';
+        $xmlString .= '<ser:secretKey>' . ($data['secret_key'] ?? null) . '</ser:secretKey>';
         $soapMethod = 'fetchWSMessageStatusResponse';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
@@ -802,20 +551,6 @@ XML;
         return $return[$code];
     }
 
-    public function cancelTransfer(array $orderInfo = []): array
-    {
-        return [];
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function verifyAccount(array $accountInfo = []): array
-    {
-        $this->validateBeneficiaryWallet($accountInfo);
-
-        return [];
-    }
 
     /**
      * Validate information of beneficiary wallet no. (validateBeneficiaryWallet)
@@ -823,15 +558,15 @@ XML;
      *
      * @throws Exception
      */
-    public function validateBeneficiaryWallet(array $data): array
+    public function validateWallet(BaseModel $order): mixed
     {
-        $validateBeneficiaryWallet = $this->__transferData($data);
+        $validateBeneficiaryWallet = $this->__transferData($order->order_data);
         $xmlString = '
-            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
-            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
+            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
+            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
         ';
-        $xmlString .= '<ser:walletNo>'.($validateBeneficiaryWallet['beneficiaryAccNo']).'</ser:walletNo>';
-        $xmlString .= '<ser:paymentType>'.($validateBeneficiaryWallet['paymentType']).'</ser:paymentType>';
+        $xmlString .= '<ser:walletNo>' . ($validateBeneficiaryWallet['beneficiaryAccNo']) . '</ser:walletNo>';
+        $xmlString .= '<ser:paymentType>' . ($validateBeneficiaryWallet['paymentType']) . '</ser:paymentType>';
         $soapMethod = 'validateBeneficiaryWallet';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
@@ -848,16 +583,6 @@ XML;
     }
 
     /**
-     * @throws Exception
-     */
-    public function vendorBalance(array $accountInfo = []): array
-    {
-        $currency = $accountInfo['currency'] ?? 'USD';
-
-        return $this->fetchBalance($currency);
-    }
-
-    /**
      * Fetch Exchange House NRT/NRD account balance (fetchBalance).
      * We are maintaining two types of account of exchange houses.
      *
@@ -865,7 +590,7 @@ XML;
      *
      * @throws Exception
      */
-    public function fetchBalance(string $currency): mixed
+    public function vendorBalance(string $currency): mixed
     {
         $method = 'fetchBalance';
         $service = $this->xml->createElement("ser:{$method}");
@@ -875,33 +600,6 @@ XML;
 
         return $this->callApi($method, $service);
 
-    }
-
-    /**
-     * @throws \DOMException
-     */
-    private function callApi($method, $payload)
-    {
-        $envelope = $this->xml->createElement('soapenv:Envelope');
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope/');
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:ser', 'http://service.ws.mt.ibbl');
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xsd', 'http://bean.ws.mt.ibbl/xsd');
-        $envelope->appendChild($this->xml->createElement('soapenv:Header'));
-
-        $envelopeBody = $this->xml->createElement('soapenv:Body');
-        $envelopeBody->appendChild($payload);
-
-        $envelope->appendChild($envelopeBody);
-
-        $this->xml->appendChild($envelope);
-
-        dump($this->xml->saveXML());
-
-        $xmlResponse = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
-
-        $response = Utility::parseXml($xmlResponse);
-
-        return $response['Envelope']['Body'];
     }
 
     /**
@@ -924,137 +622,85 @@ XML;
     }
 
     /**
-     * Beneficiary Identity Type Code
-     */
-    private function __beneficiaryIdentityTypeCode(int|string $code, string $flag = 'key'): string
-    {
-        $return = [
-            1 => 'Passport',
-            2 => 'Cheque',
-            3 => 'Photo',
-            4 => 'Finger Print',
-            5 => 'Introducer',
-            6 => 'Driving License',
-            7 => 'Other',
-            8 => 'Remittance Card',
-            9 => 'National ID Card',
-            10 => 'Birth Certificate',
-            11 => 'Student ID Card',
-        ];
-
-        if ($flag == 'value') {
-            $return = [
-                1 => 'Passport',
-                2 => 'Cheque',
-                3 => 'Photo',
-                4 => 'Finger Print',
-                5 => 'Introducer',
-                6 => 'Driving License',
-                7 => 'Other',
-                8 => 'Remittance Card',
-                9 => 'National ID',
-                9 => 'National ID Card',
-                9 => 'National Identity Card',
-                9 => 'Voter ID',
-                9 => 'Voter ID Card',
-                9 => 'Voter Identity Card',
-                10 => 'Birth Certificate',
-                11 => 'Student ID Card',
-                11 => 'Student Identity Card',
-            ];
-            $return = array_flip($return);
-        }
-
-        if (is_string($code)) {
-            $code = ucwords(str_replace('-', ' ', $code));
-        }
-
-        return $return[$code];
-    }
-
-    /**
-     * Account Type Code
-     * Please send the following two-digit code against the different types of account.
-     *
-     * @return array|string|string[]
-     */
-    public function accountTypeCode(string $code): array|string
-    {
-        $return = [
-            '01' => 'AWCA (Current)',
-            '02' => 'MSA (Savings)',
-            '03' => 'MSSA (Scheme)',
-            '05' => 'MTDRA(Term Deposit)',
-            '06' => 'MMSA (Mohr)',
-            '07' => 'MHSA (Hajj)',
-            '09' => 'SND(Short Notice Deposit)',
-            '10' => 'MSA-STAFF',
-            '11' => 'FCA (FC Current)',
-            '12' => 'MFCA (FC Savings)',
-            '67' => 'SMSA(Student Savings)',
-            '68' => 'MNSBA(NRB Savings Bond)',
-            '71' => 'Remittance card',
-        ];
-
-        if ($code == '') {
-            $returnValue = $return;
-        } else {
-            $returnValue = $return[$code];
-        }
-
-        return $returnValue;
-    }
-
-    /**
-     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
+     * @param \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel $order
      *
      * @throws Exception
      */
     public function requestQuote($order): mixed
     {
-        return $this->fetchBalance('BDT');
+        return ['balance' => $this->vendorBalance('BDT'), 'account' => $this->fetchAccountDetail($order->order_data)];
     }
 
-    /**
-     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
-     *
-     * @throws Exception
-     */
-    public function processOrder($order): mixed
-    {
-        $order_data = $order->order_data ?? [];
-
-        $order_data['beneficiary_data']['reference_no'] = $order->order_number;
-        $order_data['sending_amount'] = $order['amount'];
-        $order_data['sending_currency'] = $order['currency'];
-
-        return $this->directCreditRemittance($order_data);
-    }
-
-    /**
-     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
-     *
-     * @throws Exception
-     */
-    public function orderStatus($order): mixed
-    {
-        //        $data['transaction_reference_number'] = 'GIT4296253';
-        $data['transaction_reference_number'] = $order->order_number;
-        $data['secret_key'] = '';
-
-        return $this->fetchRemittanceStatus($data);
-    }
 
     /**
      * Method to make a request to the remittance service provider
      * for an execution of the order.
+     * Direct Credit Remittance : In case of Account payee, you can instantly credit to beneficiary account
+     * then transaction will be :
+     * Debit: Exchange House Account
+     * Credit: Beneficiary (receiver) account
+     * In case of instant cash, you can also directly debit your account and will be available for any branch payment:
+     * Debit: Exchange House Account
+     * Credit: Available for any branch payment.
      *
+     * Parameters: userID, password, accNo, wsMessage
      *
-     * @throws \ErrorException
+     * @reference directCreditRemittance
+     * @throws \DOMException
      */
     public function executeOrder(BaseModel $order): mixed
     {
-        return [];
+        $data = $this->__transferData($order->order_data);
+
+        $method = 'directCreditWSMessage';
+        $service = $this->xml->createElement("ser:{$method}");
+        $service->appendChild($this->xml->createElement('ser:userID', $this->config[$this->status]['username']));
+        $service->appendChild($this->xml->createElement('ser:password', $this->config[$this->status]['password']));
+        $wsMessage = $this->xml->createElement('ser:wsMessage');
+        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField1', $data['additionalField1'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField2', $data['additionalField2'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField3', $data['additionalField3'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField4', $data['additionalField4'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField5', $data['additionalField5'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField6', $data['additionalField6'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField7', $data['additionalField7'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField8', $data['additionalField8'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField9', $data['additionalField9'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:amount', $data['amount'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:batchID', $data['batchID'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryAccNo', $data['beneficiaryAccNo'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryAccType', $data['beneficiaryAccType'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryAddress', $data['beneficiaryAddress'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryBankCode', $data['beneficiaryBankCode'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryBankName', $data['beneficiaryBankName'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryBranchCode', $data['beneficiaryBranchCode'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryBranchName', $data['beneficiaryBranchName'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryName', $data['beneficiaryName'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryPassportNo', $data['beneficiaryPassportNo'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryPhoneNo', $data['beneficiaryPhoneNo'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryRoutingNo', $data['beneficiaryRoutingNo'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:exHouseTxID', $data['exHouseTxID'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:exchHouseBranchCode', $data['exHouseBranchCode'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:exchHouseSwiftCode', $data['exHouseSwiftCode'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:identityDescription', $data['identityDescription'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:identityType', $data['identityType'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:isoCode', $data['isoCode'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:issueDate', $data['issueDate'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:note', $data['note'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:orderNo', $data['orderNo'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:paymentType', $data['paymentType'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:remittancePurpose', $data['remittancePurpose'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:remitterAddress', $data['remitterAddress'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:remitterCountry', $data['remitterCountry'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:remitterIdentificationNo', $data['remitterIdentificationNo'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:remitterName', $data['remitterName'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:remitterPassportNo', $data['remitterPassportNo'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:remitterPhoneNo', $data['remitterPhoneNo'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:secretKey', $data['secretKey'] ?? '?'));
+        $wsMessage->appendChild($this->xml->createElement('xsd:transReferenceNo', $data['transReferenceNo'] ?? '?'));
+        $service->appendChild($wsMessage);
+
+        return $this->callApi($method, $service);
     }
 
     /**
@@ -1086,18 +732,6 @@ XML;
      * @throws \ErrorException
      */
     public function trackOrder(BaseModel $order): mixed
-    {
-        return [];
-    }
-
-    /**
-     * Method to make a request to the remittance service provider
-     * for a quotation of the order. that include charge, fee,
-     * commission and other information related to order.
-     *
-     * @throws \ErrorException
-     */
-    public function validateWallet(BaseModel $order): mixed
     {
         return [];
     }
