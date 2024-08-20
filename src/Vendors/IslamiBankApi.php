@@ -118,7 +118,12 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
      */
     public function fetchAccountDetail(array $data): array
     {
-        $accountDetail = $this->__transferData($data);
+        $accountDetail = [
+            'beneficiaryAccNo' => 11052,
+            'beneficiaryAccType' => 10,
+            'beneficiaryBankCode' => 213,
+        ];
+//        $accountDetail = $this->__transferData($data);
 
         $method = 'fetchAccountDetail';
 
