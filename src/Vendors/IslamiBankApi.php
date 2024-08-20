@@ -648,7 +648,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     {
         return [
             'balance' => $this->vendorBalance(($order->currency ?? 'BDT')),
-            'account' => $this->fetchAccountDetail($order->order_data)
+            'account' => $this->fetchAccountDetail($order->order_data),
         ];
     }
 
