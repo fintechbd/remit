@@ -847,7 +847,7 @@ XML;
      *
      * @throws Exception
      */
-    public function fetchBalance(string $currency): array
+    public function fetchBalance(string $currency): mixed
     {
         $method = 'fetchBalance';
         $service = $this->xml->createElement("ser:{$method}");
