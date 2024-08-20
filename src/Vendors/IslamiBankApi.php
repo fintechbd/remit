@@ -895,6 +895,8 @@ XML;
 
         $response = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
 
+        dump($response);
+
         return Utility::parseXml($response);
     }
 
