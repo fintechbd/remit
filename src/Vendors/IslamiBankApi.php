@@ -152,9 +152,9 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         $response = Utility::parseXml($xmlResponse);
 
-        logger("XML : " . $xmlResponse);
+        logger('XML : '.$xmlResponse);
 
-        logger("FORMATTED : " . json_encode($response));
+        logger('FORMATTED : '.json_encode($response));
 
         return $response['Envelope']['Body'] ?? null;
     }
@@ -611,7 +611,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
             $errorResponse = json_decode(
                 preg_replace(
                     '/(.+)\|([0-9]{4})/',
-                    '{"status":"$1", "balance":0, "currency":"' .$currency .'", "code":$2, "origin_message":"$0"}',
+                    '{"status":"$1", "balance":0, "currency":"'.$currency.'", "code":$2, "origin_message":"$0"}',
                     $balanceInfo),
                 true);
 
@@ -688,7 +688,6 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         $order_data = $order->order_data;
 
         $data = $this->__transferData($order->order_data);
-
 
         $method = 'directCreditWSMessage';
         $service = $this->xml->createElement("ser:{$method}");
