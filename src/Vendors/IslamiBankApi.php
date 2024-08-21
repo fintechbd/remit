@@ -152,6 +152,10 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         $response = Utility::parseXml($xmlResponse);
 
+        logger("XML : " . $xmlResponse);
+
+        logger("FORMATTED : " . json_encode($response));
+
         return $response['Envelope']['Body'] ?? null;
     }
 
@@ -599,7 +603,24 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
                 'balance' => 0,
                 'currency' => $currency,
                 'origin_response' => $balanceInfo,
+                'message' => 'ERROR OTHERS',
             ];
+        }
+
+        if (str_contains($balanceInfo, 'FALSE')) {
+            $errorResponse = json_decode(
+                preg_replace(
+                    '/(.+)\|([0-9]{4})/',
+                    '{"status":"$1", "balance":0, "currency":"' .$currency .'", "code":$2, "origin_message":"$0"}',
+                    $balanceInfo),
+                true);
+
+            if ($errorResponse['code']) {
+                $errorResponse['message'] = self::ERROR_MESSAGES[$errorResponse['code']] ?? $balanceInfo;
+                unset($errorResponse['code']);
+            }
+
+            return $errorResponse;
         }
 
         $balanceInfo = str_replace(',', '', $balanceInfo);
@@ -607,7 +628,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         return json_decode(
             preg_replace(
                 "/(.+)\|([0-9+.?0-9*]+)\s({$currency})/",
-                '{"status":"$1", "balance":$2, "currency": "$3", "origin_message" : "$0"}',
+                '{"status":"$1", "balance":$2, "currency": "$3", "origin_message" : "$0", "message":"SUCCESS"}',
                 $balanceInfo),
             true);
 
@@ -664,7 +685,10 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
      */
     public function executeOrder(BaseModel $order): mixed
     {
+        $order_data = $order->order_data;
+
         $data = $this->__transferData($order->order_data);
+
 
         $method = 'directCreditWSMessage';
         $service = $this->xml->createElement("ser:{$method}");
@@ -716,11 +740,9 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         $response = $this->callApi($method, $service);
 
-        logger('RAW Response', [$response]);
-
         $orderInfo = json_decode(
             preg_replace(
-                '/(.+)\|([0-9+]+)/',
+                '/(.+)\|([0-9]{4})/',
                 '{"status":"$1", "code":$2, "origin_message":"$0"}',
                 $response),
             true);
@@ -731,7 +753,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
             ? OrderStatus::Accepted->value
             : OrderStatus::AdminVerification->value;
 
-        $data['vendor_data'] = $orderInfo;
+        $order_data['vendor_data'] = $orderInfo;
 
         logger('Formatted Response', [$orderInfo]);
 
