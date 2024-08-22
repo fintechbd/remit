@@ -57,7 +57,6 @@ class CashPickupCollection extends ResourceCollection
             $data['amount_formatted'] = \currency($data['amount'], $data['currency'])->format();
             $data['converted_amount_formatted'] = \currency($data['converted_amount'], $data['converted_currency'])->format();
 
-
             if (Core::packageExists('MetaData')) {
                 $data['source_country_name'] = $cashPickup->sourceCountry?->name ?? null;
                 $data['destination_country_name'] = $cashPickup->destinationCountry?->name ?? null;
