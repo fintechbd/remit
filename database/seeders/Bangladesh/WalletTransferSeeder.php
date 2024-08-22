@@ -18,10 +18,10 @@ class WalletTransferSeeder extends Seeder
         if (Core::packageExists('Business')) {
 
             foreach ($this->serviceType() as $entry) {
-                $serviceTypeChild = $entry['serviceTypeChild'] ?? [];
+                $serviceTypeChildren = $entry['serviceTypeChildren'] ?? [];
 
-                if (isset($entry['serviceTypeChild'])) {
-                    unset($entry['serviceTypeChild']);
+                if (isset($entry['serviceTypeChildren'])) {
+                    unset($entry['serviceTypeChildren']);
                 }
 
                 $findServiceTypeModel = Business::serviceType()->list(['service_type_slug' => $entry['service_type_slug']])->first();
@@ -31,8 +31,8 @@ class WalletTransferSeeder extends Seeder
                     $serviceTypeModel = Business::serviceType()->create($entry);
                 }
 
-                if (! empty($serviceTypeChild)) {
-                    array_walk($serviceTypeChild, function ($item) use (&$serviceTypeModel) {
+                if (! empty($serviceTypeChildren)) {
+                    array_walk($serviceTypeChildren, function ($item) use (&$serviceTypeModel) {
                         $item['service_type_parent_id'] = $serviceTypeModel->id;
                         Business::serviceType()->create($item);
                     });

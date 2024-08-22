@@ -18,10 +18,10 @@ class RemitSeeder extends Seeder
         if (Core::packageExists('Business')) {
 
             foreach ($this->serviceType() as $entry) {
-                $serviceTypeChild = $entry['serviceTypeChild'] ?? [];
+                $serviceTypeChildren = $entry['serviceTypeChildren'] ?? [];
 
-                if (isset($entry['serviceTypeChild'])) {
-                    unset($entry['serviceTypeChild']);
+                if (isset($entry['serviceTypeChildren'])) {
+                    unset($entry['serviceTypeChildren']);
                 }
 
                 $findServiceTypeModel = Business::serviceType()->list(['service_type_slug' => $entry['service_type_slug']])->first();
@@ -31,8 +31,8 @@ class RemitSeeder extends Seeder
                     $serviceTypeModel = Business::serviceType()->create($entry);
                 }
 
-                if (! empty($serviceTypeChild)) {
-                    array_walk($serviceTypeChild, function ($item) use (&$serviceTypeModel) {
+                if (! empty($serviceTypeChildren)) {
+                    array_walk($serviceTypeChildren, function ($item) use (&$serviceTypeModel) {
                         $item['service_type_parent_id'] = $serviceTypeModel->getKey();
                         Business::serviceType()->create($item);
                     });
@@ -74,7 +74,7 @@ class RemitSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_type_step' => '1',
                 'enabled' => true,
-                'serviceTypeChild' => [
+                'serviceTypeChildren' => [
                     ['service_type_name' => 'Bank Transfer', 'service_type_slug' => 'bank_transfer', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'bank_transfer.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'bank_transfer.png')), 'service_type_is_parent' => 'no', 'service_type_is_description' => 'no', 'service_type_step' => '2', 'enabled' => true],
                     ['service_type_name' => 'Cash Pickup', 'service_type_slug' => 'cash_pickup', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'cash_pickup.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'cash_pickup.png')), 'service_type_is_parent' => 'no', 'service_type_is_description' => 'no', 'service_type_step' => '2', 'enabled' => true],
                     ['service_type_name' => 'Wallet Transfer', 'service_type_slug' => 'wallet_transfer', 'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg.'wallet_transfer.svg')), 'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents($image_png.'wallet_transfer.png')), 'service_type_is_parent' => 'yes', 'service_type_is_description' => 'no', 'service_type_step' => '2', 'enabled' => true],
