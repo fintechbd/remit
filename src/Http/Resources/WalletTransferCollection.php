@@ -54,6 +54,9 @@ class WalletTransferCollection extends ResourceCollection
                 'updated_at' => $walletTransfer->updated_at ?? null,
             ];
 
+            $data['amount_formatted'] = \currency($data['amount'], $data['currency'])->format();
+            $data['converted_amount_formatted'] = \currency($data['converted_amount'], $data['converted_currency'])->format();
+
             if (Core::packageExists('MetaData')) {
                 $data['source_country_name'] = $walletTransfer->sourceCountry?->name ?? null;
                 $data['destination_country_name'] = $walletTransfer->destinationCountry?->name ?? null;

@@ -54,6 +54,10 @@ class BankTransferCollection extends ResourceCollection
                 'updated_at' => $bankTransfer->updated_at ?? null,
             ];
 
+            $data['amount_formatted'] = \currency($data['amount'], $data['currency'])->format();
+            $data['converted_amount_formatted'] = \currency($data['converted_amount'], $data['converted_currency'])->format();
+
+
             if (Core::packageExists('MetaData')) {
                 $data['source_country_name'] = $bankTransfer->sourceCountry?->name ?? null;
                 $data['destination_country_name'] = $bankTransfer->destinationCountry?->name ?? null;
