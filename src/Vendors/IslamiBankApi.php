@@ -110,7 +110,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     private \DOMDocument $xml;
 
     /**
-     * IslamiBankApiService constructor.
+     * IslamiBank API constructor.
      */
     public function __construct()
     {
