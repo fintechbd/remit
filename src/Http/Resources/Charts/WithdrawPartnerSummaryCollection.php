@@ -36,16 +36,15 @@ class WithdrawPartnerSummaryCollection extends ResourceCollection
                 'columns' => [
                     'vendor',
                     'count',
-                    'total'
+                    'total',
                 ],
                 'labels' => [
                     'total' => 'Total Amount (CAD)',
                     'count' => 'No of Transactions',
                     'vendor' => 'Name',
-                ]
+                ],
             ],
             'query' => $request->all(),
         ];
     }
 }
-
