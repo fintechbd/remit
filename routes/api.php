@@ -56,5 +56,10 @@ if (Config::get('fintech.remit.enabled')) {
             Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])->name('islami-bank-account-type-code');
 
             //DO NOT REMOVE THIS LINE//
+
+            Route::prefix('charts')->name('charts.')->group(function () {
+                Route::get('withdraw-partner-summary', \Fintech\Remit\Http\Controllers\Charts\WithdrawPartnerSummaryController::class)
+                    ->name('withdraw-partner-summary');
+            });
         });
 }
