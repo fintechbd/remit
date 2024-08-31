@@ -63,7 +63,7 @@ class CityBankSetupCommand extends Command
 
             $idDocType = \Fintech\MetaData\Facades\MetaData::idDocType()->list(['code' => $code])->first();
 
-            if (! $idDocType) {
+            if (!$idDocType) {
                 continue;
             }
 
@@ -93,14 +93,14 @@ class CityBankSetupCommand extends Command
 
     private function addServiceVendor(): void
     {
-        $dir = __DIR__.'/../../resources/img/service_vendor/';
+        $dir = __DIR__ . '/../../resources/img/service_vendor/';
 
         $vendor = [
             'service_vendor_name' => 'City Bank',
             'service_vendor_slug' => 'citybank',
             'service_vendor_data' => [],
-            'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents("{$dir}/logo_png/citybank.png")),
-            'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents("{$dir}/logo_svg/citybank.svg")),
+            'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents("{$dir}/logo_png/citybank.png")),
+            'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents("{$dir}/logo_svg/citybank.svg")),
             'enabled' => false,
         ];
 

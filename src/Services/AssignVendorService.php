@@ -26,13 +26,13 @@ class AssignVendorService
     {
         $availableVendors = config('fintech.remit.providers', []);
 
-        if (! isset($availableVendors[$slug])) {
+        if (!isset($availableVendors[$slug])) {
             throw new RemitException(__('remit::messages.assign_vendor.not_found', ['slug' => ucfirst($slug)]));
         }
 
         $this->serviceVendorModel = \Fintech\Business\Facades\Business::serviceVendor()->list(['service_vendor_slug' => $slug, 'enabled'])->first();
 
-        if (! $this->serviceVendorModel) {
+        if (!$this->serviceVendorModel) {
             throw (new \Illuminate\Database\Eloquent\ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $slug);
         }
 
@@ -51,7 +51,7 @@ class AssignVendorService
         }
 
         if ($order->assigned_user_id == null
-            && ! Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId])) {
+            && !Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId])) {
             throw new UpdateOperationException(__('remit::messages.assign_vendor.assigned_user_failed'));
         }
 
@@ -80,7 +80,7 @@ class AssignVendorService
     {
         $this->initiateVendor($vendor_slug);
 
-        if (! Transaction::order()->update($order->getKey(), [
+        if (!Transaction::order()->update($order->getKey(), [
             'vendor' => $vendor_slug,
             'service_vendor_id' => $this->serviceVendorModel->getKey(),
             'status' => OrderStatus::Processing->value])) {

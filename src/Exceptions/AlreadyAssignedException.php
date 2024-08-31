@@ -7,4 +7,6 @@ use Exception;
 /**
  * Class AlreadyAssignedException
  */
-class AlreadyAssignedException extends Exception {}
+class AlreadyAssignedException extends Exception
+{
+}
