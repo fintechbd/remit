@@ -38,7 +38,6 @@ use Illuminate\Support\Facades\DB;
  */
 class BankTransferController extends Controller
 {
-
     public function __construct()
     {
         $this->middleware('imposter', ['only' => ['store']]);
