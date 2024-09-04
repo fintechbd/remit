@@ -171,7 +171,6 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     {
         $accountDetail = $this->__transferData($order);
 
-
         $method = 'fetchAccountDetail';
 
         $service = $this->xml->createElement("ser:{$method}");
