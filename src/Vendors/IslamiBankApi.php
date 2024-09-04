@@ -167,9 +167,10 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
      *
      * @throws Exception
      */
-    private function fetchAccountDetail(array $data): mixed
+    private function fetchAccountDetail(BaseModel $order): mixed
     {
-        $accountDetail = $this->__transferData($data);
+        $accountDetail = $this->__transferData($order);
+
 
         $method = 'fetchAccountDetail';
 
@@ -181,35 +182,6 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         $service->appendChild($this->xml->createElement('ser:branchCode', $accountDetail['beneficiaryBankCode'] ?? '?'));
 
         return $this->callApi($method, $service);
-
-        //        $xmlString = '
-        //            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
-        //            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
-        //        ';
-        //        $xmlString .= '<ser:accNo>'.($accountDetail['beneficiaryAccNo'] ?? null).'</ser:accNo>';
-        //        $xmlString .= '<ser:accType>'.($accountDetail['beneficiaryAccType'] ?? null).'</ser:accType>';
-        //        $xmlString .= '<ser:branchCode>'.($accountDetail['beneficiaryBankCode'] ?? null).'</ser:branchCode>';
-        //        $soapMethod = 'fetchAccountDetail';
-        //        $response = $this->connectionCheck($xmlString, $soapMethod);
-        //
-        //        $explodeValue = explode('|', $response['Envelope']['Body']);
-        //        $explodeValueCount = count($explodeValue) - 1;
-        //        $return['origin_response'] = $response['Envelope']['Body'];
-        //        if ($explodeValueCount > 0) {
-        //            $return['status'] = $explodeValue[0];
-        //            if ($explodeValue[0] == 'FALSE') {
-        //                $return['status_code'] = $explodeValue[$explodeValueCount];
-        //                $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
-        //            } else {
-        //                $return['account_number'] = $explodeValue[1];
-        //                $return['account_title'] = $explodeValue[2];
-        //                if ($data['branch_code'] != 358) {
-        //                    $return['account_holder_father_name'] = $explodeValue[3];
-        //                }
-        //            }
-        //        }
-        //
-        //        return $return;
     }
 
     private function __transferData(BaseModel $order): array
@@ -554,7 +526,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
      */
     public function validateWallet(BaseModel $order): mixed
     {
-        $validateBeneficiaryWallet = $this->__transferData($order->order_data);
+        $validateBeneficiaryWallet = $this->__transferData($order);
         $xmlString = '
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
             <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
@@ -660,7 +632,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     {
         return [
             'balance' => $this->vendorBalance(($order->currency ?? 'BDT')),
-            'account' => $this->fetchAccountDetail($order->order_data),
+            'account' => $this->fetchAccountDetail($order),
         ];
     }
 
