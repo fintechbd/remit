@@ -6,6 +6,7 @@ use Fintech\Core\Facades\Core;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use stdClass;
+
 use function currency;
 
 class WalletTransferResource extends JsonResource
