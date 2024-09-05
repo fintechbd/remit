@@ -2,8 +2,12 @@
 
 namespace Fintech\Remit\Commands;
 
+use Fintech\Banco\Facades\Banco;
+use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
+use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Console\Command;
+use Throwable;
 
 class MeghnaBankSetupCommand extends Command
 {
@@ -114,7 +118,7 @@ class MeghnaBankSetupCommand extends Command
 
             return self::SUCCESS;
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
 
             $this->error($th->getMessage());
 
@@ -131,9 +135,9 @@ class MeghnaBankSetupCommand extends Command
 
         foreach (self::ID_DOC_TYPES as $code => $name) {
 
-            $idDocType = \Fintech\MetaData\Facades\MetaData::idDocType()->list(['code' => $code])->first();
+            $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
 
-            if (! $idDocType) {
+            if (!$idDocType) {
                 continue;
             }
 
@@ -149,7 +153,7 @@ class MeghnaBankSetupCommand extends Command
 
             $vendor_code['remit']['meghnabank'] = $name;
 
-            if (\Fintech\MetaData\Facades\MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
+            if (MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
                 $this->line("ID Doc Type ID: {$idDocType->getKey()} updated successful.");
             }
 
@@ -163,21 +167,21 @@ class MeghnaBankSetupCommand extends Command
 
     private function addServiceVendor(): void
     {
-        $dir = __DIR__.'/../../resources/img/service_vendor';
+        $dir = __DIR__ . '/../../resources/img/service_vendor';
 
         $vendor = [
             'service_vendor_name' => 'Meghna Bank',
             'service_vendor_slug' => 'meghnabank',
             'service_vendor_data' => [],
-            'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents("{$dir}/logo_png/meghnabank.png")),
-            'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents("{$dir}/logo_svg/meghnabank.svg")),
+            'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents("{$dir}/logo_png/meghnabank.png")),
+            'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents("{$dir}/logo_svg/meghnabank.svg")),
             'enabled' => false,
         ];
 
-        if (\Fintech\Business\Facades\Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
+        if (Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
             $this->info('Service vendor already exists. Skipping');
         } else {
-            \Fintech\Business\Facades\Business::serviceVendor()->create($vendor);
+            Business::serviceVendor()->create($vendor);
             $this->info('Service vendor created successfully.');
         }
     }
@@ -191,9 +195,9 @@ class MeghnaBankSetupCommand extends Command
 
         foreach (self::BD_BANKS as $code => $name) {
 
-            $bank = \Fintech\Banco\Facades\Banco::bank()->list(['slug' => $code])->first();
+            $bank = Banco::bank()->list(['slug' => $code])->first();
 
-            if (! $bank) {
+            if (!$bank) {
                 continue;
             }
 
@@ -209,7 +213,7 @@ class MeghnaBankSetupCommand extends Command
 
             $vendor_code['remit']['meghnabank'] = $name;
 
-            if (\Fintech\Banco\Facades\Banco::bank()->update($bank->getKey(), ['vendor_code' => $vendor_code])) {
+            if (Banco::bank()->update($bank->getKey(), ['vendor_code' => $vendor_code])) {
                 $this->info("Bank ID: {$bank->getKey()} updated successful.");
             }
 

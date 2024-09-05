@@ -45,7 +45,7 @@ class VendorTestController extends Controller
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 14, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
         $order_data = $order->order_data;
-        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
+        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
         dump($vendor->directCreditRemittance($order_data));
@@ -57,7 +57,7 @@ class VendorTestController extends Controller
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 13, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
         $order_data = $order->order_data;
-        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
+        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
         dump($vendor->directCreditRemittance($order_data));
@@ -69,7 +69,7 @@ class VendorTestController extends Controller
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 13, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
         $order_data = $order->order_data;
-        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
+        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
         dump($vendor->directCreditRemittance($order_data));
@@ -91,7 +91,7 @@ class VendorTestController extends Controller
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 19, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
         $order_data = $order->order_data;
-        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
+        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
         dump($vendor->directCreditRemittance($order_data));
@@ -142,7 +142,7 @@ class VendorTestController extends Controller
             'restored_at' => null,
         ];
         $order_data = json_decode($order['order_data'], true);
-        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
+        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
         //dd($order_data);
@@ -165,7 +165,7 @@ class VendorTestController extends Controller
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 16, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
         $order_data = $order->order_data;
-        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
+        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
         dump($vendor->directCreditRemittance($order_data));
@@ -187,7 +187,7 @@ class VendorTestController extends Controller
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 17, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
         $order_data = $order->order_data;
-        $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
+        $order_data['beneficiary_data']['reference_no'] = 'TEST' . time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
         dump($vendor->directCreditRemittance($order_data));
@@ -285,7 +285,7 @@ class VendorTestController extends Controller
     public function sendTelnetRequest($host, $port, $path, $user, $password, $headers)
     {
         $fp = fsockopen($host, $port, $errno, $errstr, 30);
-        if (! $fp) {
+        if (!$fp) {
             echo "Error: $errno - $errstr<br />\n";
 
             return;
@@ -309,7 +309,7 @@ class VendorTestController extends Controller
 
         // Get the response
         $response = '';
-        while (! feof($fp)) {
+        while (!feof($fp)) {
             $response .= fgets($fp, 128);
         }
 

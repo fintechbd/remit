@@ -2,9 +2,11 @@
 
 namespace Fintech\Remit\Vendors;
 
+use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
 class TransFastApi implements MoneyTransfer
@@ -70,14 +72,14 @@ class TransFastApi implements MoneyTransfer
     /**
      * Base function that is responsible for interacting directly with the transpay api to obtain data
      *
-     * @param  array  $params
+     * @param array $params
      * @return array
      *
      * @throws Exception
      */
     public function getData($url, $params = [])
     {
-        $apiUrl = $this->apiUrl.$url;
+        $apiUrl = $this->apiUrl . $url;
         $apiUrl .= http_build_query($params);
         Log::info($apiUrl);
 
@@ -87,7 +89,7 @@ class TransFastApi implements MoneyTransfer
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Authorization: Credentials '.$this->config[$this->status]['token']]);
+            'Authorization: Credentials ' . $this->config[$this->status]['token']]);
 
         $response = curl_exec($curl);
         $info = curl_getinfo($curl);
@@ -488,7 +490,7 @@ class TransFastApi implements MoneyTransfer
     /**
      * Get the getCountryRates by source currency iso code and receive country iso code
      *
-     * @param  string  $feeProduct
+     * @param string $feeProduct
      * @return array
      *
      * @throws Exception
@@ -539,7 +541,7 @@ class TransFastApi implements MoneyTransfer
     /**
      * Returns a collection of commissions by country based on filter context and pagination parameters.
      *
-     * @param  string  $feeProduct
+     * @param string $feeProduct
      * @return array
      *
      * @throws Exception
@@ -556,7 +558,7 @@ class TransFastApi implements MoneyTransfer
     /**
      * Retrieve a catalog of complaint types that should be used when creating a complaint
      *
-     * @param  $onlyForCustomerCare  -- i.e. true or false
+     * @param  $onlyForCustomerCare -- i.e. true or false
      * @return array
      *
      * @throws Exception
@@ -615,7 +617,7 @@ class TransFastApi implements MoneyTransfer
     /**
      * Return a list of generated TfPins
      *
-     * @param  string  $generatedUnused
+     * @param string $generatedUnused
      * @return array
      *
      * @throws Exception
@@ -677,14 +679,14 @@ class TransFastApi implements MoneyTransfer
     /**
      * Base function that is responsible for interacting directly with the trans fast api to send data
      *
-     * @param  string  $method
+     * @param string $method
      * @return array
      *
      * @throws Exception
      */
     public function putPostData($url, $dataArray, $method = 'POST')
     {
-        $apiUrl = $this->apiUrl.$url;
+        $apiUrl = $this->apiUrl . $url;
         Log::info($apiUrl);
         $jsonArray = json_encode($dataArray);
         Log::info(json_decode($jsonArray, true));
@@ -697,8 +699,8 @@ class TransFastApi implements MoneyTransfer
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_VERBOSE, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Credentials '.$this->config[$this->status]['token']]
+                'Content-Type: application/json',
+                'Authorization: Credentials ' . $this->config[$this->status]['token']]
         );
 
         $response = curl_exec($curl);
@@ -748,7 +750,8 @@ class TransFastApi implements MoneyTransfer
     public function putModifySenderID(
         $senderId, $name, $address, $phoneHome, $phoneWork, $isIndividual, $countryISO, $phoneMobile, $email, $stateId,
         $cityId, $typeOfId, $idNumber, $idExpiryDate, $dateOfBirth, $nationalityIsoCode, $senderOccupation
-    ) {
+    )
+    {
         $url = 'transaction/senderinfo';
         $params['SenderId'] = $senderId;
         $params['Name'] = $name;
@@ -820,7 +823,8 @@ class TransFastApi implements MoneyTransfer
     public function postCreateSenderID(
         $name, $address, $phoneHome, $phoneWork, $isIndividual, $countryISO, $phoneMobile, $email, $stateId,
         $cityId, $typeOfId, $idNumber, $idExpiryDate, $dateOfBirth, $nationalityIsoCode, $senderOccupation
-    ) {
+    )
+    {
         $url = 'transaction/sender';
         $params['Name'] = $name;
         //$params['NameOtherLanguage'] = $nameOtherLanguage;
@@ -971,7 +975,7 @@ class TransFastApi implements MoneyTransfer
         $params['Compliance']['TypeOfId'] = ((isset($data->trans_fast_sender_id_type_id) ? $data->trans_fast_sender_id_type_id : null));
         $params['Compliance']['IdNumber'] = ((isset($data->sender_id_number) ? $data->sender_id_number : null));
         $params['Compliance']['RemittanceReasonId'] = 'A';
-        $params['Compliance']['ReceiverFullName'] = ((isset($data->receiver_first_name) ? $data->receiver_first_name : null).(isset($data->receiver_middle_name) ? ' '.$data->receiver_middle_name : null).(isset($data->receiver_last_name) ? ' '.$data->receiver_last_name : null));
+        $params['Compliance']['ReceiverFullName'] = ((isset($data->receiver_first_name) ? $data->receiver_first_name : null) . (isset($data->receiver_middle_name) ? ' ' . $data->receiver_middle_name : null) . (isset($data->receiver_last_name) ? ' ' . $data->receiver_last_name : null));
         $params['Compliance']['SenderFullName'] = ((isset($data->sender_first_name) ? $data->sender_first_name : null));
 
         //dd($params);
@@ -979,7 +983,7 @@ class TransFastApi implements MoneyTransfer
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
+     * @param Model|BaseModel $order
      */
     public function requestQuote($order): mixed
     {
@@ -992,7 +996,7 @@ class TransFastApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for an execution of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function executeOrder(BaseModel $order): mixed
     {
@@ -1003,7 +1007,7 @@ class TransFastApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for the progress status of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function orderStatus(BaseModel $order): mixed
     {
@@ -1014,7 +1018,7 @@ class TransFastApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for the cancellation of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function cancelOrder(BaseModel $order): mixed
     {
@@ -1025,7 +1029,7 @@ class TransFastApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for the amendment of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function amendmentOrder(BaseModel $order): mixed
     {
@@ -1036,7 +1040,7 @@ class TransFastApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for the track real-time progress of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function trackOrder(BaseModel $order): mixed
     {

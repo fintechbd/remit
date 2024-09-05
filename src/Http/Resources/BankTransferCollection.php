@@ -7,13 +7,14 @@ use Fintech\Core\Supports\Constant;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use stdClass;
+use function currency;
 
 class BankTransferCollection extends ResourceCollection
 {
     /**
      * Transform the resource collection into an array.
      *
-     * @param  Request  $request
+     * @param Request $request
      * @return array
      */
     public function toArray($request)
@@ -54,8 +55,8 @@ class BankTransferCollection extends ResourceCollection
                 'updated_at' => $bankTransfer->updated_at ?? null,
             ];
 
-            $data['amount_formatted'] = \currency($data['amount'], $data['currency'])->format();
-            $data['converted_amount_formatted'] = \currency($data['converted_amount'], $data['converted_currency'])->format();
+            $data['amount_formatted'] = currency($data['amount'], $data['currency'])->format();
+            $data['converted_amount_formatted'] = currency($data['converted_amount'], $data['converted_currency'])->format();
 
             if (Core::packageExists('MetaData')) {
                 $data['source_country_name'] = $bankTransfer->sourceCountry?->name ?? null;

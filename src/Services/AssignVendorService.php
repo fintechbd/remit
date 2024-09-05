@@ -8,9 +8,11 @@ use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Fintech\Remit\Exceptions\AlreadyAssignedException;
 use Fintech\Remit\Exceptions\RemitException;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\App;
 
 class AssignVendorService
@@ -26,32 +28,32 @@ class AssignVendorService
     {
         $availableVendors = config('fintech.remit.providers', []);
 
-        if (! isset($availableVendors[$slug])) {
+        if (!isset($availableVendors[$slug])) {
             throw new RemitException(__('remit::messages.assign_vendor.not_found', ['slug' => ucfirst($slug)]));
         }
 
-        $this->serviceVendorModel = \Fintech\Business\Facades\Business::serviceVendor()->list(['service_vendor_slug' => $slug, 'enabled'])->first();
+        $this->serviceVendorModel = Business::serviceVendor()->list(['service_vendor_slug' => $slug, 'enabled'])->first();
 
-        if (! $this->serviceVendorModel) {
-            throw (new \Illuminate\Database\Eloquent\ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $slug);
+        if (!$this->serviceVendorModel) {
+            throw (new ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $slug);
         }
 
         $this->serviceVendorDriver = App::make($availableVendors[$slug]['driver']);
     }
 
     /**
-     * @throws \Fintech\Remit\Exceptions\AlreadyAssignedException
+     * @throws AlreadyAssignedException
      * @throws UpdateOperationException
      */
     public function availableVendors(BaseModel $order, $requestingUserId): Collection
     {
         if ($order->assigned_user_id != null
             && $order->assigned_user_id != $requestingUserId) {
-            throw new \Fintech\Remit\Exceptions\AlreadyAssignedException(__('remit::messages.assign_vendor.already_assigned'));
+            throw new AlreadyAssignedException(__('remit::messages.assign_vendor.already_assigned'));
         }
 
         if ($order->assigned_user_id == null
-            && ! Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId])) {
+            && !Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId])) {
             throw new UpdateOperationException(__('remit::messages.assign_vendor.assigned_user_failed'));
         }
 
@@ -80,7 +82,7 @@ class AssignVendorService
     {
         $this->initiateVendor($vendor_slug);
 
-        if (! Transaction::order()->update($order->getKey(), [
+        if (!Transaction::order()->update($order->getKey(), [
             'vendor' => $vendor_slug,
             'service_vendor_id' => $this->serviceVendorModel->getKey(),
             'status' => OrderStatus::Processing->value])) {

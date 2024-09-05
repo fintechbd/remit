@@ -2,9 +2,11 @@
 
 namespace Fintech\Remit\Vendors;
 
+use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 
@@ -67,7 +69,7 @@ class ValYouApi implements MoneyTransfer
             $this->status = 'sandbox';
 
         } else {
-            $this->apiUrl = 'http://'.$this->config[$this->status]['app_host'].'/SendAPI/webService.asmx';
+            $this->apiUrl = 'http://' . $this->config[$this->status]['app_host'] . '/SendAPI/webService.asmx';
             $this->status = 'live';
         }
         $this->ClientId = $this->config[$this->status]['username'];
@@ -88,12 +90,12 @@ class ValYouApi implements MoneyTransfer
      */
     public function getEcho()
     {
-        $signature = $this->agent_code.$this->ClientId.$this->ClientPass;
+        $signature = $this->agent_code . $this->ClientId . $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+            <AGENT_CODE>' . $this->agent_code . '</AGENT_CODE>
+            <USER_ID>' . $this->ClientId . '</USER_ID>
+            <SIGNATURE>' . $hash_signature . '</SIGNATURE>
         ';
         $soapMethod = 'GetEcho';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
@@ -111,9 +113,9 @@ class ValYouApi implements MoneyTransfer
         $xml_string = '<?xml version="1.0" encoding="utf-8"?>
             <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
                 <soap:Body>
-                    <'.$method.' xmlns="WebServices">
-                        '.$string.'
-                    </'.$method.'>
+                    <' . $method . ' xmlns="WebServices">
+                        ' . $string . '
+                    </' . $method . '>
                 </soap:Body>
             </soap:Envelope>
         ';
@@ -129,10 +131,10 @@ class ValYouApi implements MoneyTransfer
     public function connectionCheck($xml_post_string, $method)
     {
         $headers = [
-            'Host: '.$this->config[$this->status]['app_host'],
+            'Host: ' . $this->config[$this->status]['app_host'],
             'Content-type: text/xml;charset="utf-8"',
-            'Content-length: '.strlen($xml_post_string),
-            'SOAPAction: WebServices/'.$method,
+            'Content-length: ' . strlen($xml_post_string),
+            'SOAPAction: WebServices/' . $method,
         ];
 
         // PHP cURL  for connection
@@ -150,7 +152,7 @@ class ValYouApi implements MoneyTransfer
         if ($response === false) {
             throw new Exception(curl_error($ch), curl_errno($ch));
             $response .= "\nError occoured when connecting to the SMS SOAP Server!";
-            $response .= "\nSoap Exception: ".$exception;
+            $response .= "\nSoap Exception: " . $exception;
             $response .= "\nSOAP Fault: (faultcode: {curl_errno($ch)}, faultstring: {curl_error($ch)})";
             Log::error('CURL reported error: ', $response);
         }
@@ -177,21 +179,21 @@ class ValYouApi implements MoneyTransfer
      */
     public function getCatalogue($input_data)
     {
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.$input_data['catalogue_type'].
-            (isset($input_data['additional_field_1']) ? $input_data['additional_field_1'] : '').
-            (isset($input_data['additional_field_2']) ? $input_data['additional_field_2'] : '').
-            (isset($input_data['additional_field_3']) ? $input_data['additional_field_3'] : '').
+        $signature = $this->agent_code . $this->ClientId . $this->agent_session_id . $input_data['catalogue_type'] .
+            (isset($input_data['additional_field_1']) ? $input_data['additional_field_1'] : '') .
+            (isset($input_data['additional_field_2']) ? $input_data['additional_field_2'] : '') .
+            (isset($input_data['additional_field_3']) ? $input_data['additional_field_3'] : '') .
             $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <CATALOGUE_TYPE>'.$input_data['catalogue_type'].'</CATALOGUE_TYPE>
-            <ADDITIONAL_FIELD1>'.(isset($input_data['additional_field_1']) ? $input_data['additional_field_1'] : '').'</ADDITIONAL_FIELD1>
-            <ADDITIONAL_FIELD1>'.(isset($input_data['additional_field_2']) ? $input_data['additional_field_2'] : '').'</ADDITIONAL_FIELD1>
-            <ADDITIONAL_FIELD1>'.(isset($input_data['additional_field_3']) ? $input_data['additional_field_3'] : '').'</ADDITIONAL_FIELD1>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+            <AGENT_CODE>' . $this->agent_code . '</AGENT_CODE>
+            <USER_ID>' . $this->ClientId . '</USER_ID>
+            <AGENT_SESSION_ID>' . $this->agent_session_id . '</AGENT_SESSION_ID>
+            <CATALOGUE_TYPE>' . $input_data['catalogue_type'] . '</CATALOGUE_TYPE>
+            <ADDITIONAL_FIELD1>' . (isset($input_data['additional_field_1']) ? $input_data['additional_field_1'] : '') . '</ADDITIONAL_FIELD1>
+            <ADDITIONAL_FIELD1>' . (isset($input_data['additional_field_2']) ? $input_data['additional_field_2'] : '') . '</ADDITIONAL_FIELD1>
+            <ADDITIONAL_FIELD1>' . (isset($input_data['additional_field_3']) ? $input_data['additional_field_3'] : '') . '</ADDITIONAL_FIELD1>
+            <SIGNATURE>' . $hash_signature . '</SIGNATURE>
         ';
         $soapMethod = 'GetCatalogue';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
@@ -219,20 +221,20 @@ class ValYouApi implements MoneyTransfer
             $this->payment_mode = 'C';
             //$this->calculated_by_sending_payout_currency = 'C';
         }
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
-            $this->payment_mode.$pay_out_country.$bank_name.$bank_branch_state.$pay_out_agent_code.
+        $signature = $this->agent_code . $this->ClientId . $this->agent_session_id .
+            $this->payment_mode . $pay_out_country . $bank_name . $bank_branch_state . $pay_out_agent_code .
             $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <PAYMENTMODE>'.$this->payment_mode.'</PAYMENTMODE>
-            <PAYOUT_COUNTRY>'.$pay_out_country.'</PAYOUT_COUNTRY>
-            <BANK_NAME>'.$bank_name.'</BANK_NAME>
-            <BANK_BRANCHSTATE>'.$bank_branch_state.'</BANK_BRANCHSTATE>
-            <PAYOUT_AGENT_CODE>'.$pay_out_agent_code.'</PAYOUT_AGENT_CODE>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+            <AGENT_CODE>' . $this->agent_code . '</AGENT_CODE>
+            <USER_ID>' . $this->ClientId . '</USER_ID>
+            <AGENT_SESSION_ID>' . $this->agent_session_id . '</AGENT_SESSION_ID>
+            <PAYMENTMODE>' . $this->payment_mode . '</PAYMENTMODE>
+            <PAYOUT_COUNTRY>' . $pay_out_country . '</PAYOUT_COUNTRY>
+            <BANK_NAME>' . $bank_name . '</BANK_NAME>
+            <BANK_BRANCHSTATE>' . $bank_branch_state . '</BANK_BRANCHSTATE>
+            <PAYOUT_AGENT_CODE>' . $pay_out_agent_code . '</PAYOUT_AGENT_CODE>
+            <SIGNATURE>' . $hash_signature . '</SIGNATURE>
         ';
         $soapMethod = 'GetAgentList';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
@@ -264,23 +266,23 @@ class ValYouApi implements MoneyTransfer
         } elseif ($input_data['recipient_type_name'] == 'Wallet') {
             $location_id = '96700241P96836978';
         }
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
-            $transfer_amount.$this->payment_mode.$this->calculated_by_sending_payout_currency.
-            $location_id.$payout_country.$this->ClientPass;
+        $signature = $this->agent_code . $this->ClientId . $this->agent_session_id .
+            $transfer_amount . $this->payment_mode . $this->calculated_by_sending_payout_currency .
+            $location_id . $payout_country . $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <TRANSFERAMOUNT>'.$transfer_amount.'</TRANSFERAMOUNT>
-            <PAYMENTMODE>'.$this->payment_mode.'</PAYMENTMODE>
-            <CALC_BY>'.$this->calculated_by_sending_payout_currency.'</CALC_BY>
-            <LOCATION_ID>'.$location_id.'</LOCATION_ID>
-            <PAYOUT_COUNTRY>'.$payout_country.'</PAYOUT_COUNTRY>
+            <AGENT_CODE>' . $this->agent_code . '</AGENT_CODE>
+            <USER_ID>' . $this->ClientId . '</USER_ID>
+            <AGENT_SESSION_ID>' . $this->agent_session_id . '</AGENT_SESSION_ID>
+            <TRANSFERAMOUNT>' . $transfer_amount . '</TRANSFERAMOUNT>
+            <PAYMENTMODE>' . $this->payment_mode . '</PAYMENTMODE>
+            <CALC_BY>' . $this->calculated_by_sending_payout_currency . '</CALC_BY>
+            <LOCATION_ID>' . $location_id . '</LOCATION_ID>
+            <PAYOUT_COUNTRY>' . $payout_country . '</PAYOUT_COUNTRY>
             <PROMOTION_CODE></PROMOTION_CODE>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+            <SIGNATURE>' . $hash_signature . '</SIGNATURE>
         ';
-        Log::info('exrate xml: '.$xml_string);
+        Log::info('exrate xml: ' . $xml_string);
         $soapMethod = 'GetEXRate';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
         $response = $this->connectionCheck($xml_post_string, $soapMethod);
@@ -302,15 +304,15 @@ class ValYouApi implements MoneyTransfer
     {
         $PINNO = $input_data['PINNO'];
         $AGENT_TXNID = $input_data['AGENT_TXNID'];
-        $signature = $this->agent_code.$this->ClientId.$PINNO.$this->agent_session_id.$AGENT_TXNID.$this->ClientPass;
+        $signature = $this->agent_code . $this->ClientId . $PINNO . $this->agent_session_id . $AGENT_TXNID . $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <PINNO>'.$PINNO.'</PINNO>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <AGENT_TXNID>'.$AGENT_TXNID.'</AGENT_TXNID>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+            <AGENT_CODE>' . $this->agent_code . '</AGENT_CODE>
+            <USER_ID>' . $this->ClientId . '</USER_ID>
+            <PINNO>' . $PINNO . '</PINNO>
+            <AGENT_SESSION_ID>' . $this->agent_session_id . '</AGENT_SESSION_ID>
+            <AGENT_TXNID>' . $AGENT_TXNID . '</AGENT_TXNID>
+            <SIGNATURE>' . $hash_signature . '</SIGNATURE>
         ';
         $soapMethod = 'QueryTXNStatus';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
@@ -337,20 +339,20 @@ class ValYouApi implements MoneyTransfer
      */
     public function reconcileReport($input_data)
     {
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
-            $input_data['report_type'].$input_data['from_date'].'00:00:00'.$input_data['to_date'].'23:59:59'.
+        $signature = $this->agent_code . $this->ClientId . $this->agent_session_id .
+            $input_data['report_type'] . $input_data['from_date'] . '00:00:00' . $input_data['to_date'] . '23:59:59' .
             $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <REPORT_TYPE>'.$input_data['report_type'].'</REPORT_TYPE>
-            <FROM_DATE>'.$input_data['from_date'].'</FROM_DATE>
+            <AGENT_CODE>' . $this->agent_code . '</AGENT_CODE>
+            <USER_ID>' . $this->ClientId . '</USER_ID>
+            <AGENT_SESSION_ID>' . $this->agent_session_id . '</AGENT_SESSION_ID>
+            <REPORT_TYPE>' . $input_data['report_type'] . '</REPORT_TYPE>
+            <FROM_DATE>' . $input_data['from_date'] . '</FROM_DATE>
             <FROM_DATE_TIME>00:00:00</FROM_DATE_TIME>
-            <TO_DATE>'.$input_data['to_date'].'</TO_DATE>
+            <TO_DATE>' . $input_data['to_date'] . '</TO_DATE>
             <TO_DATE_TIME>23:59:59</TO_DATE_TIME>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+            <SIGNATURE>' . $hash_signature . '</SIGNATURE>
         ';
         $soapMethod = 'ReconcileReport';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
@@ -369,20 +371,20 @@ class ValYouApi implements MoneyTransfer
      */
     public function reconcileReportV2($input_data)
     {
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
-            $input_data['report_type'].$input_data['from_date'].'00:00:00'.$input_data['to_date'].'23:59:59'.
+        $signature = $this->agent_code . $this->ClientId . $this->agent_session_id .
+            $input_data['report_type'] . $input_data['from_date'] . '00:00:00' . $input_data['to_date'] . '23:59:59' .
             $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <REPORT_TYPE>'.$input_data['report_type'].'</REPORT_TYPE>
-            <FROM_DATE>'.$input_data['from_date'].'</FROM_DATE>
+            <AGENT_CODE>' . $this->agent_code . '</AGENT_CODE>
+            <USER_ID>' . $this->ClientId . '</USER_ID>
+            <AGENT_SESSION_ID>' . $this->agent_session_id . '</AGENT_SESSION_ID>
+            <REPORT_TYPE>' . $input_data['report_type'] . '</REPORT_TYPE>
+            <FROM_DATE>' . $input_data['from_date'] . '</FROM_DATE>
             <FROM_DATE_TIME>00:00:00</FROM_DATE_TIME>
-            <TO_DATE>'.$input_data['to_date'].'</TO_DATE>
+            <TO_DATE>' . $input_data['to_date'] . '</TO_DATE>
             <TO_DATE_TIME>23:59:59</TO_DATE_TIME>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+            <SIGNATURE>' . $hash_signature . '</SIGNATURE>
         ';
         $soapMethod = 'ReconcileReportV2';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
@@ -401,14 +403,14 @@ class ValYouApi implements MoneyTransfer
      */
     public function getCountryWiseRate($input_data)
     {
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.$input_data['country_name'].$this->ClientPass;
+        $signature = $this->agent_code . $this->ClientId . $this->agent_session_id . $input_data['country_name'] . $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <PAYOUT_COUNTRY>'.$input_data['country_name'].'</PAYOUT_COUNTRY>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+            <AGENT_CODE>' . $this->agent_code . '</AGENT_CODE>
+            <USER_ID>' . $this->ClientId . '</USER_ID>
+            <AGENT_SESSION_ID>' . $this->agent_session_id . '</AGENT_SESSION_ID>
+            <PAYOUT_COUNTRY>' . $input_data['country_name'] . '</PAYOUT_COUNTRY>
+            <SIGNATURE>' . $hash_signature . '</SIGNATURE>
         ';
         $soapMethod = 'GetCountryWiseRate';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
@@ -429,15 +431,15 @@ class ValYouApi implements MoneyTransfer
     {
         $location_id = $input_data['location_id'];
         $account = $input_data['account'];
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.$location_id.$account.$this->ClientPass;
+        $signature = $this->agent_code . $this->ClientId . $this->agent_session_id . $location_id . $account . $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <LOCATION_ID>'.$location_id.'</LOCATION_ID>
-            <ACCOUNT_NO>'.$account.'</ACCOUNT_NO>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+            <AGENT_CODE>' . $this->agent_code . '</AGENT_CODE>
+            <USER_ID>' . $this->ClientId . '</USER_ID>
+            <AGENT_SESSION_ID>' . $this->agent_session_id . '</AGENT_SESSION_ID>
+            <LOCATION_ID>' . $location_id . '</LOCATION_ID>
+            <ACCOUNT_NO>' . $account . '</ACCOUNT_NO>
+            <SIGNATURE>' . $hash_signature . '</SIGNATURE>
         ';
         $soapMethod = 'AccountValidate';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
@@ -461,18 +463,18 @@ class ValYouApi implements MoneyTransfer
      */
     public function notificationStatus($input_data)
     {
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
-            $input_data['from_date'].$input_data['to_date'].$input_data['show_incremental'].
+        $signature = $this->agent_code . $this->ClientId . $this->agent_session_id .
+            $input_data['from_date'] . $input_data['to_date'] . $input_data['show_incremental'] .
             $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <FROM_DATE>'.$input_data['from_date'].'</FROM_DATE>
-            <TO_DATE>'.$input_data['to_date'].'</TO_DATE>
-            <SHOW_INCREMENTAL>'.$input_data['show_incremental'].'</SHOW_INCREMENTAL>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+            <AGENT_CODE>' . $this->agent_code . '</AGENT_CODE>
+            <USER_ID>' . $this->ClientId . '</USER_ID>
+            <AGENT_SESSION_ID>' . $this->agent_session_id . '</AGENT_SESSION_ID>
+            <FROM_DATE>' . $input_data['from_date'] . '</FROM_DATE>
+            <TO_DATE>' . $input_data['to_date'] . '</TO_DATE>
+            <SHOW_INCREMENTAL>' . $input_data['show_incremental'] . '</SHOW_INCREMENTAL>
+            <SIGNATURE>' . $hash_signature . '</SIGNATURE>
         ';
         $soapMethod = 'NotificationStatus';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
@@ -500,7 +502,7 @@ class ValYouApi implements MoneyTransfer
             ];
         }
 
-        return (object) array_merge($sendTransfer, $authorizedConfirmed);
+        return (object)array_merge($sendTransfer, $authorizedConfirmed);
     }
 
     /**
@@ -566,66 +568,66 @@ class ValYouApi implements MoneyTransfer
         } elseif ($input_data['recipient_type_name'] == 'Wallet') {
             $location_id = is_null($input_data['location_id']) ? $input_data['location_id'] : '96700241P96836978';
         }
-        $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.$AGENT_TXNID.$location_id.
-            $SENDER_FIRST_NAME.$SENDER_MIDDLE_NAME.$SENDER_LAST_NAME.$SENDER_GENDER.
-            $SENDER_ADDRESS.$SENDER_CITY.$SENDER_STATES.$SENDER_ZIPCODE.$SENDER_COUNTRY.$SENDER_MOBILE.
-            $SENDER_NATIONALITY.$SENDER_ID_TYPE.$SENDER_ID_NUMBER.$SENDER_ID_ISSUE_COUNTRY.$SENDER_ID_ISSUE_DATE.
-            $SENDER_ID_EXPIRE_DATE.$SENDER_DATE_OF_BIRTH.$SENDER_OCCUPATION.$SENDER_SOURCE_OF_FUND.
-            $SENDER_COUNTRY_OF_BIRTH.$SENDER_BENEFICIARY_RELATIONSHIP.$PURPOSE_OF_REMITTANCE.
-            $RECEIVER_FIRST_NAME.$RECEIVER_MIDDLE_NAME.$RECEIVER_LAST_NAME.$RECEIVER_ADDRESS.
-            $RECEIVER_CONTACT_NUMBER.$RECEIVER_CITY.$RECEIVER_COUNTRY.
-            $this->calculated_by_sending_payout_currency.$TRANSFER_AMOUNT.$REMIT_CURRENCY.
-            $TRANSFER_CURRENCY.$this->payment_mode.$BANK_NAME.$BANK_BRANCH_NAME.$BANK_ACCOUNT_NUMBER.$this->ClientPass;
+        $signature = $this->agent_code . $this->ClientId . $this->agent_session_id . $AGENT_TXNID . $location_id .
+            $SENDER_FIRST_NAME . $SENDER_MIDDLE_NAME . $SENDER_LAST_NAME . $SENDER_GENDER .
+            $SENDER_ADDRESS . $SENDER_CITY . $SENDER_STATES . $SENDER_ZIPCODE . $SENDER_COUNTRY . $SENDER_MOBILE .
+            $SENDER_NATIONALITY . $SENDER_ID_TYPE . $SENDER_ID_NUMBER . $SENDER_ID_ISSUE_COUNTRY . $SENDER_ID_ISSUE_DATE .
+            $SENDER_ID_EXPIRE_DATE . $SENDER_DATE_OF_BIRTH . $SENDER_OCCUPATION . $SENDER_SOURCE_OF_FUND .
+            $SENDER_COUNTRY_OF_BIRTH . $SENDER_BENEFICIARY_RELATIONSHIP . $PURPOSE_OF_REMITTANCE .
+            $RECEIVER_FIRST_NAME . $RECEIVER_MIDDLE_NAME . $RECEIVER_LAST_NAME . $RECEIVER_ADDRESS .
+            $RECEIVER_CONTACT_NUMBER . $RECEIVER_CITY . $RECEIVER_COUNTRY .
+            $this->calculated_by_sending_payout_currency . $TRANSFER_AMOUNT . $REMIT_CURRENCY .
+            $TRANSFER_CURRENCY . $this->payment_mode . $BANK_NAME . $BANK_BRANCH_NAME . $BANK_ACCOUNT_NUMBER . $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <AGENT_TXNID>'.$AGENT_TXNID.'</AGENT_TXNID>
-            <LOCATION_ID>'.$location_id.'</LOCATION_ID>
-            <SENDER_FIRST_NAME>'.$SENDER_FIRST_NAME.'</SENDER_FIRST_NAME>
+            <AGENT_CODE>' . $this->agent_code . '</AGENT_CODE>
+            <USER_ID>' . $this->ClientId . '</USER_ID>
+            <AGENT_SESSION_ID>' . $this->agent_session_id . '</AGENT_SESSION_ID>
+            <AGENT_TXNID>' . $AGENT_TXNID . '</AGENT_TXNID>
+            <LOCATION_ID>' . $location_id . '</LOCATION_ID>
+            <SENDER_FIRST_NAME>' . $SENDER_FIRST_NAME . '</SENDER_FIRST_NAME>
             <SENDER_MIDDLE_NAME></SENDER_MIDDLE_NAME>
             <SENDER_LAST_NAME></SENDER_LAST_NAME>
-            <SENDER_GENDER>'.$SENDER_GENDER.'</SENDER_GENDER>
-            <SENDER_ADDRESS>'.$SENDER_ADDRESS.'</SENDER_ADDRESS>
-            <SENDER_CITY>'.$SENDER_CITY.'</SENDER_CITY>
-            <SENDER_STATES>'.$SENDER_STATES.'</SENDER_STATES>
-            <SENDER_ZIPCODE>'.$SENDER_ZIPCODE.'</SENDER_ZIPCODE>
-            <SENDER_COUNTRY>'.$SENDER_COUNTRY.'</SENDER_COUNTRY>
-            <SENDER_MOBILE>'.$SENDER_MOBILE.'</SENDER_MOBILE>
-            <SENDER_NATIONALITY>'.$SENDER_NATIONALITY.'</SENDER_NATIONALITY>
-            <SENDER_ID_TYPE>'.$SENDER_ID_TYPE.'</SENDER_ID_TYPE>
-            <SENDER_ID_NUMBER>'.$SENDER_ID_NUMBER.'</SENDER_ID_NUMBER>
-            <SENDER_ID_ISSUE_COUNTRY>'.$SENDER_ID_ISSUE_COUNTRY.'</SENDER_ID_ISSUE_COUNTRY>
-            <SENDER_ID_ISSUE_DATE>'.$SENDER_ID_ISSUE_DATE.'</SENDER_ID_ISSUE_DATE>
-            <SENDER_ID_EXPIRE_DATE>'.$SENDER_ID_EXPIRE_DATE.'</SENDER_ID_EXPIRE_DATE>
-            <SENDER_DATE_OF_BIRTH>'.$SENDER_DATE_OF_BIRTH.'</SENDER_DATE_OF_BIRTH>
-            <SENDER_OCCUPATION>'.$SENDER_OCCUPATION.'</SENDER_OCCUPATION>
-            <SENDER_SOURCE_OF_FUND>'.$SENDER_SOURCE_OF_FUND.'</SENDER_SOURCE_OF_FUND>
+            <SENDER_GENDER>' . $SENDER_GENDER . '</SENDER_GENDER>
+            <SENDER_ADDRESS>' . $SENDER_ADDRESS . '</SENDER_ADDRESS>
+            <SENDER_CITY>' . $SENDER_CITY . '</SENDER_CITY>
+            <SENDER_STATES>' . $SENDER_STATES . '</SENDER_STATES>
+            <SENDER_ZIPCODE>' . $SENDER_ZIPCODE . '</SENDER_ZIPCODE>
+            <SENDER_COUNTRY>' . $SENDER_COUNTRY . '</SENDER_COUNTRY>
+            <SENDER_MOBILE>' . $SENDER_MOBILE . '</SENDER_MOBILE>
+            <SENDER_NATIONALITY>' . $SENDER_NATIONALITY . '</SENDER_NATIONALITY>
+            <SENDER_ID_TYPE>' . $SENDER_ID_TYPE . '</SENDER_ID_TYPE>
+            <SENDER_ID_NUMBER>' . $SENDER_ID_NUMBER . '</SENDER_ID_NUMBER>
+            <SENDER_ID_ISSUE_COUNTRY>' . $SENDER_ID_ISSUE_COUNTRY . '</SENDER_ID_ISSUE_COUNTRY>
+            <SENDER_ID_ISSUE_DATE>' . $SENDER_ID_ISSUE_DATE . '</SENDER_ID_ISSUE_DATE>
+            <SENDER_ID_EXPIRE_DATE>' . $SENDER_ID_EXPIRE_DATE . '</SENDER_ID_EXPIRE_DATE>
+            <SENDER_DATE_OF_BIRTH>' . $SENDER_DATE_OF_BIRTH . '</SENDER_DATE_OF_BIRTH>
+            <SENDER_OCCUPATION>' . $SENDER_OCCUPATION . '</SENDER_OCCUPATION>
+            <SENDER_SOURCE_OF_FUND>' . $SENDER_SOURCE_OF_FUND . '</SENDER_SOURCE_OF_FUND>
             <SENDER_SECONDARY_ID_TYPE></SENDER_SECONDARY_ID_TYPE>
             <SENDER_SECONDARY_ID_NUMBER></SENDER_SECONDARY_ID_NUMBER>
-            <SENDER_COUNTRY_OF_BIRTH>'.$SENDER_COUNTRY_OF_BIRTH.'</SENDER_COUNTRY_OF_BIRTH>
-            <SENDER_BENEFICIARY_RELATIONSHIP>'.$SENDER_BENEFICIARY_RELATIONSHIP.'</SENDER_BENEFICIARY_RELATIONSHIP>
-            <PURPOSE_OF_REMITTANCE>'.$PURPOSE_OF_REMITTANCE.'</PURPOSE_OF_REMITTANCE>
-            <RECEIVER_FIRST_NAME>'.$RECEIVER_FIRST_NAME.'</RECEIVER_FIRST_NAME>
-            <RECEIVER_MIDDLE_NAME>'.$RECEIVER_MIDDLE_NAME.'</RECEIVER_MIDDLE_NAME>
-            <RECEIVER_LAST_NAME>'.$RECEIVER_LAST_NAME.'</RECEIVER_LAST_NAME>
-            <RECEIVER_ADDRESS>'.$RECEIVER_ADDRESS.'</RECEIVER_ADDRESS>
-            <RECEIVER_CONTACT_NUMBER>'.$RECEIVER_CONTACT_NUMBER.'</RECEIVER_CONTACT_NUMBER>
-            <RECEIVER_CITY>'.$RECEIVER_CITY.'</RECEIVER_CITY>
-            <RECEIVER_COUNTRY>'.$RECEIVER_COUNTRY.'</RECEIVER_COUNTRY>
+            <SENDER_COUNTRY_OF_BIRTH>' . $SENDER_COUNTRY_OF_BIRTH . '</SENDER_COUNTRY_OF_BIRTH>
+            <SENDER_BENEFICIARY_RELATIONSHIP>' . $SENDER_BENEFICIARY_RELATIONSHIP . '</SENDER_BENEFICIARY_RELATIONSHIP>
+            <PURPOSE_OF_REMITTANCE>' . $PURPOSE_OF_REMITTANCE . '</PURPOSE_OF_REMITTANCE>
+            <RECEIVER_FIRST_NAME>' . $RECEIVER_FIRST_NAME . '</RECEIVER_FIRST_NAME>
+            <RECEIVER_MIDDLE_NAME>' . $RECEIVER_MIDDLE_NAME . '</RECEIVER_MIDDLE_NAME>
+            <RECEIVER_LAST_NAME>' . $RECEIVER_LAST_NAME . '</RECEIVER_LAST_NAME>
+            <RECEIVER_ADDRESS>' . $RECEIVER_ADDRESS . '</RECEIVER_ADDRESS>
+            <RECEIVER_CONTACT_NUMBER>' . $RECEIVER_CONTACT_NUMBER . '</RECEIVER_CONTACT_NUMBER>
+            <RECEIVER_CITY>' . $RECEIVER_CITY . '</RECEIVER_CITY>
+            <RECEIVER_COUNTRY>' . $RECEIVER_COUNTRY . '</RECEIVER_COUNTRY>
             <RECEIVER_ID_TYPE></RECEIVER_ID_TYPE>
             <RECEIVER_ID_NUMBER></RECEIVER_ID_NUMBER>
-            <CALC_BY>'.$this->calculated_by_sending_payout_currency.'</CALC_BY>
-            <TRANSFER_AMOUNT>'.$TRANSFER_AMOUNT.'</TRANSFER_AMOUNT>
-            <REMIT_CURRENCY>'.$REMIT_CURRENCY.'</REMIT_CURRENCY>
-            <TRANSFER_CURRENCY>'.$TRANSFER_CURRENCY.'</TRANSFER_CURRENCY>
-            <PAYMENTMODE>'.$this->payment_mode.'</PAYMENTMODE>
-            <BANK_NAME>'.$BANK_NAME.'</BANK_NAME>
-            <BANK_BRANCH_NAME>'.$BANK_BRANCH_NAME.'</BANK_BRANCH_NAME>
-            <BANK_ACCOUNT_NUMBER>'.$BANK_ACCOUNT_NUMBER.'</BANK_ACCOUNT_NUMBER>
+            <CALC_BY>' . $this->calculated_by_sending_payout_currency . '</CALC_BY>
+            <TRANSFER_AMOUNT>' . $TRANSFER_AMOUNT . '</TRANSFER_AMOUNT>
+            <REMIT_CURRENCY>' . $REMIT_CURRENCY . '</REMIT_CURRENCY>
+            <TRANSFER_CURRENCY>' . $TRANSFER_CURRENCY . '</TRANSFER_CURRENCY>
+            <PAYMENTMODE>' . $this->payment_mode . '</PAYMENTMODE>
+            <BANK_NAME>' . $BANK_NAME . '</BANK_NAME>
+            <BANK_BRANCH_NAME>' . $BANK_BRANCH_NAME . '</BANK_BRANCH_NAME>
+            <BANK_ACCOUNT_NUMBER>' . $BANK_ACCOUNT_NUMBER . '</BANK_ACCOUNT_NUMBER>
             <PROMOTION_CODE></PROMOTION_CODE>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+            <SIGNATURE>' . $hash_signature . '</SIGNATURE>
             <EXRATE_SESSION_ID></EXRATE_SESSION_ID>
         ';
         $soapMethod = 'SendTransaction';
@@ -649,14 +651,14 @@ class ValYouApi implements MoneyTransfer
     public function authorizedConfirmed($input_data)
     {
         $PINNO = $input_data['PINNO'];
-        $signature = $this->agent_code.$this->ClientId.$PINNO.$this->agent_session_id.$this->ClientPass;
+        $signature = $this->agent_code . $this->ClientId . $PINNO . $this->agent_session_id . $this->ClientPass;
         $hash_signature = hash('sha256', $signature);
         $xml_string = '
-            <AGENT_CODE>'.$this->agent_code.'</AGENT_CODE>
-            <USER_ID>'.$this->ClientId.'</USER_ID>
-            <PINNO>'.$PINNO.'</PINNO>
-            <AGENT_SESSION_ID>'.$this->agent_session_id.'</AGENT_SESSION_ID>
-            <SIGNATURE>'.$hash_signature.'</SIGNATURE>
+            <AGENT_CODE>' . $this->agent_code . '</AGENT_CODE>
+            <USER_ID>' . $this->ClientId . '</USER_ID>
+            <PINNO>' . $PINNO . '</PINNO>
+            <AGENT_SESSION_ID>' . $this->agent_session_id . '</AGENT_SESSION_ID>
+            <SIGNATURE>' . $hash_signature . '</SIGNATURE>
         ';
         $soapMethod = 'Authorized_Confirmed';
         $xml_post_string = $this->xmlGenerate($xml_string, $soapMethod);
@@ -667,7 +669,7 @@ class ValYouApi implements MoneyTransfer
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
+     * @param Model|BaseModel $order
      */
     public function requestQuote($order): mixed
     {
@@ -680,7 +682,7 @@ class ValYouApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for an execution of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function executeOrder(BaseModel $order): mixed
     {
@@ -691,7 +693,7 @@ class ValYouApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for the progress status of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function orderStatus(BaseModel $order): mixed
     {
@@ -702,7 +704,7 @@ class ValYouApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for the cancellation of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function cancelOrder(BaseModel $order): mixed
     {
@@ -713,7 +715,7 @@ class ValYouApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for the amendment of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function amendmentOrder(BaseModel $order): mixed
     {
@@ -724,7 +726,7 @@ class ValYouApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for the track real-time progress of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function trackOrder(BaseModel $order): mixed
     {

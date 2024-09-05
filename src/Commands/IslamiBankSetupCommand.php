@@ -2,8 +2,12 @@
 
 namespace Fintech\Remit\Commands;
 
+use Fintech\Banco\Facades\Banco;
+use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
+use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Console\Command;
+use Throwable;
 
 class IslamiBankSetupCommand extends Command
 {
@@ -515,7 +519,7 @@ class IslamiBankSetupCommand extends Command
 
             return self::SUCCESS;
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
 
             $this->error($th->getMessage());
 
@@ -532,9 +536,9 @@ class IslamiBankSetupCommand extends Command
 
         foreach (self::ID_DOC_TYPES as $code => $name) {
 
-            $idDocType = \Fintech\MetaData\Facades\MetaData::idDocType()->list(['code' => $code])->first();
+            $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
 
-            if (! $idDocType) {
+            if (!$idDocType) {
                 continue;
             }
 
@@ -550,7 +554,7 @@ class IslamiBankSetupCommand extends Command
 
             $vendor_code['remit']['islamibank'] = $name;
 
-            if (\Fintech\MetaData\Facades\MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
+            if (MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
                 $this->line("ID Doc Type ID: {$idDocType->getKey()} updated successful.");
             }
 
@@ -571,9 +575,9 @@ class IslamiBankSetupCommand extends Command
 
         foreach (self::BD_BANKS as $code => $name) {
 
-            $bank = \Fintech\Banco\Facades\Banco::bank()->list(['slug' => $code])->first();
+            $bank = Banco::bank()->list(['slug' => $code])->first();
 
-            if (! $bank) {
+            if (!$bank) {
                 continue;
             }
 
@@ -589,7 +593,7 @@ class IslamiBankSetupCommand extends Command
 
             $vendor_code['remit']['islamibank'] = $name;
 
-            if (\Fintech\Banco\Facades\Banco::bank()->update($bank->getKey(), ['vendor_code' => $vendor_code])) {
+            if (Banco::bank()->update($bank->getKey(), ['vendor_code' => $vendor_code])) {
                 $this->line("Bank ID: {$bank->getKey()} updated successful.");
             }
 
@@ -610,9 +614,9 @@ class IslamiBankSetupCommand extends Command
 
         foreach (self::ISLAMI_BRANCHES as $code => $name) {
 
-            $branch = \Fintech\Banco\Facades\Banco::bankBranch()->list(['location_no' => $code])->first();
+            $branch = Banco::bankBranch()->list(['location_no' => $code])->first();
 
-            if (! $branch) {
+            if (!$branch) {
                 continue;
             }
 
@@ -628,7 +632,7 @@ class IslamiBankSetupCommand extends Command
 
             $vendor_code['remit']['islamibank'] = $name;
 
-            if (\Fintech\Banco\Facades\Banco::bankBranch()->update($branch->getKey(), ['vendor_code' => $vendor_code])) {
+            if (Banco::bankBranch()->update($branch->getKey(), ['vendor_code' => $vendor_code])) {
                 $this->line("Branch ID: {$branch->getKey()} updated successful.");
             }
 
@@ -642,32 +646,32 @@ class IslamiBankSetupCommand extends Command
 
     private function addServiceVendor(): void
     {
-        $dir = __DIR__.'/../../resources/img/service_vendor/';
+        $dir = __DIR__ . '/../../resources/img/service_vendor/';
 
         $vendor = [
             'service_vendor_name' => 'Islami Bank',
             'service_vendor_slug' => 'islamibank',
             'service_vendor_data' => [],
-            'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents("{$dir}/logo_png/islamibank.png")),
-            'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents("{$dir}/logo_svg/islamibank.svg")),
+            'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents("{$dir}/logo_png/islamibank.png")),
+            'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents("{$dir}/logo_svg/islamibank.svg")),
             'enabled' => false,
         ];
 
-        if (\Fintech\Business\Facades\Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
+        if (Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
             $this->info('Service vendor already exists. Skipping');
         } else {
-            \Fintech\Business\Facades\Business::serviceVendor()->create($vendor);
+            Business::serviceVendor()->create($vendor);
             $this->info('Service vendor created successfully.');
         }
     }
 
     private function addBeneficiaryAccountTypeCodes(): void
     {
-        $bank = \Fintech\Banco\Facades\Banco::bank()
+        $bank = Banco::bank()
             ->list(['country_id' => 19, 'slug' => 'islami-bank-bangladesh-limited'])
             ->first();
 
-        if (! $bank) {
+        if (!$bank) {
             return;
         }
 
@@ -753,7 +757,7 @@ class IslamiBankSetupCommand extends Command
         ];
 
         foreach ($accounts as $entry) {
-            \Fintech\Banco\Facades\Banco::beneficiaryAccountType()->create($entry);
+            Banco::beneficiaryAccountType()->create($entry);
         }
     }
 }

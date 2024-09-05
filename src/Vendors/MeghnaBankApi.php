@@ -2,11 +2,13 @@
 
 namespace Fintech\Remit\Vendors;
 
+use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Transaction\Facades\Transaction;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
@@ -217,7 +219,7 @@ class MeghnaBankApi implements MoneyTransfer
     }
 
     /**
-     * @param  \Illuminate\Database\Eloquent\Model|\Fintech\Core\Abstracts\BaseModel  $order
+     * @param Model|BaseModel $order
      */
     public function requestQuote($order): mixed
     {
@@ -231,7 +233,7 @@ class MeghnaBankApi implements MoneyTransfer
      * for an execution of the order.
      *
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function executeOrder(BaseModel $order): mixed
     {
@@ -244,7 +246,7 @@ class MeghnaBankApi implements MoneyTransfer
         //RECEIVER
         $params['RECEIVER_NAME'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
         $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $order_data['beneficiary_data']['receiver_information']['relation_name'] ?? 'Relatives';
         $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($order_data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
         $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = ($order_data['beneficiary_data']['branch_information']['branch_data']['location_no'] ?? '');
@@ -292,7 +294,7 @@ class MeghnaBankApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for the progress status of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function orderStatus(BaseModel $order): mixed
     {
@@ -307,7 +309,7 @@ class MeghnaBankApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for the progress status of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function trackOrder(BaseModel $order): mixed
     {
@@ -322,7 +324,7 @@ class MeghnaBankApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for the cancellation of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function cancelOrder(BaseModel $order): mixed
     {
@@ -337,7 +339,7 @@ class MeghnaBankApi implements MoneyTransfer
      * Method to make a request to the remittance service provider
      * for the amendment of the order.
      *
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     public function amendmentOrder(BaseModel $order): mixed
     {

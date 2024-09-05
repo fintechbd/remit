@@ -4,6 +4,7 @@ use Fintech\Core\Facades\Core;
 use Fintech\Remit\Http\Controllers\AssignVendorController;
 use Fintech\Remit\Http\Controllers\BankTransferController;
 use Fintech\Remit\Http\Controllers\CashPickupController;
+use Fintech\Remit\Http\Controllers\Charts\WithdrawPartnerSummaryController;
 use Fintech\Remit\Http\Controllers\VendorTestController;
 use Fintech\Remit\Http\Controllers\WalletTransferController;
 use Fintech\Remit\Http\Controllers\WalletVerificationController;
@@ -58,7 +59,7 @@ if (Config::get('fintech.remit.enabled')) {
             //DO NOT REMOVE THIS LINE//
 
             Route::prefix('charts')->name('charts.')->group(function () {
-                Route::get('withdraw-partner-summary', \Fintech\Remit\Http\Controllers\Charts\WithdrawPartnerSummaryController::class)
+                Route::get('withdraw-partner-summary', WithdrawPartnerSummaryController::class)
                     ->name('withdraw-partner-summary');
             });
         });

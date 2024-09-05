@@ -6,6 +6,7 @@ use Fintech\Core\Facades\Core;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use stdClass;
+use function currency;
 
 class CashPickupResource extends JsonResource
 {
@@ -52,8 +53,8 @@ class CashPickupResource extends JsonResource
             'updated_at' => $this->updated_at ?? null,
         ];
 
-        $data['amount_formatted'] = \currency($data['amount'], $data['currency'])->format();
-        $data['converted_amount_formatted'] = \currency($data['converted_amount'], $data['converted_currency'])->format();
+        $data['amount_formatted'] = currency($data['amount'], $data['currency'])->format();
+        $data['converted_amount_formatted'] = currency($data['converted_amount'], $data['converted_currency'])->format();
 
         if (Core::packageExists('MetaData')) {
             $data['source_country_name'] = $this->sourceCountry?->name ?? null;

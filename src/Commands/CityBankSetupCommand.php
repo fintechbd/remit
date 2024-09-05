@@ -2,8 +2,11 @@
 
 namespace Fintech\Remit\Commands;
 
+use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
+use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Console\Command;
+use Throwable;
 
 class CityBankSetupCommand extends Command
 {
@@ -44,7 +47,7 @@ class CityBankSetupCommand extends Command
 
             return self::SUCCESS;
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
 
             $this->error($th->getMessage());
 
@@ -61,9 +64,9 @@ class CityBankSetupCommand extends Command
 
         foreach (self::ID_DOC_TYPES as $code => $name) {
 
-            $idDocType = \Fintech\MetaData\Facades\MetaData::idDocType()->list(['code' => $code])->first();
+            $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
 
-            if (! $idDocType) {
+            if (!$idDocType) {
                 continue;
             }
 
@@ -79,7 +82,7 @@ class CityBankSetupCommand extends Command
 
             $vendor_code['remit']['citybank'] = $name;
 
-            if (\Fintech\MetaData\Facades\MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
+            if (MetaData::idDocType()->update($idDocType->getKey(), ['vendor_code' => $vendor_code])) {
                 $this->line("ID Doc Type ID: {$idDocType->getKey()} updated successful.");
             }
 
@@ -93,21 +96,21 @@ class CityBankSetupCommand extends Command
 
     private function addServiceVendor(): void
     {
-        $dir = __DIR__.'/../../resources/img/service_vendor/';
+        $dir = __DIR__ . '/../../resources/img/service_vendor/';
 
         $vendor = [
             'service_vendor_name' => 'City Bank',
             'service_vendor_slug' => 'citybank',
             'service_vendor_data' => [],
-            'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents("{$dir}/logo_png/citybank.png")),
-            'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents("{$dir}/logo_svg/citybank.svg")),
+            'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents("{$dir}/logo_png/citybank.png")),
+            'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents("{$dir}/logo_svg/citybank.svg")),
             'enabled' => false,
         ];
 
-        if (\Fintech\Business\Facades\Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
+        if (Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
             $this->info('Service vendor already exists. Skipping');
         } else {
-            \Fintech\Business\Facades\Business::serviceVendor()->create($vendor);
+            Business::serviceVendor()->create($vendor);
             $this->info('Service vendor created successfully.');
         }
     }
