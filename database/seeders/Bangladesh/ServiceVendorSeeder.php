@@ -12,8 +12,8 @@ class ServiceVendorSeeder extends Seeder
      */
     public function run(): void
     {
-        Artisan::call('remit:agrani-bank-setup');
-        Artisan::call('remit:city-bank-setup');
+//        Artisan::call('remit:agrani-bank-setup');
+//        Artisan::call('remit:city-bank-setup');
         Artisan::call('remit:islami-bank-setup');
         Artisan::call('remit:meghna-bank-setup');
     }
