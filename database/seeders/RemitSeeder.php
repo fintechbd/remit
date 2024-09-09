@@ -55,7 +55,7 @@ class RemitSeeder extends Seeder
                 'service_type_slug' => 'wallet_transfer',
                 'logo_svg' => "{$image_svg}wallet_transfer.svg",
                 'logo_png' => "{$image_png}wallet_transfer.png",
-                'service_type_is_parent' => 'no',
+                'service_type_is_parent' => 'yes',
                 'service_type_is_description' => 'no',
             ],
         ];
