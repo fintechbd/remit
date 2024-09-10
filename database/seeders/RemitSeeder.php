@@ -2,6 +2,7 @@
 
 namespace Fintech\Remit\Seeders;
 
+use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Illuminate\Database\Seeder;
@@ -40,7 +41,9 @@ class RemitSeeder extends Seeder
                 'logo_png' => "{$image_png}bank_transfer.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
-
+                'service_settings' => [
+                    'beneficiary_type_id' => Banco::beneficiaryType()->list(['slug' => 'bank-transfer'])->first()?->id ?? 1,
+                ]
             ],
             [
                 'service_type_name' => 'Cash Pickup',
@@ -49,6 +52,9 @@ class RemitSeeder extends Seeder
                 'logo_png' => "{$image_png}cash_pickup.png",
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
+                'service_settings' => [
+                    'beneficiary_type_id' => Banco::beneficiaryType()->list(['slug' => 'cash-pickup'])->first()?->id ?? 1,
+                ]
             ],
             [
                 'service_type_name' => 'Wallet Transfer',
