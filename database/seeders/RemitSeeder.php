@@ -43,7 +43,7 @@ class RemitSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_settings' => [
                     'beneficiary_type_id' => Banco::beneficiaryType()->list(['slug' => 'bank-transfer'])->first()?->id ?? 1,
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'Cash Pickup',
@@ -54,7 +54,7 @@ class RemitSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_settings' => [
                     'beneficiary_type_id' => Banco::beneficiaryType()->list(['slug' => 'cash-pickup'])->first()?->id ?? 1,
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'Wallet Transfer',
