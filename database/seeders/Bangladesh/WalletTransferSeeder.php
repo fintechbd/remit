@@ -48,7 +48,7 @@ class WalletTransferSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_settings' => [
                     'beneficiary_type_id' => $walletTransferId,
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'Nagad',
@@ -59,7 +59,7 @@ class WalletTransferSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_settings' => [
                     'beneficiary_type_id' => $walletTransferId,
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'Rocket',
@@ -70,7 +70,7 @@ class WalletTransferSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_settings' => [
                     'beneficiary_type_id' => $walletTransferId,
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'MCash',
@@ -81,7 +81,7 @@ class WalletTransferSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_settings' => [
                     'beneficiary_type_id' => $walletTransferId,
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'SureCash',
@@ -92,7 +92,7 @@ class WalletTransferSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_settings' => [
                     'beneficiary_type_id' => $walletTransferId,
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'Upay',
@@ -102,7 +102,7 @@ class WalletTransferSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_settings' => [
                     'beneficiary_type_id' => $walletTransferId,
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'Ipay',
@@ -112,7 +112,7 @@ class WalletTransferSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_settings' => [
                     'beneficiary_type_id' => $walletTransferId,
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'Trust Axiata Pay (Tap)',
@@ -122,7 +122,7 @@ class WalletTransferSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_settings' => [
                     'beneficiary_type_id' => $walletTransferId,
-                ]
+                ],
             ],
             [
                 'service_type_name' => 'OK Wallet',
@@ -132,7 +132,7 @@ class WalletTransferSeeder extends Seeder
                 'service_type_is_description' => 'no',
                 'service_settings' => [
                     'beneficiary_type_id' => $walletTransferId,
-                ]
+                ],
             ],
         ];
     }
