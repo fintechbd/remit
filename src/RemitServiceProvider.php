@@ -33,7 +33,6 @@ class RemitServiceProvider extends ServiceProvider
 
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RepositoryServiceProvider::class);
-        $this->app->register(RouteServiceProvider::class);
     }
 
     /**
@@ -60,6 +59,8 @@ class RemitServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'remit');
 
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'remit');
+
+        $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
 
         if ($this->app->runningInConsole()) {
             $this->commands([

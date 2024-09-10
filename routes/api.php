@@ -22,45 +22,47 @@ use Illuminate\Support\Facades\Route;
 |
 */
 if (Config::get('fintech.remit.enabled')) {
-    Route::prefix('remit')->name('remit.')
-        ->middleware(config('fintech.auth.middleware'))->group(function () {
-            if (Core::packageExists('Transaction')) {
-                Route::prefix('assign-vendors')->name('assign-vendors.')
-                    ->controller(AssignVendorController::class)
-                    ->group(function () {
-                        Route::get('available/{order_id}', 'available')->name('available');
-                        Route::post('quote', 'quotation')->name('quotation');
-                        Route::post('process', 'process')->name('process');
-                        Route::get('status/{order_id}', 'tracker')->name('tracker');
-                        Route::get('release/{order_id}', 'release')->name('release');
-                        Route::post('cancel', 'cancel')->name('cancel');
-                        Route::post('amendment', 'amendment')->name('amendment');
-                        Route::get('overwrite/{order_id}', 'overwrite')->name('overwrite');
-                    });
-            }
-            Route::apiResource('bank-transfers', BankTransferController::class)->except('update', 'destroy');
-            Route::group(['prefix' => 'bank-transfers'], function () {
-                Route::post('store-without-insufficient-balance', [BankTransferController::class, 'storeWithoutInsufficientBalance'])
-                    ->name('store-without-insufficient-balance');
-            });
-            Route::apiResource('cash-pickups', CashPickupController::class)->except('update', 'destroy');
-            Route::group(['prefix' => 'cash-pickups'], function () {
-                Route::post('store-without-insufficient-balance', [CashPickupController::class, 'storeWithoutInsufficientBalance'])
-                    ->name('store-without-insufficient-balance');
-            });
-            Route::apiResource('wallet-transfers', WalletTransferController::class)->except('update', 'destroy');
-            Route::group(['prefix' => 'wallet-transfers'], function () {
-                Route::post('store-without-insufficient-balance', [WalletTransferController::class, 'storeWithoutInsufficientBalance'])
-                    ->name('store-without-insufficient-balance');
-            });
-            Route::post('wallet-verification', WalletVerificationController::class)->name('wallet-verification');
-            Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])->name('islami-bank-account-type-code');
+    Route::prefix(config('fintech.remit.root_prefix', 'api/'))->middleware(['api', 'http_log', 'encrypted'])->group(function () {
+        Route::prefix('remit')->name('remit.')
+            ->middleware(config('fintech.auth.middleware'))->group(function () {
+                if (Core::packageExists('Transaction')) {
+                    Route::prefix('assign-vendors')->name('assign-vendors.')
+                        ->controller(AssignVendorController::class)
+                        ->group(function () {
+                            Route::get('available/{order_id}', 'available')->name('available');
+                            Route::post('quote', 'quotation')->name('quotation');
+                            Route::post('process', 'process')->name('process');
+                            Route::get('status/{order_id}', 'tracker')->name('tracker');
+                            Route::get('release/{order_id}', 'release')->name('release');
+                            Route::post('cancel', 'cancel')->name('cancel');
+                            Route::post('amendment', 'amendment')->name('amendment');
+                            Route::get('overwrite/{order_id}', 'overwrite')->name('overwrite');
+                        });
+                }
+                Route::apiResource('bank-transfers', BankTransferController::class)->except('update', 'destroy');
+                Route::group(['prefix' => 'bank-transfers'], function () {
+                    Route::post('store-without-insufficient-balance', [BankTransferController::class, 'storeWithoutInsufficientBalance'])
+                        ->name('store-without-insufficient-balance');
+                });
+                Route::apiResource('cash-pickups', CashPickupController::class)->except('update', 'destroy');
+                Route::group(['prefix' => 'cash-pickups'], function () {
+                    Route::post('store-without-insufficient-balance', [CashPickupController::class, 'storeWithoutInsufficientBalance'])
+                        ->name('store-without-insufficient-balance');
+                });
+                Route::apiResource('wallet-transfers', WalletTransferController::class)->except('update', 'destroy');
+                Route::group(['prefix' => 'wallet-transfers'], function () {
+                    Route::post('store-without-insufficient-balance', [WalletTransferController::class, 'storeWithoutInsufficientBalance'])
+                        ->name('store-without-insufficient-balance');
+                });
+                Route::post('wallet-verification', WalletVerificationController::class)->name('wallet-verification');
+                Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])->name('islami-bank-account-type-code');
 
-            //DO NOT REMOVE THIS LINE//
+                //DO NOT REMOVE THIS LINE//
 
-            Route::prefix('charts')->name('charts.')->group(function () {
-                Route::get('withdraw-partner-summary', WithdrawPartnerSummaryController::class)
-                    ->name('withdraw-partner-summary');
+                Route::prefix('charts')->name('charts.')->group(function () {
+                    Route::get('withdraw-partner-summary', WithdrawPartnerSummaryController::class)
+                        ->name('withdraw-partner-summary');
+                });
             });
-        });
+    });
 }
