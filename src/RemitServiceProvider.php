@@ -11,7 +11,6 @@ use Fintech\Remit\Commands\MeghnaBankSetupCommand;
 use Fintech\Remit\Commands\RemitCommand;
 use Fintech\Remit\Providers\EventServiceProvider;
 use Fintech\Remit\Providers\RepositoryServiceProvider;
-use Fintech\Remit\Providers\RouteServiceProvider;
 use Illuminate\Support\ServiceProvider;
 
 class RemitServiceProvider extends ServiceProvider
