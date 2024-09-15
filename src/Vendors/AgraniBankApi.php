@@ -80,8 +80,8 @@ class AgraniBankApi implements MoneyTransfer
     /**
      * EMQApiService constructor.
      *
-     * @param CatalogListService $catalogListService
-     * @param CountryService $countryService
+     * @param  CatalogListService  $catalogListService
+     * @param  CountryService  $countryService
      *
      * @throws DOMException
      */
@@ -162,7 +162,7 @@ class AgraniBankApi implements MoneyTransfer
 
                     default:
 
-                        $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
+                        $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
                         $returnData->status = 'failed';
                         break;
 
@@ -187,7 +187,7 @@ class AgraniBankApi implements MoneyTransfer
 
             default:
 
-                $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
+                $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
                 $returnData->status = 'failed';
                 $returnData->status_code = 201;
                 break;
@@ -214,7 +214,7 @@ class AgraniBankApi implements MoneyTransfer
 
         $full_name = $sender_first_name;
         if (strlen($sender_last_name) > 0) {
-            $full_name .= (' ' . $sender_last_name);
+            $full_name .= (' '.$sender_last_name);
         }
 
         $nameArray = preg_split("/\s+(?=\S*+$)/", $full_name);
@@ -237,7 +237,7 @@ class AgraniBankApi implements MoneyTransfer
         $transferInfo['remfname'] = $sender_first_name;
         $transferInfo['remlname'] = $sender_last_name;
         $transferInfo['remit_tel'] = isset($data->sender_mobile) ? substr($data->sender_mobile, -11) : null;
-        $transferInfo['remaddress1'] = trim(($data->sender_address ?? null) . ' ' . ($data->sender_city ?? null));
+        $transferInfo['remaddress1'] = trim(($data->sender_address ?? null).' '.($data->sender_city ?? null));
         $transferInfo['remcountry'] = $data->trans_fast_sender_country_iso_code ?? null; //TODO agrani country code needed
         $transferInfo['benename'] = $data->receiver_first_name ?? null;
         $transferInfo['benemname'] = $data->receiver_middle_name ?? ' ';
@@ -347,7 +347,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function putPostData(string $url, array $dataArray = [], string $method = 'POST')
     {
-        $apiUrl = $this->apiUrl . $url;
+        $apiUrl = $this->apiUrl.$url;
         Log::info($apiUrl);
         $jsonArray = json_encode($dataArray);
         Log::info(json_decode($jsonArray, true));
@@ -364,8 +364,8 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
             'cache-control: no-cache',
             'Content-Type: application/xml',
             'Accepts: application/xml',
-            'Username: ' . $this->getUsername(),
-            'Expassword: ' . $this->getPassword(),
+            'Username: '.$this->getUsername(),
+            'Expassword: '.$this->getPassword(),
         ];
 
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
@@ -415,8 +415,8 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     /**
      * Render Emq Response to pointed StdClass
      *
-     * @param array $response emq response
-     * @param stdClass $returnData class that will get rendered response
+     * @param  array  $response  emq response
+     * @param  stdClass  $returnData  class that will get rendered response
      * @return void
      */
     public function renderApiResponse(array $response, stdClass &$returnData)
@@ -500,7 +500,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
 
                     default:
 
-                        $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
+                        $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
                         $returnData->status = 'failed';
                         break;
 
@@ -525,7 +525,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
 
             default:
 
-                $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
+                $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
                 $returnData->status = 'failed';
                 $returnData->status_code = 201;
                 break;
@@ -577,14 +577,14 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     /**
      * Base function that is responsible for interacting directly with the nium api to obtain data
      *
-     * @param array $params
+     * @param  array  $params
      * @return array
      *
      * @throws Exception
      */
     public function getData($url, $params = [])
     {
-        $apiUrl = $this->apiUrl . $url;
+        $apiUrl = $this->apiUrl.$url;
         $apiUrl .= http_build_query($params);
         Log::info($apiUrl);
 
@@ -596,8 +596,8 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
             'cache-control: no-cache',
             'Content-Type: application/json',
             'Accepts: application/json',
-            'Username: ' . $this->getUsername(),
-            'Expassword: ' . $this->getPassword(),
+            'Username: '.$this->getUsername(),
+            'Expassword: '.$this->getPassword(),
         ];
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
@@ -614,7 +614,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
         $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
 
-        Log::info('API Response : ' . $response);
+        Log::info('API Response : '.$response);
 
         echo $response;
 
@@ -626,7 +626,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     }
 
     /**
-     * @param Model|BaseModel $order
+     * @param  Model|BaseModel  $order
      */
     public function requestQuote($order): mixed
     {
