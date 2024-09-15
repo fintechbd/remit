@@ -135,56 +135,63 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     }
 
     /**
-     * @throws DOMException
-     */
-    private function callApi($method, $payload)
-    {
-        $envelope = $this->xml->createElement('soapenv:Envelope');
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope/');
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:ser', 'http://service.ws.mt.ibbl');
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xsd', 'http://bean.ws.mt.ibbl/xsd');
-        $envelope->appendChild($this->xml->createElement('soapenv:Header'));
-
-        $envelopeBody = $this->xml->createElement('soapenv:Body');
-        $envelopeBody->appendChild($payload);
-
-        $envelope->appendChild($envelopeBody);
-
-        $this->xml->appendChild($envelope);
-
-        $xmlResponse = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
-
-        $response = Utility::parseXml($xmlResponse);
-
-        return $response['Envelope']['Body'] ?? null;
-    }
-
-    /**
-     * Fetch Account Details (fetchAccountDetail)
+     * Import/push remittance (importWSMessage)
      *
-     * Fetching account details of beneficiary (receiver) by which you will get the
-     * full digit (17 digit) account no and account title (Beneficiary Name) which
-     * is required to send when you will execute directCreditWSMessage
-     * operation.
+     * Import/Push Remittance. If exchange house account has no available balance then you can use this operation.
+     * After certain time, we will pull the message and will be available for transaction.
      *
-     * Parameters: userID, password, account_number, account_type, branch_code
+     * Parameters: userID, password, accNo, wsMessage
      *
      * @throws Exception
      */
-    private function fetchAccountDetail(BaseModel $order): mixed
+    public function importOrPushRemittance(array $data): array
     {
-        $accountDetail = $this->__transferData($order);
+        $importOrPushRemittance = $this->__transferData($data);
+        $xmlString = '
+            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
+            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
+        ';
+        //$xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
+        $xmlString .= '<ser:wsMessage>';
+        $xmlString .= '<xsd:amount>' . ($importOrPushRemittance['amount'] ?? null) . '</xsd:amount>';
+        $xmlString .= '<xsd:isoCode>' . ($importOrPushRemittance['isoCode'] ?? null) . '</xsd:isoCode>';
+        $xmlString .= '<xsd:beneficiaryAddress>' . ($importOrPushRemittance['beneficiaryAddress'] ?? null) . '</xsd:beneficiaryAddress>';
+        $xmlString .= '<xsd:beneficiaryBankCode>' . ($importOrPushRemittance['beneficiaryBankCode'] ?? null) . '</xsd:beneficiaryBankCode>';
+        $xmlString .= '<xsd:beneficiaryBankName>' . ($importOrPushRemittance['beneficiaryBankName'] ?? null) . '</xsd:beneficiaryBankName>';
+        $xmlString .= '<xsd:beneficiaryBranchCode>' . ($importOrPushRemittance['beneficiaryBranchCode'] ?? null) . '</xsd:beneficiaryBranchCode>';
+        $xmlString .= '<xsd:beneficiaryBranchName>' . ($importOrPushRemittance['beneficiaryBranchName'] ?? null) . '</xsd:beneficiaryBranchName>';
+        $xmlString .= '<xsd:beneficiaryName>' . ($importOrPushRemittance['beneficiaryName'] ?? null) . '</xsd:beneficiaryName>';
+        $xmlString .= '<xsd:beneficiaryPassportNo>' . ($importOrPushRemittance['beneficiaryPassportNo'] ?? null) . '</xsd:beneficiaryPassportNo>';
+        $xmlString .= '<xsd:beneficiaryPhoneNo>' . ($importOrPushRemittance['beneficiaryPhoneNo'] ?? null) . '</xsd:beneficiaryPhoneNo>';
+        $xmlString .= '<xsd:creatorID>' . ($importOrPushRemittance['creatorID'] ?? null) . '</xsd:creatorID>';
+        $xmlString .= '<xsd:exchHouseSwiftCode>' . ($importOrPushRemittance['exchHouseSwiftCode'] ?? null) . '</xsd:exchHouseSwiftCode>';
+        $xmlString .= '<xsd:identityDescription>' . ($importOrPushRemittance['identityDescription'] ?? null) . '</xsd:identityDescription>';
+        $xmlString .= '<xsd:identityType>' . ($importOrPushRemittance['identityType'] ?? null) . '</xsd:identityType>';
+        $xmlString .= '<xsd:issueDate>' . ($importOrPushRemittance['issueDate'] ?? null) . '</xsd:issueDate>';
+        $xmlString .= '<xsd:note>' . ($importOrPushRemittance['note'] ?? null) . '</xsd:note>';
+        $xmlString .= '<xsd:paymentType>' . ($importOrPushRemittance['paymentType'] ?? null) . '</xsd:paymentType>';
+        $xmlString .= '<xsd:remitterAddress>' . ($importOrPushRemittance['remitterAddress'] ?? null) . '</xsd:remitterAddress>';
+        $xmlString .= '<xsd:remitterIdentificationNo>' . ($importOrPushRemittance['remitterIdentificationNo'] ?? null) . '</xsd:remitterIdentificationNo>';
+        $xmlString .= '<xsd:remitterName' . ($importOrPushRemittance['remitterName'] ?? null) . '</xsd:remitterName>';
+        $xmlString .= '<xsd:remitterPhoneNo>' . ($importOrPushRemittance['remitterPhoneNo'] ?? null) . '</xsd:remitterPhoneNo>';
+        $xmlString .= '<xsd:secretKey>' . ($importOrPushRemittance['secretKey'] ?? null) . '</xsd:secretKey>';
+        $xmlString .= '<xsd:transReferenceNo>' . ($importOrPushRemittance['transReferenceNo'] ?? null) . '</xsd:transReferenceNo>';
+        $xmlString .= '<xsd:transferDate>' . ($importOrPushRemittance['transferDate'] ?? null) . '</xsd:transferDate>';
+        $xmlString .= '<xsd: remittancePurpose>' . ($importOrPushRemittance['remittancePurpose'] ?? null) . '</xsd: remittancePurpose >';
+        $xmlString .= '</ser:wsMessage>';
+        $soapMethod = 'directCreditWSMessage';
+        $response = $this->connectionCheck($xmlString, $soapMethod);
 
-        $method = 'fetchAccountDetail';
+        $explodeValue = explode('|', $response['Envelope']['Body']);
+        $explodeValueCount = count($explodeValue) - 1;
+        $return['origin_response'] = $response['Envelope']['Body'];
+        if ($explodeValueCount > 0) {
+            $return['status'] = $explodeValue[0];
+            $return['status_code'] = $explodeValue[$explodeValueCount];
+            $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
+        }
 
-        $service = $this->xml->createElement("ser:{$method}");
-        $service->appendChild($this->xml->createElement('ser:userID', $this->config[$this->status]['username']));
-        $service->appendChild($this->xml->createElement('ser:password', $this->config[$this->status]['password']));
-        $service->appendChild($this->xml->createElement('ser:accNo', $accountDetail['beneficiaryAccNo'] ?? '?'));
-        $service->appendChild($this->xml->createElement('ser:accType', $accountDetail['beneficiaryAccType'] ?? '?'));
-        $service->appendChild($this->xml->createElement('ser:branchCode', $accountDetail['beneficiaryBankCode'] ?? '?'));
-
-        return $this->callApi($method, $service);
+        return $return;
     }
 
     private function __transferData(BaseModel $order): array
@@ -204,7 +211,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         $transferData['batchID'] = '?';
         $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number'] ?? $data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
         $transferData['beneficiaryAccType'] = '';
-        $transferData['beneficiaryAddress'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $transferData['beneficiaryAddress'] = ($data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['bank_information']['vendor_code']['remit']['islamibank'] ?? null);
         $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['bank_information']['bank_name'] ?? null);
         $transferData['beneficiaryBranchCode'] = '';
@@ -333,66 +340,6 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     }
 
     /**
-     * Import/push remittance (importWSMessage)
-     *
-     * Import/Push Remittance. If exchange house account has no available balance then you can use this operation.
-     * After certain time, we will pull the message and will be available for transaction.
-     *
-     * Parameters: userID, password, accNo, wsMessage
-     *
-     * @throws Exception
-     */
-    public function importOrPushRemittance(array $data): array
-    {
-        $importOrPushRemittance = $this->__transferData($data);
-        $xmlString = '
-            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
-            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
-        ';
-        //$xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
-        $xmlString .= '<ser:wsMessage>';
-        $xmlString .= '<xsd:amount>'.($importOrPushRemittance['amount'] ?? null).'</xsd:amount>';
-        $xmlString .= '<xsd:isoCode>'.($importOrPushRemittance['isoCode'] ?? null).'</xsd:isoCode>';
-        $xmlString .= '<xsd:beneficiaryAddress>'.($importOrPushRemittance['beneficiaryAddress'] ?? null).'</xsd:beneficiaryAddress>';
-        $xmlString .= '<xsd:beneficiaryBankCode>'.($importOrPushRemittance['beneficiaryBankCode'] ?? null).'</xsd:beneficiaryBankCode>';
-        $xmlString .= '<xsd:beneficiaryBankName>'.($importOrPushRemittance['beneficiaryBankName'] ?? null).'</xsd:beneficiaryBankName>';
-        $xmlString .= '<xsd:beneficiaryBranchCode>'.($importOrPushRemittance['beneficiaryBranchCode'] ?? null).'</xsd:beneficiaryBranchCode>';
-        $xmlString .= '<xsd:beneficiaryBranchName>'.($importOrPushRemittance['beneficiaryBranchName'] ?? null).'</xsd:beneficiaryBranchName>';
-        $xmlString .= '<xsd:beneficiaryName>'.($importOrPushRemittance['beneficiaryName'] ?? null).'</xsd:beneficiaryName>';
-        $xmlString .= '<xsd:beneficiaryPassportNo>'.($importOrPushRemittance['beneficiaryPassportNo'] ?? null).'</xsd:beneficiaryPassportNo>';
-        $xmlString .= '<xsd:beneficiaryPhoneNo>'.($importOrPushRemittance['beneficiaryPhoneNo'] ?? null).'</xsd:beneficiaryPhoneNo>';
-        $xmlString .= '<xsd:creatorID>'.($importOrPushRemittance['creatorID'] ?? null).'</xsd:creatorID>';
-        $xmlString .= '<xsd:exchHouseSwiftCode>'.($importOrPushRemittance['exchHouseSwiftCode'] ?? null).'</xsd:exchHouseSwiftCode>';
-        $xmlString .= '<xsd:identityDescription>'.($importOrPushRemittance['identityDescription'] ?? null).'</xsd:identityDescription>';
-        $xmlString .= '<xsd:identityType>'.($importOrPushRemittance['identityType'] ?? null).'</xsd:identityType>';
-        $xmlString .= '<xsd:issueDate>'.($importOrPushRemittance['issueDate'] ?? null).'</xsd:issueDate>';
-        $xmlString .= '<xsd:note>'.($importOrPushRemittance['note'] ?? null).'</xsd:note>';
-        $xmlString .= '<xsd:paymentType>'.($importOrPushRemittance['paymentType'] ?? null).'</xsd:paymentType>';
-        $xmlString .= '<xsd:remitterAddress>'.($importOrPushRemittance['remitterAddress'] ?? null).'</xsd:remitterAddress>';
-        $xmlString .= '<xsd:remitterIdentificationNo>'.($importOrPushRemittance['remitterIdentificationNo'] ?? null).'</xsd:remitterIdentificationNo>';
-        $xmlString .= '<xsd:remitterName'.($importOrPushRemittance['remitterName'] ?? null).'</xsd:remitterName>';
-        $xmlString .= '<xsd:remitterPhoneNo>'.($importOrPushRemittance['remitterPhoneNo'] ?? null).'</xsd:remitterPhoneNo>';
-        $xmlString .= '<xsd:secretKey>'.($importOrPushRemittance['secretKey'] ?? null).'</xsd:secretKey>';
-        $xmlString .= '<xsd:transReferenceNo>'.($importOrPushRemittance['transReferenceNo'] ?? null).'</xsd:transReferenceNo>';
-        $xmlString .= '<xsd:transferDate>'.($importOrPushRemittance['transferDate'] ?? null).'</xsd:transferDate>';
-        $xmlString .= '<xsd: remittancePurpose>'.($importOrPushRemittance['remittancePurpose'] ?? null).'</xsd: remittancePurpose >';
-        $xmlString .= '</ser:wsMessage>';
-        $soapMethod = 'directCreditWSMessage';
-        $response = $this->connectionCheck($xmlString, $soapMethod);
-
-        $explodeValue = explode('|', $response['Envelope']['Body']);
-        $explodeValueCount = count($explodeValue) - 1;
-        $return['origin_response'] = $response['Envelope']['Body'];
-        if ($explodeValueCount > 0) {
-            $return['status'] = $explodeValue[0];
-            $return['status_code'] = $explodeValue[$explodeValueCount];
-            $return['message'] = $this->__responseCodeList($explodeValue[$explodeValueCount]);
-        }
-
-        return $return;
-    }
-
-    /**
      * Verify remittance (importWSMessage)
      * Parameters: userID, password, accNo, wsMessage
      *
@@ -402,36 +349,36 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     {
         $verifyRemittance = $this->__transferData($data);
         $xmlString = '
-            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
-            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
+            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
+            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
         ';
         //$xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
         $xmlString .= '<ser:wsMessage>';
-        $xmlString .= '<xsd:amount>'.($verifyRemittance['amount'] ?? null).'</xsd:amount>';
-        $xmlString .= '<xsd:isoCode>'.($verifyRemittance['isoCode'] ?? null).'</xsd:isoCode>';
-        $xmlString .= '<xsd:beneficiaryAddress>'.($verifyRemittance['beneficiaryAddress'] ?? null).'</xsd:beneficiaryAddress>';
-        $xmlString .= '<xsd:beneficiaryBankCode>'.($verifyRemittance['beneficiaryBankCode'] ?? null).'</xsd:beneficiaryBankCode>';
-        $xmlString .= '<xsd:beneficiaryBankName>'.($verifyRemittance['beneficiaryBankName'] ?? null).'</xsd:beneficiaryBankName>';
-        $xmlString .= '<xsd:beneficiaryBranchCode>'.($verifyRemittance['beneficiaryBranchCode'] ?? null).'</xsd:beneficiaryBranchCode>';
-        $xmlString .= '<xsd:beneficiaryBranchName>'.($verifyRemittance['beneficiaryBranchName'] ?? null).'</xsd:beneficiaryBranchName>';
-        $xmlString .= '<xsd:beneficiaryName>'.($verifyRemittance['beneficiaryName'] ?? null).'</xsd:beneficiaryName>';
-        $xmlString .= '<xsd:beneficiaryPassportNo>'.($verifyRemittance['beneficiaryPassportNo'] ?? null).'</xsd:beneficiaryPassportNo>';
-        $xmlString .= '<xsd:beneficiaryPhoneNo>'.($verifyRemittance['beneficiaryPhoneNo'] ?? null).'</xsd:beneficiaryPhoneNo>';
-        $xmlString .= '<xsd:creatorID>'.($verifyRemittance['creatorID'] ?? null).'</xsd:creatorID>';
-        $xmlString .= '<xsd:exchHouseSwiftCode>'.($verifyRemittance['exchHouseSwiftCode'] ?? null).'</xsd:exchHouseSwiftCode>';
-        $xmlString .= '<xsd:identityDescription>'.($verifyRemittance['identityDescription'] ?? null).'</xsd:identityDescription>';
-        $xmlString .= '<xsd:identityType>'.($verifyRemittance['identityType'] ?? null).'</xsd:identityType>';
-        $xmlString .= '<xsd:issueDate>'.($verifyRemittance['issueDate'] ?? null).'</xsd:issueDate>';
-        $xmlString .= '<xsd:note>'.($verifyRemittance['note'] ?? null).'</xsd:note>';
-        $xmlString .= '<xsd:paymentType>'.($verifyRemittance['paymentType'] ?? null).'</xsd:paymentType>';
-        $xmlString .= '<xsd:remitterAddress>'.($verifyRemittance['remitterAddress'] ?? null).'</xsd:remitterAddress>';
-        $xmlString .= '<xsd:remitterIdentificationNo>'.($verifyRemittance['remitterIdentificationNo'] ?? null).'</xsd:remitterIdentificationNo>';
-        $xmlString .= '<xsd:remitterName'.($verifyRemittance['remitterName'] ?? null).'</xsd:remitterName>';
-        $xmlString .= '<xsd:remitterPhoneNo>'.($verifyRemittance['remitterPhoneNo'] ?? null).'</xsd:remitterPhoneNo>';
-        $xmlString .= '<xsd:secretKey>'.($verifyRemittance['secretKey'] ?? null).'</xsd:secretKey>';
-        $xmlString .= '<xsd:transReferenceNo>'.($verifyRemittance['transReferenceNo'] ?? null).'</xsd:transReferenceNo>';
-        $xmlString .= '<xsd:transferDate>'.($verifyRemittance['transferDate'] ?? null).'</xsd:transferDate>';
-        $xmlString .= '<xsd: remittancePurpose>'.($verifyRemittance['remittancePurpose'] ?? null).'</xsd: remittancePurpose >';
+        $xmlString .= '<xsd:amount>' . ($verifyRemittance['amount'] ?? null) . '</xsd:amount>';
+        $xmlString .= '<xsd:isoCode>' . ($verifyRemittance['isoCode'] ?? null) . '</xsd:isoCode>';
+        $xmlString .= '<xsd:beneficiaryAddress>' . ($verifyRemittance['beneficiaryAddress'] ?? null) . '</xsd:beneficiaryAddress>';
+        $xmlString .= '<xsd:beneficiaryBankCode>' . ($verifyRemittance['beneficiaryBankCode'] ?? null) . '</xsd:beneficiaryBankCode>';
+        $xmlString .= '<xsd:beneficiaryBankName>' . ($verifyRemittance['beneficiaryBankName'] ?? null) . '</xsd:beneficiaryBankName>';
+        $xmlString .= '<xsd:beneficiaryBranchCode>' . ($verifyRemittance['beneficiaryBranchCode'] ?? null) . '</xsd:beneficiaryBranchCode>';
+        $xmlString .= '<xsd:beneficiaryBranchName>' . ($verifyRemittance['beneficiaryBranchName'] ?? null) . '</xsd:beneficiaryBranchName>';
+        $xmlString .= '<xsd:beneficiaryName>' . ($verifyRemittance['beneficiaryName'] ?? null) . '</xsd:beneficiaryName>';
+        $xmlString .= '<xsd:beneficiaryPassportNo>' . ($verifyRemittance['beneficiaryPassportNo'] ?? null) . '</xsd:beneficiaryPassportNo>';
+        $xmlString .= '<xsd:beneficiaryPhoneNo>' . ($verifyRemittance['beneficiaryPhoneNo'] ?? null) . '</xsd:beneficiaryPhoneNo>';
+        $xmlString .= '<xsd:creatorID>' . ($verifyRemittance['creatorID'] ?? null) . '</xsd:creatorID>';
+        $xmlString .= '<xsd:exchHouseSwiftCode>' . ($verifyRemittance['exchHouseSwiftCode'] ?? null) . '</xsd:exchHouseSwiftCode>';
+        $xmlString .= '<xsd:identityDescription>' . ($verifyRemittance['identityDescription'] ?? null) . '</xsd:identityDescription>';
+        $xmlString .= '<xsd:identityType>' . ($verifyRemittance['identityType'] ?? null) . '</xsd:identityType>';
+        $xmlString .= '<xsd:issueDate>' . ($verifyRemittance['issueDate'] ?? null) . '</xsd:issueDate>';
+        $xmlString .= '<xsd:note>' . ($verifyRemittance['note'] ?? null) . '</xsd:note>';
+        $xmlString .= '<xsd:paymentType>' . ($verifyRemittance['paymentType'] ?? null) . '</xsd:paymentType>';
+        $xmlString .= '<xsd:remitterAddress>' . ($verifyRemittance['remitterAddress'] ?? null) . '</xsd:remitterAddress>';
+        $xmlString .= '<xsd:remitterIdentificationNo>' . ($verifyRemittance['remitterIdentificationNo'] ?? null) . '</xsd:remitterIdentificationNo>';
+        $xmlString .= '<xsd:remitterName' . ($verifyRemittance['remitterName'] ?? null) . '</xsd:remitterName>';
+        $xmlString .= '<xsd:remitterPhoneNo>' . ($verifyRemittance['remitterPhoneNo'] ?? null) . '</xsd:remitterPhoneNo>';
+        $xmlString .= '<xsd:secretKey>' . ($verifyRemittance['secretKey'] ?? null) . '</xsd:secretKey>';
+        $xmlString .= '<xsd:transReferenceNo>' . ($verifyRemittance['transReferenceNo'] ?? null) . '</xsd:transReferenceNo>';
+        $xmlString .= '<xsd:transferDate>' . ($verifyRemittance['transferDate'] ?? null) . '</xsd:transferDate>';
+        $xmlString .= '<xsd: remittancePurpose>' . ($verifyRemittance['remittancePurpose'] ?? null) . '</xsd: remittancePurpose >';
         $xmlString .= '</ser:wsMessage>';
         $soapMethod = 'directCreditWSMessage';
         $response = $this->connectionCheck($xmlString, $soapMethod);
@@ -461,11 +408,11 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     public function orderStatus(BaseModel $order): mixed
     {
         $xmlString = '
-            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
-            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
+            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
+            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
         ';
-        $xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
-        $xmlString .= '<ser:secretKey>'.($data['secret_key'] ?? null).'</ser:secretKey>';
+        $xmlString .= '<ser:transRefNo>' . ($data['transaction_reference_number'] ?? null) . '</ser:transRefNo>';
+        $xmlString .= '<ser:secretKey>' . ($data['secret_key'] ?? null) . '</ser:secretKey>';
         $soapMethod = 'fetchWSMessageStatusResponse';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
@@ -531,11 +478,11 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     {
         $validateBeneficiaryWallet = $this->__transferData($order);
         $xmlString = '
-            <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
-            <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
+            <ser:userID>' . $this->config[$this->status]['username'] . '</ser:userID>
+            <ser:password>' . $this->config[$this->status]['password'] . '</ser:password>
         ';
-        $xmlString .= '<ser:walletNo>'.($validateBeneficiaryWallet['beneficiaryAccNo']).'</ser:walletNo>';
-        $xmlString .= '<ser:paymentType>'.($validateBeneficiaryWallet['paymentType']).'</ser:paymentType>';
+        $xmlString .= '<ser:walletNo>' . ($validateBeneficiaryWallet['beneficiaryAccNo']) . '</ser:walletNo>';
+        $xmlString .= '<ser:paymentType>' . ($validateBeneficiaryWallet['paymentType']) . '</ser:paymentType>';
         $soapMethod = 'validateBeneficiaryWallet';
         $response = $this->connectionCheck($xmlString, $soapMethod);
 
@@ -549,6 +496,19 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         }
 
         return $return;
+    }
+
+    /**
+     * @param Model|BaseModel $order
+     *
+     * @throws Exception
+     */
+    public function requestQuote($order): mixed
+    {
+        return [
+            'balance' => $this->vendorBalance(($order->currency ?? 'BDT')),
+            'account' => $this->fetchAccountDetail($order),
+        ];
     }
 
     /**
@@ -584,7 +544,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
             $errorResponse = json_decode(
                 preg_replace(
                     '/(.+)\|([0-9]{4})/',
-                    '{"status":"$1", "balance":0, "currency":"'.$currency.'", "code":$2, "origin_message":"$0"}',
+                    '{"status":"$1", "balance":0, "currency":"' . $currency . '", "code":$2, "origin_message":"$0"}',
                     $balanceInfo),
                 true);
 
@@ -608,35 +568,56 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     }
 
     /**
-     * Instrument/Payment Type Code
+     * @throws DOMException
      */
-    private function __instrumentOrPaymentTypeCode(int $code): string
+    private function callApi($method, $payload)
     {
-        $return = [
-            1 => 'Instant Cash / Spot Cash/COC',
-            2 => 'IBBL Account Payee',
-            3 => 'Other Bank (BEFTN)',
-            4 => 'Remittance Card',
-            5 => 'Mobile Banking (mCash)',
-            6 => 'New IBBL Account Open',
-            7 => 'Mobile Banking(bKash)',
-            8 => 'Mobile Banking (Nagad)',
-        ];
+        $envelope = $this->xml->createElement('soapenv:Envelope');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope/');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:ser', 'http://service.ws.mt.ibbl');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xsd', 'http://bean.ws.mt.ibbl/xsd');
+        $envelope->appendChild($this->xml->createElement('soapenv:Header'));
 
-        return $return[$code];
+        $envelopeBody = $this->xml->createElement('soapenv:Body');
+        $envelopeBody->appendChild($payload);
+
+        $envelope->appendChild($envelopeBody);
+
+        $this->xml->appendChild($envelope);
+
+        $xmlResponse = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
+
+        $response = Utility::parseXml($xmlResponse);
+
+        return $response['Envelope']['Body'] ?? null;
     }
 
     /**
-     * @param  Model|BaseModel  $order
+     * Fetch Account Details (fetchAccountDetail)
+     *
+     * Fetching account details of beneficiary (receiver) by which you will get the
+     * full digit (17 digit) account no and account title (Beneficiary Name) which
+     * is required to send when you will execute directCreditWSMessage
+     * operation.
+     *
+     * Parameters: userID, password, account_number, account_type, branch_code
      *
      * @throws Exception
      */
-    public function requestQuote($order): mixed
+    private function fetchAccountDetail(BaseModel $order): mixed
     {
-        return [
-            'balance' => $this->vendorBalance(($order->currency ?? 'BDT')),
-            'account' => $this->fetchAccountDetail($order),
-        ];
+        $accountDetail = $this->__transferData($order);
+
+        $method = 'fetchAccountDetail';
+
+        $service = $this->xml->createElement("ser:{$method}");
+        $service->appendChild($this->xml->createElement('ser:userID', $this->config[$this->status]['username']));
+        $service->appendChild($this->xml->createElement('ser:password', $this->config[$this->status]['password']));
+        $service->appendChild($this->xml->createElement('ser:accNo', $accountDetail['beneficiaryAccNo'] ?? '?'));
+        $service->appendChild($this->xml->createElement('ser:accType', $accountDetail['beneficiaryAccType'] ?? '?'));
+        $service->appendChild($this->xml->createElement('ser:branchCode', $accountDetail['beneficiaryBankCode'] ?? '?'));
+
+        return $this->callApi($method, $service);
     }
 
     /**
@@ -767,5 +748,24 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     public function trackOrder(BaseModel $order): mixed
     {
         return [];
+    }
+
+    /**
+     * Instrument/Payment Type Code
+     */
+    private function __instrumentOrPaymentTypeCode(int $code): string
+    {
+        $return = [
+            1 => 'Instant Cash / Spot Cash/COC',
+            2 => 'IBBL Account Payee',
+            3 => 'Other Bank (BEFTN)',
+            4 => 'Remittance Card',
+            5 => 'Mobile Banking (mCash)',
+            6 => 'New IBBL Account Open',
+            7 => 'Mobile Banking(bKash)',
+            8 => 'Mobile Banking (Nagad)',
+        ];
+
+        return $return[$code];
     }
 }

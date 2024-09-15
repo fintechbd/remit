@@ -26,11 +26,6 @@ class AssignVendorQuotaResource extends JsonResource
         };
     }
 
-    private function formatAgrani(Request $request): array
-    {
-        return parent::toArray($request);
-    }
-
     private function formatEmqApi(Request $request): array
     {
         return parent::toArray($request);
@@ -42,6 +37,11 @@ class AssignVendorQuotaResource extends JsonResource
     }
 
     private function formatValyou(Request $request): array
+    {
+        return parent::toArray($request);
+    }
+
+    private function formatAgrani(Request $request): array
     {
         return parent::toArray($request);
     }

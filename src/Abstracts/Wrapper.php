@@ -110,15 +110,15 @@ abstract class Wrapper implements Arrayable, ArrayAccess, Jsonable
                     return $value == 'true';
                 }
 
-                return (bool) $value;
+                return (bool)$value;
 
             case 'float' :
             case 'double' :
             case 'decimal' :
-                return (float) $value;
+                return (float)$value;
 
             case 'integer' :
-                return (int) $value;
+                return (int)$value;
 
             case 'array' :
                 return Arr::wrap($value);
@@ -127,11 +127,11 @@ abstract class Wrapper implements Arrayable, ArrayAccess, Jsonable
             case 'date':
                 return Carbon::parse($value);
 
-                //            case 'money' :
-                //                return Money::parse($value);
+            //            case 'money' :
+            //                return Money::parse($value);
 
             case 'string' :
-                return (string) $value;
+                return (string)$value;
 
             default:
                 return $value;

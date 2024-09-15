@@ -538,7 +538,7 @@ class IslamiBankSetupCommand extends Command
 
             $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
 
-            if (! $idDocType) {
+            if (!$idDocType) {
                 continue;
             }
 
@@ -566,6 +566,27 @@ class IslamiBankSetupCommand extends Command
         $this->info('ID Doc Type metadata updated successfully.');
     }
 
+    private function addServiceVendor(): void
+    {
+        $dir = __DIR__ . '/../../resources/img/service_vendor/';
+
+        $vendor = [
+            'service_vendor_name' => 'Islami Bank',
+            'service_vendor_slug' => 'islamibank',
+            'service_vendor_data' => [],
+            'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents("{$dir}/logo_png/islamibank.png")),
+            'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents("{$dir}/logo_svg/islamibank.svg")),
+            'enabled' => false,
+        ];
+
+        if (Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
+            $this->info('Service vendor already exists. Skipping');
+        } else {
+            Business::serviceVendor()->create($vendor);
+            $this->info('Service vendor created successfully.');
+        }
+    }
+
     private function updateBank(): void
     {
 
@@ -577,7 +598,7 @@ class IslamiBankSetupCommand extends Command
 
             $bank = Banco::bank()->list(['slug' => $code])->first();
 
-            if (! $bank) {
+            if (!$bank) {
                 continue;
             }
 
@@ -616,7 +637,7 @@ class IslamiBankSetupCommand extends Command
 
             $branch = Banco::bankBranch()->list(['location_no' => $code])->first();
 
-            if (! $branch) {
+            if (!$branch) {
                 continue;
             }
 
@@ -644,34 +665,13 @@ class IslamiBankSetupCommand extends Command
         $this->info('Bank Branch updated successfully.');
     }
 
-    private function addServiceVendor(): void
-    {
-        $dir = __DIR__.'/../../resources/img/service_vendor/';
-
-        $vendor = [
-            'service_vendor_name' => 'Islami Bank',
-            'service_vendor_slug' => 'islamibank',
-            'service_vendor_data' => [],
-            'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents("{$dir}/logo_png/islamibank.png")),
-            'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents("{$dir}/logo_svg/islamibank.svg")),
-            'enabled' => false,
-        ];
-
-        if (Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
-            $this->info('Service vendor already exists. Skipping');
-        } else {
-            Business::serviceVendor()->create($vendor);
-            $this->info('Service vendor created successfully.');
-        }
-    }
-
     private function addBeneficiaryAccountTypeCodes(): void
     {
         $bank = Banco::bank()
             ->list(['country_id' => 19, 'slug' => 'islami-bank-bangladesh-limited'])
             ->first();
 
-        if (! $bank) {
+        if (!$bank) {
             return;
         }
 

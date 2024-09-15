@@ -18,17 +18,6 @@ use Illuminate\Http\JsonResponse;
 
 class AssignVendorController extends Controller
 {
-    private function getOrder($id)
-    {
-        $order = Transaction::order()->find($id);
-
-        if (! $order) {
-            throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
-        }
-
-        return $order;
-    }
-
     public function available(string $order_Id): JsonResponse|AssignableVendorCollection
     {
         try {
@@ -51,6 +40,17 @@ class AssignVendorController extends Controller
 
             return response()->failed($exception);
         }
+    }
+
+    private function getOrder($id)
+    {
+        $order = Transaction::order()->find($id);
+
+        if (!$order) {
+            throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
+        }
+
+        return $order;
     }
 
     public function quotation(AssignableVendorInfoRequest $request): JsonResponse|AssignVendorQuotaResource
@@ -86,7 +86,7 @@ class AssignVendorController extends Controller
         try {
             $order = $this->getOrder($order_id);
 
-            if (! Remit::assignVendor()->processOrder($order, $service_vendor_slug)) {
+            if (!Remit::assignVendor()->processOrder($order, $service_vendor_slug)) {
                 throw new UpdateOperationException(__('remit::messages.assign_vendor.failed', ['slug' => $service_vendor_slug]));
             }
 
@@ -197,7 +197,7 @@ class AssignVendorController extends Controller
         try {
             $order = $this->getOrder($order_id);
 
-            if (! Transaction::order()->update($order->getKey(), ['assigned_user_id' => null, 'service_vendor_id' => null, 'vendor' => null])) {
+            if (!Transaction::order()->update($order->getKey(), ['assigned_user_id' => null, 'service_vendor_id' => null, 'vendor' => null])) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $order_id);
             }

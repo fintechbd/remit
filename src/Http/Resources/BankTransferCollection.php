@@ -7,7 +7,6 @@ use Fintech\Core\Supports\Constant;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use stdClass;
-
 use function currency;
 
 class BankTransferCollection extends ResourceCollection
@@ -15,7 +14,7 @@ class BankTransferCollection extends ResourceCollection
     /**
      * Transform the resource collection into an array.
      *
-     * @param  Request  $request
+     * @param Request $request
      * @return array
      */
     public function toArray($request)

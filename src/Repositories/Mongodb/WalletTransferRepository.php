@@ -19,7 +19,7 @@ class WalletTransferRepository extends MongodbRepository implements InterfacesWa
     {
         $model = app(config('fintech.remit.wallet_transfer_model', WalletTransfer::class));
 
-        if (! $model instanceof Model) {
+        if (!$model instanceof Model) {
             throw new InvalidArgumentException("Mongodb repository require model class to be `MongoDB\Laravel\Eloquent\Model` instance.");
         }
 
@@ -37,7 +37,7 @@ class WalletTransferRepository extends MongodbRepository implements InterfacesWa
         $query = $this->model->newQuery();
 
         //Searching
-        if (! empty($filters['search'])) {
+        if (!empty($filters['search'])) {
             if (is_numeric($filters['search'])) {
                 $query->where($this->model->getKeyName(), 'like', "%{$filters['search']}%");
             } else {

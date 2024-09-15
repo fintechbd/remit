@@ -16,22 +16,23 @@ class InstallCommand extends Command
 
     private string $module = 'Remit';
 
-    private string $image_svg = __DIR__.'/../../resources/img/service_type/logo_svg/';
+    private string $image_svg = __DIR__ . '/../../resources/img/service_type/logo_svg/';
 
-    private string $image_png = __DIR__.'/../../resources/img/service_type/logo_png/';
+    private string $image_png = __DIR__ . '/../../resources/img/service_type/logo_png/';
 
     public function handle(): int
     {
-        $this->addDefaultServiceTypes();
+        $this->task("Module Installation", function () {
+            $this->addDefaultServiceTypes();
 
-        $this->components->twoColumnDetail("<fg=black;bg=bright-yellow;options=bold> {$this->module} </> Installation", '<fg=green;options=bold>COMPLETED</>');
+        }, "COMPETED");
 
         return self::SUCCESS;
     }
 
     private function addDefaultServiceTypes(): void
     {
-        $this->components->task("<fg=black;bg=bright-yellow;options=bold> {$this->module} </> Creating system default service types", function () {
+        $this->task("Creating system default service types", function () {
 
             $entry = [
                 'service_type_name' => 'Money Transfer',

@@ -22,26 +22,6 @@ class AssignVendorService
     private MoneyTransfer $serviceVendorDriver;
 
     /**
-     * @throws RemitException
-     */
-    private function initiateVendor(string $slug): void
-    {
-        $availableVendors = config('fintech.remit.providers', []);
-
-        if (! isset($availableVendors[$slug])) {
-            throw new RemitException(__('remit::messages.assign_vendor.not_found', ['slug' => ucfirst($slug)]));
-        }
-
-        $this->serviceVendorModel = Business::serviceVendor()->list(['service_vendor_slug' => $slug, 'enabled'])->first();
-
-        if (! $this->serviceVendorModel) {
-            throw (new ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $slug);
-        }
-
-        $this->serviceVendorDriver = App::make($availableVendors[$slug]['driver']);
-    }
-
-    /**
      * @throws AlreadyAssignedException
      * @throws UpdateOperationException
      */
@@ -53,7 +33,7 @@ class AssignVendorService
         }
 
         if ($order->assigned_user_id == null
-            && ! Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId])) {
+            && !Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId])) {
             throw new UpdateOperationException(__('remit::messages.assign_vendor.assigned_user_failed'));
         }
 
@@ -75,6 +55,26 @@ class AssignVendorService
     }
 
     /**
+     * @throws RemitException
+     */
+    private function initiateVendor(string $slug): void
+    {
+        $availableVendors = config('fintech.remit.providers', []);
+
+        if (!isset($availableVendors[$slug])) {
+            throw new RemitException(__('remit::messages.assign_vendor.not_found', ['slug' => ucfirst($slug)]));
+        }
+
+        $this->serviceVendorModel = Business::serviceVendor()->list(['service_vendor_slug' => $slug, 'enabled'])->first();
+
+        if (!$this->serviceVendorModel) {
+            throw (new ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $slug);
+        }
+
+        $this->serviceVendorDriver = App::make($availableVendors[$slug]['driver']);
+    }
+
+    /**
      * @throws ErrorException
      * @throws UpdateOperationException|RemitException
      */
@@ -82,7 +82,7 @@ class AssignVendorService
     {
         $this->initiateVendor($vendor_slug);
 
-        if (! Transaction::order()->update($order->getKey(), [
+        if (!Transaction::order()->update($order->getKey(), [
             'vendor' => $vendor_slug,
             'service_vendor_id' => $this->serviceVendorModel->getKey(),
             'status' => OrderStatus::Processing->value])) {
@@ -92,21 +92,6 @@ class AssignVendorService
         $order->fresh();
 
         return $this->serviceVendorDriver->executeOrder($order);
-    }
-
-    /**
-     * @throws RemitException
-     */
-    public function orderStatus(BaseModel $order): mixed
-    {
-
-        if ($order->service_vendor_id == config('fintech.business.default_vendor')) {
-            throw new RemitException(__('remit::messages.assign_vendor.not_assigned'));
-        }
-
-        $this->initiateVendor($order->vendor);
-
-        return $this->serviceVendorDriver->orderStatus($order);
     }
 
     /**
@@ -130,6 +115,21 @@ class AssignVendorService
      */
     public function cancelOrder(BaseModel $order): mixed
     {
+        $this->initiateVendor($order->vendor);
+
+        return $this->serviceVendorDriver->orderStatus($order);
+    }
+
+    /**
+     * @throws RemitException
+     */
+    public function orderStatus(BaseModel $order): mixed
+    {
+
+        if ($order->service_vendor_id == config('fintech.business.default_vendor')) {
+            throw new RemitException(__('remit::messages.assign_vendor.not_assigned'));
+        }
+
         $this->initiateVendor($order->vendor);
 
         return $this->serviceVendorDriver->orderStatus($order);

@@ -137,7 +137,7 @@ class MeghnaBankSetupCommand extends Command
 
             $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
 
-            if (! $idDocType) {
+            if (!$idDocType) {
                 continue;
             }
 
@@ -167,14 +167,14 @@ class MeghnaBankSetupCommand extends Command
 
     private function addServiceVendor(): void
     {
-        $dir = __DIR__.'/../../resources/img/service_vendor';
+        $dir = __DIR__ . '/../../resources/img/service_vendor';
 
         $vendor = [
             'service_vendor_name' => 'Meghna Bank',
             'service_vendor_slug' => 'meghnabank',
             'service_vendor_data' => [],
-            'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents("{$dir}/logo_png/meghnabank.png")),
-            'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents("{$dir}/logo_svg/meghnabank.svg")),
+            'logo_png' => 'data:image/png;base64,' . base64_encode(file_get_contents("{$dir}/logo_png/meghnabank.png")),
+            'logo_svg' => 'data:image/svg+xml;base64,' . base64_encode(file_get_contents("{$dir}/logo_svg/meghnabank.svg")),
             'enabled' => false,
         ];
 
@@ -197,7 +197,7 @@ class MeghnaBankSetupCommand extends Command
 
             $bank = Banco::bank()->list(['slug' => $code])->first();
 
-            if (! $bank) {
+            if (!$bank) {
                 continue;
             }
 
