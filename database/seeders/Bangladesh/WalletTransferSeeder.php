@@ -21,10 +21,16 @@ class WalletTransferSeeder extends Seeder
 
             $country = MetaData::country()->list(['iso2' => 'BD'])->first()->id;
 
+            $walletTransferId = (int)(Banco::beneficiaryType()->list(['slug' => 'wallet-transfer'])->first()?->id ?? 1);
+
             foreach ($this->data() as $entry) {
                 Business::serviceTypeManager($entry, $parent)
                     ->hasService()
                     ->distCountries([$country])
+                    ->serviceSettings([
+                        'transactional_currency' => 'BDT',
+                        'beneficiary_type_id' => $walletTransferId,
+                    ])
                     ->enabled()
                     ->execute();
             }
@@ -36,8 +42,6 @@ class WalletTransferSeeder extends Seeder
         $image_svg = base_path('vendor/fintech/remit/resources/img/service_type/logo_svg/');
         $image_png = base_path('vendor/fintech/remit/resources/img/service_type/logo_png/');
 
-        $walletTransferId = Banco::beneficiaryType()->list(['slug' => 'wallet-transfer'])->first()?->id ?? 1;
-
         return [
             [
                 'service_type_name' => 'bKash',
@@ -46,9 +50,6 @@ class WalletTransferSeeder extends Seeder
                 'logo_png' => $image_png.'mfs_bkash.png',
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
-                'service_settings' => [
-                    'beneficiary_type_id' => $walletTransferId,
-                ],
             ],
             [
                 'service_type_name' => 'Nagad',
@@ -57,9 +58,6 @@ class WalletTransferSeeder extends Seeder
                 'logo_png' => $image_png.'mfs_nagad.png',
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
-                'service_settings' => [
-                    'beneficiary_type_id' => $walletTransferId,
-                ],
             ],
             [
                 'service_type_name' => 'Rocket',
@@ -68,9 +66,6 @@ class WalletTransferSeeder extends Seeder
                 'logo_png' => $image_png.'mbs_rocket.png',
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
-                'service_settings' => [
-                    'beneficiary_type_id' => $walletTransferId,
-                ],
             ],
             [
                 'service_type_name' => 'MCash',
@@ -79,9 +74,6 @@ class WalletTransferSeeder extends Seeder
                 'logo_png' => $image_png.'mbs_m_cash.png',
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
-                'service_settings' => [
-                    'beneficiary_type_id' => $walletTransferId,
-                ],
             ],
             [
                 'service_type_name' => 'SureCash',
@@ -90,9 +82,6 @@ class WalletTransferSeeder extends Seeder
                 'logo_png' => $image_png.'mbs_sure_cash.png',
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
-                'service_settings' => [
-                    'beneficiary_type_id' => $walletTransferId,
-                ],
             ],
             [
                 'service_type_name' => 'Upay',
@@ -100,9 +89,6 @@ class WalletTransferSeeder extends Seeder
                 'logo_svg' => $image_svg.'mbs_u_pay.svg',
                 'logo_png' => $image_png.'mbs_u_pay.png', 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
-                'service_settings' => [
-                    'beneficiary_type_id' => $walletTransferId,
-                ],
             ],
             [
                 'service_type_name' => 'Ipay',
@@ -110,9 +96,6 @@ class WalletTransferSeeder extends Seeder
                 'logo_svg' => $image_svg.'mbs_i_pay.svg',
                 'logo_png' => $image_png.'mbs_i_pay.png', 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
-                'service_settings' => [
-                    'beneficiary_type_id' => $walletTransferId,
-                ],
             ],
             [
                 'service_type_name' => 'Trust Axiata Pay (Tap)',
@@ -120,9 +103,6 @@ class WalletTransferSeeder extends Seeder
                 'logo_svg' => $image_svg.'mbs_trust_axiata_pay_tap.svg',
                 'logo_png' => $image_png.'mbs_trust_axiata_pay_tap.png', 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
-                'service_settings' => [
-                    'beneficiary_type_id' => $walletTransferId,
-                ],
             ],
             [
                 'service_type_name' => 'OK Wallet',
@@ -130,9 +110,6 @@ class WalletTransferSeeder extends Seeder
                 'logo_svg' => $image_svg.'mbs_ok_wallet.svg',
                 'logo_png' => $image_png.'mbs_ok_wallet.png', 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
-                'service_settings' => [
-                    'beneficiary_type_id' => $walletTransferId,
-                ],
             ],
         ];
     }
