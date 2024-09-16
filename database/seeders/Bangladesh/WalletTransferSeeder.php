@@ -21,7 +21,7 @@ class WalletTransferSeeder extends Seeder
 
             $country = MetaData::country()->list(['iso2' => 'BD'])->first()->id;
 
-            $walletTransferId = (int)(Banco::beneficiaryType()->list(['slug' => 'wallet-transfer'])->first()?->id ?? 1);
+            $walletTransferId = (int) (Banco::beneficiaryType()->list(['slug' => 'wallet-transfer'])->first()?->id ?? 1);
 
             foreach ($this->data() as $entry) {
                 Business::serviceTypeManager($entry, $parent)
