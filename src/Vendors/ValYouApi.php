@@ -686,7 +686,7 @@ class ValYouApi implements MoneyTransfer
      */
     public function executeOrder(BaseModel $order): mixed
     {
-        // TODO: Implement executeOrder() method.
+        return [];
     }
 
     /**
@@ -697,7 +697,7 @@ class ValYouApi implements MoneyTransfer
      */
     public function orderStatus(BaseModel $order): mixed
     {
-        // TODO: Implement orderStatus() method.
+        return [];
     }
 
     /**
@@ -708,7 +708,7 @@ class ValYouApi implements MoneyTransfer
      */
     public function cancelOrder(BaseModel $order): mixed
     {
-        // TODO: Implement cancelOrder() method.
+        return [];
     }
 
     /**
@@ -719,7 +719,7 @@ class ValYouApi implements MoneyTransfer
      */
     public function amendmentOrder(BaseModel $order): mixed
     {
-        // TODO: Implement amendmentOrder() method.
+        return [];
     }
 
     /**
@@ -730,6 +730,6 @@ class ValYouApi implements MoneyTransfer
      */
     public function trackOrder(BaseModel $order): mixed
     {
-        // TODO: Implement trackOrder() method.
+        return [];
     }
 }
