@@ -98,7 +98,7 @@ return [
             'mode' => 'sandbox',
             'driver' => Fintech\Remit\Vendors\ValYouApi::class,
             'live' => [
-                'endpoint' => 'http://www.prabhucashsystem.com/SendAPI/webService.asmx',
+                'endpoint' => 'https://www.prabhucashsystem.com/SendAPI/webService.asmx',
                 'username' => env('PACKAGE_REMIT_VALYOU_USERNAME'),
                 'password' => env('PACKAGE_REMIT_VALYOU_PASSWORD'),
                 'agent_code' => env('PACKAGE_REMIT_VALYOU_AGENT_CODE'),

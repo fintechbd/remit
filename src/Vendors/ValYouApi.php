@@ -69,7 +69,7 @@ class ValYouApi implements MoneyTransfer
             $this->status = 'sandbox';
 
         } else {
-            $this->apiUrl = 'http://'.$this->config[$this->status]['app_host'].'/SendAPI/webService.asmx';
+            $this->apiUrl = 'https://'.$this->config[$this->status]['app_host'].'/SendAPI/webService.asmx';
             $this->status = 'live';
         }
         $this->ClientId = $this->config[$this->status]['username'];
