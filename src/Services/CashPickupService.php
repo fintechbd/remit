@@ -13,7 +13,7 @@ use Illuminate\Support\Collection;
  *
  * @property CashPickupRepository $cashPickupRepository
  */
-class CashPickupService
+class CashPickupService extends \Fintech\Core\Abstracts\Service
 {
     /**
      * CashPickupService constructor.

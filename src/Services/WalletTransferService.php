@@ -13,7 +13,7 @@ use Illuminate\Support\Collection;
  *
  * @property WalletTransferRepository $walletTransferRepository
  */
-class WalletTransferService
+class WalletTransferService extends \Fintech\Core\Abstracts\Service
 {
     /**
      * WalletTransferService constructor.
