@@ -13,8 +13,10 @@ use Illuminate\Support\Collection;
  *
  * @property WalletTransferRepository $walletTransferRepository
  */
-class WalletTransferService extends \Fintech\Core\Abstracts\Service
+class WalletTransferService
 {
+    use \Fintech\Core\Traits\HasFindWhereSearch;
+
     /**
      * WalletTransferService constructor.
      */

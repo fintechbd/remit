@@ -13,8 +13,10 @@ use Illuminate\Support\Collection;
  *
  * @property BankTransferRepository $bankTransferRepository
  */
-class BankTransferService extends \Fintech\Core\Abstracts\Service
+class BankTransferService
 {
+    use \Fintech\Core\Traits\HasFindWhereSearch;
+
     /**
      * BankTransferService constructor.
      */

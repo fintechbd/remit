@@ -13,8 +13,10 @@ use Illuminate\Support\Collection;
  *
  * @property CashPickupRepository $cashPickupRepository
  */
-class CashPickupService extends \Fintech\Core\Abstracts\Service
+class CashPickupService
 {
+    use \Fintech\Core\Traits\HasFindWhereSearch;
+
     /**
      * CashPickupService constructor.
      */
