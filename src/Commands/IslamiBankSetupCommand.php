@@ -536,7 +536,7 @@ class IslamiBankSetupCommand extends Command
 
         foreach (self::ID_DOC_TYPES as $code => $name) {
 
-            $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
+            $idDocType = MetaData::idDocType()->findWhere(['code' => $code]);
 
             if (! $idDocType) {
                 continue;
@@ -579,7 +579,7 @@ class IslamiBankSetupCommand extends Command
             'enabled' => false,
         ];
 
-        if (Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
+        if (Business::serviceVendor()->findWhere(['service_vendor_slug' => $vendor['service_vendor_slug']])) {
             $this->info('Service vendor already exists. Skipping');
         } else {
             Business::serviceVendor()->create($vendor);
@@ -596,7 +596,7 @@ class IslamiBankSetupCommand extends Command
 
         foreach (self::BD_BANKS as $code => $name) {
 
-            $bank = Banco::bank()->list(['slug' => $code])->first();
+            $bank = Banco::bank()->findWhere(['slug' => $code]);
 
             if (! $bank) {
                 continue;
@@ -635,7 +635,7 @@ class IslamiBankSetupCommand extends Command
 
         foreach (self::ISLAMI_BRANCHES as $code => $name) {
 
-            $branch = Banco::bankBranch()->list(['location_no' => $code])->first();
+            $branch = Banco::bankBranch()->findWhere(['location_no' => $code]);
 
             if (! $branch) {
                 continue;

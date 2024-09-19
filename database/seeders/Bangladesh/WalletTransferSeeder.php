@@ -17,11 +17,11 @@ class WalletTransferSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $parent = Business::serviceType()->list(['service_type_slug' => 'wallet_transfer'])->first();
+            $parent = Business::serviceType()->findWhere(['service_type_slug' => 'wallet_transfer']);
 
-            $country = MetaData::country()->list(['iso2' => 'BD'])->first()->id;
+            $country = MetaData::country()->findWhere(['iso2' => 'BD'])->id;
 
-            $walletTransferId = (int) (Banco::beneficiaryType()->list(['slug' => 'wallet-transfer'])->first()?->id ?? 1);
+            $walletTransferId = (int) (Banco::beneficiaryType()->findWhere(['slug' => 'wallet-transfer'])?->id ?? 1);
 
             foreach ($this->data() as $entry) {
                 Business::serviceTypeManager($entry, $parent)

@@ -55,7 +55,7 @@ class CashPickupController extends Controller
         try {
             $inputs = $request->validated();
 
-            $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'money_transfer'])->first()->getKey();
+            $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'money_transfer'])->getKey();
             $cashPickupPaginate = Remit::cashPickup()->list($inputs);
 
             return new CashPickupCollection($cashPickupPaginate);
@@ -104,7 +104,7 @@ class CashPickupController extends Controller
                 }
 
                 //set pre defined conditions of deposit
-                $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'money_transfer'])->first()->getKey();
+                $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'money_transfer'])->getKey();
                 $inputs['user_id'] = $user_id ?? $depositor->getKey();
                 $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
                 if ($delayCheck['countValue'] > 0) {
@@ -411,7 +411,7 @@ class CashPickupController extends Controller
                 }
 
                 //set pre defined conditions of deposit
-                $inputs['transaction_form_id'] = Transaction::transactionForm()->list(['code' => 'money_transfer'])->first()->getKey();
+                $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'money_transfer'])->getKey();
                 $inputs['user_id'] = $user_id ?? $depositor->getKey();
                 $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
                 if ($delayCheck['countValue'] > 0) {

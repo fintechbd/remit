@@ -64,7 +64,7 @@ class CityBankSetupCommand extends Command
 
         foreach (self::ID_DOC_TYPES as $code => $name) {
 
-            $idDocType = MetaData::idDocType()->list(['code' => $code])->first();
+            $idDocType = MetaData::idDocType()->findWhere(['code' => $code]);
 
             if (! $idDocType) {
                 continue;
@@ -107,7 +107,7 @@ class CityBankSetupCommand extends Command
             'enabled' => false,
         ];
 
-        if (Business::serviceVendor()->list(['service_vendor_slug' => $vendor['service_vendor_slug']])->first()) {
+        if (Business::serviceVendor()->findWhere(['service_vendor_slug' => $vendor['service_vendor_slug']])) {
             $this->info('Service vendor already exists. Skipping');
         } else {
             Business::serviceVendor()->create($vendor);

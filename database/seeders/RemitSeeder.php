@@ -16,7 +16,7 @@ class RemitSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $parent = Business::serviceType()->list(['service_type_slug' => 'money_transfer'])->first();
+            $parent = Business::serviceType()->findWhere(['service_type_slug' => 'money_transfer']);
 
             foreach ($this->data() as $entry) {
                 Business::serviceTypeManager($entry, $parent)
@@ -42,7 +42,7 @@ class RemitSeeder extends Seeder
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'service_settings' => [
-                    'beneficiary_type_id' => intval(Banco::beneficiaryType()->list(['slug' => 'bank-transfer'])->first()?->id ?? 1),
+                    'beneficiary_type_id' => intval(Banco::beneficiaryType()->findWhere(['slug' => 'bank-transfer'])?->id ?? 1),
                 ],
             ],
             [
@@ -53,7 +53,7 @@ class RemitSeeder extends Seeder
                 'service_type_is_parent' => 'no',
                 'service_type_is_description' => 'no',
                 'service_settings' => [
-                    'beneficiary_type_id' => intval(Banco::beneficiaryType()->list(['slug' => 'cash-pickup'])->first()?->id ?? 1),
+                    'beneficiary_type_id' => intval(Banco::beneficiaryType()->findWhere(['slug' => 'cash-pickup'])?->id ?? 1),
                 ],
             ],
             [
