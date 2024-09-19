@@ -9,10 +9,10 @@ use Fintech\Remit\Services\WalletTransferService;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static BankTransferService bankTransfer()
- * @method static CashPickupService cashPickup()
- * @method static WalletTransferService walletTransfer()
- * @method static AssignVendorService assignVendor()
+ * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|BankTransferService bankTransfer(array $filters = null)
+ * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|CashPickupService cashPickup(array $filters = null)
+ * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|WalletTransferService walletTransfer(array $filters = null)
+ * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|AssignVendorService assignVendor(array $filters = null)
  *
  * // Crud Service Method Point Do not Remove //
  *
