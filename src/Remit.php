@@ -9,25 +9,16 @@ use Fintech\Remit\Services\WalletTransferService;
 
 class Remit
 {
-    /**
-     * @return BankTransferService
-     */
     public function bankTransfer($filters = null)
     {
         return \singleton(BankTransferService::class, $filters);
     }
 
-    /**
-     * @return CashPickupService
-     */
     public function cashPickup($filters = null)
     {
         return \singleton(CashPickupService::class, $filters);
     }
 
-    /**
-     * @return WalletTransferService
-     */
     public function walletTransfer($filters = null)
     {
         return \singleton(WalletTransferService::class, $filters);
