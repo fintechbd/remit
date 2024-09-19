@@ -7,6 +7,7 @@ use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
+use Fintech\Core\Exceptions\VendorNotFoundException;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Exceptions\AlreadyAssignedException;
 use Fintech\Remit\Exceptions\RemitException;
@@ -57,14 +58,14 @@ class AssignVendorService
     }
 
     /**
-     * @throws RemitException
+     * @throws VendorNotFoundException
      */
     private function initiateVendor(string $slug): void
     {
         $availableVendors = config('fintech.remit.providers', []);
 
         if (! isset($availableVendors[$slug])) {
-            throw new RemitException(__('remit::messages.assign_vendor.not_found', ['slug' => ucfirst($slug)]));
+            throw new VendorNotFoundException(ucfirst($slug));
         }
 
         $this->serviceVendorModel = Business::serviceVendor()->findWhere(['service_vendor_slug' => $slug, 'enabled']);
