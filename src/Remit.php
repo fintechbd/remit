@@ -12,33 +12,33 @@ class Remit
     /**
      * @return BankTransferService
      */
-    public function bankTransfer()
-    {
-        return app(BankTransferService::class);
+    public function bankTransfer($filters = null)
+{
+	return \singleton(BankTransferService::class, $filters);
     }
 
     /**
      * @return CashPickupService
      */
-    public function cashPickup()
-    {
-        return app(CashPickupService::class);
+    public function cashPickup($filters = null)
+{
+	return \singleton(CashPickupService::class, $filters);
     }
 
     /**
      * @return WalletTransferService
      */
-    public function walletTransfer()
-    {
-        return app(WalletTransferService::class);
+    public function walletTransfer($filters = null)
+{
+	return \singleton(WalletTransferService::class, $filters);
     }
 
     /**
      * @return AssignVendorService
      */
-    public function assignVendor()
-    {
-        return app(AssignVendorService::class);
+    public function assignVendor($filters = null)
+{
+	return \singleton(AssignVendorService::class, $filters);
     }
 
     //** Crud Service Method Point Do not Remove **//
