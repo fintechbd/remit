@@ -29,7 +29,7 @@ class WalletTransferSeeder extends Seeder
                     ->distCountries([$country])
                     ->serviceSettings([
                         'transactional_currency' => 'BDT',
-                        'beneficiary_type_id' => $walletTransferId,
+                        'beneficiary_type_id' => (int)$walletTransferId,
                     ])
                     ->enabled()
                     ->execute();
