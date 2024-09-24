@@ -2,9 +2,7 @@
 
 namespace Fintech\Remit\Events;
 
-use Fintech\Remit\Models\BankTransfer;
-use Fintech\Remit\Models\CashPickup;
-use Fintech\Remit\Models\WalletTransfer;
+use Fintech\Core\Abstracts\BaseModel;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -15,27 +13,14 @@ class RemitTransferRequested
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $transfer;
-
     /**
      * Create a new event instance.
      *
-     * @param BankTransfer|CashPickup|WalletTransfer
+     * @param string $transferType
+     * @param BaseModel $transfer
      */
-    public function __construct($transfer)
+    public function __construct(public string $transferType, public BaseModel $transfer)
     {
-        $this->transfer = $transfer;
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, Channel>
-     */
-    public function broadcastOn(): array
-    {
-        return [
-            new PrivateChannel('channel-name'),
-        ];
-    }
 }
