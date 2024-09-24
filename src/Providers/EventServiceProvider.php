@@ -20,7 +20,7 @@ class EventServiceProvider extends ServiceProvider
 
         ],
         RemitTransferRequested::class => [
-            \Fintech\Remit\Jobs\RemitTransferComplianceBatchJob::class
+            \Fintech\Remit\Jobs\RemitOrderComplianceBatchJob::class
         ],
         RemitTransferVendorAssigned::class => [
 
