@@ -3,7 +3,6 @@
 namespace Fintech\Remit\Jobs;
 
 use Fintech\Core\Enums\Transaction\OrderStatus;
-use Fintech\Reload\Events\InteracTransferReceived;
 use Fintech\Reload\Facades\Reload;
 use Fintech\Remit\Events\RemitTransferRequested;
 use Fintech\Remit\Jobs\CompliancePolicies\AccountVelocityJob;
@@ -39,20 +38,20 @@ class RemitOrderComplianceBatchJob implements ShouldQueue
     public function handle(RemitTransferRequested $event): void
     {
         $batch = Bus::batch([
-            new LargeCashTransferJob(),
-            new LargeVirtualCashTransferJob(),
-            new ElectronicFundTransferJob(),
-            new SuspiciousTransactionJob(),
-            new ClientDueDiligenceJob(),
-            new StructuringDetectionJob(),
-            new HighRiskCountryTransferJob(),
-            new PepDetectionJob(),
-            new HIODetectionJob(),
-            new AccountVelocityJob(),
-            new NewProductUsageJob(),
-            new DormantAccountActivityJob(),
-            new ThirdPartyTransferJob(),
-            new VirtualCurrencyTravelJob(),
+            new LargeCashTransferJob,
+            new LargeVirtualCashTransferJob,
+            new ElectronicFundTransferJob,
+            new SuspiciousTransactionJob,
+            new ClientDueDiligenceJob,
+            new StructuringDetectionJob,
+            new HighRiskCountryTransferJob,
+            new PepDetectionJob,
+            new HIODetectionJob,
+            new AccountVelocityJob,
+            new NewProductUsageJob,
+            new DormantAccountActivityJob,
+            new ThirdPartyTransferJob,
+            new VirtualCurrencyTravelJob,
         ])->before(function (Batch $batch) {
             // The batch has been created but no jobs have been added...
         })->progress(function (Batch $batch) {
