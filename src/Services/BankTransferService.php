@@ -158,18 +158,30 @@ class BankTransferService
         ];
         $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData($inputs['order_data']);
 
-        return DB::transaction(function () use ($inputs, $sender, $senderAccount) {
-            $deposit = $this->bankTransferRepository->create($inputs);
-            if ($inputs['order_data']['deposit_type'] == 'interac_e_transfer') {
-                InteracTransferReceived::dispatch($deposit);
-            } elseif ($inputs['order_data']['deposit_type'] == 'card_deposit') {
-                CardDepositReceived::dispatch($deposit);
-            } else {
-                BankDepositReceived::dispatch($deposit);
-            }
+        DB::beginTransaction();
 
-            return $deposit;
-        });
+        if ($bankTransfer = $this->bankTransferRepository->create($inputs)) {
+            DB::commit();
+            $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
+
+            $userUpdatedBalance = $this->debitTransaction($bankTransfer);
+            $senderUpdatedAccount = $senderAccount->toArray();
+            $senderUpdatedAccount['user_account_data']['spent_amount'] = (float) $senderUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
+            $senderUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
+
+            $inputs['order_data']['previous_amount'] = (float) $senderAccount->user_account_data['available_amount'];
+            $inputs['order_data']['current_amount'] = ((float) $inputs['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
+
+            if (! Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount) ||
+                !$this->bankTransferRepository->update($bankTransfer->getKey(), ['order_data' => $inputs['order_data']])) {
+                throw new \Exception(__('User Account Balance does not update', [
+                    'current_status' => $bankTransfer->currentStatus(),
+                    'target_status' => OrderStatus::Success->value,
+                ]));
+            }
+        }
+
+        DB::rollBack();
 
         return null;
     }
@@ -184,26 +196,7 @@ class BankTransferService
                 if (! $bankTransfer) {
                     throw (new StoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'));
                 }
-                $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
-                $userUpdatedBalance = Remit::bankTransfer()->debitTransaction($bankTransfer);
-                $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $depositor->getKey(), 'country_id' => $bankTransfer->source_country_id]);
-                //update User Account
-                $depositedUpdatedAccount = $depositedAccount->toArray();
-                $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
-                $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
 
-                $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
-                $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
-
-                if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
-                    throw new Exception(__('User Account Balance does not update', [
-                        'current_status' => $bankTransfer->currentStatus(),
-                        'target_status' => OrderStatus::Success->value,
-                    ]));
-                }
-
-                Remit::bankTransfer()->update($bankTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
-                Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
 
                 event(new RemitTransferRequested('bank_deposit', $bankTransfer));
 
