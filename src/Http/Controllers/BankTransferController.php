@@ -12,7 +12,9 @@ use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
+use Fintech\Core\Exceptions\Transaction\RequestOrderExistsException;
 use Fintech\Core\Exceptions\UpdateOperationException;
+use Fintech\Reload\Facades\Reload;
 use Fintech\Remit\Events\RemitTransferRequested;
 use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\ImportBankTransferRequest;
@@ -75,105 +77,39 @@ class BankTransferController extends Controller
      */
     public function store(StoreBankTransferRequest $request): JsonResponse
     {
-        DB::beginTransaction();
+        $inputs = $request->validated();
+
+        $inputs['user_id'] = ($request->filled('user_id'))
+            ? $request->input('user_id')
+            : $request->user('sanctum')->getKey();
+
         try {
-            $inputs = $request->validated();
-            if ($request->input('user_id') > 0) {
-                $user_id = $request->input('user_id');
+
+            $orderQueueId = Transaction::orderQueue()->addToQueueUserWise($inputs['user_id']);
+
+            if ($orderQueueId == 0) {
+                throw new RequestOrderExistsException;
             }
-            $depositor = $request->user('sanctum');
-            if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
-                $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $user_id ?? $depositor->getKey(), 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id)]);
 
-                if (! $depositAccount) {
-                    throw new Exception("User don't have account deposit balance");
-                }
+            $bankTransfer = Remit::bankTransfer()->create($inputs);
 
-                $masterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id)]);
-
-                if (! $masterUser) {
-                    throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
-                }
-
-                //set pre defined conditions of deposit
-                $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'money_transfer'])->getKey();
-                $inputs['user_id'] = $user_id ?? $depositor->getKey();
-                $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
-                if ($delayCheck['countValue'] > 0) {
-                    throw new Exception('Your Request For This Amount Is Already Submitted. Please Wait For Update');
-                }
-                $inputs['sender_receiver_id'] = $masterUser->getKey();
-                $inputs['is_refunded'] = false;
-                $inputs['status'] = OrderStatus::Pending->value;
-                $inputs['risk'] = RiskProfile::Low->value;
-                $inputs['reverse'] = true;
-                $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
-                unset($inputs['reverse']);
-                $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
-                $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
-                $inputs['order_data']['created_by'] = $depositor->name;
-                $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
-                $inputs['order_data']['created_at'] = now();
-                $inputs['order_data']['master_user_name'] = $masterUser['name'];
-                $inputs['order_data']['sending_amount'] = $inputs['converted_amount'];
-                $inputs['order_data']['assign_order'] = 'no';
-                $inputs['order_data']['system_notification_variable_success'] = 'bank_transfer_success';
-                $inputs['order_data']['system_notification_variable_failed'] = 'bank_transfer_failed';
-                unset($inputs['pin'], $inputs['password']);
-
-                $bankTransfer = Remit::bankTransfer()->create($inputs);
-
-                if (! $bankTransfer) {
-                    throw (new StoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'));
-                }
-                $order_data = $bankTransfer->order_data;
-                $service = Business::service()->find($inputs['service_id']);
-                $order_data['service_slug'] = $service->service_slug;
-                $order_data['service_name'] = $service->service_name;
-                $order_data['purchase_number'] = entry_number($bankTransfer->getKey(), $bankTransfer->sourceCountry->iso3, OrderStatus::Successful->value);
-                $order_data['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
-                $order_data['user_name'] = $bankTransfer->user->name;
-                $bankTransfer->order_data = $order_data;
-                $userUpdatedBalance = Remit::bankTransfer()->debitTransaction($bankTransfer);
-                $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $depositor->getKey(), 'country_id' => $bankTransfer->source_country_id]);
-                //update User Account
-                $depositedUpdatedAccount = $depositedAccount->toArray();
-                $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
-                $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
-
-                $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
-                $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
-
-                if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
-                    throw new Exception(__('User Account Balance does not update', [
-                        'current_status' => $bankTransfer->currentStatus(),
-                        'target_status' => OrderStatus::Success->value,
-                    ]));
-                }
-                //TODO ALL Beneficiary Data with bank and branch data
-                $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
-                $order_data['beneficiary_data'] = $beneficiaryData;
-
-                Remit::bankTransfer()->update($bankTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
-                Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
-
-                event(new RemitTransferRequested('bank_deposit', $bankTransfer));
-
-                DB::commit();
-
-                return response()->created([
-                    'message' => __('restapi::messages.resource.created', ['model' => 'Bank Transfer']),
-                    'id' => $bankTransfer->id,
-                ]);
-            } else {
-                throw new Exception('Your another order is in process...!');
+            if (! $bankTransfer) {
+                throw (new StoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'));
             }
+
+            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+
+            return response()->created([
+                'message' => __('restapi::messages.resource.created', ['model' => 'Bank Transfer']),
+                'id' => $bankTransfer->getKey(),
+            ]);
+
         } catch (Exception $exception) {
 
-            DB::rollBack();
-            Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
+            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
             return response()->failed($exception);
+
         }
     }
 
