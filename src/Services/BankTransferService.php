@@ -3,6 +3,7 @@
 namespace Fintech\Remit\Services;
 
 use Fintech\Auth\Facades\Auth;
+use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Auth\RiskProfile;
@@ -155,8 +156,9 @@ class BankTransferService
             'flag' => 'create',
             'timestamp' => now(),
         ];
+        $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData($inputs['order_data']);
 
-        return DB::transaction(function () use ($inputs) {
+        return DB::transaction(function () use ($inputs, $sender, $senderAccount) {
             $deposit = $this->bankTransferRepository->create($inputs);
             if ($inputs['order_data']['deposit_type'] == 'interac_e_transfer') {
                 InteracTransferReceived::dispatch($deposit);
@@ -199,9 +201,6 @@ class BankTransferService
                         'target_status' => OrderStatus::Success->value,
                     ]));
                 }
-                //TODO ALL Beneficiary Data with bank and branch data
-                $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
-                $order_data['beneficiary_data'] = $beneficiaryData;
 
                 Remit::bankTransfer()->update($bankTransfer->getKey(), ['order_data' => $order_data, 'order_number' => $order_data['purchase_number']]);
                 Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
