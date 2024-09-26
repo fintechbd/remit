@@ -177,7 +177,13 @@ class BankTransferService
             $inputs['order_data']['previous_amount'] = (float)$senderAccount->user_account_data['available_amount'];
             $inputs['order_data']['current_amount'] = ((float)$inputs['order_data']['previous_amount'] + (float)$inputs['converted_currency']);
 
-            $bankTransfer = $this->bankTransferRepository->update($bankTransfer->getKey(), ['order_data' => $inputs['order_data']]);
+            $inputs['timeline'][] = [
+                'message' => 'Deducted ' . currency($userUpdatedBalance['spent_amount'], $inputs['currency']).' from user account successfully',
+                'flag' => 'success',
+                'timestamp' => now(),
+            ];
+
+            $bankTransfer = $this->bankTransferRepository->update($bankTransfer->getKey(), ['order_data' => $inputs['order_data'], 'timeline' => $inputs['timeline']]);
 
             if (!Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount)) {
                 throw new \Exception(__('User Account Balance does not update', [
