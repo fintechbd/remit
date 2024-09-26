@@ -95,6 +95,8 @@ class BankTransferService
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['user_id']);
         }
 
+        $role = $sender->roles->first();
+
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
 
         $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
@@ -159,7 +161,7 @@ class BankTransferService
             DB::commit();
             $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData($bankTransfer);
 
-            dd(Business::serviceStat()->serviceStateData($bankTransfer), Business::serviceStat()->cost($inputs));
+            dd(Business::serviceStat()->serviceStateData($bankTransfer), Business::serviceStat()->cost([...$inputs, 'role_id' => $role->getKey()]));
 
             $bankTransfer = $this->bankTransferRepository->update($bankTransfer->getKey(), ['order_data' => $inputs['order_data']]);
 
