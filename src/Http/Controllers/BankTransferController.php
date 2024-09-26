@@ -14,7 +14,6 @@ use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\Transaction\RequestOrderExistsException;
 use Fintech\Core\Exceptions\UpdateOperationException;
-use Fintech\Reload\Facades\Reload;
 use Fintech\Remit\Events\RemitTransferRequested;
 use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\ImportBankTransferRequest;
