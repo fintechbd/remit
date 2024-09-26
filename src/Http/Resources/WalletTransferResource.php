@@ -52,6 +52,7 @@ class WalletTransferResource extends JsonResource
             'status' => $this->status ?? null,
             'created_at' => $this->created_at ?? null,
             'updated_at' => $this->updated_at ?? null,
+            'timeline' => $this->timeline ?? [],
         ];
 
         $data['amount_formatted'] = currency($data['amount'], $data['currency'])->format();
