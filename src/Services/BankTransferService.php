@@ -155,15 +155,7 @@ class BankTransferService
             'timestamp' => now(),
         ];
         $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData($inputs['order_data']);
-        $inputs['order_data']['service_stat_data'] = Business::serviceStat()->cost([...$inputs, 'role_id' => $role->getKey()]);
-        $inputs['order_data']['service_stat_data'] = Arr::only(
-            $inputs['order_data']['service_stat_data'],
-            [
-                "charge", "discount", "commission", "charge_refund",
-                "discount_refund", "commission_refund", "charge_break_down_id",
-                "service_stat_id"
-            ]
-        );
+        $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([...$inputs, 'role_id' => $role->getKey()]);
 
         DB::beginTransaction();
 
