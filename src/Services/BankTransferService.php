@@ -92,23 +92,23 @@ class BankTransferService
     {
         $sender = Auth::user()->find($inputs['user_id']);
 
-        if (!$sender) {
+        if (! $sender) {
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['user_id']);
         }
 
-        $role = $sender->roles->first();
+        $role = $sender->roles?->first() ?? null;
 
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
 
         $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
 
-        if (!$senderAccount) {
+        if (! $senderAccount) {
             throw new CurrencyUnavailableException($inputs['source_country_id']);
         }
 
         $masterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['source_country_id']]);
 
-        if (!$masterUser) {
+        if (! $masterUser) {
             throw new MasterCurrencyUnavailableException($inputs['source_country_id']);
         }
 
@@ -123,7 +123,7 @@ class BankTransferService
         $inputs['status'] = OrderStatus::Pending->value;
         $inputs['risk'] = RiskProfile::Low;
         $inputs['order_data']['order_type'] = OrderType::BankTransfer;
-        if (!isset($inputs['reverse'])) {
+        if (! isset($inputs['reverse'])) {
             $inputs['reverse'] = false;
         }
         $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
@@ -171,11 +171,11 @@ class BankTransferService
             DB::commit();
             $userUpdatedBalance = $this->debitTransaction($bankTransfer);
             $senderUpdatedAccount = $senderAccount->toArray();
-            $senderUpdatedAccount['user_account_data']['spent_amount'] = (float)$senderUpdatedAccount['user_account_data']['spent_amount'] + (float)$userUpdatedBalance['spent_amount'];
-            $senderUpdatedAccount['user_account_data']['available_amount'] = (float)$userUpdatedBalance['current_amount'];
+            $senderUpdatedAccount['user_account_data']['spent_amount'] = (float) $senderUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
+            $senderUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
 
-            $inputs['order_data']['previous_amount'] = (float)$senderAccount->user_account_data['available_amount'];
-            $inputs['order_data']['current_amount'] = ((float)$inputs['order_data']['previous_amount'] + (float)$inputs['converted_currency']);
+            $inputs['order_data']['previous_amount'] = (float) $senderAccount->user_account_data['available_amount'];
+            $inputs['order_data']['current_amount'] = ((float) $inputs['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
 
             $inputs['timeline'][] = [
                 'message' => 'Deducted ' . currency($userUpdatedBalance['spent_amount'], $inputs['currency']).' from user account successfully',
@@ -185,7 +185,7 @@ class BankTransferService
 
             $bankTransfer = $this->bankTransferRepository->update($bankTransfer->getKey(), ['order_data' => $inputs['order_data'], 'timeline' => $inputs['timeline']]);
 
-            if (!Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount)) {
+            if (! Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount)) {
                 throw new \Exception(__('User Account Balance does not update', [
                     'current_status' => $bankTransfer->currentStatus(),
                     'target_status' => OrderStatus::Success->value,
@@ -238,7 +238,7 @@ class BankTransferService
         $orderDetailStoreForMaster->order_detail_amount = $amount;
         $orderDetailStoreForMaster->converted_amount = $converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Bank Transfer Payment Receive From' . $user_name;
+        $orderDetailStoreForMaster->notes = 'Bank Transfer Payment Receive From'.$user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -275,7 +275,7 @@ class BankTransferService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Bank Transfer Discount to ' . $user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Bank Transfer Discount to '.$user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
@@ -324,7 +324,7 @@ class BankTransferService
         $data->order_detail_cause_name = 'cash_withdraw';
         $data->order_detail_number = $data->order_data['accepted_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
-        $data->notes = 'Bank Transfer Refund From ' . $master_user_name;
+        $data->notes = 'Bank Transfer Refund From '.$master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -337,7 +337,7 @@ class BankTransferService
         $orderDetailStoreForMaster->order_detail_amount = -$amount;
         $orderDetailStoreForMaster->converted_amount = -$converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Bank Transfer Send to ' . $user_name;
+        $orderDetailStoreForMaster->notes = 'Bank Transfer Send to '.$user_name;
         $orderDetailStoreForMaster->save();
 
         //For Charge
@@ -345,7 +345,7 @@ class BankTransferService
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $data->notes = 'Bank Transfer Charge Receive from ' . $master_user_name;
+        $data->notes = 'Bank Transfer Charge Receive from '.$master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
@@ -355,7 +355,7 @@ class BankTransferService
         $orderDetailStoreForChargeForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Bank Transfer Charge Send to ' . $user_name;
+        $orderDetailStoreForChargeForMaster->notes = 'Bank Transfer Charge Send to '.$user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
@@ -363,7 +363,7 @@ class BankTransferService
         $data->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $data->order_detail_cause_name = 'discount';
-        $data->notes = 'Bank Transfer Discount form ' . $master_user_name;
+        $data->notes = 'Bank Transfer Discount form '.$master_user_name;
         $data->step = 5;
         //$data->order_detail_parent_id = $orderDetailStore->getKey();
         //$updateData['order_data']['previous_amount'] = 0;
@@ -374,7 +374,7 @@ class BankTransferService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Bank Transfer Discount to ' . $user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Bank Transfer Discount to '.$user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
