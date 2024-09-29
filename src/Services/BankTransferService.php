@@ -194,6 +194,7 @@ class BankTransferService
             $bankTransfer = $this->bankTransferRepository->create($inputs);
             DB::commit();
             $userUpdatedBalance = $this->debitTransaction($bankTransfer);
+            dd($userUpdatedBalance);
             $senderUpdatedAccount = $senderAccount->toArray();
             $senderUpdatedAccount['user_account_data']['spent_amount'] = (float) $senderUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
             $senderUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
@@ -209,9 +210,9 @@ class BankTransferService
 
             $bankTransfer = $this->bankTransferRepository->update($bankTransfer->getKey(), ['order_data' => $inputs['order_data'], 'timeline' => $inputs['timeline']]);
 
-            if (! Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount)) {
+/*            if (! Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount)) {
                 throw new \Exception('Failed to update user account balance.');
-            }
+            }*/
 
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
@@ -241,7 +242,7 @@ class BankTransferService
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $bankTransfer->user_id,
-            'converted_currency' => $bankTransfer->converted_currency,
+            'order_detail_currency' => $bankTransfer->currency,
         ]);
 
         $serviceStatData = $bankTransfer->order_data['service_stat_data'];
@@ -313,14 +314,14 @@ class BankTransferService
         $userAccountData['current_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $bankTransfer->user_id,
-            'converted_currency' => $bankTransfer->converted_currency,
+            'order_detail_currency' => $bankTransfer->currency,
         ]);
 
         $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $bankTransfer->user_id,
             'order_id' => $bankTransfer->getKey(),
-            'converted_currency' => $bankTransfer->converted_currency,
+            'order_detail_currency' => $bankTransfer->currency,
         ]);
 
         return $userAccountData;
