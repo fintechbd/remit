@@ -12,8 +12,11 @@ use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Enums\Transaction\OrderType;
 use Fintech\Core\Exceptions\Transaction\CurrencyUnavailableException;
 use Fintech\Core\Exceptions\Transaction\MasterCurrencyUnavailableException;
+use Fintech\Core\Exceptions\Transaction\OrderRequestFailedException;
 use Fintech\Core\Exceptions\Transaction\RequestAmountExistsException;
+use Fintech\Core\Exceptions\Transaction\RequestOrderExistsException;
 use Fintech\MetaData\Facades\MetaData;
+use Fintech\Remit\Events\BankTransferRequested;
 use Fintech\Remit\Interfaces\BankTransferRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Contracts\Pagination\Paginator;
@@ -95,7 +98,11 @@ class BankTransferService
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['user_id']);
         }
 
-        $role = $sender->roles?->first() ?? null;
+        if (Transaction::orderQueue()->addToQueueUserWise($inputs['user_id']) == 0) {
+            throw new RequestOrderExistsException;
+        }
+
+        $inputs['order_data']['order_type'] = OrderType::BankTransfer;
 
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
 
@@ -117,15 +124,22 @@ class BankTransferService
             throw new RequestAmountExistsException;
         }
 
+        $role = $sender->roles?->first() ?? null;
+        $inputs['order_data']['role_id'] = $role->id;
+        $inputs['order_data']['is_reload'] = false;
+        $inputs['order_data']['is_reverse'] = $inputs['reverse'] ?? false;
         $inputs['sender_receiver_id'] = $masterUser->getKey();
         $inputs['is_refunded'] = false;
         $inputs['status'] = OrderStatus::Pending->value;
         $inputs['risk'] = RiskProfile::Low;
-        $inputs['order_data']['order_type'] = OrderType::BankTransfer;
-        if (! isset($inputs['reverse'])) {
-            $inputs['reverse'] = false;
-        }
-        $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert($inputs);
+        $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert([
+            'role_id' => $inputs['order_data']['role_id'],
+            'reverse' => $inputs['order_data']['is_reverse'],
+            'source_country_id' => $inputs['source_country_id'],
+            'destination_country_id' => $inputs['destination_country_id'],
+            'amount' => $inputs['amount'],
+            'service_id' => $inputs['service_id'],
+        ]);
         unset($inputs['reverse']);
         $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
         $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
@@ -154,11 +168,19 @@ class BankTransferService
             'timestamp' => now(),
         ];
         $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData($inputs['order_data']);
-        $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([...$inputs, 'role_id' => $role->getKey()]);
+        $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([
+            'role_id' => $inputs['order_data']['role_id'],
+            'reload' => $inputs['order_data']['is_reload'],
+            'reverse' => $inputs['order_data']['is_reverse'],
+            'source_country_id' => $inputs['source_country_id'],
+            'destination_country_id' => $inputs['destination_country_id'],
+            'amount' => $inputs['amount'],
+            'service_id' => $inputs['service_id'],
+        ]);
 
         DB::beginTransaction();
-
-        if ($bankTransfer = $this->bankTransferRepository->create($inputs)) {
+        try {
+        $bankTransfer = $this->bankTransferRepository->create($inputs);
             DB::commit();
             $userUpdatedBalance = $this->debitTransaction($bankTransfer);
             $senderUpdatedAccount = $senderAccount->toArray();
@@ -177,16 +199,20 @@ class BankTransferService
             $bankTransfer = $this->bankTransferRepository->update($bankTransfer->getKey(), ['order_data' => $inputs['order_data'], 'timeline' => $inputs['timeline']]);
 
             if (! Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount)) {
-                throw new \Exception(__('User Account Balance does not update', [
-                    'current_status' => $bankTransfer->currentStatus(),
-                    'target_status' => OrderStatus::Success->value,
-                ]));
+                throw new \Exception('Failed to update user account balance.');
             }
+
+            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+
+            BankTransferRequested::dispatch($bankTransfer);
+
+            return $bankTransfer;
+
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            throw new OrderRequestFailedException(OrderType::BankTransfer->value, 0, $exception);
         }
-
-        DB::rollBack();
-
-        return null;
     }
 
     /**

@@ -35,9 +35,10 @@ class RemitOrderComplianceBatchJob implements ShouldQueue
     /**
      * Handle the event.
      */
-    public function handle(RemitTransferRequested $event): void
+    public function handle(object $event): void
     {
-        $batch = Bus::batch([
+
+/*        $batch = Bus::batch([
             new LargeCashTransferJob,
             new LargeVirtualCashTransferJob,
             new ElectronicFundTransferJob,
@@ -62,7 +63,7 @@ class RemitOrderComplianceBatchJob implements ShouldQueue
             // First batch job failure detected...
         })->finally(function (Batch $batch) {
             // The batch has finished executing...
-        })->dispatch();
+        })->dispatch();*/
     }
 
     /**

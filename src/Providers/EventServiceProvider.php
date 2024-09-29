@@ -2,6 +2,7 @@
 
 namespace Fintech\Remit\Providers;
 
+use Fintech\Remit\Events\BankTransferRequested;
 use Fintech\Remit\Events\RemitTransferFailed;
 use Fintech\Remit\Events\RemitTransferRejected;
 use Fintech\Remit\Events\RemitTransferRequested;
@@ -19,7 +20,7 @@ class EventServiceProvider extends ServiceProvider
         RemitTransferFailed::class => [
 
         ],
-        RemitTransferRequested::class => [
+        BankTransferRequested::class => [
             \Fintech\Remit\Jobs\RemitOrderComplianceBatchJob::class,
         ],
         RemitTransferVendorAssigned::class => [

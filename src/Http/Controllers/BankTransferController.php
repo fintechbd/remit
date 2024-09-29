@@ -78,37 +78,19 @@ class BankTransferController extends Controller
     {
         $inputs = $request->validated();
 
-        $inputs['user_id'] = ($request->filled('user_id'))
-            ? $request->input('user_id')
-            : $request->user('sanctum')->getKey();
+        $inputs['user_id'] = ($request->filled('user_id')) ? $request->input('user_id') : $request->user('sanctum')->getKey();
 
         try {
-
-            $orderQueueId = Transaction::orderQueue()->addToQueueUserWise($inputs['user_id']);
-
-            if ($orderQueueId == 0) {
-                throw new RequestOrderExistsException;
-            }
-
             $bankTransfer = Remit::bankTransfer()->create($inputs);
 
-            if (! $bankTransfer) {
-                throw (new StoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'));
-            }
-
-            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
-
             return response()->created([
-                'message' => __('restapi::messages.resource.created', ['model' => 'Bank Transfer']),
+                'message' => __('core::messages.transaction.request_created', ['service' => 'Bank Transfer']),
                 'id' => $bankTransfer->getKey(),
             ]);
 
         } catch (Exception $exception) {
-
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
-
             return response()->failed($exception);
-
         }
     }
 
