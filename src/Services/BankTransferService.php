@@ -201,7 +201,7 @@ class BankTransferService
             $inputs['order_data']['previous_amount'] = (float) $senderAccount->user_account_data['available_amount'];
             $inputs['order_data']['current_amount'] = ((float) $inputs['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
             $inputs['timeline'][] = [
-                'message' => 'Deducted ' . currency($userUpdatedBalance['spent_amount'], $inputs['currency']) . ' from user account successfully',
+                'message' => 'Deducted '.currency($userUpdatedBalance['spent_amount'], $inputs['currency']).' from user account successfully',
                 'flag' => 'info',
                 'timestamp' => now(),
             ];
