@@ -132,7 +132,7 @@ class BankTransferService
         $inputs['is_refunded'] = false;
         $inputs['status'] = OrderStatus::Pending->value;
         $inputs['risk'] = RiskProfile::Low;
-        $inputs['order_data']['currency_convert_rate'] = Business::currencyRate()->convert([
+        $currencyConversion = Business::currencyRate()->convert([
             'role_id' => $inputs['order_data']['role_id'],
             'reverse' => $inputs['order_data']['is_reverse'],
             'source_country_id' => $inputs['source_country_id'],
@@ -140,9 +140,15 @@ class BankTransferService
             'amount' => $inputs['amount'],
             'service_id' => $inputs['service_id'],
         ]);
+        if ($inputs['reverse']) {
+            $inputs['amount'] = $currencyConversion['converted'];
+            $inputs['converted_amount'] = $currencyConversion['amount'];
+        } else {
+            $inputs['amount'] = $currencyConversion['amount'];
+            $inputs['converted_amount'] = $currencyConversion['converted'];
+        }
+        $inputs['order_data']['currency_convert_rate'] = $currencyConversion;
         unset($inputs['reverse']);
-        $inputs['converted_amount'] = $inputs['order_data']['currency_convert_rate']['converted'];
-        $inputs['converted_currency'] = $inputs['order_data']['currency_convert_rate']['output'];
         $inputs['order_data']['created_by'] = $sender->name ?? 'N/A';
         $inputs['order_data']['user_name'] = $sender->name ?? 'N/A';
         $inputs['order_data']['created_by_mobile_number'] = $sender->mobile ?? 'N/A';
@@ -170,8 +176,7 @@ class BankTransferService
         $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData($inputs['order_data']);
         $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([
             'role_id' => $inputs['order_data']['role_id'],
-            'reload' => $inputs['order_data']['is_reload'],
-            'reverse' => $inputs['order_data']['is_reverse'],
+            'reverse' => false,
             'source_country_id' => $inputs['source_country_id'],
             'destination_country_id' => $inputs['destination_country_id'],
             'amount' => $inputs['amount'],
