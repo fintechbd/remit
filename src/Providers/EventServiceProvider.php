@@ -5,7 +5,6 @@ namespace Fintech\Remit\Providers;
 use Fintech\Remit\Events\BankTransferRequested;
 use Fintech\Remit\Events\RemitTransferFailed;
 use Fintech\Remit\Events\RemitTransferRejected;
-use Fintech\Remit\Events\RemitTransferRequested;
 use Fintech\Remit\Events\RemitTransferVendorAssigned;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 

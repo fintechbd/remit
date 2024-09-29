@@ -3,9 +3,6 @@
 namespace Fintech\Remit\Events;
 
 use Fintech\Business\Facades\Business;
-use Fintech\Core\Abstracts\BaseModel;
-use Fintech\Core\Enums\Transaction\OrderType;
-use Fintech\Reload\Facades\Reload;
 use Fintech\Remit\Facades\Remit;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -14,7 +11,6 @@ use Illuminate\Queue\SerializesModels;
 class BankTransferRequested
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
 
     public $transfer;
 

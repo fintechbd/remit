@@ -12,7 +12,6 @@ use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
-use Fintech\Core\Exceptions\Transaction\RequestOrderExistsException;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Events\RemitTransferRequested;
 use Fintech\Remit\Facades\Remit;
@@ -90,6 +89,7 @@ class BankTransferController extends Controller
 
         } catch (Exception $exception) {
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+
             return response()->failed($exception);
         }
     }

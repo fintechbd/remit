@@ -38,32 +38,32 @@ class RemitOrderComplianceBatchJob implements ShouldQueue
     public function handle(object $event): void
     {
 
-/*        $batch = Bus::batch([
-            new LargeCashTransferJob,
-            new LargeVirtualCashTransferJob,
-            new ElectronicFundTransferJob,
-            new SuspiciousTransactionJob,
-            new ClientDueDiligenceJob,
-            new StructuringDetectionJob,
-            new HighRiskCountryTransferJob,
-            new PepDetectionJob,
-            new HIODetectionJob,
-            new AccountVelocityJob,
-            new NewProductUsageJob,
-            new DormantAccountActivityJob,
-            new ThirdPartyTransferJob,
-            new VirtualCurrencyTravelJob,
-        ])->before(function (Batch $batch) {
-            // The batch has been created but no jobs have been added...
-        })->progress(function (Batch $batch) {
-            // A single job has completed successfully...
-        })->then(function (Batch $batch) {
-            // All jobs completed successfully...
-        })->catch(function (Batch $batch, \Throwable $e) {
-            // First batch job failure detected...
-        })->finally(function (Batch $batch) {
-            // The batch has finished executing...
-        })->dispatch();*/
+        /*        $batch = Bus::batch([
+                    new LargeCashTransferJob,
+                    new LargeVirtualCashTransferJob,
+                    new ElectronicFundTransferJob,
+                    new SuspiciousTransactionJob,
+                    new ClientDueDiligenceJob,
+                    new StructuringDetectionJob,
+                    new HighRiskCountryTransferJob,
+                    new PepDetectionJob,
+                    new HIODetectionJob,
+                    new AccountVelocityJob,
+                    new NewProductUsageJob,
+                    new DormantAccountActivityJob,
+                    new ThirdPartyTransferJob,
+                    new VirtualCurrencyTravelJob,
+                ])->before(function (Batch $batch) {
+                    // The batch has been created but no jobs have been added...
+                })->progress(function (Batch $batch) {
+                    // A single job has completed successfully...
+                })->then(function (Batch $batch) {
+                    // All jobs completed successfully...
+                })->catch(function (Batch $batch, \Throwable $e) {
+                    // First batch job failure detected...
+                })->finally(function (Batch $batch) {
+                    // The batch has finished executing...
+                })->dispatch();*/
     }
 
     /**
