@@ -46,7 +46,9 @@ class StoreBankTransferRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        $this->mergeIfMissing(['order_data.request_from' => request()->platform()->value]);
+        $order_data = $this->input('order_data');
+        $order_data['request_from'] = request()->platform()->value;
+        $this->merge(['order_data' => $order_data]);
     }
 
     /**
