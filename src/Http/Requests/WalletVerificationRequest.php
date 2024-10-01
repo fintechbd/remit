@@ -24,7 +24,7 @@ class WalletVerificationRequest extends FormRequest
     {
         return [
             'wallet_no' => ['required', 'string', 'min:5', 'max:255'],
-            'wallet_id' => ['nullable', 'string'],
+            'wallet_id' => ['required', 'integer', 'min:1'],
         ];
     }
 }

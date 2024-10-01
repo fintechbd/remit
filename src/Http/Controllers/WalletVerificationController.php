@@ -3,6 +3,7 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
+use Fintech\Banco\Facades\Banco;
 use Fintech\Remit\Http\Requests\WalletVerificationRequest;
 use Fintech\Remit\Http\Resources\WalletVerificationResource;
 use Illuminate\Http\JsonResponse;
@@ -17,16 +18,16 @@ class WalletVerificationController extends Controller
     {
 
         try {
+            $wallet = Banco::bank()->find($request->input('wallet_id'));
 
-            if (strlen($request->input('wallet_no')) < 10) {
-                throw new Exception('Invalid Bkash Wallet Number.');
+            $data['name'] = $wallet->name ?? null;
+
+            if ($request->input('wallet_no') == '01689553434') {
+                $data['account_title'] = $request->user('sanctum')->name ?? null;
+                $data['account_no'] = $request->input('wallet_no');
+            } else {
+                throw new Exception('Wallet Verification failed');
             }
-
-            $data = [
-                'name' => 'Bkash',
-                'account_title' => 'MT TECHNOLOGIES LTD',
-                'account_no' => $request->input('wallet_no', '01689553434'),
-            ];
 
             return new WalletVerificationResource($data);
 
