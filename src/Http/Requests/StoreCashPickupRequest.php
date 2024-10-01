@@ -32,6 +32,7 @@ class StoreCashPickupRequest extends FormRequest
             'currency' => ['required', 'string', 'size:3'],
             'converted_currency' => ['required', 'string', 'size:3'],
             'order_data' => ['nullable', 'array'],
+            'reverse' => ['nullable', 'boolean'],
             'order_data.request_from' => ['string', 'required'],
             'order_data.beneficiary_type_id' => ['integer', 'nullable'],
             'order_data.beneficiary_id' => ['integer', 'nullable'],

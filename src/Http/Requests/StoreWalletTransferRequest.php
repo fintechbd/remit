@@ -31,6 +31,7 @@ class StoreWalletTransferRequest extends FormRequest
             'amount' => ['required', 'numeric'],
             'currency' => ['required', 'string', 'size:3'],
             'converted_currency' => ['required', 'string', 'size:3'],
+            'reverse' => ['nullable', 'boolean'],
             'order_data' => ['nullable', 'array'],
             'order_data.request_from' => ['string', 'required'],
             'order_data.beneficiary_type_id' => ['integer', 'nullable'],
