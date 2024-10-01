@@ -9,7 +9,6 @@ use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Auth\SystemRole;
 use Fintech\Core\Enums\Transaction\OrderStatus;
-use Fintech\Core\Enums\Transaction\OrderType;
 use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
@@ -90,8 +89,7 @@ class CashPickupController extends Controller
                 'id' => $cashPickup->getKey(),
             ]);
 
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception) {
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
             return response()->failed($exception);
@@ -113,13 +111,13 @@ class CashPickupController extends Controller
 
             $cashPickup = Remit::cashPickup()->find($id);
 
-            if (!$cashPickup) {
+            if (! $cashPickup) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
             $inputs = $request->validated();
 
-            if (!Remit::cashPickup()->update($id, $inputs)) {
+            if (! Remit::cashPickup()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
@@ -150,7 +148,7 @@ class CashPickupController extends Controller
 
             $cashPickup = Remit::cashPickup()->find($id);
 
-            if (!$cashPickup) {
+            if (! $cashPickup) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
@@ -183,11 +181,11 @@ class CashPickupController extends Controller
 
             $cashPickup = Remit::cashPickup()->find($id);
 
-            if (!$cashPickup) {
+            if (! $cashPickup) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
-            if (!Remit::cashPickup()->destroy($id)) {
+            if (! Remit::cashPickup()->destroy($id)) {
 
                 throw (new DeleteOperationException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
@@ -219,11 +217,11 @@ class CashPickupController extends Controller
 
             $cashPickup = Remit::cashPickup()->find($id, true);
 
-            if (!$cashPickup) {
+            if (! $cashPickup) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
-            if (!Remit::cashPickup()->restore($id)) {
+            if (! Remit::cashPickup()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
@@ -307,14 +305,14 @@ class CashPickupController extends Controller
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
                 $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $user_id ?? $depositor->getKey(), 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id)]);
 
-                if (!$depositAccount) {
+                if (! $depositAccount) {
                     throw new Exception("User don't have account deposit balance");
                 }
 
                 $masterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id)]);
 
-                if (!$masterUser) {
-                    throw new Exception('Master User Account not found for ' . $request->input('source_country_id', $depositor->profile?->country_id) . ' country');
+                if (! $masterUser) {
+                    throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
                 }
 
                 //set pre defined conditions of deposit
@@ -345,7 +343,7 @@ class CashPickupController extends Controller
 
                 $cashPickup = Remit::cashPickup()->create($inputs);
 
-                if (!$cashPickup) {
+                if (! $cashPickup) {
                     throw (new StoreOperationException)->setModel(config('fintech.remit.cash_pickup_model'));
                 }
 
@@ -361,19 +359,19 @@ class CashPickupController extends Controller
                 $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $depositor->getKey(), 'country_id' => $cashPickup->source_country_id]);
                 //update User Account
                 $depositedUpdatedAccount = $depositedAccount->toArray();
-                $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float)$depositedUpdatedAccount['user_account_data']['spent_amount'] + (float)$userUpdatedBalance['spent_amount'];
-                $depositedUpdatedAccount['user_account_data']['available_amount'] = (float)$userUpdatedBalance['current_amount'];
+                $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
+                $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
 
-                if (((float)$depositedUpdatedAccount['user_account_data']['available_amount']) < ((float)config('fintech.transaction.minimum_balance'))) {
+                if (((float) $depositedUpdatedAccount['user_account_data']['available_amount']) < ((float) config('fintech.transaction.minimum_balance'))) {
                     throw new Exception(__('Insufficient balance!', [
-                        'previous_amount' => ((float)$depositedUpdatedAccount['user_account_data']['available_amount']),
-                        'current_amount' => ((float)$userUpdatedBalance['spent_amount']),
+                        'previous_amount' => ((float) $depositedUpdatedAccount['user_account_data']['available_amount']),
+                        'current_amount' => ((float) $userUpdatedBalance['spent_amount']),
                     ]));
                 }
 
-                $order_data['previous_amount'] = (float)$depositedAccount->user_account_data['available_amount'];
-                $order_data['current_amount'] = ((float)$order_data['previous_amount'] + (float)$inputs['converted_currency']);
-                if (!Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
+                $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
+                if (! Transaction::userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'current_status' => $cashPickup->currentStatus(),
                         'target_status' => OrderStatus::Success->value,
