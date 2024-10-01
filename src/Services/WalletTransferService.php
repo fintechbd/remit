@@ -218,7 +218,7 @@ class WalletTransferService
     /**
      * @return int[]
      */
-    private function debitTransaction($data): array
+    public function debitTransaction($data): array
     {
         $userAccountData = [
             'previous_amount' => null,
