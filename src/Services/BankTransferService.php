@@ -225,7 +225,7 @@ class BankTransferService
     /**
      * @return int[]
      */
-    public function debitTransaction($bankTransfer): array
+    private function debitTransaction($bankTransfer): array
     {
         $userAccountData = [
             'previous_amount' => null,
@@ -326,7 +326,7 @@ class BankTransferService
     /**
      * @return int[]
      */
-    public function creditTransaction($data): array
+    private function creditTransaction($data): array
     {
         $userAccountData = [
             'previous_amount' => null,
