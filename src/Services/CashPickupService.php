@@ -18,7 +18,6 @@ use Fintech\Core\Exceptions\Transaction\OrderRequestFailedException;
 use Fintech\Core\Exceptions\Transaction\RequestAmountExistsException;
 use Fintech\Core\Exceptions\Transaction\RequestOrderExistsException;
 use Fintech\MetaData\Facades\MetaData;
-use Fintech\Remit\Events\BankTransferRequested;
 use Fintech\Remit\Events\CashPickupRequested;
 use Fintech\Remit\Interfaces\CashPickupRepository;
 use Fintech\Transaction\Facades\Transaction;
