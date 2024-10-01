@@ -2,11 +2,30 @@
 
 namespace Fintech\Remit\Services;
 
+use Fintech\Auth\Facades\Auth;
+use Fintech\Banco\Facades\Banco;
+use Fintech\Business\Exceptions\BusinessException;
+use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Enums\Auth\RiskProfile;
+use Fintech\Core\Enums\Auth\SystemRole;
+use Fintech\Core\Enums\Transaction\OrderStatus;
+use Fintech\Core\Enums\Transaction\OrderType;
+use Fintech\Core\Exceptions\Transaction\CurrencyUnavailableException;
+use Fintech\Core\Exceptions\Transaction\InsufficientBalanceException;
+use Fintech\Core\Exceptions\Transaction\MasterCurrencyUnavailableException;
+use Fintech\Core\Exceptions\Transaction\OrderRequestFailedException;
+use Fintech\Core\Exceptions\Transaction\RequestAmountExistsException;
+use Fintech\Core\Exceptions\Transaction\RequestOrderExistsException;
+use Fintech\MetaData\Facades\MetaData;
+use Fintech\Remit\Events\BankTransferRequested;
+use Fintech\Remit\Events\CashPickupRequested;
 use Fintech\Remit\Interfaces\CashPickupRepository;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class CashPickupService
@@ -61,9 +80,147 @@ class CashPickupService
         return $this->cashPickupRepository->create($filters);
     }
 
+    /**
+     * @throws BusinessException
+     * @throws RequestAmountExistsException
+     * @throws CurrencyUnavailableException
+     * @throws RequestOrderExistsException
+     * @throws InsufficientBalanceException
+     * @throws OrderRequestFailedException
+     * @throws MasterCurrencyUnavailableException
+     */
     public function create(array $inputs = []): ?BaseModel
     {
-        return $this->cashPickupRepository->create($inputs);
+        $sender = Auth::user()->find($inputs['user_id']);
+
+        if (! $sender) {
+            throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['user_id']);
+        }
+
+        if (Transaction::orderQueue()->addToQueueUserWise($inputs['user_id']) == 0) {
+            throw new RequestOrderExistsException;
+        }
+
+        $inputs['order_data']['order_type'] = OrderType::CashPickup;
+
+        $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
+
+        $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
+
+        if (! $senderAccount) {
+            throw new CurrencyUnavailableException($inputs['source_country_id']);
+        }
+
+        $masterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['source_country_id']]);
+
+        if (! $masterUser) {
+            throw new MasterCurrencyUnavailableException($inputs['source_country_id']);
+        }
+
+        $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'money_transfer'])->getKey();
+
+        if (Transaction::order()->transactionDelayCheck($inputs)['countValue'] > 0) {
+            throw new RequestAmountExistsException;
+        }
+
+        $role = $sender->roles?->first() ?? null;
+        $inputs['order_data']['role_id'] = $role->id;
+        $inputs['order_data']['is_reload'] = false;
+        $inputs['order_data']['is_reverse'] = $inputs['reverse'] ?? false;
+        $inputs['sender_receiver_id'] = $masterUser->getKey();
+        $inputs['is_refunded'] = false;
+        $inputs['status'] = OrderStatus::Pending->value;
+        $inputs['risk'] = RiskProfile::Low;
+        $currencyConversion = Business::currencyRate()->convert([
+            'role_id' => $inputs['order_data']['role_id'],
+            'reverse' => $inputs['order_data']['is_reverse'],
+            'source_country_id' => $inputs['source_country_id'],
+            'destination_country_id' => $inputs['destination_country_id'],
+            'amount' => $inputs['amount'],
+            'service_id' => $inputs['service_id'],
+        ]);
+        if ($inputs['reverse']) {
+            $inputs['amount'] = $currencyConversion['converted'];
+            $inputs['converted_amount'] = $currencyConversion['amount'];
+        } else {
+            $inputs['amount'] = $currencyConversion['amount'];
+            $inputs['converted_amount'] = $currencyConversion['converted'];
+        }
+        $inputs['order_data']['currency_convert_rate'] = $currencyConversion;
+        unset($inputs['reverse']);
+
+        $inputs['order_data']['created_by'] = $sender->name ?? 'N/A';
+        $inputs['order_data']['user_name'] = $sender->name ?? 'N/A';
+        $inputs['order_data']['created_by_mobile_number'] = $sender->mobile ?? 'N/A';
+        $inputs['order_data']['created_by_email'] = $sender->email ?? 'N/A';
+        $inputs['order_data']['created_at'] = now();
+        $inputs['order_data']['master_user_name'] = $masterUser->name;
+        $inputs['order_data']['sending_amount'] = $inputs['converted_amount'];
+        $inputs['order_data']['assign_order'] = 'no';
+        $inputs['order_data']['system_notification_variable_success'] = 'cash_pickup_success';
+        $inputs['order_data']['system_notification_variable_failed'] = 'cash_pickup_success';
+        $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
+        $inputs['order_number'] = $inputs['order_data']['purchase_number'];
+        if ($service = Business::service()->find($inputs['service_id'])) {
+            $inputs['order_data']['service_slug'] = $service->service_slug ?? null;
+            $inputs['order_data']['service_name'] = $service->service_name ?? null;
+            $vendor = $service->serviceVendor;
+            $inputs['service_vendor_id'] = $vendor?->getKey() ?? null;
+            $inputs['vendor'] = $vendor?->service_vendor_slug ?? null;
+        }
+        $inputs['timeline'][] = [
+            'message' => 'Cash Pickup entry created successfully',
+            'flag' => 'create',
+            'timestamp' => now(),
+        ];
+        $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData($inputs['order_data']);
+        $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([
+            'role_id' => $inputs['order_data']['role_id'],
+            'reverse' => false,
+            'source_country_id' => $inputs['source_country_id'],
+            'destination_country_id' => $inputs['destination_country_id'],
+            'amount' => $inputs['amount'],
+            'service_id' => $inputs['service_id'],
+        ]);
+
+        if ((float) $inputs['order_data']['service_stat_data']['total_amount'] > (float) $senderAccount->user_account_data['available_amount']) {
+            throw new InsufficientBalanceException($senderAccount->user_account_data['currency']);
+        }
+
+        DB::beginTransaction();
+        try {
+            $cashPickup = $this->cashPickupRepository->create($inputs);
+            DB::commit();
+            $userUpdatedBalance = $this->debitTransaction($cashPickup);
+            $senderUpdatedAccount = $senderAccount->toArray();
+            $senderUpdatedAccount['user_account_data']['spent_amount'] = (float) $senderUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
+            $senderUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
+
+            $inputs['order_data']['previous_amount'] = (float) $senderAccount->user_account_data['available_amount'];
+            $inputs['order_data']['current_amount'] = ((float) $inputs['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
+            $inputs['timeline'][] = [
+                'message' => 'Deducted '.currency($userUpdatedBalance['spent_amount'], $inputs['currency']).' from user account successfully',
+                'flag' => 'info',
+                'timestamp' => now(),
+            ];
+
+            $cashPickup = $this->cashPickupRepository->update($cashPickup->getKey(), ['order_data' => $inputs['order_data'], 'timeline' => $inputs['timeline']]);
+
+            if (! Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount)) {
+                throw new \Exception('Failed to update user account balance.');
+            }
+
+            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+
+            CashPickupRequested::dispatch($cashPickup);
+
+            return $cashPickup;
+
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            throw new OrderRequestFailedException(OrderType::BankTransfer->value, 0, $exception);
+        }
     }
 
     /**

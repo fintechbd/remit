@@ -75,7 +75,7 @@ class CashPickupController extends Controller
      *
      * @throws StoreOperationException
      */
-    public function store(StoreCashPickupRequest $request): JsonResponse
+    public function oldStore(StoreCashPickupRequest $request): JsonResponse
     {
         DB::beginTransaction();
         try {
@@ -84,7 +84,9 @@ class CashPickupController extends Controller
             if ($request->input('user_id') > 0) {
                 $user_id = $request->input('user_id');
             }
+
             $depositor = $request->user('sanctum');
+
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
                 $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $user_id ?? $depositor->getKey(), 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id)]);
 
@@ -173,6 +175,27 @@ class CashPickupController extends Controller
 
             Transaction::orderQueue()->removeFromQueueUserWise($user_id ?? $depositor->getKey());
             DB::rollBack();
+
+            return response()->failed($exception);
+        }
+    }
+
+    public function store(StoreCashPickupRequest $request): JsonResponse
+    {
+        $inputs = $request->validated();
+
+        $inputs['user_id'] = ($request->filled('user_id')) ? $request->input('user_id') : $request->user('sanctum')->getKey();
+
+        try {
+            $cashPickup = Remit::cashPickup()->create($inputs);
+
+            return response()->created([
+                'message' => __('core::messages.transaction.request_created', ['service' => 'Cash Pickup']),
+                'id' => $cashPickup->getKey(),
+            ]);
+
+        } catch (Exception $exception) {
+            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
             return response()->failed($exception);
         }
