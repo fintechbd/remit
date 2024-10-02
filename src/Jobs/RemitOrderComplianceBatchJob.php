@@ -5,28 +5,12 @@ namespace Fintech\Remit\Jobs;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Reload\Facades\Reload;
 use Fintech\Remit\Events\RemitTransferRequested;
-use Fintech\Remit\Jobs\CompliancePolicies\AccountVelocityJob;
-use Fintech\Remit\Jobs\CompliancePolicies\ClientDueDiligenceJob;
-use Fintech\Remit\Jobs\CompliancePolicies\DormantAccountActivityJob;
-use Fintech\Remit\Jobs\CompliancePolicies\ElectronicFundTransferJob;
-use Fintech\Remit\Jobs\CompliancePolicies\HighRiskCountryTransferJob;
-use Fintech\Remit\Jobs\CompliancePolicies\HIODetectionJob;
-use Fintech\Remit\Jobs\CompliancePolicies\LargeCashTransferJob;
-use Fintech\Remit\Jobs\CompliancePolicies\LargeVirtualCashTransferJob;
-use Fintech\Remit\Jobs\CompliancePolicies\NewProductUsageJob;
-use Fintech\Remit\Jobs\CompliancePolicies\PepDetectionJob;
-use Fintech\Remit\Jobs\CompliancePolicies\StructuringDetectionJob;
-use Fintech\Remit\Jobs\CompliancePolicies\SuspiciousTransactionJob;
-use Fintech\Remit\Jobs\CompliancePolicies\ThirdPartyTransferJob;
-use Fintech\Remit\Jobs\CompliancePolicies\VirtualCurrencyTravelJob;
-use Illuminate\Bus\Batch;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Bus;
 
 class RemitOrderComplianceBatchJob implements ShouldQueue
 {
