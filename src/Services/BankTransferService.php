@@ -93,7 +93,7 @@ class BankTransferService
      */
     public function create(array $inputs = []): ?BaseModel
     {
-        $inputs['allow_insufficient_balance'] = $inputs['allow_insufficient_balance'] ?? true;
+        $inputs['allow_insufficient_balance'] = $inputs['allow_insufficient_balance'] ?? false;
 
         $sender = Auth::user()->find($inputs['user_id']);
 
@@ -185,7 +185,7 @@ class BankTransferService
             'service_id' => $inputs['service_id'],
         ]);
 
-        if ($inputs['allow_insufficient_balance']) {
+        if (!$inputs['allow_insufficient_balance']) {
             if ((float)$inputs['order_data']['service_stat_data']['total_amount'] > (float)$senderAccount->user_account_data['available_amount']) {
                 throw new InsufficientBalanceException($senderAccount->user_account_data['currency']);
             }
@@ -199,7 +199,7 @@ class BankTransferService
             $userUpdatedBalance = $this->debitTransaction($bankTransfer);
             $senderUpdatedAccount = $senderAccount->toArray();
             $senderUpdatedAccount['user_account_data']['spent_amount'] = (float)$senderUpdatedAccount['user_account_data']['spent_amount'] + (float)$userUpdatedBalance['spent_amount'];
-            if ($inputs['allow_insufficient_balance']) {
+            if (!$inputs['allow_insufficient_balance']) {
                 $senderUpdatedAccount['user_account_data']['available_amount'] = (float)$userUpdatedBalance['current_amount'];
             }
             $inputs['order_data']['previous_amount'] = (float)$senderAccount->user_account_data['available_amount'];
