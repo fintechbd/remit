@@ -138,7 +138,7 @@ class CashPickupService
             'amount' => $inputs['amount'],
             'service_id' => $inputs['service_id'],
         ]);
-        if ($inputs['reverse']) {
+        if ($inputs['order_data']['is_reverse']) {
             $inputs['amount'] = $currencyConversion['converted'];
             $inputs['converted_amount'] = $currencyConversion['amount'];
         } else {
@@ -218,7 +218,7 @@ class CashPickupService
         } catch (\Exception $exception) {
             DB::rollBack();
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
-            throw new OrderRequestFailedException(OrderType::BankTransfer->value, 0, $exception);
+            throw new OrderRequestFailedException(OrderType::CashPickup->value, 0, $exception);
         }
     }
 

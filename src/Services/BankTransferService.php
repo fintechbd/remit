@@ -143,7 +143,7 @@ class BankTransferService
             'amount' => $inputs['amount'],
             'service_id' => $inputs['service_id'],
         ]);
-        if ($inputs['reverse']) {
+        if ($inputs['order_data']['is_reverse']) {
             $inputs['amount'] = $currencyConversion['converted'];
             $inputs['converted_amount'] = $currencyConversion['amount'];
         } else {
@@ -175,7 +175,6 @@ class BankTransferService
             'flag' => 'create',
             'timestamp' => now(),
         ];
-        $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData($inputs['order_data']);
         $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([
             'role_id' => $inputs['order_data']['role_id'],
             'reverse' => false,
