@@ -9,8 +9,6 @@ interface WalletVerification
     /**
      * Run a wallet verification
      * and return conclusion if it is valid or not
-     *
-     * @return WalletVerificationVerdict
      */
     public function __invoke(): WalletVerificationVerdict;
 }

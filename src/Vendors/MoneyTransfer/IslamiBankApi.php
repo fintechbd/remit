@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Vendors\MoneyTransfer;
 
-use DOMDocument;
 use DOMException;
 use ErrorException;
 use Exception;
