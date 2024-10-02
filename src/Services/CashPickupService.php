@@ -101,7 +101,7 @@ class CashPickupService
         }
 
         $inputs['order_data']['order_type'] = OrderType::CashPickup;
-
+        $inputs['description'] = 'Cash Pickup';
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
 
         $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
