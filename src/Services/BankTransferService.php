@@ -3,7 +3,6 @@
 namespace Fintech\Remit\Services;
 
 use Fintech\Auth\Facades\Auth;
-use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Auth\RiskProfile;
