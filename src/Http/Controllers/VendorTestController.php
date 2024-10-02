@@ -2,7 +2,7 @@
 
 namespace Fintech\Remit\Http\Controllers;
 
-use Fintech\Remit\Vendors\IslamiBankApi;
+use Fintech\Remit\Vendors\MoneyTransfer\IslamiBankApi;
 use Fintech\Transaction\Services\OrderService;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Http;

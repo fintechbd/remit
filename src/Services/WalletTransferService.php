@@ -78,7 +78,7 @@ class WalletTransferService
         return $this->walletTransferRepository->create($filters);
     }
 
-    private function create(array $inputs = []): ?BaseModel
+    public function create(array $inputs = []): ?BaseModel
     {
         $sender = Auth::user()->find($inputs['user_id']);
 

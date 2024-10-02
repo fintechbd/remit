@@ -1,6 +1,6 @@
 <?php
 
-namespace Fintech\Remit\Vendors;
+namespace Fintech\Remit\Vendors\MoneyTransfer;
 
 use Carbon\Carbon;
 use DOMDocument;
@@ -9,6 +9,8 @@ use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Fintech\Remit\Vendors\CatalogListService;
+use Fintech\Remit\Vendors\CountryService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use stdClass;
