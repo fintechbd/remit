@@ -150,5 +150,4 @@ trait IslamiBankAuthTrait
 
         return $response['Envelope']['Body'] ?? null;
     }
-
 }

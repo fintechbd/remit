@@ -2,7 +2,4 @@
 
 namespace Fintech\Remit\Support;
 
-class WalletVerificationVerdict
-{
-
-}
+class WalletVerificationVerdict {}
