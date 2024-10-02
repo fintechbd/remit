@@ -185,8 +185,8 @@ class BankTransferService
             'service_id' => $inputs['service_id'],
         ]);
 
-        if (!$inputs['allow_insufficient_balance']) {
-            if ((float)$inputs['order_data']['service_stat_data']['total_amount'] > (float)$senderAccount->user_account_data['available_amount']) {
+        if (! $inputs['allow_insufficient_balance']) {
+            if ((float) $inputs['order_data']['service_stat_data']['total_amount'] > (float) $senderAccount->user_account_data['available_amount']) {
                 throw new InsufficientBalanceException($senderAccount->user_account_data['currency']);
             }
         }
@@ -198,12 +198,12 @@ class BankTransferService
             DB::commit();
             $userUpdatedBalance = $this->debitTransaction($bankTransfer);
             $senderUpdatedAccount = $senderAccount->toArray();
-            $senderUpdatedAccount['user_account_data']['spent_amount'] = (float)$senderUpdatedAccount['user_account_data']['spent_amount'] + (float)$userUpdatedBalance['spent_amount'];
-            if (!$inputs['allow_insufficient_balance']) {
-                $senderUpdatedAccount['user_account_data']['available_amount'] = (float)$userUpdatedBalance['current_amount'];
+            $senderUpdatedAccount['user_account_data']['spent_amount'] = (float) $senderUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
+            if (! $inputs['allow_insufficient_balance']) {
+                $senderUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
             }
-            $inputs['order_data']['previous_amount'] = (float)$senderAccount->user_account_data['available_amount'];
-            $inputs['order_data']['current_amount'] = ((float)$inputs['order_data']['previous_amount'] + (float)$inputs['converted_amount']);
+            $inputs['order_data']['previous_amount'] = (float) $senderAccount->user_account_data['available_amount'];
+            $inputs['order_data']['current_amount'] = ((float) $inputs['order_data']['previous_amount'] + (float) $inputs['converted_amount']);
             $inputs['timeline'][] = [
                 'message' => 'Deducted '.currency($userUpdatedBalance['spent_amount'], $inputs['currency']).' from user account successfully',
                 'flag' => 'info',
