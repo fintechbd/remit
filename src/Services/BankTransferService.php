@@ -3,6 +3,7 @@
 namespace Fintech\Remit\Services;
 
 use Fintech\Auth\Facades\Auth;
+use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Auth\RiskProfile;
@@ -174,6 +175,7 @@ class BankTransferService
             'flag' => 'create',
             'timestamp' => now(),
         ];
+        $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData($inputs['order_data']);
         $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([
             'role_id' => $inputs['order_data']['role_id'],
             'reverse' => false,
