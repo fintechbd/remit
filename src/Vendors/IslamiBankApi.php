@@ -788,7 +788,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
 
         $response = $this->callApi($method, $service);
 
-        $response = "TRUE|20502131001105202|ABDULLAH AL MASUD|MD MOSHARRAF HOSSAIN";
+        $response = "TRUE|{$walletNo}|ABDULLAH AL MASUD|MD MOSHARRAF HOSSAIN";
 
 //        $response = "FALSE|3005";
 
