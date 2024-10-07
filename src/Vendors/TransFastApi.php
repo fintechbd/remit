@@ -1,6 +1,6 @@
 <?php
 
-namespace Fintech\Remit\Vendors\MoneyTransfer;
+namespace Fintech\Remit\Vendors;
 
 use ErrorException;
 use Exception;

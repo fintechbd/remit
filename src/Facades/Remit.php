@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|CashPickupService cashPickup(array $filters = null)
  * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|WalletTransferService walletTransfer(array $filters = null)
  * @method static \Illuminate\Contracts\Pagination\Paginator|\Illuminate\Support\Collection|AssignVendorService assignVendor(array $filters = null)
+ * @method static \Fintech\Remit\Support\WalletVerificationVerdict verifyWallet(array $inputs = [])
  *
  * // Crud Service Method Point Do not Remove //
  *

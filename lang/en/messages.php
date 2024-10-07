@@ -10,4 +10,8 @@ return [
         'release_failed' => 'There\'s been an error. while :model with ID::id failed to release.',
         'success' => 'Successfully assigned order to requested vendor [:slug].',
     ],
+    'verification' => [
+        'wallet_provider_not_found' => 'No wallet verification provider found for (:wallet).',
+        'provider_missing_method' => ':provider verification provider doesn\'t implement required interface.',
+    ]
 ];

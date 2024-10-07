@@ -1,6 +1,6 @@
 <?php
 
-namespace Fintech\Remit\Vendors\MoneyTransfer;
+namespace Fintech\Remit\Vendors;
 
 use App\Models\Backend\Setting\CatalogList;
 use App\Models\Backend\Setting\Country;

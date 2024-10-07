@@ -70,7 +70,9 @@ return [
     'providers' => [
         'emqapi' => [
             'mode' => 'sandbox',
-            'driver' => \Fintech\Remit\Vendors\MoneyTransfer\EmqApi::class,
+            'driver' => \Fintech\Remit\Vendors\EmqApi::class,
+            'wallet_verification' => false,
+            'countries' => [],
             'live' => [
                 'endpoint' => 'https://partner.emq.com/v1',
                 'username' => env('PACKAGE_REMIT_EMQ_API_USERNAME'),
@@ -84,7 +86,9 @@ return [
         ],
         'transfast' => [
             'mode' => 'sandbox',
-            'driver' => \Fintech\Remit\Vendors\MoneyTransfer\TransFastApi::class,
+            'driver' => \Fintech\Remit\Vendors\TransFastApi::class,
+            'wallet_verification' => false,
+            'countries' => [],
             'live' => [
                 'endpoint' => 'https://send.transfast.ws/api/',
                 'token' => env('PACKAGE_REMIT_TRANS_FAST_TOKEN'),
@@ -96,7 +100,9 @@ return [
         ],
         'valyou' => [
             'mode' => 'sandbox',
-            'driver' => \Fintech\Remit\Vendors\MoneyTransfer\ValYouApi::class,
+            'driver' => \Fintech\Remit\Vendors\ValYouApi::class,
+            'wallet_verification' => false,
+            'countries' => [],
             'live' => [
                 'endpoint' => 'https://www.prabhucashsystem.com/SendAPI/webService.asmx',
                 'username' => env('PACKAGE_REMIT_VALYOU_USERNAME'),
@@ -114,7 +120,9 @@ return [
         ],
         'agrani' => [
             'mode' => 'sandbox',
-            'driver' => \Fintech\Remit\Vendors\MoneyTransfer\AgraniBankApi::class,
+            'driver' => \Fintech\Remit\Vendors\AgraniBankApi::class,
+            'wallet_verification' => false,
+            'countries' => [],
             'live' => [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
                 'username' => env('PACKAGE_REMIT_AGRANI_BANK_USERNAME'),
@@ -130,7 +138,9 @@ return [
         ],
         'citybank' => [
             'mode' => 'sandbox',
-            'driver' => \Fintech\Remit\Vendors\MoneyTransfer\CityBankApi::class,
+            'driver' => \Fintech\Remit\Vendors\CityBankApi::class,
+            'wallet_verification' => false,
+            'countries' => [],
             'live' => [
                 'endpoint' => 'http://nrbms.thecitybank.com/nrb_api_test/dynamicApi.php?wsdl',
                 'username' => env('PACKAGE_REMIT_CITY_BANK_USERNAME'),
@@ -144,7 +154,9 @@ return [
         ],
         'islamibank' => [
             'mode' => env('PACKAGE_REMIT_ISLAMI_BANK_MODE', 'sandbox'),
-            'driver' => \Fintech\Remit\Vendors\MoneyTransfer\IslamiBankApi::class,
+            'driver' => \Fintech\Remit\Vendors\IslamiBankApi::class,
+            'wallet_verification' => true,
+            'countries' => [19],
             'live' => [
                 'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
                 'username' => env('PACKAGE_REMIT_ISLAMI_BANK_USERNAME'),
@@ -158,7 +170,9 @@ return [
         ],
         'meghnabank' => [
             'mode' => env('PACKAGE_REMIT_MEGHNA_BANK_MODE', 'sandbox'),
-            'driver' => \Fintech\Remit\Vendors\MoneyTransfer\MeghnaBankApi::class,
+            'driver' => \Fintech\Remit\Vendors\MeghnaBankApi::class,
+            'wallet_verification' => false,
+            'countries' => [],
             'live' => [
                 'endpoint' => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/',
                 'bankid' => env('PACKAGE_REMIT_MEGHNA_BANK_BANK_ID', null),

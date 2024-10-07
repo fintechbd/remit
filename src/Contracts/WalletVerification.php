@@ -7,8 +7,11 @@ use Fintech\Remit\Support\WalletVerificationVerdict;
 interface WalletVerification
 {
     /**
-     * Run a wallet verification
-     * and return conclusion if it is valid or not
+     * Method to make a request to the remittance service provider
+     * for a quotation of the order. that include charge, fee,
+     * commission and other information related to order.
+     *
+     * @throws \ErrorException
      */
     public function __invoke(): WalletVerificationVerdict;
 }
