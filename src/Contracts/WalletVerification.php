@@ -13,5 +13,5 @@ interface WalletVerification
      *
      * @throws \ErrorException
      */
-    public function __invoke(): WalletVerificationVerdict;
+    public function __invoke(array $inputs = []): WalletVerificationVerdict;
 }

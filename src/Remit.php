@@ -51,6 +51,10 @@ class Remit
             throw new \ErrorException(__('remit::messages.verification.provider_missing_method', ['provider' => class_basename($provider['driver'])]));
         }
 
+        $inputs['wallet'] = $wallet;
+
+        unset($inputs['wallet_id']);
+
         return $instance($inputs);
     }
 

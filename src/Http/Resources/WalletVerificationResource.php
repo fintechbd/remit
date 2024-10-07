@@ -14,6 +14,10 @@ class WalletVerificationResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'account_no' => $this->account_no,
+            'account_title' => $this->account_title,
+            'name' => $this->wallet->name
+        ];
     }
 }

@@ -22,6 +22,10 @@ class WalletVerificationController extends Controller
         try {
             $verification = Remit::verifyWallet($request->validated());
 
+            if (!$verification->status) {
+                throw new Exception($verification->message);
+            }
+
             return new WalletVerificationResource($verification);
 
         } catch (Exception $exception) {
