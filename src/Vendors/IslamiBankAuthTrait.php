@@ -111,15 +111,8 @@ trait IslamiBankAuthTrait
     public function __construct()
     {
         $this->config = config('fintech.remit.providers.islamibank');
-
-        if ($this->config['mode'] === 'sandbox') {
-            $this->apiUrl = $this->config[$this->status]['endpoint'];
-            $this->status = 'sandbox';
-
-        } else {
-            $this->apiUrl = $this->config[$this->status]['endpoint'];
-            $this->status = 'live';
-        }
+        $this->status = config('fintech.remit.providers.islamibank.mode');
+        $this->apiUrl = $this->config[$this->status]['endpoint'];
 
         $this->xml = new DOMDocument('1.0', 'utf-8');
         $this->xml->preserveWhiteSpace = false;

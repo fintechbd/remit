@@ -143,7 +143,7 @@ return [
             ],
         ],
         'islamibank' => [
-            'mode' => 'sandbox',
+            'mode' => env('PACKAGE_REMIT_ISLAMI_BANK_MODE', 'sandbox'),
             'driver' => \Fintech\Remit\Vendors\MoneyTransfer\IslamiBankApi::class,
             'live' => [
                 'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
@@ -157,7 +157,7 @@ return [
             ],
         ],
         'meghnabank' => [
-            'mode' => 'sandbox',
+            'mode' => env('PACKAGE_REMIT_MEGHNA_BANK_MODE', 'sandbox'),
             'driver' => \Fintech\Remit\Vendors\MoneyTransfer\MeghnaBankApi::class,
             'live' => [
                 'endpoint' => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/',
