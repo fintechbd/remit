@@ -55,7 +55,7 @@ class Remit
 
         unset($inputs['wallet_id']);
 
-        return $instance($inputs);
+        return $instance->validateWallet($inputs);
     }
 
     //** Crud Service Method Point Do not Remove **//
