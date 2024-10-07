@@ -33,7 +33,7 @@ class Remit
     /**
      * @throws \Exception
      */
-    public function verifyWallet(array $inputs = []) : WalletVerificationVerdict
+    public function verifyWallet(array $inputs = []): WalletVerificationVerdict
     {
         $wallet = \Fintech\Banco\Facades\Banco::bank()->find($inputs['wallet_id']);
 
@@ -41,13 +41,13 @@ class Remit
             return $provider['wallet_verification'] == true && in_array($wallet->country_id, $provider['countries'], true);
         })->first();
 
-        if (!$provider) {
+        if (! $provider) {
             throw new \ErrorException(__('remit::messages.verification.wallet_provider_not_found', ['wallet' => ucwords(strtolower($wallet->name))]));
         }
 
         $instance = app($provider['driver']);
 
-        if (!$instance instanceof \Fintech\Remit\Contracts\WalletVerification) {
+        if (! $instance instanceof \Fintech\Remit\Contracts\WalletVerification) {
             throw new \ErrorException(__('remit::messages.verification.provider_missing_method', ['provider' => class_basename($provider['driver'])]));
         }
 

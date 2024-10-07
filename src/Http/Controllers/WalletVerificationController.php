@@ -3,8 +3,6 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
-use Fintech\Banco\Facades\Banco;
-use Fintech\Remit\Contracts\WalletVerification;
 use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\WalletVerificationRequest;
 use Fintech\Remit\Http\Resources\WalletVerificationResource;
@@ -22,7 +20,7 @@ class WalletVerificationController extends Controller
         try {
             $verification = Remit::verifyWallet($request->validated());
 
-            if (!$verification->status) {
+            if (! $verification->status) {
                 throw new Exception($verification->message);
             }
 

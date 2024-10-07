@@ -17,7 +17,7 @@ class WalletVerificationResource extends JsonResource
         return [
             'account_no' => $this->account_no,
             'account_title' => $this->account_title,
-            'name' => $this->wallet->name
+            'name' => $this->wallet->name,
         ];
     }
 }

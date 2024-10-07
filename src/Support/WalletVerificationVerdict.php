@@ -20,7 +20,7 @@ class WalletVerificationVerdict extends DynamicProperty
         'status' => 'bool',
         'message' => 'string',
         'account_title' => 'string',
-        'account_no' => 'string'
+        'account_no' => 'string',
     ];
 
     protected array $defaults = [
@@ -29,6 +29,6 @@ class WalletVerificationVerdict extends DynamicProperty
         'account_title' => '',
         'original' => null,
         'wallet' => null,
-        'account_no' => ''
+        'account_no' => '',
     ];
 }
