@@ -1,20 +1,13 @@
 <?php
 
-namespace Fintech\Remit\Jobs;
+namespace Fintech\Remit\Listeners;
 
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Bus\Batch;
-use Illuminate\Bus\Batchable;
-use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 
-class RemitOrderComplianceBatchJob implements ShouldQueue
+class RemitOrderComplianceCheck implements ShouldQueue
 {
-    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
     /**
      * Handle the event.
      *
@@ -65,7 +58,7 @@ class RemitOrderComplianceBatchJob implements ShouldQueue
             ->catch(function (Batch $batch, \Throwable $e) use (&$transfer) {
                 $timeline = $transfer->timeline;
                 $timeline[] = [
-                    'message' => 'Remittance transfer compliance policy reported an error: '.$e->getMessage(),
+                    'message' => 'Remittance transfer compliance policy reported an error: ' . $e->getMessage(),
                     'flag' => 'error',
                     'timestamp' => now(),
                 ];
@@ -83,5 +76,16 @@ class RemitOrderComplianceBatchJob implements ShouldQueue
             ->name('Remit compliance verification')
             ->withOption('allowFailures', true)
             ->dispatch();
+    }
+
+    /**
+     * Handle a job failure.
+     */
+    public function failed(object $event, \Throwable $exception): void
+    {
+        Transaction::order()->update($event->transfer->getKey(), [
+            'status' => \Fintech\Core\Enums\Transaction\OrderStatus::AdminVerification->value,
+            'notes' => $exception->getMessage(),
+        ]);
     }
 }
