@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Jobs;
 
-use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Bus\Batch;
 use Illuminate\Bus\Batchable;
@@ -18,6 +17,7 @@ class RemitOrderComplianceBatchJob implements ShouldQueue
 
     /**
      * Handle the event.
+     *
      * @throws \Throwable
      */
     public function handle(object $event): void
@@ -50,14 +50,14 @@ class RemitOrderComplianceBatchJob implements ShouldQueue
                 $transfer = Transaction::order()->update($transfer->getKey(), ['timeline' => $timeline]);
             })
             ->progress(function (Batch $batch) use (&$transfer) {
-                logger("Batch", [$batch]);
-//                $timeline = $transfer->timeline;
-//                $timeline[] = [
-//                    'message' => 'Testing',
-//                    'flag' => 'info',
-//                    'timestamp' => now(),
-//                ];
-//                $transfer = Transaction::order()->update($transfer->getKey(), ['timeline' => $timeline]);
+                logger('Batch', [$batch]);
+                //                $timeline = $transfer->timeline;
+                //                $timeline[] = [
+                //                    'message' => 'Testing',
+                //                    'flag' => 'info',
+                //                    'timestamp' => now(),
+                //                ];
+                //                $transfer = Transaction::order()->update($transfer->getKey(), ['timeline' => $timeline]);
             })
             ->then(function (Batch $batch) use (&$transfer) {
                 \Fintech\Transaction\Jobs\OrderRiskProfileUpdateJob::dispatch($transfer->getKey());
@@ -65,7 +65,7 @@ class RemitOrderComplianceBatchJob implements ShouldQueue
             ->catch(function (Batch $batch, \Throwable $e) use (&$transfer) {
                 $timeline = $transfer->timeline;
                 $timeline[] = [
-                    'message' => 'Remittance transfer compliance policy reported an error: ' . $e->getMessage(),
+                    'message' => 'Remittance transfer compliance policy reported an error: '.$e->getMessage(),
                     'flag' => 'error',
                     'timestamp' => now(),
                 ];
@@ -84,5 +84,4 @@ class RemitOrderComplianceBatchJob implements ShouldQueue
             ->withOption('allowFailures', true)
             ->dispatch();
     }
-
 }
