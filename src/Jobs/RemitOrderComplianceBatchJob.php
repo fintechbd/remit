@@ -2,6 +2,8 @@
 
 namespace Fintech\Remit\Jobs;
 
+use Fintech\Core\Enums\Transaction\OrderStatus;
+use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Bus\Batch;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -16,36 +18,71 @@ class RemitOrderComplianceBatchJob implements ShouldQueue
 
     /**
      * Handle the event.
+     * @throws \Throwable
      */
     public function handle(object $event): void
     {
+        $transfer = $event->transfer;
 
-        $batch = \Illuminate\Support\Facades\Bus::batch([
-            \Fintech\Transaction\Jobs\Compliance\LargeCashTransferJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\LargeVirtualCashTransferJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\ElectronicFundTransferJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\SuspiciousTransactionJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\ClientDueDiligenceJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\StructuringDetectionJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\HighRiskCountryTransferJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\PepDetectionJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\HIODetectionJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\AccountVelocityJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\NewProductUsageJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\DormantAccountActivityJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\ThirdPartyTransferJob::dispatch($event->transfer->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\VirtualCurrencyTravelJob::dispatch($event->transfer->getKey()),
-        ])->before(function (Batch $batch) use ($event) {
-            // The batch has been created but no jobs have been added...
-        })->progress(function (Batch $batch) use ($event) {
-
-        })->then(function (Batch $batch) use ($event) {
-            \Fintech\Transaction\Jobs\OrderRiskProfileUpdateJob::dispatch($event->transfer->getKey());
-        })->catch(function (Batch $batch, \Throwable $e) use ($event) {
-            // First batch job failure detected...
-        })->finally(function (Batch $batch) use ($event) {
-            // The batch has finished executing...
-        })->name('Remit compliance verification')->dispatch();
+        \Illuminate\Support\Facades\Bus::batch([
+            \Fintech\Transaction\Jobs\Compliance\LargeCashTransferJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\LargeVirtualCashTransferJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\ElectronicFundTransferJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\SuspiciousTransactionJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\ClientDueDiligenceJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\StructuringDetectionJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\HighRiskCountryTransferJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\PepDetectionJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\HIODetectionJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\AccountVelocityJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\NewProductUsageJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\DormantAccountActivityJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\ThirdPartyTransferJob::dispatch($transfer->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\VirtualCurrencyTravelJob::dispatch($transfer->getKey()),
+        ])
+            ->before(function (Batch $batch) use (&$transfer) {
+                $timeline = $transfer->timeline;
+                $timeline[] = [
+                    'message' => 'Verifying remittance transfer compliance policy.',
+                    'flag' => 'info',
+                    'timestamp' => now(),
+                ];
+                $transfer = Transaction::order()->update($transfer->getKey(), ['timeline' => $timeline]);
+            })
+            ->progress(function (Batch $batch) use (&$transfer) {
+                logger("Batch", [$batch]);
+//                $timeline = $transfer->timeline;
+//                $timeline[] = [
+//                    'message' => 'Testing',
+//                    'flag' => 'info',
+//                    'timestamp' => now(),
+//                ];
+//                $transfer = Transaction::order()->update($transfer->getKey(), ['timeline' => $timeline]);
+            })
+            ->then(function (Batch $batch) use (&$transfer) {
+                \Fintech\Transaction\Jobs\OrderRiskProfileUpdateJob::dispatch($transfer->getKey());
+            })
+            ->catch(function (Batch $batch, \Throwable $e) use (&$transfer) {
+                $timeline = $transfer->timeline;
+                $timeline[] = [
+                    'message' => 'Remittance transfer compliance policy reported an error: ' . $e->getMessage(),
+                    'flag' => 'error',
+                    'timestamp' => now(),
+                ];
+                $transfer = Transaction::order()->update($transfer->getKey(), ['timeline' => $timeline]);
+            })
+            ->finally(function (Batch $batch) use (&$transfer) {
+                $timeline = $transfer->timeline;
+                $timeline[] = [
+                    'message' => 'Remittance transfer compliance policy verification completed.',
+                    'flag' => 'info',
+                    'timestamp' => now(),
+                ];
+                $transfer = Transaction::order()->update($transfer->getKey(), ['timeline' => $timeline]);
+            })
+            ->name('Remit compliance verification')
+            ->withOption('allowFailures', true)
+            ->dispatch();
     }
 
 }
