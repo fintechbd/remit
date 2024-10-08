@@ -21,19 +21,19 @@ class RemitOrderComplianceCheck implements ShouldQueue
 
         \Illuminate\Support\Facades\Bus::batch([
             \Fintech\Transaction\Jobs\Compliance\LargeCashTransferJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\LargeVirtualCashTransferJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\ElectronicFundTransferJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\SuspiciousTransactionJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\ClientDueDiligenceJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\StructuringDetectionJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\HighRiskCountryTransferJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\PepDetectionJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\HIODetectionJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\AccountVelocityJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\NewProductUsageJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\DormantAccountActivityJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\ThirdPartyTransferJob::dispatch($order->getKey()),
-//            \Fintech\Transaction\Jobs\Compliance\VirtualCurrencyTravelJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\LargeVirtualCashTransferJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\ElectronicFundTransferJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\SuspiciousTransactionJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\ClientDueDiligenceJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\StructuringDetectionJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\HighRiskCountryTransferJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\PepDetectionJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\HIODetectionJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\AccountVelocityJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\NewProductUsageJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\DormantAccountActivityJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\ThirdPartyTransferJob::dispatch($order->getKey()),
+            //            \Fintech\Transaction\Jobs\Compliance\VirtualCurrencyTravelJob::dispatch($order->getKey()),
         ])
             ->before(function (Batch $batch) use (&$timeline) {
                 $timeline[] = [
@@ -55,11 +55,11 @@ class RemitOrderComplianceCheck implements ShouldQueue
                     'flag' => 'info',
                     'timestamp' => now(),
                 ];
-//                \Fintech\Transaction\Jobs\OrderRiskProfileUpdateJob::dispatch($order->getKey());
+                //                \Fintech\Transaction\Jobs\OrderRiskProfileUpdateJob::dispatch($order->getKey());
             })
             ->catch(function (Batch $batch, \Throwable $e) use (&$timeline) {
                 $timeline[] = [
-                    'message' => 'Remittance transfer compliance policy reported an error: ' . $e->getMessage(),
+                    'message' => 'Remittance transfer compliance policy reported an error: '.$e->getMessage(),
                     'flag' => 'error',
                     'timestamp' => now(),
                 ];
