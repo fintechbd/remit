@@ -24,7 +24,7 @@ class WalletTransferRequested
         $service = Business::service()->find($bankTransfer->service_id);
 
         $timeline[] = [
-            'message' => ucwords(strtolower($service->service_name)).' bank transfer requested',
+            'message' => ucwords(strtolower($service->service_name)).' wallet transfer requested',
             'flag' => 'info',
             'timestamp' => now(),
         ];

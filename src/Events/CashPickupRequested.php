@@ -24,7 +24,7 @@ class CashPickupRequested
         $service = Business::service()->find($bankTransfer->service_id);
 
         $timeline[] = [
-            'message' => ucwords(strtolower($service->service_name)).' bank transfer requested',
+            'message' => ucwords(strtolower($service->service_name)).' cash pickup requested',
             'flag' => 'info',
             'timestamp' => now(),
         ];
