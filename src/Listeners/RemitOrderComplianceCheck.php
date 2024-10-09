@@ -20,7 +20,7 @@ class RemitOrderComplianceCheck implements ShouldQueue
         $timeline = $order->timeline;
 
         \Illuminate\Support\Facades\Bus::batch([
-//            [
+            //            [
             new \Fintech\Transaction\Jobs\Compliance\LargeCashTransferPolicy($order->getKey()),
             new \Fintech\Transaction\Jobs\Compliance\LargeVirtualCashTransferPolicy($order->getKey()),
             new \Fintech\Transaction\Jobs\Compliance\ElectronicFundTransferPolicy($order->getKey()),
@@ -35,7 +35,7 @@ class RemitOrderComplianceCheck implements ShouldQueue
             new \Fintech\Transaction\Jobs\Compliance\DormantAccountActivityPolicy($order->getKey()),
             new \Fintech\Transaction\Jobs\Compliance\ThirdPartyTransferPolicy($order->getKey()),
             new \Fintech\Transaction\Jobs\Compliance\VirtualCurrencyTravelPolicy($order->getKey()),
-//            ]
+            //            ]
         ])
             ->before(function (Batch $batch) use (&$timeline) {
                 $timeline[] = [
@@ -45,7 +45,7 @@ class RemitOrderComplianceCheck implements ShouldQueue
                 ];
             })
             ->then(function (Batch $batch) use (&$timeline) {
-                logger("Then: ", [$timeline]);
+                logger('Then: ', [$timeline]);
                 $timeline[] = [
                     'message' => 'All Job is Done',
                     'flag' => 'info',
@@ -55,7 +55,7 @@ class RemitOrderComplianceCheck implements ShouldQueue
             })
             ->catch(function (Batch $batch, \Throwable $e) use (&$timeline) {
                 $timeline[] = [
-                    'message' => 'Remittance transfer compliance policy reported an error: ' . $e->getMessage(),
+                    'message' => 'Remittance transfer compliance policy reported an error: '.$e->getMessage(),
                     'flag' => 'error',
                     'timestamp' => now(),
                 ];
