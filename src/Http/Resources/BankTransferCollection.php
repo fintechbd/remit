@@ -4,6 +4,7 @@ namespace Fintech\Remit\Http\Resources;
 
 use Fintech\Core\Facades\Core;
 use Fintech\Core\Supports\Constant;
+use Fintech\Remit\Traits\CompliancePolicyTable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use stdClass;
@@ -12,6 +13,8 @@ use function currency;
 
 class BankTransferCollection extends ResourceCollection
 {
+    use CompliancePolicyTable;
+
     /**
      * Transform the resource collection into an array.
      *
@@ -79,6 +82,8 @@ class BankTransferCollection extends ResourceCollection
             $data['assignable'] = ($data['assigned_user_id'] == null || $data['assigned_user_id'] == $request->user()->getKey());
 
             $data['trackable'] = $data['service_vendor_id'] != config('fintech.business.default_vendor');
+
+            $this->renderPolicyData($data['order_data']);
 
             return $data;
         })->toArray();
