@@ -14,6 +14,7 @@ trait CompliancePolicyTable
             foreach ($order_data['compliance_data'] as $index => $compliance) {
                 $policies[$index] = $compliance;
                 $policies[$index]['risk'] = RiskProfile::from($compliance['risk']);
+                $policies[$index]['priority'] = RiskProfile::from($compliance['priority'] ?? 'green');
             }
         }
 
