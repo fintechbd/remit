@@ -28,7 +28,7 @@ class RemitOrderComplianceCheck implements ShouldQueue
             new \Fintech\Transaction\Jobs\Compliance\ClientDueDiligencePolicy($order->getKey()),
             new \Fintech\Transaction\Jobs\Compliance\StructuringDetectionPolicy($order->getKey()),
             new \Fintech\Transaction\Jobs\Compliance\HighRiskCountryTransferPolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\PepDetectionPolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\PEPDetectionPolicy($order->getKey()),
             new \Fintech\Transaction\Jobs\Compliance\HIODetectionPolicy($order->getKey()),
             new \Fintech\Transaction\Jobs\Compliance\AccountVelocityPolicy($order->getKey()),
             new \Fintech\Transaction\Jobs\Compliance\NewProductUsagePolicy($order->getKey()),
