@@ -15,6 +15,7 @@ trait CompliancePolicyTable
                 $policies[$index] = $compliance;
                 $policies[$index]['risk'] = RiskProfile::from($compliance['risk']);
                 $policies[$index]['priority'] = RiskProfile::from($compliance['priority'] ?? 'green');
+                $policies[$index]['remarks'] = $compliance['remarks'] ?? 'N/A';
             }
         }
 
