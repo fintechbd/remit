@@ -20,20 +20,22 @@ class RemitOrderComplianceCheck implements ShouldQueue
         $timeline = $order->timeline;
 
         \Illuminate\Support\Facades\Bus::batch([
-            \Fintech\Transaction\Jobs\Compliance\LargeCashTransferPolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\LargeVirtualCashTransferPolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\ElectronicFundTransferPolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\SuspiciousTransactionPolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\ClientDueDiligencePolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\StructuringDetectionPolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\HighRiskCountryTransferPolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\PepDetectionPolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\HIODetectionPolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\AccountVelocityPolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\NewProductUsagePolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\DormantAccountActivityPolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\ThirdPartyTransferPolicy::dispatch($order->getKey()),
-            \Fintech\Transaction\Jobs\Compliance\VirtualCurrencyTravelPolicy::dispatch($order->getKey()),
+//            [
+            new \Fintech\Transaction\Jobs\Compliance\LargeCashTransferPolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\LargeVirtualCashTransferPolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\ElectronicFundTransferPolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\SuspiciousTransactionPolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\ClientDueDiligencePolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\StructuringDetectionPolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\HighRiskCountryTransferPolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\PepDetectionPolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\HIODetectionPolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\AccountVelocityPolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\NewProductUsagePolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\DormantAccountActivityPolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\ThirdPartyTransferPolicy($order->getKey()),
+            new \Fintech\Transaction\Jobs\Compliance\VirtualCurrencyTravelPolicy($order->getKey()),
+//            ]
         ])
             ->before(function (Batch $batch) use (&$timeline) {
                 $timeline[] = [
