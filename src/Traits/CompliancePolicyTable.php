@@ -10,7 +10,7 @@ trait CompliancePolicyTable
     {
         $policies = [];
 
-        if (!empty($order_data['compliance_data'])) {
+        if (! empty($order_data['compliance_data'])) {
             foreach ($order_data['compliance_data'] as $index => $compliance) {
                 $policies[$index] = $compliance;
                 $policies[$index]['risk'] = RiskProfile::from($compliance['risk']);
