@@ -21,19 +21,19 @@ class RemitOrderComplianceCheck implements ShouldQueue
 
         \Illuminate\Support\Facades\Bus::batch([
             \Fintech\Transaction\Jobs\Compliance\LargeCashTransferPolicy::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\LargeVirtualCashTransferJob::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\ElectronicFundTransferJob::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\SuspiciousTransactionJob::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\ClientDueDiligenceJob::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\StructuringDetectionJob::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\HighRiskCountryTransferJob::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\PepDetectionJob::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\HIODetectionJob::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\AccountVelocityJob::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\NewProductUsageJob::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\DormantAccountActivityJob::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\ThirdPartyTransferJob::dispatch($order->getKey()),
-            //            \Fintech\Transaction\Jobs\Compliance\VirtualCurrencyTravelJob::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\LargeVirtualCashTransferPolicy::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\ElectronicFundTransferPolicy::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\SuspiciousTransactionPolicy::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\ClientDueDiligencePolicy::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\StructuringDetectionPolicy::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\HighRiskCountryTransferPolicy::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\PepDetectionPolicy::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\HIODetectionPolicy::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\AccountVelocityPolicy::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\NewProductUsagePolicy::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\DormantAccountActivityPolicy::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\ThirdPartyTransferPolicy::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\VirtualCurrencyTravelPolicy::dispatch($order->getKey()),
         ])
             ->before(function (Batch $batch) use (&$timeline) {
                 $timeline[] = [
@@ -42,14 +42,8 @@ class RemitOrderComplianceCheck implements ShouldQueue
                     'timestamp' => now(),
                 ];
             })
-            ->progress(function (Batch $batch) use (&$timeline) {
-                $timeline[] = [
-                    'message' => 'Another Job is Done',
-                    'flag' => 'info',
-                    'timestamp' => now(),
-                ];
-            })
             ->then(function (Batch $batch) use (&$timeline) {
+                logger("Then: ", [$timeline]);
                 $timeline[] = [
                     'message' => 'All Job is Done',
                     'flag' => 'info',
@@ -59,7 +53,7 @@ class RemitOrderComplianceCheck implements ShouldQueue
             })
             ->catch(function (Batch $batch, \Throwable $e) use (&$timeline) {
                 $timeline[] = [
-                    'message' => 'Remittance transfer compliance policy reported an error: '.$e->getMessage(),
+                    'message' => 'Remittance transfer compliance policy reported an error: ' . $e->getMessage(),
                     'flag' => 'error',
                     'timestamp' => now(),
                 ];
