@@ -20,7 +20,7 @@ class RemitOrderComplianceCheck implements ShouldQueue
         $timeline = $order->timeline;
 
         \Illuminate\Support\Facades\Bus::batch([
-            \Fintech\Transaction\Jobs\Compliance\LargeCashTransferJob::dispatch($order->getKey()),
+            \Fintech\Transaction\Jobs\Compliance\LargeCashTransferPolicy::dispatch($order->getKey()),
             //            \Fintech\Transaction\Jobs\Compliance\LargeVirtualCashTransferJob::dispatch($order->getKey()),
             //            \Fintech\Transaction\Jobs\Compliance\ElectronicFundTransferJob::dispatch($order->getKey()),
             //            \Fintech\Transaction\Jobs\Compliance\SuspiciousTransactionJob::dispatch($order->getKey()),
@@ -51,7 +51,7 @@ class RemitOrderComplianceCheck implements ShouldQueue
             })
             ->then(function (Batch $batch) use (&$timeline) {
                 $timeline[] = [
-                    'message' => 'Another Job is Done',
+                    'message' => 'All Job is Done',
                     'flag' => 'info',
                     'timestamp' => now(),
                 ];
