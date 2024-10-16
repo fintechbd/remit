@@ -41,8 +41,8 @@ class RemitOrderComplianceCheck implements ShouldQueue
             new \Fintech\Transaction\Jobs\Compliance\ThirdPartyTransferPolicy($order_id),
             new \Fintech\Transaction\Jobs\Compliance\VirtualCurrencyTravelPolicy($order_id),
         ])
-            ->then(function (Batch $batch) use ($order_id) {
-//                \Fintech\Transaction\Jobs\OrderRiskProfileUpdateJob::dispatch($order_id);
+            ->then(function (Batch $batch) {
+                //                \Fintech\Transaction\Jobs\OrderRiskProfileUpdateJob::dispatch($order_id);
             })
             ->finally(function (Batch $batch) use (&$event) {
                 $event->transfer->refresh();
