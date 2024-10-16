@@ -15,58 +15,44 @@ class RemitOrderComplianceCheck implements ShouldQueue
      */
     public function handle(object $event): void
     {
-        $order = $event->transfer;
+        $order_id = $event->transfer->getKey();
 
-        $timeline = $order->timeline;
+        $timeline = $event->transfer->timeline;
+        $timeline[] = [
+            'message' => 'Verifying remittance transfer compliance policy.',
+            'flag' => 'info',
+            'timestamp' => now(),
+        ];
+        Transaction::order()->update($order_id, ['timeline' => $timeline]);
 
         \Illuminate\Support\Facades\Bus::batch([
-            //            [
-            new \Fintech\Transaction\Jobs\Compliance\LargeCashTransferPolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\LargeVirtualCashTransferPolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\ElectronicFundTransferPolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\SuspiciousTransactionPolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\ClientDueDiligencePolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\StructuringDetectionPolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\HighRiskCountryTransferPolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\PEPDetectionPolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\HIODetectionPolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\AccountVelocityPolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\NewProductUsagePolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\DormantAccountActivityPolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\ThirdPartyTransferPolicy($order->getKey()),
-            new \Fintech\Transaction\Jobs\Compliance\VirtualCurrencyTravelPolicy($order->getKey()),
-            //            ]
+            new \Fintech\Transaction\Jobs\Compliance\LargeCashTransferPolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\LargeVirtualCashTransferPolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\ElectronicFundTransferPolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\SuspiciousTransactionPolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\ClientDueDiligencePolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\StructuringDetectionPolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\HighRiskCountryTransferPolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\PEPDetectionPolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\HIODetectionPolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\AccountVelocityPolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\NewProductUsagePolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\DormantAccountActivityPolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\ThirdPartyTransferPolicy($order_id),
+            new \Fintech\Transaction\Jobs\Compliance\VirtualCurrencyTravelPolicy($order_id),
         ])
-            ->before(function (Batch $batch) use (&$timeline) {
-                $timeline[] = [
-                    'message' => 'Verifying remittance transfer compliance policy.',
-                    'flag' => 'info',
-                    'timestamp' => now(),
-                ];
+            ->then(function (Batch $batch) use ($order_id) {
+//                \Fintech\Transaction\Jobs\OrderRiskProfileUpdateJob::dispatch($order_id);
             })
-            ->then(function (Batch $batch) use (&$timeline) {
-                logger('Then: ', [$timeline]);
-                $timeline[] = [
-                    'message' => 'All Job is Done',
-                    'flag' => 'info',
-                    'timestamp' => now(),
-                ];
-                //                \Fintech\Transaction\Jobs\OrderRiskProfileUpdateJob::dispatch($order->getKey());
-            })
-            ->catch(function (Batch $batch, \Throwable $e) use (&$timeline) {
-                $timeline[] = [
-                    'message' => 'Remittance transfer compliance policy reported an error: '.$e->getMessage(),
-                    'flag' => 'error',
-                    'timestamp' => now(),
-                ];
-            })
-            ->finally(function (Batch $batch) use (&$order, &$timeline) {
+            ->finally(function (Batch $batch) use (&$event) {
+                $event->transfer->refresh();
+                $timeline = $event->transfer->timeline;
                 $timeline[] = [
                     'message' => 'Remittance transfer compliance policy verification completed.',
                     'flag' => 'info',
                     'timestamp' => now(),
                 ];
-                $order = Transaction::order()->update($order->getKey(), ['timeline' => $timeline]);
+                Transaction::order()->update($event->transfer->getKey(), ['timeline' => $timeline]);
             })
             ->name('Remit compliance verification')
             ->withOption('allowFailures', true)
