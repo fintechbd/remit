@@ -2,11 +2,15 @@
 
 namespace Fintech\Remit\Models;
 
+use Fintech\Core\Traits\BlameableTrait;
 use Fintech\Transaction\Models\Order;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class WalletTransfer extends Order
+class WalletTransfer extends Order implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
+    use BlameableTrait;
     use SoftDeletes;
 
     /*
