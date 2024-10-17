@@ -54,7 +54,13 @@ class WalletTransferController extends Controller
     {
         try {
             $inputs = $request->validated();
+
             $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'wallet_transfer'])->getKey();
+
+            if ($request->isAgent()) {
+                $inputs['creator_id'] = $request->user('sanctum')->getKey();
+            }
+
             $walletTransferPaginate = Remit::walletTransfer()->list($inputs);
 
             return new WalletTransferCollection($walletTransferPaginate);

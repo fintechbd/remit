@@ -57,6 +57,11 @@ class BankTransferController extends Controller
             $inputs = $request->validated();
 
             $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'money_transfer'])->getKey();
+
+            if ($request->isAgent()) {
+                $inputs['creator_id'] = $request->user('sanctum')->getKey();
+            }
+
             $bankTransferPaginate = Remit::bankTransfer()->list($inputs);
 
             return new BankTransferCollection($bankTransferPaginate);
