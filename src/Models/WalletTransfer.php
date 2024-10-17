@@ -9,8 +9,8 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 class WalletTransfer extends Order implements Auditable
 {
-    use \OwenIt\Auditing\Auditable;
     use BlameableTrait;
+    use \OwenIt\Auditing\Auditable;
     use SoftDeletes;
 
     /*
