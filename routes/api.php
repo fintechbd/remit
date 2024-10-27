@@ -29,14 +29,14 @@ if (Config::get('fintech.remit.enabled')) {
                     Route::prefix('assign-vendors')->name('assign-vendors.')
                         ->controller(AssignVendorController::class)
                         ->group(function () {
-                            Route::get('available/{order_id}', 'available')->name('available');
+                            Route::get('{order_id}/available', 'available')->name('available');
                             Route::post('quote', 'quotation')->name('quotation');
                             Route::post('process', 'process')->name('process');
-                            Route::get('status/{order_id}', 'tracker')->name('tracker');
-                            Route::get('release/{order_id}', 'release')->name('release');
+                            Route::get('{order_id}/status', 'tracker')->name('tracker');
+                            Route::get('{order_id}/release', 'release')->name('release');
                             Route::post('cancel', 'cancel')->name('cancel');
                             Route::post('amendment', 'amendment')->name('amendment');
-                            Route::get('overwrite/{order_id}', 'overwrite')->name('overwrite');
+                            Route::get('{order_id}/overwrite', 'overwrite')->name('overwrite');
                         });
                 }
                 Route::apiResource('bank-transfers', BankTransferController::class)->except('update', 'destroy');

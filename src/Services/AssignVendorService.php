@@ -48,7 +48,8 @@ class AssignVendorService
     }
 
     /**
-     * @throws RemitException|ErrorException
+     * @throws ErrorException
+     * @throws VendorNotFoundException
      */
     public function requestQuote(BaseModel $order, string $vendor_slug): mixed
     {

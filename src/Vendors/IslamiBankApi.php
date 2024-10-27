@@ -151,7 +151,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
 
         $xmlResponse = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
 
-        $response = Utility::parseXml($xmlResponse);
+        $response = Utility::parseXml($xmlResponse, true);
 
         return $response['Envelope']['Body'] ?? null;
     }
@@ -498,8 +498,8 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
     public function requestQuote($order): mixed
     {
         return [
-            'balance' => $this->vendorBalance(($order->currency ?? 'BDT')),
-            'account' => $this->fetchAccountDetail($order),
+            'account' => $this->vendorBalance(($order->converted_currency ?? 'BDT')),
+            'beneficiary' => [],
         ];
     }
 
@@ -521,6 +521,8 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
         $service->appendChild($this->xml->createElement('ser:currency', $currency));
 
         $balanceInfo = $this->callApi($method, $service);
+
+        dd($balanceInfo);
 
         if (is_array($balanceInfo) && isset($balanceInfo['Fault'])) {
             return [
