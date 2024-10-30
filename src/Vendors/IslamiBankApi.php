@@ -153,8 +153,6 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
 
         $response = Utility::parseXml($xmlResponse);
 
-        dd($response);
-
         return $response['Envelope']['Body'] ?? null;
     }
 
