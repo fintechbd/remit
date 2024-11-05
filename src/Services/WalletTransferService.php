@@ -119,7 +119,7 @@ class WalletTransferService
         $inputs['sender_receiver_id'] = $masterUser->getKey();
         $inputs['is_refunded'] = false;
         $inputs['status'] = OrderStatus::Pending->value;
-        $inputs['risk'] = RiskProfile::Low;
+        $inputs['risk'] = $sender->risk_profile ?? RiskProfile::Low;
         $currencyConversion = Business::currencyRate()->convert([
             'role_id' => $inputs['order_data']['role_id'],
             'reverse' => $inputs['order_data']['is_reverse'],
