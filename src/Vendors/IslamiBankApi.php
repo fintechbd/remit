@@ -579,8 +579,10 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
                 $balance),
             true);
 
+        dd($successResponse);
+
         return AssignVendorVerdict::make([
-            ... $successResponse,
+            ...$successResponse,
             'original' => $response,
         ]);
 
