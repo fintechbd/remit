@@ -155,11 +155,15 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
 
         $response = Utility::parseXml($xmlResponse);
 
-        return $response['Envelope']['Body'] ?? null;
+        return $response['Envelope']['Body'] ?? [];
 
     }
 
-    private function errorHandle($response): AssignVendorVerdict
+    /**
+     * @param array $response
+     * @return AssignVendorVerdict
+     */
+    private function errorHandle(array $response): AssignVendorVerdict
     {
         $verdict = AssignVendorVerdict::make([
             'status' => 'false',
@@ -539,36 +543,46 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
         $service->appendChild($this->xml->createElement('ser:password', $this->config[$this->status]['password']));
         $service->appendChild($this->xml->createElement('ser:currency', $currency));
 
-        $originalResponse = $this->callApi($method, $service);
+        $response = $this->callApi($method, $service);
 
-        $balanceInfo = $originalResponse['fetchBalanceResponse']['return'] ?? '';
+        if (isset($response['Fault'])) {
+            return $this->errorHandle($response);
+        }
 
-        if (str_contains($balanceInfo, 'FALSE')) {
+        $balance = strtolower($response['fetchBalanceResponse']['return'] ?? '');
+
+        if (str_contains($balance, 'false')) {
             $errorResponse = json_decode(
                 preg_replace(
                     '/(.+)\|([0-9]{4})/',
-                    '{"status":"$1", "balance":0, "currency":"' . $currency . '", "code":$2, "origin_message":"$0"}',
-                    $balanceInfo),
+                    '{"status": $1, "amount": 0, "code": $2}',
+                    $balance),
                 true);
 
             if ($errorResponse['code']) {
-                $errorResponse['message'] = self::ERROR_MESSAGES[$errorResponse['code']] ?? $balanceInfo;
+                $errorResponse['message'] = self::ERROR_MESSAGES[$errorResponse['code']] ?? $balance;
                 unset($errorResponse['code']);
             }
 
-            return $errorResponse;
+            return AssignVendorVerdict::make([
+                ... $errorResponse,
+                'original' => $response,
+            ]);
         }
 
-        $balanceInfo = str_replace(',', '', $balanceInfo);
+        $balance = str_replace(',', '', $balance);
 
-        $success = json_decode(
+        $successResponse = json_decode(
             preg_replace(
                 "/(.+)\|([0-9+.?0-9*]+)\s({$currency})/",
-                '{"status":"$1", "amount":$2, "message":"SUCCESS"}',
-                $balanceInfo),
+                '{"status": $1, "amount": $2, "message": "The request was successful"}',
+                $balance),
             true);
 
-        dd($success);
+        return AssignVendorVerdict::make([
+            ... $successResponse,
+            'original' => $response,
+        ]);
 
     }
 
