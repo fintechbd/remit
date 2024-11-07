@@ -514,9 +514,9 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
      *
      * @throws Exception
      */
-    public function requestQuote($order): mixed
+    public function requestQuote($order): AssignVendorVerdict
     {
-        return $this->vendorBalance('BDT')->toArray();
+        return $this->vendorBalance('BDT');
     }
 
     /**
@@ -527,7 +527,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
      *
      * @throws Exception
      */
-    private function vendorBalance(string $currency): mixed
+    private function vendorBalance(string $currency): AssignVendorVerdict
     {
         $currency = trim($currency);
         $method = 'fetchBalance';
@@ -626,7 +626,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
      *
      * @throws DOMException
      */
-    public function executeOrder(BaseModel $order): mixed
+    public function executeOrder(BaseModel $order): AssignVendorVerdict
     {
         $order_data = $order->order_data;
 

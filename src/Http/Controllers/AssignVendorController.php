@@ -63,9 +63,9 @@ class AssignVendorController extends Controller
 
             $order = $this->getOrder($order_id);
 
-            $jsonResponse = Remit::assignVendor()->requestQuote($order, $service_vendor_slug);
+            $quotation = Remit::assignVendor()->requestQuote($order, $service_vendor_slug);
 
-            return new AssignVendorQuotaResource($jsonResponse);
+            return new AssignVendorQuotaResource($quotation->toArray());
 
         } catch (ModelNotFoundException $exception) {
 

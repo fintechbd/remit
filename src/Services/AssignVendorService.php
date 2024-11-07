@@ -3,11 +3,13 @@
 namespace Fintech\Remit\Services;
 
 use ErrorException;
+use Fintech\Auth\Facades\Auth;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Exceptions\VendorNotFoundException;
+use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Exceptions\AlreadyAssignedException;
 use Fintech\Remit\Exceptions\RemitException;
@@ -30,13 +32,31 @@ class AssignVendorService
      */
     public function availableVendors(BaseModel $order, $requestingUserId): Collection
     {
+        $requestedUser = Auth::user()->find($requestingUserId);
+
         if ($order->assigned_user_id != null
             && $order->assigned_user_id != $requestingUserId) {
             throw new AlreadyAssignedException(__('remit::messages.assign_vendor.already_assigned'));
         }
 
+        $timeline = $order->timeline;
+
+        $service = $order->service;
+
+        $timeline[] = [
+            'message' => "Assigning {$requestedUser->name} for managing " . ucwords(strtolower($service->service_name)) . ' money transfer request',
+            'flag' => 'info',
+            'timestamp' => now(),
+        ];
+
+        $timeline[] = [
+            'message' => "{$requestedUser->name} requested available vendor list for " . ucwords(strtolower($service->service_name)) . ' money transfer request',
+            'flag' => 'info',
+            'timestamp' => now(),
+        ];
+
         if ($order->assigned_user_id == null
-            && ! Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId])) {
+            && !Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId, 'timeline' => $timeline])) {
             throw new UpdateOperationException(__('remit::messages.assign_vendor.assigned_user_failed'));
         }
 
@@ -49,44 +69,50 @@ class AssignVendorService
 
     /**
      * @throws ErrorException
-     * @throws VendorNotFoundException
+     * @throws VendorNotFoundException|UpdateOperationException
      */
-    public function requestQuote(BaseModel $order, string $vendor_slug): mixed
+    public function requestQuote(BaseModel $order, string $vendor_slug): AssignVendorVerdict
     {
         $this->initiateVendor($vendor_slug);
 
-        return $this->serviceVendorDriver->requestQuote($order);
-    }
+        $timeline = $order->timeline;
 
-    /**
-     * @throws VendorNotFoundException
-     */
-    private function initiateVendor(string $slug): void
-    {
-        $availableVendors = config('fintech.remit.providers', []);
+        $service = $order->service;
 
-        if (! isset($availableVendors[$slug])) {
-            throw new VendorNotFoundException(ucfirst($slug));
+        $timeline[] = [
+            'message' => "Requesting ({$this->serviceVendorModel->service_vendor_name}) for " . ucwords(strtolower($service->service_name)) . ' money transfer quotation',
+            'flag' => 'info',
+            'timestamp' => now(),
+        ];
+
+
+        $quotation = $this->serviceVendorDriver->requestQuote($order);
+
+        if (!$quotation->status) {
+            $timeline[] = [
+                'message' => "({$this->serviceVendorModel->service_vendor_name}) reported error : " . $quotation->message,
+                'flag' => 'error',
+                'timestamp' => now(),
+            ];
         }
 
-        $this->serviceVendorModel = Business::serviceVendor()->findWhere(['service_vendor_slug' => $slug, 'enabled']);
-
-        if (! $this->serviceVendorModel) {
-            throw (new ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $slug);
+        if (!Transaction::order()->update($order->getKey(), ['timeline' => $timeline])) {
+            throw new UpdateOperationException();
         }
 
-        $this->serviceVendorDriver = App::make($availableVendors[$slug]['driver']);
+        return $quotation;
     }
 
     /**
      * @throws ErrorException
      * @throws UpdateOperationException|RemitException
+     * @throws VendorNotFoundException
      */
     public function processOrder(BaseModel $order, string $vendor_slug): mixed
     {
         $this->initiateVendor($vendor_slug);
 
-        if (! Transaction::order()->update($order->getKey(), [
+        if (!Transaction::order()->update($order->getKey(), [
             'vendor' => $vendor_slug,
             'service_vendor_id' => $this->serviceVendorModel->getKey(),
             'status' => OrderStatus::Processing->value])) {
@@ -144,5 +170,25 @@ class AssignVendorService
         $this->initiateVendor($order->vendor);
 
         return $this->serviceVendorDriver->orderStatus($order);
+    }
+
+    /**
+     * @throws VendorNotFoundException
+     */
+    private function initiateVendor(string $slug): void
+    {
+        $availableVendors = config('fintech.remit.providers', []);
+
+        if (!isset($availableVendors[$slug])) {
+            throw new VendorNotFoundException(ucfirst($slug));
+        }
+
+        $this->serviceVendorModel = Business::serviceVendor()->findWhere(['service_vendor_slug' => $slug, 'enabled']);
+
+        if (!$this->serviceVendorModel) {
+            throw (new ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $slug);
+        }
+
+        $this->serviceVendorDriver = App::make($availableVendors[$slug]['driver']);
     }
 }

@@ -4,6 +4,7 @@ namespace Fintech\Remit\Contracts;
 
 use ErrorException;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Supports\AssignVendorVerdict;
 
 interface MoneyTransfer
 {
@@ -14,7 +15,7 @@ interface MoneyTransfer
      *
      * @throws ErrorException
      */
-    public function requestQuote(BaseModel $order): mixed;
+    public function requestQuote(BaseModel $order): AssignVendorVerdict;
 
     /**
      * Method to make a request to the remittance service provider
@@ -22,7 +23,7 @@ interface MoneyTransfer
      *
      * @throws ErrorException
      */
-    public function executeOrder(BaseModel $order): mixed;
+    public function executeOrder(BaseModel $order): AssignVendorVerdict;
 
     /**
      * Method to make a request to the remittance service provider
