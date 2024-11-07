@@ -301,7 +301,8 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
         $transferData['remitterPassportNo'] = '?';
         $transferData['remitterPhoneNo'] = ($data['beneficiary_data']['sender_information']['mobile'] ?? null);
         $transferData['secretKey'] = ($data['beneficiary_data']['reference_no'] ?? null);
-        $transferData['transReferenceNo'] = ($data['beneficiary_data']['reference_no'] ?? null);
+//        $transferData['transReferenceNo'] = ($data['beneficiary_data']['reference_no'] ?? null);
+        $transferData['transReferenceNo'] = mt_rand(1000000, 999999999);
 
         switch ($data['service_slug']) {
             case 'mbs_m_cash':
@@ -686,6 +687,16 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
         $service->appendChild($wsMessage);
 
         $response = $this->callApi($method, $service);
+
+        if (isset($response['Fault'])) {
+            return $this->connectionErrorResponse($response);
+        }
+
+        $balance = $response['fetchBalanceResponse']['return'] ?? '';
+
+        if (str_contains($balance, 'FALSE')) {
+            return $this->apiErrorResponse($response, $balance);
+        }
 
         $orderInfo = json_decode(
             preg_replace(
