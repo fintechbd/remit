@@ -28,7 +28,7 @@ class InstallCommand extends Command
 
         $this->task('Module Installation', function () {
 
-//            $this->addDefaultServiceTypes();
+            //            $this->addDefaultServiceTypes();
 
             $this->addSchedulerTasks();
 

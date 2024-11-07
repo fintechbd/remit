@@ -70,7 +70,7 @@ class RemitServiceProvider extends ServiceProvider
                 MeghnaBankSetupCommand::class,
                 InstallCommand::class,
                 RemitCommand::class,
-                RemitOrderStatusUpdateCommand::class
+                RemitOrderStatusUpdateCommand::class,
             ]);
         }
     }
