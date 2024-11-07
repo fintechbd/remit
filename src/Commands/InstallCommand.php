@@ -3,8 +3,10 @@
 namespace Fintech\Remit\Commands;
 
 use Fintech\Business\Facades\Business;
+use Fintech\Core\Facades\Core;
 use Fintech\Core\Traits\HasCoreSetting;
 use Illuminate\Console\Command;
+use Throwable;
 
 class InstallCommand extends Command
 {
@@ -25,7 +27,10 @@ class InstallCommand extends Command
         $this->infoMessage('Module Installation', 'RUNNING');
 
         $this->task('Module Installation', function () {
-            $this->addDefaultServiceTypes();
+
+//            $this->addDefaultServiceTypes();
+
+            $this->addSchedulerTasks();
 
         });
 
@@ -47,6 +52,37 @@ class InstallCommand extends Command
             ];
 
             Business::serviceTypeManager($entry)->execute();
+        });
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function addSchedulerTasks(): void
+    {
+        $tasks = [
+            [
+                'name' => 'Update all the remit vendor order status.',
+                'description' => 'This scheduled program update all the remittance order in a sequential way as for their vendor progress.',
+                'command' => 'remit:order-status-update',
+                'enabled' => false,
+                'timezone' => 'Asia/Dhaka',
+                'interval' => '*/5 * * * *',
+                'priority' => 1,
+            ],
+        ];
+
+        $this->task('Register schedule tasks', function () use (&$tasks) {
+            foreach ($tasks as $task) {
+
+                $taskModel = Core::schedule()->findWhere(['command' => $task['command']]);
+
+                if ($taskModel) {
+                    continue;
+                }
+
+                Core::schedule()->create($task);
+            }
         });
     }
 }

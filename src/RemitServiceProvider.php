@@ -9,6 +9,7 @@ use Fintech\Remit\Commands\InstallCommand;
 use Fintech\Remit\Commands\IslamiBankSetupCommand;
 use Fintech\Remit\Commands\MeghnaBankSetupCommand;
 use Fintech\Remit\Commands\RemitCommand;
+use Fintech\Remit\Commands\RemitOrderStatusUpdateCommand;
 use Fintech\Remit\Providers\EventServiceProvider;
 use Fintech\Remit\Providers\RepositoryServiceProvider;
 use Illuminate\Support\ServiceProvider;
@@ -69,6 +70,7 @@ class RemitServiceProvider extends ServiceProvider
                 MeghnaBankSetupCommand::class,
                 InstallCommand::class,
                 RemitCommand::class,
+                RemitOrderStatusUpdateCommand::class
             ]);
         }
     }
