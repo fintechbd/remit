@@ -103,13 +103,13 @@ class AssignVendorService
     }
 
     /**
-     * @return BaseModel
+     * @return AssignVendorVerdict
      *
      * @throws ErrorException
      * @throws UpdateOperationException|RemitException
      * @throws VendorNotFoundException
      */
-    public function processOrder(BaseModel $order, string $vendor_slug)
+    public function processOrder(BaseModel $order, string $vendor_slug): AssignVendorVerdict
     {
         $this->initiateVendor($vendor_slug);
 
@@ -157,9 +157,7 @@ class AssignVendorService
             ]));
         }
 
-        $order->refresh();
-
-        return $order;
+        return $verdict;
     }
 
     /**

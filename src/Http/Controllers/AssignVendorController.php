@@ -46,7 +46,7 @@ class AssignVendorController extends Controller
     {
         $order = Transaction::order()->find($id);
 
-        if (! $order) {
+        if (!$order) {
             throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
         }
 
@@ -86,8 +86,10 @@ class AssignVendorController extends Controller
         try {
             $order = $this->getOrder($order_id);
 
-            if (! Remit::assignVendor()->processOrder($order, $service_vendor_slug)) {
-                throw new UpdateOperationException(__('remit::messages.assign_vendor.failed', ['slug' => $service_vendor_slug]));
+            $verdict = Remit::assignVendor()->processOrder($order, $service_vendor_slug);
+
+            if (!$verdict->status) {
+                throw new UpdateOperationException(__('remit::messages.assign_vendor.failed', ['slug' => $service_vendor_slug, 'error' => $verdict->message]));
             }
 
             return response()->success(__('remit::messages.assign_vendor.success', ['slug' => ucfirst($service_vendor_slug)]));
@@ -197,7 +199,7 @@ class AssignVendorController extends Controller
         try {
             $order = $this->getOrder($order_id);
 
-            if (! Transaction::order()->update($order->getKey(), ['assigned_user_id' => null, 'service_vendor_id' => null, 'vendor' => null])) {
+            if (!Transaction::order()->update($order->getKey(), ['assigned_user_id' => null, 'service_vendor_id' => null, 'vendor' => null])) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $order_id);
             }

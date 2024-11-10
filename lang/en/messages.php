@@ -6,7 +6,7 @@ return [
         'not_assigned' => 'This order have not been assigned to any vendor.',
         'already_assigned' => 'This order has already assigned by another user.',
         'assigned_user_failed' => 'Unable to assign this order to requested user.',
-        'failed' => 'Unable to assign order to requested vendor [:slug].',
+        'failed' => 'Unable to assign order to :slug vendor. Error: :error',
         'release_failed' => 'There\'s been an error. while :model with ID::id failed to release.',
         'success' => 'Successfully assigned order to :slug vendor.',
     ],
