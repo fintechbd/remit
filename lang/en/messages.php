@@ -8,7 +8,7 @@ return [
         'assigned_user_failed' => 'Unable to assign this order to requested user.',
         'failed' => 'Unable to assign order to requested vendor [:slug].',
         'release_failed' => 'There\'s been an error. while :model with ID::id failed to release.',
-        'success' => 'Successfully assigned order to requested vendor [:slug].',
+        'success' => 'Successfully assigned order to :slug vendor.',
     ],
     'verification' => [
         'wallet_provider_not_found' => 'No wallet verification provider found for (:wallet).',
