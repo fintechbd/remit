@@ -103,10 +103,6 @@ class AssignVendorService
     }
 
     /**
-     * @param BaseModel $order
-     * @param string $vendor_slug
-     * @return AssignVendorVerdict
-     *
      * @throws ErrorException
      * @throws VendorNotFoundException
      */
