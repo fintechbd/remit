@@ -103,10 +103,11 @@ class AssignVendorService
     }
 
     /**
+     * @param BaseModel $order
+     * @param string $vendor_slug
      * @return AssignVendorVerdict
      *
      * @throws ErrorException
-     * @throws UpdateOperationException|RemitException
      * @throws VendorNotFoundException
      */
     public function processOrder(BaseModel $order, string $vendor_slug): AssignVendorVerdict

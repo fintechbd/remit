@@ -177,17 +177,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
 
         $this->xml->appendChild($envelope);
 
-//        file_put_contents('request.xml', $this->xml->saveXML());
-
         $xmlResponse = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
-
-//        $response =new DOMDocument();
-//
-//        $response->formatOutput = true;
-//
-//        $response->loadXML($xmlResponse);
-//
-//        file_put_contents('response.xml',$response->saveXML());
 
         $response = Utility::parseXml($xmlResponse);
 
@@ -276,8 +266,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
         $transferData['remitterPassportNo'] = '?';
         $transferData['remitterPhoneNo'] = Str::substr(($data['beneficiary_data']['sender_information']['mobile'] ?? '01689553436'), -11);
         $transferData['secretKey'] = ($data['beneficiary_data']['reference_no'] ?? null);
-        //        $transferData['transReferenceNo'] = ($data['beneficiary_data']['reference_no'] ?? null);
-        $transferData['transReferenceNo'] = mt_rand(1000000, 999999999);
+        $transferData['transReferenceNo'] = ($data['beneficiary_data']['reference_no'] ?? null);
 
         switch ($data['service_slug']) {
 
@@ -491,26 +480,18 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
         $data = $this->__transferData($order);
 
         $method = 'directCreditWSMessage';
+
         $service = $this->xml->createElement("ser:{$method}");
         $service->appendChild($this->xml->createElement('ser:userID', $this->config[$this->status]['username']));
         $service->appendChild($this->xml->createElement('ser:password', $this->config[$this->status]['password']));
+
         $wsMessage = $this->xml->createElement('ser:wsMessage');
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField1', $data['additionalField1'] ?? '?'));
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField2', $data['additionalField2'] ?? '?'));
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField3', $data['additionalField3'] ?? '?'));
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField4', $data['additionalField4'] ?? '?'));
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField5', $data['additionalField5'] ?? '?'));
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField6', $data['additionalField6'] ?? '?'));
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField7', $data['additionalField7'] ?? '?'));
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField8', $data['additionalField8'] ?? '?'));
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:additionalField9', $data['additionalField9'] ?? '?'));
         $wsMessage->appendChild($this->xml->createElement('xsd:amount', $data['amount'] ?? '?'));
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:batchID', $data['batchID'] ?? '?'));
         $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryBankName', $data['beneficiaryBankName'] ?? '?'));
         $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryBankCode', $data['beneficiaryBankCode'] ?? '?'));
         $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryBranchName', $data['beneficiaryBranchName'] ?? '?'));
         if (!empty($data['beneficiaryBranchCode'])) {
-            $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryBranchCode', $data['beneficiaryBranchCode'] ?? '?'));
+            $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryBranchCode', $data['beneficiaryBranchCode']));
         }
         $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryName', $data['beneficiaryName'] ?? '?'));
         $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryAccNo', $data['beneficiaryAccNo'] ?? '?'));
@@ -523,12 +504,8 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
         if (!empty($data['beneficiaryRoutingNo'])) {
             $wsMessage->appendChild($this->xml->createElement('xsd:beneficiaryRoutingNo', $data['beneficiaryRoutingNo'] ?? '?'));
         }
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:exHouseTxID', $data['exHouseTxID'] ?? '?'));
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:exchHouseBranchCode', $data['exHouseBranchCode'] ?? '?'));
-        //        $wsMessage->appendChild($this->xml->createElement('xsd:exchHouseSwiftCode', $data['exHouseSwiftCode'] ?? '?'));
         $wsMessage->appendChild($this->xml->createElement('xsd:identityDescription', $data['identityDescription'] ?? ''));
         $wsMessage->appendChild($this->xml->createElement('xsd:identityType', $data['identityType'] ?? '1'));
-//        $wsMessage->appendChild($this->xml->createElement('xsd:creatorID', 'ISSUER'));
         $wsMessage->appendChild($this->xml->createElement('xsd:isoCode', $data['isoCode'] ?? '?'));
         $wsMessage->appendChild($this->xml->createElement('xsd:issueDate', $data['issueDate'] ?? '?'));
         $wsMessage->appendChild($this->xml->createElement('xsd:note', $data['note'] ?? '?'));
@@ -551,34 +528,44 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
             return $this->connectionErrorResponse($response);
         }
 
-        $balance = $response['directCreditWSMessageResponse']['return'] ?? '';
+        $orderResponse = $response['directCreditWSMessageResponse']['return'] ?? '';
 
-        if (str_contains($balance, 'FALSE')) {
-            return $this->apiErrorResponse($response, $balance);
+        if (str_contains($orderResponse, 'FALSE')) {
+            return $this->apiErrorResponse($response, $orderResponse);
         }
 
-        $orderInfo = json_decode(
+        $successResponse = json_decode(
             preg_replace(
                 '/(.+)\|([0-9]{4})(.+)/',
-                '{"status":"$1", "code":$2, "origin_message":"$0"}',
-                $balance),
+                '{"status":"$1", "code":$2}',
+                $orderResponse),
             true);
 
-        $orderInfo['message'] = isset($orderInfo['code']) ? self::ERROR_MESSAGES[$orderInfo['code']] : $response;
+        $successResponse['message'] = isset($successResponse['code']) ? self::ERROR_MESSAGES[$successResponse['code']] : 'Error : ' . $orderResponse;
 
-        $status = (in_array($orderInfo['code'], ['5003']))
-            ? OrderStatus::Accepted->value
-            : OrderStatus::AdminVerification->value;
+        unset($successResponse['code']);
 
-        $order_data['vendor_data']['payment_info'] = $orderInfo;
+        return AssignVendorVerdict::make([
+            ...$successResponse,
+            'original' => $response,
+            'ref_number' => $data['transReferenceNo'] ?? '?',
+            'amount' => $data['amount'] ?? '0',
+        ])->orderTimeline('(Islami Bank) responded with ' . strtolower($successResponse['message']) . '.');
 
-        if (Transaction::order()->update($order->getKey(), ['status' => $status, 'order_data' => $order_data])) {
-            $order->fresh();
 
-            return $order;
-        }
-
-        return false;
+//        $status = (in_array($successResponse['code'], ['5003']))
+//            ? OrderStatus::Accepted->value
+//            : OrderStatus::AdminVerification->value;
+//
+//        $order_data['vendor_data']['payment_info'] = $successResponse;
+//
+//        if (Transaction::order()->update($order->getKey(), ['status' => $status, 'order_data' => $order_data])) {
+//            $order->fresh();
+//
+//            return $order;
+//        }
+//
+//        return false;
     }
 
 
