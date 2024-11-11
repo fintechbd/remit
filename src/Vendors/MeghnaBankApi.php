@@ -159,8 +159,10 @@ class MeghnaBankApi implements MoneyTransfer
     {
         $order_data = $order->order_data ?? [];
 
-        $params['ORDER_NO'] = $order_data['beneficiary_data']['reference_no'] ?? null;
-        $params['TRANSACTION_PIN'] = $order_data['beneficiary_data']['reference_no'] ?? null;
+        $ref_number = $data['beneficiary_data']['reference_no'] ?? $order_data['purchase_number'];
+
+        $params['ORDER_NO'] = $ref_number;
+        $params['TRANSACTION_PIN'] = $ref_number;
         $params['TRN_DATE'] = (date('Y-m-d', strtotime($order_data['created_at'])) ?? null);
         $params['AMOUNT'] = round(floatval($order_data['sending_amount'] ?? $order->converted_amount), 2);
         //RECEIVER
@@ -173,7 +175,6 @@ class MeghnaBankApi implements MoneyTransfer
         $params['RECEIVER_BANK'] = ($order_data['beneficiary_data']['bank_information']['bank_name'] ?? null);
         $params['RECEIVER_BANK_BRANCH'] = ($order_data['beneficiary_data']['branch_information']['branch_name'] ?? null);
         $params['RECEIVER_ACCOUNT_NUMBER'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number']);
-
         //SENDER
         $params['SENDER_NAME'] = ($order_data['beneficiary_data']['sender_information']['name'] ?? null);
         $params['SENDER_PASSPORT_NO'] = ($order_data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
@@ -193,21 +194,25 @@ class MeghnaBankApi implements MoneyTransfer
 
         $response = $this->post('/remitAccCrTransfer', $params);
 
+
         $response = array_shift($response);
 
-        $status = (in_array($response['Code'], ['0001', '0002']))
-            ? OrderStatus::Accepted->value
-            : OrderStatus::AdminVerification->value;
+        $verdict = AssignVendorVerdict::make([
+            'original' => $response,
+            'ref_number' => $ref_number,
+            'message' => $response['Message'] ?? null,
+            'amount' => $params['AMOUNT'],
+        ]);
 
-        $order_data['vendor_data'] = $response;
-
-        if (Transaction::order()->update($order->getKey(), ['status' => $status, 'order_data' => $order_data])) {
-            $order->fresh();
-
-            return $order;
+        if (in_array($response['Code'], ['0001', '0002'])) {
+            $verdict->status('TRUE')
+                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: " . strtolower($response['Message']) . '.');
+        } else {
+            $verdict->status('FALSE')
+                ->orderTimeline("(Meghna Bank) reported error: " . strtolower($response['Message']) . '.');
         }
 
-        return false;
+        return $verdict;
     }
 
     private function post(string $url, array $params = []): array
