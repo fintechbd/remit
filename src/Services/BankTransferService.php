@@ -175,7 +175,7 @@ class BankTransferService
             'flag' => 'create',
             'timestamp' => now(),
         ];
-        $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData([...$inputs['order_data'], $inputs['source_country_id']]);
+        $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData([...$inputs['order_data'], 'source_country_id' => $inputs['source_country_id']]);
         $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([
             'role_id' => $inputs['order_data']['role_id'],
             'reverse' => false,
