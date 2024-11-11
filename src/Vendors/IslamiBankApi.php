@@ -194,7 +194,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
 
         if (isset($response['Fault'])) {
             $verdict->message($response['Fault']['faultstring'])
-                ->orderTimeline('(Islami Bank) reported error: ' . strtolower($response['Fault']['faultstring']), 'warn');
+                ->orderTimeline('(Islami Bank) reported error: '.strtolower($response['Fault']['faultstring']), 'warn');
         }
 
         return $verdict;
@@ -565,13 +565,13 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
                 $statusResponse),
             true);
 
-        if (in_array($successResponse['code'], array_keys(self::ERROR_MESSAGES))) :
+        if (in_array($successResponse['code'], array_keys(self::ERROR_MESSAGES))) {
             $successResponse['message'] = self::ERROR_MESSAGES[$successResponse['code']];
-        elseif (in_array($successResponse['code'], array_keys(self::STATUS_MESSAGES))) :
+        } elseif (in_array($successResponse['code'], array_keys(self::STATUS_MESSAGES))) {
             $successResponse['message'] = self::STATUS_MESSAGES[$successResponse['code']];
-        else:
+        } else {
             $successResponse['message'] = "Error: {$statusResponse}";
-        endif;
+        }
 
         unset($successResponse['code']);
 
@@ -770,13 +770,13 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
                 $statusResponse),
             true);
 
-        if (in_array($successResponse['code'], array_keys(self::ERROR_MESSAGES))) :
+        if (in_array($successResponse['code'], array_keys(self::ERROR_MESSAGES))) {
             $successResponse['message'] = self::ERROR_MESSAGES[$successResponse['code']];
-        elseif (in_array($successResponse['code'], array_keys(self::STATUS_MESSAGES))) :
+        } elseif (in_array($successResponse['code'], array_keys(self::STATUS_MESSAGES))) {
             $successResponse['message'] = self::STATUS_MESSAGES[$successResponse['code']];
-        else:
+        } else {
             $successResponse['message'] = "Error: {$statusResponse}";
-        endif;
+        }
 
         unset($successResponse['code']);
 
