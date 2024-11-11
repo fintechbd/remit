@@ -742,7 +742,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
         $service = $this->xml->createElement("ser:{$method}");
         $service->appendChild($this->xml->createElement('ser:userID', $this->config[$this->status]['username']));
         $service->appendChild($this->xml->createElement('ser:password', $this->config[$this->status]['password']));
-        $service->appendChild($this->xml->createElement('ser:transRefNo', $order->order_data['purchase_number']));
+        $service->appendChild($this->xml->createElement('ser:transRefNo', $order->order_data['beneficiary_data']['reference_no'] ?? $order->order_data['purchase_number']));
         $service->appendChild($this->xml->createElement('ser:secretKey', null));
 
         $response = $this->callApi($method, $service);
