@@ -160,6 +160,7 @@ class AssignVendorService
     /**
      * @throws RemitException
      * @throws ErrorException
+     * @throws VendorNotFoundException
      */
     public function trackOrder(BaseModel $order): mixed
     {

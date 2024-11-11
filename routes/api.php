@@ -32,7 +32,7 @@ if (Config::get('fintech.remit.enabled')) {
                             Route::get('{order_id}/available', 'available')->name('available');
                             Route::post('quote', 'quotation')->name('quotation');
                             Route::post('process', 'process')->name('process');
-                            Route::get('{order_id}/status', 'tracker')->name('tracker');
+                            Route::get('{order_id}/track', 'track')->name('track');
                             Route::get('{order_id}/release', 'release')->name('release');
                             Route::post('cancel', 'cancel')->name('cancel');
                             Route::post('amendment', 'amendment')->name('amendment');

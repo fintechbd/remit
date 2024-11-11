@@ -104,15 +104,17 @@ class AssignVendorController extends Controller
         }
     }
 
-    public function tracker(string $order_id): JsonResponse|AssignVendorStatusResource
+    public function track(string $order_id): JsonResponse|AssignVendorStatusResource
     {
         try {
 
             $order = $this->getOrder($order_id);
 
-            $jsonResponse = Remit::assignVendor()->trackOrder($order);
+            $verdict = Remit::assignVendor()->trackOrder($order);
 
-            return new AssignVendorStatusResource($jsonResponse);
+            unset($verdict->amount, $verdict->charge, $verdict->discount, $verdict->commission);
+
+            return new AssignVendorStatusResource($verdict);
 
         } catch (ModelNotFoundException $exception) {
 
