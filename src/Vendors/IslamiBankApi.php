@@ -194,7 +194,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
 
         if (isset($response['Fault'])) {
             $verdict->message($response['Fault']['faultstring'])
-                ->orderTimeline('(Islami Bank) reported error: ' . strtolower($response['Fault']['faultstring']), 'error');
+                ->orderTimeline('(Islami Bank) reported error: ' . strtolower($response['Fault']['faultstring']), 'warn');
         }
 
         return $verdict;
