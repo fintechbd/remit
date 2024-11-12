@@ -16,6 +16,7 @@ use Fintech\Remit\Exceptions\RemitException;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 
 class AssignVendorService
@@ -162,7 +163,7 @@ class AssignVendorService
      * @throws ErrorException
      * @throws VendorNotFoundException
      */
-    public function trackOrder(BaseModel $order): mixed
+    public function trackOrder(BaseModel $order, Request $request): mixed
     {
 
         if ($order->service_vendor_id == config('fintech.business.default_vendor')) {
@@ -171,7 +172,23 @@ class AssignVendorService
 
         $this->initiateVendor($order->vendor);
 
-        return $this->serviceVendorDriver->trackOrder($order);
+        $timeline = $order->timeline;
+
+        $userName = ucwords($request->user()?->name ?? '');
+
+        $timeline[] = [
+            'message' => "{$userName} requested order status tracker on {$this->serviceVendorModel->service_vendor_name} for #{$order->order_number} money transfer request.",
+            'flag' => 'info',
+            'timestamp' => now(),
+        ];
+
+        $verdict = $this->serviceVendorDriver->trackOrder($order);
+
+        $timeline[] = $verdict->timeline;
+
+        Transaction::order()->update($order->getKey(), ['timeline' => $timeline]);
+
+        return $verdict;
     }
 
     /**
