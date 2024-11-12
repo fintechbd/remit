@@ -95,7 +95,7 @@ class AssignVendorService
             ];
         }
 
-        if (! Transaction::order()->update($order->getKey(), ['timeline' => $timeline])) {
+        if (! Transaction::order()->update($order->getKey(), ['status' => OrderStatus::Processing, 'timeline' => $timeline])) {
             throw new UpdateOperationException;
         }
 
@@ -140,7 +140,7 @@ class AssignVendorService
                 'timestamp' => now(),
             ];
         } else {
-            $data['status'] = OrderStatus::Processing->value;
+            $data['status'] = OrderStatus::Accepted->value;
             $data['timeline'][] = [
                 'message' => "Waiting for ({$vendorName}) to process {$serviceName} money transfer request.",
                 'flag' => 'info',
