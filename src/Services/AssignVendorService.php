@@ -16,7 +16,6 @@ use Fintech\Remit\Exceptions\RemitException;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 
 class AssignVendorService
@@ -165,7 +164,7 @@ class AssignVendorService
      * @throws ErrorException
      * @throws VendorNotFoundException
      */
-    public function trackOrder(BaseModel $order, BaseModel $user = null): mixed
+    public function trackOrder(BaseModel $order, ?BaseModel $user = null): mixed
     {
 
         if ($order->service_vendor_id == config('fintech.business.default_vendor')) {
