@@ -165,7 +165,7 @@ class AssignVendorService
      * @throws ErrorException
      * @throws VendorNotFoundException
      */
-    public function trackOrder(BaseModel $order, Request $request): mixed
+    public function trackOrder(BaseModel $order, BaseModel $user = null): mixed
     {
 
         if ($order->service_vendor_id == config('fintech.business.default_vendor')) {
@@ -176,7 +176,7 @@ class AssignVendorService
 
         $timeline = $order->timeline;
 
-        $userName = ucwords($request->user()?->name ?? '');
+        $userName = ucwords($user?->name ?? '');
 
         $timeline[] = [
             'message' => "{$userName} requested order status tracker on {$this->serviceVendorModel->service_vendor_name} for #{$order->order_number} money transfer request.",

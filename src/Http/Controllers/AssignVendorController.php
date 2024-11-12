@@ -15,6 +15,7 @@ use Fintech\Remit\Http\Resources\AssignVendorStatusResource;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class AssignVendorController extends Controller
 {
@@ -104,13 +105,15 @@ class AssignVendorController extends Controller
         }
     }
 
-    public function track(string $order_id): JsonResponse|AssignVendorStatusResource
+    public function track(string $order_id, Request $request): JsonResponse|AssignVendorStatusResource
     {
         try {
 
             $order = $this->getOrder($order_id);
 
-            $verdict = Remit::assignVendor()->trackOrder($order);
+            $user = $request->user();
+
+            $verdict = Remit::assignVendor()->trackOrder($order, $user);
 
             unset($verdict->amount, $verdict->charge, $verdict->discount, $verdict->commission);
 
