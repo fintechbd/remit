@@ -18,6 +18,8 @@ return [
     */
     'enabled' => env('PACKAGE_REMIT_ENABLED', true),
 
+    'attempt_threshold' => 5,
+
     /*
     |--------------------------------------------------------------------------
     | Remit Group Root Prefix

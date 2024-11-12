@@ -45,19 +45,19 @@ class AssignVendorService
         $service = $order->service;
 
         $timeline[] = [
-            'message' => "Assigning {$requestedUser->name} for managing ".ucwords(strtolower($service->service_name)).' money transfer request',
+            'message' => "Assigning {$requestedUser->name} for managing " . ucwords(strtolower($service->service_name)) . ' money transfer request',
             'flag' => 'info',
             'timestamp' => now(),
         ];
 
         $timeline[] = [
-            'message' => "{$requestedUser->name} requested available vendor list for ".ucwords(strtolower($service->service_name)).' money transfer request',
+            'message' => "{$requestedUser->name} requested available vendor list for " . ucwords(strtolower($service->service_name)) . ' money transfer request',
             'flag' => 'info',
             'timestamp' => now(),
         ];
 
         if ($order->assigned_user_id == null
-            && ! Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId, 'timeline' => $timeline])) {
+            && !Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId, 'timeline' => $timeline])) {
             throw new UpdateOperationException(__('remit::messages.assign_vendor.assigned_user_failed'));
         }
 
@@ -81,22 +81,22 @@ class AssignVendorService
         $service = $order->service;
 
         $timeline[] = [
-            'message' => "Requesting ({$this->serviceVendorModel->service_vendor_name}) for ".ucwords(strtolower($service->service_name)).' money transfer quotation',
+            'message' => "Requesting ({$this->serviceVendorModel->service_vendor_name}) for " . ucwords(strtolower($service->service_name)) . ' money transfer quotation',
             'flag' => 'info',
             'timestamp' => now(),
         ];
 
         $quotation = $this->serviceVendorDriver->requestQuote($order);
 
-        if (! $quotation->status) {
+        if (!$quotation->status) {
             $timeline[] = [
-                'message' => "({$this->serviceVendorModel->service_vendor_name}) reported error : ".$quotation->message,
+                'message' => "({$this->serviceVendorModel->service_vendor_name}) reported error : " . $quotation->message,
                 'flag' => 'error',
                 'timestamp' => now(),
             ];
         }
 
-        if (! Transaction::order()->update($order->getKey(), ['status' => OrderStatus::Processing, 'timeline' => $timeline])) {
+        if (!Transaction::order()->update($order->getKey(), ['status' => OrderStatus::Processing, 'timeline' => $timeline])) {
             throw new UpdateOperationException;
         }
 
@@ -133,15 +133,17 @@ class AssignVendorService
         $data['order_data'] = $order->order_data;
         $data['order_data']['vendor_data']['payout_info'] = $verdict->toArray();
 
-        if (! $verdict->status) {
+        if (!$verdict->status) {
             $data['status'] = OrderStatus::AdminVerification->value;
             $data['timeline'][] = [
-                'message' => "Updating {$serviceName} money transfer request status. Requires ".OrderStatus::AdminVerification->label().' confirmation',
+                'message' => "Updating {$serviceName} money transfer request status. Requires " . OrderStatus::AdminVerification->label() . ' confirmation',
                 'flag' => 'warn',
                 'timestamp' => now(),
             ];
         } else {
             $data['status'] = OrderStatus::Accepted->value;
+            $data['order_data']['attempts'] = 0;
+            $data['order_data']['queued'] = false;
             $data['timeline'][] = [
                 'message' => "Waiting for ({$vendorName}) to process {$serviceName} money transfer request.",
                 'flag' => 'info',
@@ -149,7 +151,7 @@ class AssignVendorService
             ];
         }
 
-        if (! Transaction::order()->update($order->getKey(), $data)) {
+        if (!Transaction::order()->update($order->getKey(), $data)) {
             throw new \ErrorException(__('remit::messages.assign_vendor.failed', [
                 'slug' => $vendor_slug,
             ]));
@@ -203,17 +205,59 @@ class AssignVendorService
 
     /**
      * @throws RemitException
+     * @throws VendorNotFoundException|ErrorException
      */
-    public function orderStatus(BaseModel $order): mixed
+    public function orderStatus(BaseModel $order): AssignVendorVerdict
     {
-
-        if ($order->service_vendor_id == config('fintech.business.default_vendor')) {
-            throw new RemitException(__('remit::messages.assign_vendor.not_assigned'));
-        }
-
         $this->initiateVendor($order->vendor);
 
-        return $this->serviceVendorDriver->orderStatus($order);
+        $service = $order->service;
+
+        $vendorName = $this->serviceVendorModel->service_vendor_name;
+
+        $data['timeline'] = $order->timeline ?? [];
+        $data['order_data'] = $order->order_data;
+        $data['order_data']['attempts'] = $data['order_data']['attempts'] ?? 0;
+        $data['order_data']['attempts']++;
+
+
+        $data['timeline'][] = [
+            'message' => "Attempt #{$data['order_data']['attempts']}. Requesting ({$vendorName}) for " . ucwords(strtolower($service->service_name)) . ' money transfer request progress update.',
+            'flag' => 'info',
+            'timestamp' => now(),
+        ];
+
+        $verdict = $this->serviceVendorDriver->orderStatus($order);
+
+        $data['timeline'][] = $verdict->timeline;
+        $data['notes'] = $verdict->message;
+        $data['order_data']['vendor_data']['status_info'][] = $verdict->toArray();
+
+        if ($verdict->status) {
+            $data['status'] = OrderStatus::Success->value;
+            $data['order_data']['completed_at'] = now();
+            $data['timeline'][] = [
+                'message' => ucwords(strtolower($service->service_name)) . " money transfer order completed by ({$this->serviceVendorModel->service_vendor_name}).",
+                'flag' => 'success',
+                'timestamp' => now(),
+            ];
+        } elseif (!$verdict->status && $data['order_data']['attempts'] >= config('fintech.airtime.attempt_threshold', 5)) {
+            $data['status'] = OrderStatus::AdminVerification->value;
+            $data['timeline'][] = [
+                'message' => "Updating {$service->service_name} money transfer request status. Requires " . OrderStatus::AdminVerification->label() . ' confirmation',
+                'flag' => 'warn',
+                'timestamp' => now(),
+            ];
+        }
+
+
+        if (!Transaction::order()->update($order->getKey(), $data)) {
+            throw new \ErrorException(__('remit::messages.assign_vendor.failed', [
+                'slug' => $order->vendor,
+            ]));
+        }
+
+        return $verdict;
     }
 
     public function amendmentOrder(BaseModel $order): mixed
@@ -230,13 +274,13 @@ class AssignVendorService
     {
         $availableVendors = config('fintech.remit.providers', []);
 
-        if (! isset($availableVendors[$slug])) {
+        if (!isset($availableVendors[$slug])) {
             throw new VendorNotFoundException(ucfirst($slug));
         }
 
         $this->serviceVendorModel = Business::serviceVendor()->findWhere(['service_vendor_slug' => $slug, 'enabled']);
 
-        if (! $this->serviceVendorModel) {
+        if (!$this->serviceVendorModel) {
             throw (new ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $slug);
         }
 
