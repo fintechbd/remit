@@ -31,7 +31,7 @@ class RemitOrderStatusUpdateCommand extends Command
         $filters['status'] = OrderStatus::Accepted->value;
         $filters['queued'] = false;
         $filters['limit'] = 5;
-        $filters['attempt_threshold'] =config('fintech.remit.attempt_threshold', 5);
+        $filters['attempt_threshold'] = config('fintech.remit.attempt_threshold', 5);
 
         Transaction::order()->list($filters)->each(function ($order) {
             $order_data = $order->order_data;

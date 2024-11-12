@@ -3,7 +3,6 @@
 namespace Fintech\Remit\Jobs;
 
 use Fintech\Remit\Facades\Remit;
-use Fintech\Remit\Services\AssignVendorService;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -50,7 +49,7 @@ class RemitOrderStatusUpdateJob implements ShouldQueue
         Transaction::order()->update($this->order->getKey(), [
             'status' => \Fintech\Core\Enums\Transaction\OrderStatus::AdminVerification->value,
             'notes' => $exception->getMessage(),
-            'order_data' => $order_data
+            'order_data' => $order_data,
         ]);
     }
 }
