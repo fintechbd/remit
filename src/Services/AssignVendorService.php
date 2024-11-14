@@ -164,7 +164,7 @@ class AssignVendorService
      * @throws ErrorException
      * @throws VendorNotFoundException
      */
-    public function trackOrder(BaseModel $order, ?BaseModel $user = null): mixed
+    public function trackOrder(BaseModel $order, $user = null): mixed
     {
 
         if ($order->service_vendor_id == config('fintech.business.default_vendor')) {

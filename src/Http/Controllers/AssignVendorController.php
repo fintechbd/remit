@@ -4,6 +4,7 @@ namespace Fintech\Remit\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Exception;
+use Fintech\Auth\Facades\Auth;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Exceptions\AlreadyAssignedException;
 use Fintech\Remit\Facades\Remit;
@@ -111,9 +112,7 @@ class AssignVendorController extends Controller
 
             $order = $this->getOrder($order_id);
 
-            $user = $request->user();
-
-            $verdict = Remit::assignVendor()->trackOrder($order, $user);
+            $verdict = Remit::assignVendor()->trackOrder($order, $request->user());
 
             unset($verdict->amount, $verdict->charge, $verdict->discount, $verdict->commission);
 
