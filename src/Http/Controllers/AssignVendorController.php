@@ -4,7 +4,6 @@ namespace Fintech\Remit\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Exception;
-use Fintech\Auth\Facades\Auth;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Exceptions\AlreadyAssignedException;
 use Fintech\Remit\Facades\Remit;
