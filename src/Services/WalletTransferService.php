@@ -148,6 +148,8 @@ class WalletTransferService
         $inputs['order_data']['assign_order'] = 'no';
         $inputs['order_data']['system_notification_variable_success'] = 'wallet_transfer_success';
         $inputs['order_data']['system_notification_variable_failed'] = 'wallet_transfer_failed';
+        $inputs['order_data']['serving_country_id'] = $inputs['source_country_id'];
+        $inputs['order_data']['receiving_country_id'] = $inputs['destination_country_id'];
         $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
         $inputs['order_number'] = $inputs['order_data']['purchase_number'];
         if ($service = Business::service()->find($inputs['service_id'])) {

@@ -167,6 +167,8 @@ class BankTransferService
         $service = Business::service()->find($inputs['service_id']);
         $inputs['order_data']['service_slug'] = $service->service_slug ?? null;
         $inputs['order_data']['service_name'] = $service->service_name ?? null;
+        $inputs['order_data']['serving_country_id'] = $inputs['source_country_id'];
+        $inputs['order_data']['receiving_country_id'] = $inputs['destination_country_id'];
         $vendor = $service->serviceVendor;
         $inputs['service_vendor_id'] = $vendor?->getKey() ?? null;
         $inputs['vendor'] = $vendor?->service_vendor_slug ?? null;
