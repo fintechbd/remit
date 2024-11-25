@@ -8,6 +8,7 @@ use Fintech\Core\Traits\RestApi\CompliancePolicyTable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use stdClass;
+
 use function currency;
 
 class CashPickupCollection extends ResourceCollection

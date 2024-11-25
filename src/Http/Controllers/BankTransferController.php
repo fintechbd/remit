@@ -352,7 +352,7 @@ class BankTransferController extends Controller
      */
     public function storeWithoutInsufficientBalance(StoreBankTransferRequest $request): JsonResponse
     {
-            $depositor = $request->user('sanctum');
+        $depositor = $request->user('sanctum');
         DB::beginTransaction();
         try {
             $inputs = $request->validated();
