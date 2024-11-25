@@ -30,7 +30,7 @@ class InstallCommand extends Command
 
             $this->addDefaultServiceTypes();
 
-//            $this->addSchedulerTasks();
+            $this->addSchedulerTasks();
 
         });
 
