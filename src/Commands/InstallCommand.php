@@ -18,9 +18,9 @@ class InstallCommand extends Command
 
     private string $module = 'Remit';
 
-    private string $image_svg = __DIR__.'/../../resources/img/service_type/logo_svg/';
+    private string $image_svg = __DIR__ . '/../../resources/img/service_type/logo_svg/';
 
-    private string $image_png = __DIR__.'/../../resources/img/service_type/logo_png/';
+    private string $image_png = __DIR__ . '/../../resources/img/service_type/logo_png/';
 
     public function handle(): int
     {
@@ -28,9 +28,9 @@ class InstallCommand extends Command
 
         $this->task('Module Installation', function () {
 
-            //            $this->addDefaultServiceTypes();
+            $this->addDefaultServiceTypes();
 
-            $this->addSchedulerTasks();
+//            $this->addSchedulerTasks();
 
         });
 
