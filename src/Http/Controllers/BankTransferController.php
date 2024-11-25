@@ -352,13 +352,13 @@ class BankTransferController extends Controller
      */
     public function storeWithoutInsufficientBalance(StoreBankTransferRequest $request): JsonResponse
     {
+            $depositor = $request->user('sanctum');
         DB::beginTransaction();
         try {
             $inputs = $request->validated();
             if ($request->input('user_id') > 0) {
                 $user_id = $request->input('user_id');
             }
-            $depositor = $request->user('sanctum');
             if (Transaction::orderQueue()->addToQueueUserWise(($user_id ?? $depositor->getKey())) > 0) {
                 $depositAccount = Transaction::userAccount()->findWhere(['user_id' => $user_id ?? $depositor->getKey(), 'country_id' => $request->input('source_country_id', $depositor->profile?->country_id)]);
 

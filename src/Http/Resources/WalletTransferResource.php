@@ -3,11 +3,10 @@
 namespace Fintech\Remit\Http\Resources;
 
 use Fintech\Core\Facades\Core;
-use Fintech\Core\Traits\CompliancePolicyTable;
+use Fintech\Core\Traits\RestApi\CompliancePolicyTable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use stdClass;
-
 use function currency;
 
 class WalletTransferResource extends JsonResource

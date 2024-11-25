@@ -621,7 +621,7 @@ class CityBankApi implements MoneyTransfer
      *
      * @throws Exception
      */
-    public function requestQuote($order): mixed
+    public function requestQuote($order): \Fintech\Core\Supports\AssignVendorVerdict
     {
         return $this->vendorBalance();
     }
@@ -655,7 +655,7 @@ class CityBankApi implements MoneyTransfer
      *
      * @throws ErrorException
      */
-    public function executeOrder(BaseModel $order): mixed
+    public function executeOrder(BaseModel $order): \Fintech\Core\Supports\AssignVendorVerdict
     {
         // TODO: Implement executeOrder() method.
     }

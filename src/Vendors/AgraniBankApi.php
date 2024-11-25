@@ -628,7 +628,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     /**
      * @param  Model|BaseModel  $order
      */
-    public function requestQuote($order): mixed
+    public function requestQuote($order): \Fintech\Core\Supports\AssignVendorVerdict
     {
         return [
 
@@ -641,7 +641,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      *
      * @throws ErrorException
      */
-    public function executeOrder(BaseModel $order): mixed
+    public function executeOrder(BaseModel $order): \Fintech\Core\Supports\AssignVendorVerdict
     {
         // TODO: Implement executeOrder() method.
     }

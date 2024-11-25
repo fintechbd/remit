@@ -2,7 +2,7 @@
 
 namespace Fintech\Remit;
 
-use Fintech\Core\Traits\RegisterPackageTrait;
+use Fintech\Core\Traits\Packages\RegisterPackageTrait;
 use Fintech\Remit\Commands\AgraniBankSetupCommand;
 use Fintech\Remit\Commands\CityBankSetupCommand;
 use Fintech\Remit\Commands\InstallCommand;
