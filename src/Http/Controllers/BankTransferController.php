@@ -122,7 +122,7 @@ class BankTransferController extends Controller
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
-            return response()->updated(__('restapi::messages.resource.updated', ['model' => 'Bank Transfer']));
+            return response()->updated(__('core::messages.resource.updated', ['model' => 'Bank Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -188,7 +188,7 @@ class BankTransferController extends Controller
                 throw (new DeleteOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
-            return response()->deleted(__('restapi::messages.resource.deleted', ['model' => 'Bank Transfer']));
+            return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Bank Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -214,7 +214,7 @@ class BankTransferController extends Controller
 
             $bankTransferPaginate = Remit::bankTransfer()->export($inputs);
 
-            return response()->exported(__('restapi::messages.resource.exported', ['model' => 'Bank Transfer']));
+            return response()->exported(__('core::messages.resource.exported', ['model' => 'Bank Transfer']));
 
         } catch (Exception $exception) {
 
@@ -265,7 +265,7 @@ class BankTransferController extends Controller
                 throw (new RestoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
-            return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Bank Transfer']));
+            return response()->restored(__('core::messages.resource.restored', ['model' => 'Bank Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -299,7 +299,7 @@ class BankTransferController extends Controller
                 throw (new RestoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
-            return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Bank Transfer']));
+            return response()->restored(__('core::messages.resource.restored', ['model' => 'Bank Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -332,7 +332,7 @@ class BankTransferController extends Controller
                 throw (new RestoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
-            return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Bank Transfer']));
+            return response()->restored(__('core::messages.resource.restored', ['model' => 'Bank Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -446,7 +446,7 @@ class BankTransferController extends Controller
                 DB::commit();
 
                 return response()->created([
-                    'message' => __('restapi::messages.resource.created', ['model' => 'Bank Transfer']),
+                    'message' => __('core::messages.resource.created', ['model' => 'Bank Transfer']),
                     'id' => $bankTransfer->id,
                 ]);
             } else {

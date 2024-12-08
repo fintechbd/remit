@@ -51,7 +51,7 @@ class CashPickup extends Order implements Auditable
         $primaryKey = $this->getKey();
 
         return [
-            'show' => action_link(route('remit.cash-pickups.show', $primaryKey), __('restapi::messages.action.show'), 'get'),
+            'show' => action_link(route('remit.cash-pickups.show', $primaryKey), __('core::messages.action.show'), 'get'),
         ];
     }
 

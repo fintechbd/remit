@@ -207,7 +207,7 @@ class AssignVendorController extends Controller
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $order_id);
             }
 
-            return response()->updated(__('restapi::messages.resource.updated', ['model' => 'Order']));
+            return response()->updated(__('core::messages.resource.updated', ['model' => 'Order']));
 
         } catch (ModelNotFoundException $exception) {
 

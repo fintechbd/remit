@@ -127,7 +127,7 @@ class WalletTransferController extends Controller
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return response()->updated(__('restapi::messages.resource.updated', ['model' => 'Wallet Transfer']));
+            return response()->updated(__('core::messages.resource.updated', ['model' => 'Wallet Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -195,7 +195,7 @@ class WalletTransferController extends Controller
                 throw (new DeleteOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return response()->deleted(__('restapi::messages.resource.deleted', ['model' => 'Wallet Transfer']));
+            return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Wallet Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -231,7 +231,7 @@ class WalletTransferController extends Controller
                 throw (new RestoreOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Wallet Transfer']));
+            return response()->restored(__('core::messages.resource.restored', ['model' => 'Wallet Transfer']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -257,7 +257,7 @@ class WalletTransferController extends Controller
 
             $walletTransferPaginate = Remit::walletTransfer()->export($inputs);
 
-            return response()->exported(__('restapi::messages.resource.exported', ['model' => 'Wallet Transfer']));
+            return response()->exported(__('core::messages.resource.exported', ['model' => 'Wallet Transfer']));
 
         } catch (Exception $exception) {
 
@@ -392,7 +392,7 @@ class WalletTransferController extends Controller
                 DB::commit();
 
                 return response()->created([
-                    'message' => __('restapi::messages.resource.created', ['model' => 'Wallet Transfer']),
+                    'message' => __('core::messages.resource.created', ['model' => 'Wallet Transfer']),
                     'id' => $walletTransfer->id,
                 ]);
             } else {

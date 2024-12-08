@@ -127,7 +127,7 @@ class CashPickupController extends Controller
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
-            return response()->updated(__('restapi::messages.resource.updated', ['model' => 'Cash Pickup']));
+            return response()->updated(__('core::messages.resource.updated', ['model' => 'Cash Pickup']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -195,7 +195,7 @@ class CashPickupController extends Controller
                 throw (new DeleteOperationException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
-            return response()->deleted(__('restapi::messages.resource.deleted', ['model' => 'Cash Pickup']));
+            return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Cash Pickup']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -231,7 +231,7 @@ class CashPickupController extends Controller
                 throw (new RestoreOperationException)->setModel(config('fintech.remit.cash_pickup_model'), $id);
             }
 
-            return response()->restored(__('restapi::messages.resource.restored', ['model' => 'Cash Pickup']));
+            return response()->restored(__('core::messages.resource.restored', ['model' => 'Cash Pickup']));
 
         } catch (ModelNotFoundException $exception) {
 
@@ -257,7 +257,7 @@ class CashPickupController extends Controller
 
             $cashPickupPaginate = Remit::cashPickup()->export($inputs);
 
-            return response()->exported(__('restapi::messages.resource.exported', ['model' => 'Cash Pickup']));
+            return response()->exported(__('core::messages.resource.exported', ['model' => 'Cash Pickup']));
 
         } catch (Exception $exception) {
 
@@ -391,7 +391,7 @@ class CashPickupController extends Controller
                 DB::commit();
 
                 return response()->created([
-                    'message' => __('restapi::messages.resource.created', ['model' => 'Cash Pickup']),
+                    'message' => __('core::messages.resource.created', ['model' => 'Cash Pickup']),
                     'id' => $cashPickup->id,
                 ]);
             } else {
