@@ -188,24 +188,24 @@ class WalletTransferService
 
             $accounting->debitBalanceFromUserAccount();
 
-//            $userUpdatedBalance = $this->debitTransaction($walletTransfer);
-//            $senderUpdatedAccount = $senderAccount->toArray();
-//            $senderUpdatedAccount['user_account_data']['spent_amount'] = (float) $senderUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
-//            $senderUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
-//
-//            $inputs['order_data']['previous_amount'] = (float) $senderAccount->user_account_data['available_amount'];
-//            $inputs['order_data']['current_amount'] = ((float) $inputs['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
-//            $inputs['timeline'][] = [
-//                'message' => 'Deducted '.currency($userUpdatedBalance['spent_amount'], $inputs['currency']).' from user account successfully',
-//                'flag' => 'info',
-//                'timestamp' => now(),
-//            ];
-//
-//            $walletTransfer = $this->walletTransferRepository->update($walletTransfer->getKey(), ['order_data' => $inputs['order_data'], 'timeline' => $inputs['timeline']]);
-//
-//            if (! Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount)) {
-//                throw new \Exception('Failed to update user account balance.');
-//            }
+            //            $userUpdatedBalance = $this->debitTransaction($walletTransfer);
+            //            $senderUpdatedAccount = $senderAccount->toArray();
+            //            $senderUpdatedAccount['user_account_data']['spent_amount'] = (float) $senderUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
+            //            $senderUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
+            //
+            //            $inputs['order_data']['previous_amount'] = (float) $senderAccount->user_account_data['available_amount'];
+            //            $inputs['order_data']['current_amount'] = ((float) $inputs['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
+            //            $inputs['timeline'][] = [
+            //                'message' => 'Deducted '.currency($userUpdatedBalance['spent_amount'], $inputs['currency']).' from user account successfully',
+            //                'flag' => 'info',
+            //                'timestamp' => now(),
+            //            ];
+            //
+            //            $walletTransfer = $this->walletTransferRepository->update($walletTransfer->getKey(), ['order_data' => $inputs['order_data'], 'timeline' => $inputs['timeline']]);
+            //
+            //            if (! Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount)) {
+            //                throw new \Exception('Failed to update user account balance.');
+            //            }
 
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
