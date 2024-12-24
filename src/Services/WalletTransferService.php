@@ -178,8 +178,8 @@ class WalletTransferService
             'service_id' => $inputs['service_id'],
         ]);
 
-        if (!$allowInsufficientBalance) {
-            if ((float)$inputs['order_data']['service_stat_data']['total_amount'] > (float)$senderAccount->user_account_data['available_amount']) {
+        if (! $allowInsufficientBalance) {
+            if ((float) $inputs['order_data']['service_stat_data']['total_amount'] > (float) $senderAccount->user_account_data['available_amount']) {
                 throw new InsufficientBalanceException($senderAccount->user_account_data['currency']);
             }
         }
