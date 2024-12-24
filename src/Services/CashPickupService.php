@@ -90,6 +90,10 @@ class CashPickupService
      */
     public function create(array $inputs = []): ?BaseModel
     {
+        $allowInsufficientBalance = $inputs['allow_insufficient_balance'] ?? false;
+
+        unset($inputs['allow_insufficient_balance']);
+
         $sender = Auth::user()->find($inputs['user_id']);
 
         if (! $sender) {
@@ -184,8 +188,10 @@ class CashPickupService
             'service_id' => $inputs['service_id'],
         ]);
 
-        if ((float) $inputs['order_data']['service_stat_data']['total_amount'] > (float) $senderAccount->user_account_data['available_amount']) {
-            throw new InsufficientBalanceException($senderAccount->user_account_data['currency']);
+        if (!$allowInsufficientBalance) {
+            if ((float)$inputs['order_data']['service_stat_data']['total_amount'] > (float)$senderAccount->user_account_data['available_amount']) {
+                throw new InsufficientBalanceException($senderAccount->user_account_data['currency']);
+            }
         }
 
         DB::beginTransaction();

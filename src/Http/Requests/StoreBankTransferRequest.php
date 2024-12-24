@@ -23,6 +23,7 @@ class StoreBankTransferRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'allow_insufficient_balance' => ['nullable', 'boolean'],
             'user_id' => ['nullable', 'integer', 'min:1'],
             'source_country_id' => ['required', 'integer', 'min:1', 'master_currency'],
             'destination_country_id' => ['required', 'integer', 'min:1', 'master_currency'],
@@ -34,6 +35,8 @@ class StoreBankTransferRequest extends FormRequest
             'order_data' => ['nullable', 'array'],
             'reverse' => ['nullable', 'boolean'],
             'order_data.request_from' => ['string', 'required'],
+            'order_data.business_type' => ['string', 'nullable', 'in:personal,corporate'],
+            'order_data.transaction_type' => ['string', 'nullable', 'in:fast,low'],
             'order_data.beneficiary_type_id' => ['integer', 'nullable'],
             'order_data.beneficiary_id' => ['integer', 'nullable'],
             'order_data.bank_id' => ['integer', 'nullable'],
@@ -46,8 +49,20 @@ class StoreBankTransferRequest extends FormRequest
 
     protected function prepareForValidation()
     {
+        $this->mergeIfMissing(['allow_insufficient_balance' => false]);
+
         $order_data = $this->input('order_data');
+
         $order_data['request_from'] = request()->platform()->value;
+
+        if (empty($order_data['business_type'])) {
+            $order_data['business_type'] = 'personal';
+        }
+
+        if (empty($order_data['transaction_type'])) {
+            $order_data['transaction_type'] = 'low';
+        }
+
         $this->merge(['order_data' => $order_data]);
     }
 

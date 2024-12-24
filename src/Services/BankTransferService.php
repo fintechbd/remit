@@ -93,11 +93,13 @@ class BankTransferService
      */
     public function create(array $inputs = []): ?BaseModel
     {
-        $inputs['allow_insufficient_balance'] = $inputs['allow_insufficient_balance'] ?? false;
+        $allowInsufficientBalance = $inputs['allow_insufficient_balance'] ?? false;
+
+        unset($inputs['allow_insufficient_balance']);
 
         $sender = Auth::user()->find($inputs['user_id']);
 
-        if (! $sender) {
+        if (!$sender) {
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['user_id']);
         }
 
@@ -111,13 +113,13 @@ class BankTransferService
 
         $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
 
-        if (! $senderAccount) {
+        if (!$senderAccount) {
             throw new CurrencyUnavailableException($inputs['source_country_id']);
         }
 
         $masterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['source_country_id']]);
 
-        if (! $masterUser) {
+        if (!$masterUser) {
             throw new MasterCurrencyUnavailableException($inputs['source_country_id']);
         }
 
@@ -187,8 +189,8 @@ class BankTransferService
             'service_id' => $inputs['service_id'],
         ]);
 
-        if (! $inputs['allow_insufficient_balance']) {
-            if ((float) $inputs['order_data']['service_stat_data']['total_amount'] > (float) $senderAccount->user_account_data['available_amount']) {
+        if (!$allowInsufficientBalance) {
+            if ((float)$inputs['order_data']['service_stat_data']['total_amount'] > (float)$senderAccount->user_account_data['available_amount']) {
                 throw new InsufficientBalanceException($senderAccount->user_account_data['currency']);
             }
         }
