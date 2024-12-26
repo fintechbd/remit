@@ -89,7 +89,7 @@ class BankTransferController extends Controller
             return response()->created([
                 'message' => __('core::messages.transaction.request_created', ['service' => 'Bank Transfer']),
                 'id' => $bankTransfer->getKey(),
-                'order_number' => $bankTransfer->order_number ?? $bankTransfer->order_data['purchase_number']
+                'order_number' => $bankTransfer->order_number ?? $bankTransfer->order_data['purchase_number'],
             ]);
 
         } catch (Exception $exception) {
