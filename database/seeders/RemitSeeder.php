@@ -63,6 +63,9 @@ class RemitSeeder extends Seeder
                 'logo_png' => "{$image_png}wallet_transfer.png",
                 'service_type_is_parent' => 'yes',
                 'service_type_is_description' => 'no',
+                'service_settings' => [
+                    'beneficiary_type_id' => intval(Banco::beneficiaryType()->findWhere(['slug' => 'wallet-transfer'])?->id ?? 1),
+                ],
             ],
         ];
     }
