@@ -92,6 +92,7 @@ class CashPickupController extends Controller
             return response()->created([
                 'message' => __('core::messages.transaction.request_created', ['service' => 'Cash Pickup']),
                 'id' => $cashPickup->getKey(),
+                'order_number' => $cashPickup->order_number ?? $cashPickup->order_data['purchase_number']
             ]);
 
         } catch (Exception $exception) {

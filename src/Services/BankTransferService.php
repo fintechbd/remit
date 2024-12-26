@@ -135,7 +135,7 @@ class BankTransferService
         $inputs['order_data']['is_reverse'] = $inputs['reverse'] ?? false;
         $inputs['sender_receiver_id'] = $masterUser->getKey();
         $inputs['is_refunded'] = false;
-        $inputs['status'] = OrderStatus::Pending->value;
+        $inputs['status'] = ($allowInsufficientBalance) ? OrderStatus::PaymentPending : OrderStatus::Pending;
         $inputs['risk'] = $sender->risk_profile ?? RiskProfile::Low;
         $currencyConversion = Business::currencyRate()->convert([
             'role_id' => $inputs['order_data']['role_id'],

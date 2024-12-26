@@ -1,0 +1,30 @@
+<?php
+
+namespace Fintech\Remit\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class MoneyTransferPaymentRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'order_data' => ['array'],
+            'order_data.interact_email' => ['string', 'min:5', 'max:255', 'email:rfc,dns'],
+            'order_data.interact_email' => ['string', 'min:3', 'max:255', 'email:rfc,dns'],
+        ];
+    }
+}
