@@ -12,6 +12,7 @@ class MoneyTransferPayoutRequested
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $moneyTransfer;
+
     /**
      * Create a new event instance.
      */

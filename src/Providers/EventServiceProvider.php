@@ -34,7 +34,7 @@ class EventServiceProvider extends ServiceProvider
 
         ],
         MoneyTransferPayoutRequested::class => [
-            MoneyTransferPayoutListener::class
-        ]
+            MoneyTransferPayoutListener::class,
+        ],
     ];
 }

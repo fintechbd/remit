@@ -14,6 +14,7 @@ class MoneyTransferPaymentController extends Controller
 {
     /**
      * Handle the incoming request.
+     *
      * @throws UpdateOperationException
      */
     public function __invoke(string $id, MoneyTransferPaymentRequest $request): \Illuminate\Http\JsonResponse
@@ -22,13 +23,13 @@ class MoneyTransferPaymentController extends Controller
 
             $moneyTransfer = Transaction::order()->find($id);
 
-            if (!$moneyTransfer) {
+            if (! $moneyTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
             }
 
             $inputs = $request->validated();
 
-            if (!Transaction::order()->update($id, $inputs)) {
+            if (! Transaction::order()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.transaction.order_model'), $id);
             }
