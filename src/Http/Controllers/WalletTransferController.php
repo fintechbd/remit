@@ -92,7 +92,7 @@ class WalletTransferController extends Controller
             return response()->created([
                 'message' => __('core::messages.transaction.request_created', ['service' => 'Wallet Transfer']),
                 'id' => $walletTransfer->getKey(),
-                'order_number' => $walletTransfer->order_number ?? $walletTransfer->order_data['purchase_number']
+                'order_number' => $walletTransfer->order_number ?? $walletTransfer->order_data['purchase_number'],
             ]);
 
         } catch (Exception $exception) {
