@@ -3,6 +3,7 @@
 namespace Fintech\Remit\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class MoneyTransferPaymentRequest extends FormRequest
 {
@@ -22,7 +23,8 @@ class MoneyTransferPaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'interac_email' => ['string', 'min:5', 'max:255', 'email:rfc,dns'],
+            'interac_email' => ['required', 'string', 'min:5', 'max:255', 'email:rfc,dns'],
+            'vendor' => ['required', 'string']
         ];
     }
 }

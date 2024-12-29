@@ -3,6 +3,7 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
+use Fintech\Business\Facades\Business;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Events\MoneyTransferPayoutRequested;
@@ -24,7 +25,7 @@ class MoneyTransferPaymentController extends Controller
 
             $moneyTransfer = Transaction::order()->find($id);
 
-            if (! $moneyTransfer) {
+            if (!$moneyTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
             }
 
@@ -34,7 +35,25 @@ class MoneyTransferPaymentController extends Controller
 
             $orderData['interac_email'] = $inputs['interac_email'];
 
-            if (! Transaction::order()->update($id, ['status' => OrderStatus::Pending, 'order_data' => $orderData])) {
+            $payoutVendor = Business::serviceVendor()->findWhere([
+                'service_vendor_slug' => $inputs['vendor'] ?? 'leatherback',
+                'enabled' => true,
+                'paginate' => false,
+            ]);
+
+            if (!$payoutVendor) {
+
+                throw (new ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $inputs['vendor']);
+            }
+
+            $data = [
+                'status' => OrderStatus::Pending,
+                'order_data' => $orderData,
+                'service_vendor_id' => $payoutVendor->getKey(),
+                'vendor' => $payoutVendor->service_vendor_slug
+            ];
+
+            if (!Transaction::order()->update($id, $data)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.transaction.order_model'), $id);
             }
@@ -43,7 +62,7 @@ class MoneyTransferPaymentController extends Controller
 
             event(new MoneyTransferPayoutRequested($moneyTransfer));
 
-            return response()->updated(__('core::messages.transaction.request_created', ['service' => ucwords($service->service_name).' Payment']));
+            return response()->updated(__('core::messages.transaction.request_created', ['service' => ucwords($service->service_name) . ' Payment']));
 
         } catch (ModelNotFoundException $exception) {
 
