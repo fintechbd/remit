@@ -207,7 +207,7 @@ class BankTransferService
 
             $accounting->debitTransaction();
 
-            $accounting->debitBalanceFromUserAccount();
+            $accounting->debitBalanceFromUserAccount(['allow_insufficient_balance' => $allowInsufficientBalance]);
 
             //            $userUpdatedBalance = $this->debitTransaction($bankTransfer);
             //            $senderUpdatedAccount = $senderAccount->toArray();

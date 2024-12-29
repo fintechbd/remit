@@ -192,7 +192,7 @@ class WalletTransferService
 
             $accounting->debitTransaction();
 
-            $accounting->debitBalanceFromUserAccount();
+            $accounting->debitBalanceFromUserAccount(['allow_insufficient_balance' => $allowInsufficientBalance]);
 
             //            $userUpdatedBalance = $this->debitTransaction($walletTransfer);
             //            $senderUpdatedAccount = $senderAccount->toArray();

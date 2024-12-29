@@ -22,8 +22,7 @@ class MoneyTransferPaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'order_data' => ['array'],
-            'order_data.interac_email' => ['string', 'min:5', 'max:255', 'email:rfc,dns'],
+            'interac_email' => ['string', 'min:5', 'max:255', 'email:rfc,dns'],
         ];
     }
 }

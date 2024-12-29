@@ -3,6 +3,7 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
+use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Events\MoneyTransferPayoutRequested;
 use Fintech\Remit\Http\Requests\MoneyTransferPaymentRequest;
@@ -29,7 +30,11 @@ class MoneyTransferPaymentController extends Controller
 
             $inputs = $request->validated();
 
-            if (! Transaction::order()->update($id, $inputs)) {
+            $orderData = $moneyTransfer->order_data ?? [];
+
+            $orderData['interac_email'] = $inputs['interac_email'];
+
+            if (! Transaction::order()->update($id, ['status' => OrderStatus::Pending, 'order_data' => $orderData])) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.transaction.order_model'), $id);
             }
@@ -38,7 +43,7 @@ class MoneyTransferPaymentController extends Controller
 
             event(new MoneyTransferPayoutRequested($moneyTransfer));
 
-            return response()->updated(__('core::messages.transaction.request_created', ['model' => ucwords($service->service_name).' Payment']));
+            return response()->updated(__('core::messages.transaction.request_created', ['service' => ucwords($service->service_name).' Payment']));
 
         } catch (ModelNotFoundException $exception) {
 

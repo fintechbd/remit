@@ -202,7 +202,7 @@ class CashPickupService
 
             $accounting->debitTransaction();
 
-            $accounting->debitBalanceFromUserAccount();
+            $accounting->debitBalanceFromUserAccount(['allow_insufficient_balance' => $allowInsufficientBalance]);
 
             //            $userUpdatedBalance = $this->debitTransaction($cashPickup);
             //            $senderUpdatedAccount = $senderAccount->toArray();
