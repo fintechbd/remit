@@ -25,7 +25,7 @@ class MoneyTransferPaymentController extends Controller
 
             $moneyTransfer = Transaction::order()->find($id);
 
-            if (!$moneyTransfer) {
+            if (! $moneyTransfer) {
                 throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
             }
 
@@ -41,7 +41,7 @@ class MoneyTransferPaymentController extends Controller
                 'paginate' => false,
             ]);
 
-            if (!$payoutVendor) {
+            if (! $payoutVendor) {
 
                 throw (new ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $inputs['vendor']);
             }
@@ -50,10 +50,10 @@ class MoneyTransferPaymentController extends Controller
                 'status' => OrderStatus::Pending,
                 'order_data' => $orderData,
                 'service_vendor_id' => $payoutVendor->getKey(),
-                'vendor' => $payoutVendor->service_vendor_slug
+                'vendor' => $payoutVendor->service_vendor_slug,
             ];
 
-            if (!Transaction::order()->update($id, $data)) {
+            if (! Transaction::order()->update($id, $data)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.transaction.order_model'), $id);
             }
@@ -62,7 +62,7 @@ class MoneyTransferPaymentController extends Controller
 
             event(new MoneyTransferPayoutRequested($moneyTransfer));
 
-            return response()->updated(__('core::messages.transaction.request_created', ['service' => ucwords($service->service_name) . ' Payment']));
+            return response()->updated(__('core::messages.transaction.request_created', ['service' => ucwords($service->service_name).' Payment']));
 
         } catch (ModelNotFoundException $exception) {
 
