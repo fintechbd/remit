@@ -73,5 +73,8 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "suggest": {
+        "fintech/reload": "To use payment via interac-e-transfer"
+    }
 }
