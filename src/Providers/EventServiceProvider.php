@@ -2,12 +2,10 @@
 
 namespace Fintech\Remit\Providers;
 
-use Fintech\Reload\Events\OrderPayoutRequested;
 use Fintech\Remit\Events\BankTransferRequested;
 use Fintech\Remit\Events\CashPickupRequested;
 use Fintech\Remit\Events\RemitTransferVendorAssigned;
 use Fintech\Remit\Events\WalletTransferRequested;
-use Fintech\Remit\Listeners\MoneyTransferPayoutListener;
 use Fintech\Remit\Listeners\RemitOrderComplianceCheck;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -32,9 +30,6 @@ class EventServiceProvider extends ServiceProvider
 
         RemitTransferVendorAssigned::class => [
 
-        ],
-        OrderPayoutRequested::class => [
-            MoneyTransferPayoutListener::class,
-        ],
+        ]
     ];
 }
