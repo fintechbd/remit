@@ -1,11 +1,11 @@
 <?php
 
 use Fintech\Core\Facades\Core;
+use Fintech\Reload\Http\Controllers\OrderPaymentController;
 use Fintech\Remit\Http\Controllers\AssignVendorController;
 use Fintech\Remit\Http\Controllers\BankTransferController;
 use Fintech\Remit\Http\Controllers\CashPickupController;
 use Fintech\Remit\Http\Controllers\Charts\WithdrawPartnerSummaryController;
-use Fintech\Remit\Http\Controllers\MoneyTransferPaymentController;
 use Fintech\Remit\Http\Controllers\VendorTestController;
 use Fintech\Remit\Http\Controllers\WalletTransferController;
 use Fintech\Remit\Http\Controllers\WalletVerificationController;
@@ -57,10 +57,6 @@ if (Config::get('fintech.remit.enabled')) {
                 });
                 Route::post('wallet-verification', WalletVerificationController::class)->name('wallet-verification');
                 Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])->name('islami-bank-account-type-code');
-                Route::post('money-transfer/{order}/payment', MoneyTransferPaymentController::class)
-                    ->name('money-transfer-payment')
-                    ->middleware('imposter');
-
                 //DO NOT REMOVE THIS LINE//
 
                 Route::prefix('charts')->name('charts.')->group(function () {
