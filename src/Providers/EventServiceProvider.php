@@ -30,6 +30,6 @@ class EventServiceProvider extends ServiceProvider
 
         RemitTransferVendorAssigned::class => [
 
-        ]
+        ],
     ];
 }
