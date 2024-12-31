@@ -43,7 +43,7 @@ class AgraniBankApi implements MoneyTransfer
     /**
      * @var array
      */
-    public $transactionBody; //base64 encode of auth
+    public $transactionBody; // base64 encode of auth
 
     /**
      * EMQ API configuration.
@@ -135,7 +135,7 @@ class AgraniBankApi implements MoneyTransfer
             case 200:
             case 201:
 
-                //send confirmation request
+                // send confirmation request
                 $transConfirmResponse = null; // $this->postTransactionConfirm($reference);
                 $returnData->emq_confirm_response = json_encode($transConfirmResponse);
 
@@ -232,13 +232,13 @@ class AgraniBankApi implements MoneyTransfer
             ? ($transactionTypes[$data->recipient_type_name] ?? '15')
             : '15';
 
-        $transferInfo['purpose'] = $data->emq_purpose_of_remittance ?? null; //TODO agrani code needed
+        $transferInfo['purpose'] = $data->emq_purpose_of_remittance ?? null; // TODO agrani code needed
         $transferInfo['remamountdest'] = isset($data->transfer_amount) ? round($data->transfer_amount, 2) : '0.00';
         $transferInfo['remfname'] = $sender_first_name;
         $transferInfo['remlname'] = $sender_last_name;
         $transferInfo['remit_tel'] = isset($data->sender_mobile) ? substr($data->sender_mobile, -11) : null;
         $transferInfo['remaddress1'] = trim(($data->sender_address ?? null).' '.($data->sender_city ?? null));
-        $transferInfo['remcountry'] = $data->trans_fast_sender_country_iso_code ?? null; //TODO agrani country code needed
+        $transferInfo['remcountry'] = $data->trans_fast_sender_country_iso_code ?? null; // TODO agrani country code needed
         $transferInfo['benename'] = $data->receiver_first_name ?? null;
         $transferInfo['benemname'] = $data->receiver_middle_name ?? ' ';
         $transferInfo['benelname'] = $data->receiver_last_name ?? null;
@@ -261,7 +261,7 @@ class AgraniBankApi implements MoneyTransfer
 
         Log::info($this->xmlBody->saveXML());
 
-        //die();
+        // die();
         return $this->putPostData('/MyCash', $transferInfo, 'POST');
     }
 
@@ -328,10 +328,10 @@ k6aHAHli0D9xC3UQzJSYVIGx6PDR8q5TgADSLyPDwejCArLUpchYrFz3R1FWRs/W
 egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
 -----END RSA PRIVATE KEY-----';
         $certs = [];
-        openssl_pkcs12_read(file_get_contents(public_path('Certificate.crt')), $certs, '1'); //where 1106@123 is your certificate password
-        //dd($certs);
+        openssl_pkcs12_read(file_get_contents(public_path('Certificate.crt')), $certs, '1'); // where 1106@123 is your certificate password
+        // dd($certs);
 
-        //if (! $certs ) return ;
+        // if (! $certs ) return ;
         $signature = '';
         openssl_sign($plainText, $signature, $key);
 
@@ -374,7 +374,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
         $info = curl_getinfo($curl);
         $error = curl_error($curl);
 
-        //dd([$error, $info, $response]);
+        // dd([$error, $info, $response]);
         if ($response == false) {
             Log::info($info);
             Log::info($error);
@@ -444,7 +444,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
         $returnData->available_credit = isset($response['info']['state']) ? $response['info']['state'] : null;
         $returnData->message = json_encode($response['info'], JSON_PRETTY_PRINT);
 
-        //$returnData->vr_guid = $response['info']['code'];
+        // $returnData->vr_guid = $response['info']['code'];
         $returnData->vr_guid = isset($response['reference']) ? $response['reference'] : null;
         $returnData->telco_transaction_id = isset($response['info']['code']) ? $response['info']['code'] : null;
 
@@ -473,7 +473,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
             case 200:
             case 201:
 
-                //send confirmation request
+                // send confirmation request
                 $transConfirmResponse = $this->postTransactionConfirm($reference);
                 $returnData->emq_confirm_response = json_encode($transConfirmResponse);
 

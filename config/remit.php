@@ -60,7 +60,7 @@ return [
     */
     'wallet_transfer_model' => WalletTransfer::class,
 
-    //** Model Config Point Do not Remove **//
+    // ** Model Config Point Do not Remove **//
 
     /*
     |--------------------------------------------------------------------------
@@ -207,7 +207,7 @@ return [
 
         \Fintech\Remit\Interfaces\WalletTransferRepository::class => WalletTransferRepository::class,
 
-        //** Repository Binding Config Point Do not Remove **//
+        // ** Repository Binding Config Point Do not Remove **//
     ],
 
 ];

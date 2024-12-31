@@ -271,9 +271,9 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
                 $transferData['paymentType'] = 5;
                 //                $transferData['beneficiaryRoutingNo'] = '?';
                 $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
-                //$transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['wallet_information']['vendor_code']['remit']['islamibank'] ?? '42');
+                // $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['wallet_information']['vendor_code']['remit']['islamibank'] ?? '42');
                 $transferData['beneficiaryBankCode'] = '42';
-                //$transferData['beneficiaryBankName'] = ($data['beneficiary_data']['wallet_information']['bank_name'] ?? 'ISLAMI BANK BANGLADESH LIMITED');
+                // $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['wallet_information']['bank_name'] ?? 'ISLAMI BANK BANGLADESH LIMITED');
                 $transferData['beneficiaryBankName'] = 'ISLAMI BANK BANGLADESH LIMITED';
                 $transferData['beneficiaryBranchCode'] = '358';
                 $transferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? 'Head Office Complex');
@@ -283,9 +283,9 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
                 $transferData['paymentType'] = 7;
                 //                $transferData['beneficiaryRoutingNo'] = '?';
                 $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
-                //$transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['wallet_information']['vendor_code']['remit']['islamibank'] ?? '42');
+                // $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['wallet_information']['vendor_code']['remit']['islamibank'] ?? '42');
                 $transferData['beneficiaryBankCode'] = '42';
-                //$transferData['beneficiaryBankName'] = ($data['beneficiary_data']['wallet_information']['bank_name'] ?? 'ISLAMI BANK BANGLADESH LIMITED');
+                // $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['wallet_information']['bank_name'] ?? 'ISLAMI BANK BANGLADESH LIMITED');
                 $transferData['beneficiaryBankName'] = 'ISLAMI BANK BANGLADESH LIMITED';
                 $transferData['beneficiaryBranchCode'] = '358';
                 $transferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? 'Head Office Complex');
@@ -295,9 +295,9 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
                 $transferData['paymentType'] = 8;
                 //                $transferData['beneficiaryRoutingNo'] = '?';
                 $transferData['beneficiaryAccNo'] = ($data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] ?? null);
-                //$transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['wallet_information']['vendor_code']['remit']['islamibank'] ?? '42');
+                // $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['wallet_information']['vendor_code']['remit']['islamibank'] ?? '42');
                 $transferData['beneficiaryBankCode'] = '42';
-                //$transferData['beneficiaryBankName'] = ($data['beneficiary_data']['wallet_information']['bank_name'] ?? 'ISLAMI BANK BANGLADESH LIMITED');
+                // $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['wallet_information']['bank_name'] ?? 'ISLAMI BANK BANGLADESH LIMITED');
                 $transferData['beneficiaryBankName'] = 'ISLAMI BANK BANGLADESH LIMITED';
                 $transferData['beneficiaryBranchCode'] = '358';
                 $transferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? 'Head Office Complex');
@@ -337,7 +337,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
                 $transferData['paymentType'] = 1;
                 break;
             default:
-                //code block
+                // code block
         }
         /*if ($data['service_slug'] == 'mbs_m_cash') {
             $transferData['paymentType'] = 5;
@@ -628,7 +628,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
             <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
         ';
-        //$xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
+        // $xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
         $xmlString .= '<ser:wsMessage>';
         $xmlString .= '<xsd:amount>'.($importOrPushRemittance['amount'] ?? null).'</xsd:amount>';
         $xmlString .= '<xsd:isoCode>'.($importOrPushRemittance['isoCode'] ?? null).'</xsd:isoCode>';
@@ -684,7 +684,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
             <ser:userID>'.$this->config[$this->status]['username'].'</ser:userID>
             <ser:password>'.$this->config[$this->status]['password'].'</ser:password>
         ';
-        //$xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
+        // $xmlString .= '<ser:transRefNo>'.($data['transaction_reference_number'] ?? null).'</ser:transRefNo>';
         $xmlString .= '<ser:wsMessage>';
         $xmlString .= '<xsd:amount>'.($verifyRemittance['amount'] ?? null).'</xsd:amount>';
         $xmlString .= '<xsd:isoCode>'.($verifyRemittance['isoCode'] ?? null).'</xsd:isoCode>';

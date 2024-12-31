@@ -1,7 +1,6 @@
 <?php
 
 use Fintech\Core\Facades\Core;
-use Fintech\Reload\Http\Controllers\OrderPaymentController;
 use Fintech\Remit\Http\Controllers\AssignVendorController;
 use Fintech\Remit\Http\Controllers\BankTransferController;
 use Fintech\Remit\Http\Controllers\CashPickupController;
@@ -57,7 +56,7 @@ if (Config::get('fintech.remit.enabled')) {
                 });
                 Route::post('wallet-verification', WalletVerificationController::class)->name('wallet-verification');
                 Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])->name('islami-bank-account-type-code');
-                //DO NOT REMOVE THIS LINE//
+                // DO NOT REMOVE THIS LINE//
 
                 Route::prefix('charts')->name('charts.')->group(function () {
                     Route::get('withdraw-partner-summary', WithdrawPartnerSummaryController::class)
