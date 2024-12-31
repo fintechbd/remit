@@ -321,7 +321,7 @@ class CashPickupController extends Controller
                     throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
                 }
 
-                //set pre defined conditions of deposit
+                // set pre defined conditions of deposit
                 $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'money_transfer'])->getKey();
                 $inputs['user_id'] = $user_id ?? $depositor->getKey();
                 $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
@@ -341,7 +341,7 @@ class CashPickupController extends Controller
                 $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
                 $inputs['order_data']['created_at'] = now();
                 $inputs['order_data']['master_user_name'] = $masterUser['name'];
-                //$inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
+                // $inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
                 $inputs['order_data']['assign_order'] = 'no';
                 $inputs['order_data']['system_notification_variable_success'] = 'cash_pickup_success';
                 $inputs['order_data']['system_notification_variable_failed'] = 'cash_pickup_failed';
@@ -363,7 +363,7 @@ class CashPickupController extends Controller
                 $cashPickup->order_data = $order_data;
                 $userUpdatedBalance = Remit::cashPickup()->debitTransaction($cashPickup);
                 $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $depositor->getKey(), 'country_id' => $cashPickup->source_country_id]);
-                //update User Account
+                // update User Account
                 $depositedUpdatedAccount = $depositedAccount->toArray();
                 $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
                 $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
@@ -383,7 +383,7 @@ class CashPickupController extends Controller
                         'target_status' => OrderStatus::Success->value,
                     ]));
                 }
-                //TODO ALL Beneficiary Data with bank and branch data
+                // TODO ALL Beneficiary Data with bank and branch data
                 $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
                 $order_data['beneficiary_data'] = $beneficiaryData;
 

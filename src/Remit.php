@@ -58,6 +58,6 @@ class Remit
         return $instance->validateWallet($inputs);
     }
 
-    //** Crud Service Method Point Do not Remove **//
+    // ** Crud Service Method Point Do not Remove **//
 
 }

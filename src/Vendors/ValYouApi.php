@@ -76,8 +76,8 @@ class ValYouApi implements MoneyTransfer
         $this->ClientPass = $this->config[$this->status]['password'];
         $this->agent_code = $this->config[$this->status]['agent_code'];
         $this->agent_session_id = $this->config[$this->status]['agent_session_id'];
-        $this->payment_mode = 'B'; //C- Cash Pickup by ID, B- Account Deposit, H- Home Delivery
-        $this->calculated_by_sending_payout_currency = 'P'; //P – Calculated by Payout Currency or C – Calculated by Sending Currency
+        $this->payment_mode = 'B'; // C- Cash Pickup by ID, B- Account Deposit, H- Home Delivery
+        $this->calculated_by_sending_payout_currency = 'P'; // P – Calculated by Payout Currency or C – Calculated by Sending Currency
     }
 
     /**
@@ -219,7 +219,7 @@ class ValYouApi implements MoneyTransfer
         $pay_out_agent_code = isset($input_data['pay_out_agent_code']) ? $input_data['pay_out_agent_code'] : '';
         if ($input_data['recipient_type_name'] == 'Cash') {
             $this->payment_mode = 'C';
-            //$this->calculated_by_sending_payout_currency = 'C';
+            // $this->calculated_by_sending_payout_currency = 'C';
         }
         $signature = $this->agent_code.$this->ClientId.$this->agent_session_id.
             $this->payment_mode.$pay_out_country.$bank_name.$bank_branch_state.$pay_out_agent_code.
@@ -255,14 +255,14 @@ class ValYouApi implements MoneyTransfer
      */
     public function exRate($input_data)
     {
-        //dd($input_data);
+        // dd($input_data);
         $location_id = $input_data['location_id'];
         $transfer_amount = $input_data['transfer_amount'];
         $payout_country = $input_data['payout_country'];
         if ($input_data['recipient_type_name'] == 'Cash') {
             $location_id = '96700015P39319013P743723';
             $this->payment_mode = 'C';
-            //$this->calculated_by_sending_payout_currency = 'C';
+            // $this->calculated_by_sending_payout_currency = 'C';
         } elseif ($input_data['recipient_type_name'] == 'Wallet') {
             $location_id = '96700241P96836978';
         }
@@ -519,7 +519,7 @@ class ValYouApi implements MoneyTransfer
      */
     public function sendTransaction($input_data)
     {
-        //dd($input_data);
+        // dd($input_data);
         $location_id = $input_data->valyou_location_routing_id[0]->bank_branch_location_field_value;
         $AGENT_TXNID = $input_data->purchase_number;
         $SENDER_FIRST_NAME = $input_data->sender_first_name;
@@ -543,17 +543,17 @@ class ValYouApi implements MoneyTransfer
         $SENDER_SOURCE_OF_FUND = $input_data->sender_source_of_fund;
         $SENDER_COUNTRY_OF_BIRTH = $input_data->sender_country_of_birth;
         $SENDER_BENEFICIARY_RELATIONSHIP = $input_data->sender_beneficiary_relationship;
-        //$PURPOSE_OF_REMITTANCE = $input_data->purpose_of_remittance;
+        // $PURPOSE_OF_REMITTANCE = $input_data->purpose_of_remittance;
         $PURPOSE_OF_REMITTANCE = 'FAMILY MAINTENANCE/SAVINGS';
         $RECEIVER_FIRST_NAME = $input_data->receiver_first_name;
-        $RECEIVER_MIDDLE_NAME = ''; //$input_data->receiver_middle_name;
+        $RECEIVER_MIDDLE_NAME = ''; // $input_data->receiver_middle_name;
         $RECEIVER_LAST_NAME = $input_data->receiver_last_name;
         $RECEIVER_ADDRESS = $input_data->receiver_address;
-        $RECEIVER_CONTACT_NUMBER = ''; //$input_data->receiver_contact_number;
+        $RECEIVER_CONTACT_NUMBER = ''; // $input_data->receiver_contact_number;
         $RECEIVER_COUNTRY = $input_data->receiver_country;
         $RECEIVER_CITY = $input_data->receiver_country;
         $TRANSFER_AMOUNT = $input_data->transfer_amount;
-        $REMIT_CURRENCY = ''; //$input_data->sender_currency;
+        $REMIT_CURRENCY = ''; // $input_data->sender_currency;
         $TRANSFER_CURRENCY = $input_data->transfer_currency;
         $BANK_NAME = $input_data->valyou_bank_name;
         $BANK_BRANCH_NAME = $input_data->valyou_bank_branch_name;
@@ -564,7 +564,7 @@ class ValYouApi implements MoneyTransfer
         if ($input_data['recipient_type_name'] == 'Cash') {
             $location_id = is_null($input_data['location_id']) ? $input_data['location_id'] : '96700015P39319013P743723';
             $this->payment_mode = 'C';
-            //$this->calculated_by_sending_payout_currency = 'C';
+            // $this->calculated_by_sending_payout_currency = 'C';
         } elseif ($input_data['recipient_type_name'] == 'Wallet') {
             $location_id = is_null($input_data['location_id']) ? $input_data['location_id'] : '96700241P96836978';
         }

@@ -48,7 +48,7 @@ class EmqApi implements MoneyTransfer
     /**
      * @var mixed|string
      */
-    private $apiUrl; //base64 encode of auth
+    private $apiUrl; // base64 encode of auth
 
     /**
      * @var string
@@ -118,7 +118,7 @@ class EmqApi implements MoneyTransfer
             case 200:
             case 201:
 
-                //send confirmation request
+                // send confirmation request
                 $transConfirmResponse = $this->postTransactionConfirm($reference);
                 $returnData->emq_confirm_response = json_encode($transConfirmResponse);
 
@@ -211,15 +211,15 @@ class EmqApi implements MoneyTransfer
         }
 
         $transferInfo['destination_amount']['currency'] = isset($data->transfer_currency) ? $data->transfer_currency : null;
-        $transferInfo['destination_amount']['units'] = isset($data->transfer_amount) ? (string) round($data->transfer_amount, 2) : null; //TODO with charge or without charge
-        //TODO FOR PHL
+        $transferInfo['destination_amount']['units'] = isset($data->transfer_amount) ? (string) round($data->transfer_amount, 2) : null; // TODO with charge or without charge
+        // TODO FOR PHL
         $transferInfo['destination']['country'] = isset($data->emq_receiver_country_iso_code) ? $data->emq_receiver_country_iso_code : null;
         if (in_array($transferInfo['destination']['country'], ['PHL', 'IDN'])) {
-            $transferInfo['destination_amount']['units'] = isset($data->transfer_amount) ? (string) floor($data->transfer_amount) : null; //TODO with charge or without charge
+            $transferInfo['destination_amount']['units'] = isset($data->transfer_amount) ? (string) floor($data->transfer_amount) : null; // TODO with charge or without charge
         }
 
-        //$transferInfo["source_amount"]["currency"] = isset($data->sender_currency) ? $data->sender_currency : null;
-        //$transferInfo["source_amount"]["units"] = isset($data->sender_amount) ? (string)round($data->sender_amount) : null; //TODO with charge or without charge
+        // $transferInfo["source_amount"]["currency"] = isset($data->sender_currency) ? $data->sender_currency : null;
+        // $transferInfo["source_amount"]["units"] = isset($data->sender_amount) ? (string)round($data->sender_amount) : null; //TODO with charge or without charge
 
         $transferInfo['compliance']['source_of_funds'] = isset($data->emq_sender_source_of_fund_id) ? (string) $data->emq_sender_source_of_fund_id : null;
         $transferInfo['compliance']['remittance_purpose'] = isset($data->emq_purpose_of_remittance) ? $data->emq_purpose_of_remittance : null;
@@ -230,7 +230,7 @@ class EmqApi implements MoneyTransfer
             $transferInfo['compliance']['relationship']['relation'] = isset($data->sender_beneficiary_relationship) ? ucwords(strtolower($data->sender_beneficiary_relationship)) : 'Others';
         }
 
-        //Source
+        // Source
         $transferInfo['source']['type'] = 'partner';
         $transferInfo['source']['gender'] = isset($data->sender_gender) ? strtoupper(substr($data->sender_gender, 0, 1)) : 'M';
         $transferInfo['source']['country'] = isset($data->emq_sender_country_iso3_code) ? $data->emq_sender_country_iso3_code : null;
@@ -245,8 +245,8 @@ class EmqApi implements MoneyTransfer
 
         $transferInfo['source']['nationality'] = isset($data->emq_sender_nationality) ? $data->emq_sender_nationality : null;
 
-        //$transferInfo['source']["id_type"] = isset($data->emq_sender_id_type) ? strtolower($data->emq_sender_id_type) : null;
-        $transferInfo['source']['id_type'] = 'passport'; //national
+        // $transferInfo['source']["id_type"] = isset($data->emq_sender_id_type) ? strtolower($data->emq_sender_id_type) : null;
+        $transferInfo['source']['id_type'] = 'passport'; // national
         $transferInfo['source']['id_country'] = isset($data->emq_sender_id_issue_country) ? $data->emq_sender_id_issue_country : null;
         $transferInfo['source']['id_number'] = isset($data->sender_id_number) ? $data->sender_id_number : null;
         $transferInfo['source']['id_expiration'] = isset($data->sender_expire_date) ? Carbon::parse($data->sender_expire_date)->format('Y-m-d') : null;
@@ -256,7 +256,7 @@ class EmqApi implements MoneyTransfer
         $transferInfo['source']['address_zip'] = isset($data->sender_zipcode) ? $data->sender_zipcode : null;
         $transferInfo['source']['address_country'] = isset($data->emq_sender_country_iso3_code) ? $data->emq_sender_country_iso3_code : null;
 
-        //Destination
+        // Destination
         $transferInfo['destination']['type'] = isset($data->recipient_type_name)
             ? (isset($transactionTypes[$data->recipient_type_name])
                 ? $transactionTypes[$data->recipient_type_name] : 'bank_account')
@@ -269,25 +269,25 @@ class EmqApi implements MoneyTransfer
         $transferInfo['destination']['address_line'] = isset($data->receiver_address) ? $data->receiver_address : null;
         $transferInfo['destination']['address_city'] = isset($data->receiver_city) ? $data->receiver_city : null;
 
-        //type bank account
+        // type bank account
         if ($transferInfo['destination']['type'] === 'bank_account') {
 
             if ($transferInfo['destination']['country'] !== 'CHN') {
                 $transferInfo['destination']['bank'] = isset($data->emq_bank_id) ? $data->emq_bank_id : null;
             }
-            //remove china bank address info
+            // remove china bank address info
             if ($transferInfo['destination']['country'] == 'CHN') {
                 unset($transferInfo['destination']['address_line']);
                 unset($transferInfo['destination']['address_city']);
             }
 
-            //remove malaysia bank address info
+            // remove malaysia bank address info
             if ($transferInfo['destination']['country'] == 'MYS') {
                 unset($transferInfo['destination']['mobile_number']);
                 unset($transferInfo['destination']['address_city']);
             }
 
-            //indonesia
+            // indonesia
             if ($transferInfo['destination']['country'] == 'IDN') {
                 $transferInfo['destination']['address_state'] = isset($data->receiver_province) ? $data->receiver_province : 'Jawa Barat';
                 $transferInfo['destination']['address_state_code'] = isset($data->emq_receiver_province_code) ? $data->emq_receiver_province_code : '01';
@@ -297,24 +297,24 @@ class EmqApi implements MoneyTransfer
             }
 
             $transferInfo['destination']['account_number'] = isset($data->bank_account_number) ? $data->bank_account_number : null;
-            //branch
-            if ($transferInfo['destination']['country'] === 'IND') { //India //99
-                //$transferInfo["destination"]["branch"] = isset($data->emq_bank_branch_id) ? $data->emq_bank_branch_id : null;
-                //$transferInfo["destination"]["branch"] = str_replace((isset($data->emq_bank_id) ? $data->emq_bank_id : null), '', (isset($data->location_routing_id[1]->bank_branch_location_field_value) ? $data->location_routing_id[1]->bank_branch_location_field_value : null));
+            // branch
+            if ($transferInfo['destination']['country'] === 'IND') { // India //99
+                // $transferInfo["destination"]["branch"] = isset($data->emq_bank_branch_id) ? $data->emq_bank_branch_id : null;
+                // $transferInfo["destination"]["branch"] = str_replace((isset($data->emq_bank_id) ? $data->emq_bank_id : null), '', (isset($data->location_routing_id[1]->bank_branch_location_field_value) ? $data->location_routing_id[1]->bank_branch_location_field_value : null));
                 $transferInfo['destination']['branch'] = substr((isset($data->location_routing_id[1]->bank_branch_location_field_value) ? $data->location_routing_id[1]->bank_branch_location_field_value : null), -6);
 
             } elseif ($transferInfo['destination']['country'] === 'JPN') {
                 $transferInfo['destination']['branch'] = isset($data->emq_bank_branch_id) ? $data->emq_bank_branch_id : null;
             }
 
-            //swift //SPEA Country TODO Feature Work
+            // swift //SPEA Country TODO Feature Work
             /*if ($transferInfo["destination"]["country"] === '') :
                 $transferInfo["destination"]["swift_code"] = isset($data->emq_bank_swift_code) ? $data->emq_bank_swift_code : null;
                 $transferInfo["destination"]["iban"] = isset($data->emq_bank_iban_code) ? $data->emq_bank_iban_code : null;
             endif;*/
         }
 
-        //type ewallet
+        // type ewallet
         if ($transferInfo['destination']['type'] === 'ewallet') {
             if (in_array($transferInfo['destination']['country'], $this->config['ewallet_allow_country'])) {
                 $transferInfo['destination']['segment'] = isset($data->emq_sender_segment) ? $data->emq_sender_segment : 'individual';
@@ -335,7 +335,7 @@ class EmqApi implements MoneyTransfer
             }
         }
 
-        //type cash_pickup
+        // type cash_pickup
         if ($transferInfo['destination']['type'] === 'cash_pickup') {
             $transferInfo['destination']['partner'] = isset($data->emq_cash_pickup_partner) ? $data->emq_cash_pickup_partner : null;
         }
@@ -456,7 +456,7 @@ class EmqApi implements MoneyTransfer
         $returnData->available_credit = isset($response['info']['state']) ? $response['info']['state'] : null;
         $returnData->message = json_encode($response['info'], JSON_PRETTY_PRINT);
 
-        //$returnData->vr_guid = $response['info']['code'];
+        // $returnData->vr_guid = $response['info']['code'];
         $returnData->vr_guid = isset($response['reference']) ? $response['reference'] : null;
         $returnData->telco_transaction_id = isset($response['info']['code']) ? $response['info']['code'] : null;
         $returnData->status = $this->stateHandler($response['state']);
@@ -479,7 +479,7 @@ class EmqApi implements MoneyTransfer
                 break;
 
             case 'cancelled':
-                //$response = 'failed_and_refund';
+                // $response = 'failed_and_refund';
                 $response = 'admin_to_verify';
                 break;
 

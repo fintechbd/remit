@@ -373,7 +373,7 @@ class AgraniBankSetupCommand extends Command
         }
     }
 
-    //add country code all country
+    // add country code all country
     public function addCountryCodeToCountries(): void
     {
         if (Core::packageExists('MetaData')) {
