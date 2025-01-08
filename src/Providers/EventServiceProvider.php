@@ -28,10 +28,10 @@ class EventServiceProvider extends ServiceProvider
 
         ],
         \Fintech\Reload\Events\DepositAccepted::class => [
-            RemitOrderPaymentAccepted::class
+            RemitOrderPaymentAccepted::class,
         ],
         \Fintech\Reload\Events\DepositRejected::class => [
-            RemitOrderPaymentRejected::class
-        ]
+            RemitOrderPaymentRejected::class,
+        ],
     ];
 }

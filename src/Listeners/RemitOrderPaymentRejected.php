@@ -13,10 +13,7 @@ class RemitOrderPaymentRejected implements ShouldQueue
      *
      * @throws \Throwable
      */
-    public function handle(object $event): void
-    {
-
-    }
+    public function handle(object $event): void {}
 
     /**
      * Handle a job failure.

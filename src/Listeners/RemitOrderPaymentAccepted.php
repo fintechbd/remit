@@ -8,17 +8,18 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class RemitOrderPaymentAccepted implements ShouldQueue
 {
-
     private $order;
+
     /**
      * Handle the event.
-     * @param \Fintech\Reload\Events\DepositAccepted $event
+     *
+     * @param  \Fintech\Reload\Events\DepositAccepted  $event
+     *
      * @throws \Throwable
      */
     public function handle(object $event): void
     {
         $this->order = Transaction::order()->find($event->deposit->parent_id);
-
 
     }
 
