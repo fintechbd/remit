@@ -56,8 +56,7 @@ if (Config::get('fintech.remit.enabled')) {
                 });
                 Route::post('wallet-verification', WalletVerificationController::class)->name('wallet-verification');
                 Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])->name('islami-bank-account-type-code');
-
-                //DO NOT REMOVE THIS LINE//
+                // DO NOT REMOVE THIS LINE//
 
                 Route::prefix('charts')->name('charts.')->group(function () {
                     Route::get('withdraw-partner-summary', WithdrawPartnerSummaryController::class)

@@ -93,7 +93,9 @@ class BankTransferService
      */
     public function create(array $inputs = []): ?BaseModel
     {
-        $inputs['allow_insufficient_balance'] = $inputs['allow_insufficient_balance'] ?? false;
+        $allowInsufficientBalance = $inputs['allow_insufficient_balance'] ?? false;
+
+        unset($inputs['allow_insufficient_balance']);
 
         $sender = Auth::user()->find($inputs['user_id']);
 
@@ -133,7 +135,7 @@ class BankTransferService
         $inputs['order_data']['is_reverse'] = $inputs['reverse'] ?? false;
         $inputs['sender_receiver_id'] = $masterUser->getKey();
         $inputs['is_refunded'] = false;
-        $inputs['status'] = OrderStatus::Pending->value;
+        $inputs['status'] = ($allowInsufficientBalance) ? OrderStatus::PaymentPending : OrderStatus::Pending;
         $inputs['risk'] = $sender->risk_profile ?? RiskProfile::Low;
         $currencyConversion = Business::currencyRate()->convert([
             'role_id' => $inputs['order_data']['role_id'],
@@ -152,6 +154,7 @@ class BankTransferService
         }
         $inputs['order_data']['currency_convert_rate'] = $currencyConversion;
         unset($inputs['reverse']);
+        $inputs['order_data']['allow_insufficient_balance'] = $allowInsufficientBalance;
         $inputs['order_data']['created_by'] = $sender->name ?? 'N/A';
         $inputs['order_data']['user_name'] = $sender->name ?? 'N/A';
         $inputs['order_data']['created_by_mobile_number'] = $sender->mobile ?? 'N/A';
@@ -187,7 +190,7 @@ class BankTransferService
             'service_id' => $inputs['service_id'],
         ]);
 
-        if (! $inputs['allow_insufficient_balance']) {
+        if (! $allowInsufficientBalance) {
             if ((float) $inputs['order_data']['service_stat_data']['total_amount'] > (float) $senderAccount->user_account_data['available_amount']) {
                 throw new InsufficientBalanceException($senderAccount->user_account_data['currency']);
             }
@@ -206,26 +209,6 @@ class BankTransferService
             $accounting->debitTransaction();
 
             $accounting->debitBalanceFromUserAccount();
-
-            //            $userUpdatedBalance = $this->debitTransaction($bankTransfer);
-            //            $senderUpdatedAccount = $senderAccount->toArray();
-            //            $senderUpdatedAccount['user_account_data']['spent_amount'] = (float) $senderUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
-            //            if (! $inputs['allow_insufficient_balance']) {
-            //                $senderUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
-            //            }
-            //            $inputs['order_data']['previous_amount'] = (float) $senderAccount->user_account_data['available_amount'];
-            //            $inputs['order_data']['current_amount'] = ((float) $inputs['order_data']['previous_amount'] + (float) $inputs['converted_amount']);
-            //            $inputs['timeline'][] = [
-            //                'message' => 'Deducted '.currency($userUpdatedBalance['spent_amount'], $inputs['currency']).' from user account successfully',
-            //                'flag' => 'info',
-            //                'timestamp' => now(),
-            //            ];
-            //
-            //            $bankTransfer = $this->bankTransferRepository->update($bankTransfer->getKey(), ['order_data' => $inputs['order_data'], 'timeline' => $inputs['timeline']]);
-
-            //            if (! Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount)) {
-            //                throw new \Exception('Failed to update user account balance.');
-            //            }
 
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 

@@ -50,8 +50,8 @@ class TransFastApi implements MoneyTransfer
             $this->status = 'live';
         }
 
-        $this->payment_mode = 'C'; //C = Bank Deposit, 2 = Cash Pick Up, G = Mobile Cash, U = Cash Card
-        $this->account_type = 'P'; //P = SAVINGS, C = CHECKING
+        $this->payment_mode = 'C'; // C = Bank Deposit, 2 = Cash Pick Up, G = Mobile Cash, U = Cash Card
+        $this->account_type = 'P'; // P = SAVINGS, C = CHECKING
     }
 
     /**
@@ -427,13 +427,13 @@ class TransFastApi implements MoneyTransfer
             $params['BankId'] = isset($inputData->trans_fast_bank_id) ? $inputData->trans_fast_bank_id : null;
         }
         $params['ReceiveCurrencyIsoCode'] = isset($inputData->transfer_currency) ? $inputData->transfer_currency : 'BDT';
-        //$params['SentAmount'] = isset($inputData->sender_amount)?$inputData->sender_amount:0;
+        // $params['SentAmount'] = isset($inputData->sender_amount)?$inputData->sender_amount:0;
         $params['SourceCurrencyIsoCode'] = isset($inputData->sender_currency) ? $inputData->sender_currency : 'SGD';
         $params['SenderLoyaltyCardNumber'] = isset($inputData->sender_loyaty_card_number) ? $inputData->sender_loyaty_card_number : null;
         $params['ReceiveAmount'] = isset($inputData->transfer_amount) ? $inputData->transfer_amount : 0;
         $params['Rate'] = isset($inputData->trans_fast_rate) ? $inputData->trans_fast_rate : null;
         $params['FeeProduct'] = isset($inputData->trans_fast_product_fee) ? $inputData->trans_fast_product_fee : null;
-        //dd($params);
+        // dd($params);
         $response = $this->getData($url, $params);
 
         return $response;
@@ -465,7 +465,7 @@ class TransFastApi implements MoneyTransfer
     public function getByReferenceNumber($referenceNumber)
     {
         $url = 'transaction/ByReferenceNumber?';
-        //$url = 'transaction/ByReferenceNo?';
+        // $url = 'transaction/ByReferenceNo?';
         $params = ['ReferenceNumber' => $referenceNumber];
         $response = $this->getData($url, $params);
 
@@ -517,9 +517,9 @@ class TransFastApi implements MoneyTransfer
         $params['StartDate'] = $startDate;
         $params['EndDate'] = $endDate;
 
-        //$params['InvoiceStatusId'] = $invoiceStatusId;
-        //$params['StartIndex'] = $startIndex;
-        //$params['PageSize'] = $pageSize;
+        // $params['InvoiceStatusId'] = $invoiceStatusId;
+        // $params['StartIndex'] = $startIndex;
+        // $params['PageSize'] = $pageSize;
         return $this->getData($url, $params);
     }
 
@@ -825,13 +825,13 @@ class TransFastApi implements MoneyTransfer
     ) {
         $url = 'transaction/sender';
         $params['Name'] = $name;
-        //$params['NameOtherLanguage'] = $nameOtherLanguage;
+        // $params['NameOtherLanguage'] = $nameOtherLanguage;
         $params['Address'] = $address;
-        //$params['AddressOtherLanguage'] = $addressOtherLanguage;
+        // $params['AddressOtherLanguage'] = $addressOtherLanguage;
         $params['PhoneMobile'] = $phoneMobile;
         $params['PhoneHome'] = $phoneHome;
         $params['PhoneWork'] = $phoneWork;
-        //$params['ZipCode'] = $zipCode;
+        // $params['ZipCode'] = $zipCode;
         $params['CityId'] = $cityId;
         $params['StateId'] = $stateId;
         $params['CountryIsoCode'] = $countryISO;
@@ -864,15 +864,15 @@ class TransFastApi implements MoneyTransfer
         }
         $url = 'transaction/invoice';
 
-        //Sender Information
+        // Sender Information
         $params['Sender']['LoyaltyCardNumber'] = ((isset($data->sender_loyalty_card_number) ? $data->sender_loyalty_card_number : null));
         $params['Sender']['Name'] = ((isset($data->sender_first_name) ? $data->sender_first_name : null));
-        //$params['Sender']['NameOtherLanguage'] = ((isset($data->sender_name_other_language)?$data->sender_name_other_language:null));
+        // $params['Sender']['NameOtherLanguage'] = ((isset($data->sender_name_other_language)?$data->sender_name_other_language:null));
         $params['Sender']['Address'] = ((isset($data->sender_address) ? $data->sender_address : null));
-        //$params['Sender']['AddressOtherLanguage'] = ((isset($data->sender_address_other_language)?$data->sender_address_other_language:null));
+        // $params['Sender']['AddressOtherLanguage'] = ((isset($data->sender_address_other_language)?$data->sender_address_other_language:null));
         $params['Sender']['PhoneMobile'] = ((isset($data->sender_mobile) ? $data->sender_mobile : null));
-        //$params['Sender']['PhoneHome'] = ((isset($data->sender_mobile_home)?$data->sender_mobile_home:null));
-        //$params['Sender']['PhoneWork'] = ((isset($data->sender_mobile_work)?$data->sender_mobile_work:null));
+        // $params['Sender']['PhoneHome'] = ((isset($data->sender_mobile_home)?$data->sender_mobile_home:null));
+        // $params['Sender']['PhoneWork'] = ((isset($data->sender_mobile_work)?$data->sender_mobile_work:null));
         $params['Sender']['ZipCode'] = ((isset($data->sender_zipcode) ? $data->sender_zipcode : null));
         $params['Sender']['CityId'] = ((isset($data->trans_fast_sender_city_id) ? $data->trans_fast_sender_city_id : '94702'));
         if (isset($data->trans_fast_sender_state_id) && $data->trans_fast_sender_state_id != 'NA') {
@@ -886,41 +886,41 @@ class TransFastApi implements MoneyTransfer
         $params['Sender']['IdExpiryDate'] = ((isset($data->sender_expire_date) ? date('Y-m-d', strtotime($data->sender_expire_date)) : null));
         $params['Sender']['NationalityIsoCode'] = ((isset($data->trans_fast_sender_nationality) ? $data->trans_fast_sender_nationality : null));
         $params['Sender']['DateOfBirth'] = ((isset($data->sender_date_of_birth) ? date('Y-m-d', strtotime($data->sender_date_of_birth)) : null));
-        //$params['Sender']['Email'] = ((isset($data->sender_email)?$data->sender_email:null));
+        // $params['Sender']['Email'] = ((isset($data->sender_email)?$data->sender_email:null));
         $params['Sender']['IsIndividual'] = 'true';
         $params['Sender']['SenderOccupaton'] = ((isset($data->sender_occupation) ? $data->sender_occupation : null));
 
-        //Receiver Information
+        // Receiver Information
         $params['Receiver']['FirstName'] = ((isset($data->receiver_first_name) ? $data->receiver_first_name : null));
-        //$params['Receiver']['FirstNameOtherLanguage'] = ((isset($data->receiver_first_name_other_language)?$data->receiver_first_name_other_language:null));
+        // $params['Receiver']['FirstNameOtherLanguage'] = ((isset($data->receiver_first_name_other_language)?$data->receiver_first_name_other_language:null));
         $params['Receiver']['SecondName'] = ((isset($data->receiver_middle_name) ? $data->receiver_middle_name : null));
-        //$params['Receiver']['SecondNameOtherLanguage'] = ((isset($data->receiver_middle_name_other_language)?$data->receiver_middle_name_other_language:null));
+        // $params['Receiver']['SecondNameOtherLanguage'] = ((isset($data->receiver_middle_name_other_language)?$data->receiver_middle_name_other_language:null));
         $params['Receiver']['LastName'] = ((isset($data->receiver_last_name) ? $data->receiver_last_name : null));
-        //$params['Receiver']['LastNameOtherLanguage'] = ((isset($data->receiver_last_name_other_language)?$data->receiver_last_name_other_language:null));
-        //$params['Receiver']['SecondLastName'] = ((isset($data->receiver_second_last_name)?$data->receiver_second_last_name:null));
-        //$params['Receiver']['SecondLastNameOtherLanguage'] = ((isset($data->receiver_second_last_name_other_language)?$data->receiver_second_last_name_other_language:null));
-        //$params['Receiver']['FullNameOtherLanguage'] = ((isset($data->receiver_full_name_other_language)?$data->receiver_full_name_other_language:null));
+        // $params['Receiver']['LastNameOtherLanguage'] = ((isset($data->receiver_last_name_other_language)?$data->receiver_last_name_other_language:null));
+        // $params['Receiver']['SecondLastName'] = ((isset($data->receiver_second_last_name)?$data->receiver_second_last_name:null));
+        // $params['Receiver']['SecondLastNameOtherLanguage'] = ((isset($data->receiver_second_last_name_other_language)?$data->receiver_second_last_name_other_language:null));
+        // $params['Receiver']['FullNameOtherLanguage'] = ((isset($data->receiver_full_name_other_language)?$data->receiver_full_name_other_language:null));
         $params['Receiver']['CompleteAddress'] = ((isset($data->receiver_address) ? $data->receiver_address : null));
-        //$params['Receiver']['CompleteAddressOtherLanguage'] = ((isset($data->receiver_address_other_language)?$data->receiver_address_other_language:null));
-        //$params['Receiver']['StateId'] = ((isset($data->trans_fast_receiver_state_id)?$data->trans_fast_receiver_state_id:null));
-        //$params['Receiver']['CityId'] = ((isset($data->trans_fast_receiver_city_id)?$data->trans_fast_receiver_city_id:null));
-        //$params['Receiver']['TownId'] = ((isset($data->trans_fast_receiver_town_id)?$data->trans_fast_receiver_town_id:null));
+        // $params['Receiver']['CompleteAddressOtherLanguage'] = ((isset($data->receiver_address_other_language)?$data->receiver_address_other_language:null));
+        // $params['Receiver']['StateId'] = ((isset($data->trans_fast_receiver_state_id)?$data->trans_fast_receiver_state_id:null));
+        // $params['Receiver']['CityId'] = ((isset($data->trans_fast_receiver_city_id)?$data->trans_fast_receiver_city_id:null));
+        // $params['Receiver']['TownId'] = ((isset($data->trans_fast_receiver_town_id)?$data->trans_fast_receiver_town_id:null));
         $params['Receiver']['CountryIsoCode'] = ((isset($data->trans_fast_receiver_country_iso_code) ? $data->trans_fast_receiver_country_iso_code : null));
         $params['Receiver']['MobilePhone'] = ((isset($data->receiver_contact_number) ? $data->receiver_contact_number : null));
-        //$params['Receiver']['HomePhone'] = ((isset($data->receiver_home_contact_number)?$data->receiver_home_contact_number:null));
-        //$params['Receiver']['WorkPhone'] = ((isset($data->receiver_work_contact_number)?$data->receiver_work_contact_number:null));
+        // $params['Receiver']['HomePhone'] = ((isset($data->receiver_home_contact_number)?$data->receiver_home_contact_number:null));
+        // $params['Receiver']['WorkPhone'] = ((isset($data->receiver_work_contact_number)?$data->receiver_work_contact_number:null));
         $params['Receiver']['ReceiverCityId'] = ((isset($data->trans_fast_receiver_city_id) ? $data->trans_fast_receiver_city_id : null));
-        //$params['Receiver']['ZipCode'] = ((isset($data->receiver_zip_code)?$data->receiver_zip_code:null));
-        //$params['Receiver']['NationalityIsoCode'] = ((isset($data->trans_fast_receiver_nationality_iso_code)?$data->trans_fast_receiver_nationality_iso_code:null));
-        //$params['Receiver']['IsIndividual'] = true;
-        //$params['Receiver']['Email'] = ((isset($data->receiver_email)?$data->receiver_email:null));
-        //$params['Receiver']['Cpf'] = ((isset($data->receiver_cpf_id)?$data->receiver_cpf_id:null));
-        //$params['Receiver']['ReceiverTypeOfId'] = ((isset($data->trans_fast_receiver_type_of_id)?$data->trans_fast_receiver_type_of_id:null));
-        //$params['Receiver']['ReceiverIdNumber'] = ((isset($data->trans_fast_receiver_id_number)?$data->trans_fast_receiver_id_number:null));
-        //$params['Receiver']['Notes'] = ((isset($data->receiver_notes)?$data->receiver_notes:null));
-        //$params['Receiver']['NotesOtherLanguage'] = ((isset($data->receiver_notes_other_language)?$data->receiver_notes_other_language:null));
+        // $params['Receiver']['ZipCode'] = ((isset($data->receiver_zip_code)?$data->receiver_zip_code:null));
+        // $params['Receiver']['NationalityIsoCode'] = ((isset($data->trans_fast_receiver_nationality_iso_code)?$data->trans_fast_receiver_nationality_iso_code:null));
+        // $params['Receiver']['IsIndividual'] = true;
+        // $params['Receiver']['Email'] = ((isset($data->receiver_email)?$data->receiver_email:null));
+        // $params['Receiver']['Cpf'] = ((isset($data->receiver_cpf_id)?$data->receiver_cpf_id:null));
+        // $params['Receiver']['ReceiverTypeOfId'] = ((isset($data->trans_fast_receiver_type_of_id)?$data->trans_fast_receiver_type_of_id:null));
+        // $params['Receiver']['ReceiverIdNumber'] = ((isset($data->trans_fast_receiver_id_number)?$data->trans_fast_receiver_id_number:null));
+        // $params['Receiver']['Notes'] = ((isset($data->receiver_notes)?$data->receiver_notes:null));
+        // $params['Receiver']['NotesOtherLanguage'] = ((isset($data->receiver_notes_other_language)?$data->receiver_notes_other_language:null));
 
-        //Transaction Information
+        // Transaction Information
         $params['TransactionInfo']['PaymentModeId'] = $this->payment_mode;
         $params['TransactionInfo']['ReceiveCurrencyIsoCode'] = ((isset($data->transfer_currency) ? $data->transfer_currency : 'BDT'));
         if (isset($data->trans_fast_payer_id) && $data->trans_fast_payer_id != null) {
@@ -931,19 +931,19 @@ class TransFastApi implements MoneyTransfer
         }
         $params['TransactionInfo']['PurposeOfRemittanceId'] = ((isset($data->trans_fast_purpose_of_remittance) ? $data->trans_fast_purpose_of_remittance : 1));
         $params['TransactionInfo']['SourceCurrencyIsoCode'] = ((isset($data->sender_currency) ? $data->sender_currency : null));
-        //$params['TransactionInfo']['Rate'] = ((isset($data->transaction_exchange_rate)?$data->transaction_exchange_rate:null));
-        //$params['TransactionInfo']['Rate'] = ((isset($data->transaction_total_sent_amount)?$data->transaction_total_sent_amount:null));
-        //$params['TransactionInfo']['SentAmount'] = ((isset($data->sender_amount)?$data->sender_amount:null));
-        //$params['TransactionInfo']['ServiceFee'] = ((isset($data->transaction_service_fee)?$data->transaction_service_fee:null));
-        //$params['TransactionInfo']['USDServiceFee'] = ((isset($data->transaction_usd_service_fee)?$data->transaction_usd_service_fee:null));
+        // $params['TransactionInfo']['Rate'] = ((isset($data->transaction_exchange_rate)?$data->transaction_exchange_rate:null));
+        // $params['TransactionInfo']['Rate'] = ((isset($data->transaction_total_sent_amount)?$data->transaction_total_sent_amount:null));
+        // $params['TransactionInfo']['SentAmount'] = ((isset($data->sender_amount)?$data->sender_amount:null));
+        // $params['TransactionInfo']['ServiceFee'] = ((isset($data->transaction_service_fee)?$data->transaction_service_fee:null));
+        // $params['TransactionInfo']['USDServiceFee'] = ((isset($data->transaction_usd_service_fee)?$data->transaction_usd_service_fee:null));
         $params['TransactionInfo']['ReceiveAmount'] = ((isset($data->transfer_amount) ? $data->transfer_amount : null));
-        //$params['TransactionInfo']['CashAmount'] = ((isset($data->transfer_amount)?$data->transfer_amount:null));
-        //$params['TransactionInfo']['Payout'] = ((isset($data->transfer_amount)?$data->transfer_amount:null));
+        // $params['TransactionInfo']['CashAmount'] = ((isset($data->transfer_amount)?$data->transfer_amount:null));
+        // $params['TransactionInfo']['Payout'] = ((isset($data->transfer_amount)?$data->transfer_amount:null));
         $params['TransactionInfo']['FormOfPaymentId'] = 'ACH';
         $params['TransactionInfo']['ReferenceNumber'] = ((isset($data->purchase_number) ? $data->purchase_number : null));
-        //$params['TransactionInfo']['ReferenceNumber'] = mt_rand(1000000, 9999999);
+        // $params['TransactionInfo']['ReferenceNumber'] = mt_rand(1000000, 9999999);
         $params['TransactionInfo']['SourceOfFundsID'] = ((isset($data->trans_fast_sender_source_of_fund_id) ? $data->trans_fast_sender_source_of_fund_id : null));
-        //$params['TransactionInfo']['FeeProduct'] = ((isset($data->trans_fast_front_end_or_back_end)?$data->trans_fast_front_end_or_back_end:null));
+        // $params['TransactionInfo']['FeeProduct'] = ((isset($data->trans_fast_front_end_or_back_end)?$data->trans_fast_front_end_or_back_end:null));
         if ($this->payment_mode == 'C') {
             $params['TransactionInfo']['BankId'] = ((isset($data->trans_fast_bank_id) ? $data->trans_fast_bank_id : null));
             $params['TransactionInfo']['BankBranchId'] = (isset($data->location_routing_id[1]->bank_branch_location_field_value) ? $data->location_routing_id[1]->bank_branch_location_field_value : null);
@@ -953,22 +953,22 @@ class TransFastApi implements MoneyTransfer
             $params['TransactionInfo']['Account'] = ((isset($data->bank_account_number) ? $data->bank_account_number : null));
         }
 
-        //Compliance Information
+        // Compliance Information
         $params['Compliance']['CountryIssueIsoCode'] = ((isset($data->trans_fast_sender_country_iso_code) ? $data->trans_fast_sender_country_iso_code : null));
         if (isset($data->trans_fast_sender_state_id) && $data->trans_fast_sender_state_id != 'NA') {
             $params['Compliance']['StateIssueId'] = ((isset($data->trans_fast_sender_state_id) ? $data->trans_fast_sender_state_id : 'SGP01'));
         } else {
             $params['Compliance']['StateIssueId'] = 'SGP01';
         }
-        //$params['Compliance']['StateIssueId'] = ((isset($data->trans_fast_sender_state_id)?$data->trans_fast_sender_state_id:null));
+        // $params['Compliance']['StateIssueId'] = ((isset($data->trans_fast_sender_state_id)?$data->trans_fast_sender_state_id:null));
         $params['Compliance']['ReceiverRelationship'] = ((isset($data->sender_beneficiary_relationship) ? $data->sender_beneficiary_relationship : null));
         $params['Compliance']['SourceOfFundsID'] = ((isset($data->trans_fast_sender_source_of_fund_id) ? $data->trans_fast_sender_source_of_fund_id : null));
         $params['Compliance']['Ssn'] = ((isset($data->sender_ssn_number) ? $data->sender_ssn_number : null));
         $params['Compliance']['SenderOccupation'] = ((isset($data->sender_occupation) ? $data->sender_occupation : null));
-        //$params['Compliance']['SenderEmployerName'] = ((isset($data->sender_employer_name)?$data->sender_employer_name:null));
-        //$params['Compliance']['SenderEmployerAddress'] = ((isset($data->sender_employer_address)?$data->sender_employer_address:null));
-        //$params['Compliance']['SenderEmployerPhone'] = ((isset($data->sender_employer_phone)?$data->sender_employer_phone:null));
-        //$params['Compliance']['ReceiverDateOfBirth'] = ((isset($data->receiver_date_of_birth)?date('Y-m-d', strtotime($data->receiver_date_of_birth)):null));
+        // $params['Compliance']['SenderEmployerName'] = ((isset($data->sender_employer_name)?$data->sender_employer_name:null));
+        // $params['Compliance']['SenderEmployerAddress'] = ((isset($data->sender_employer_address)?$data->sender_employer_address:null));
+        // $params['Compliance']['SenderEmployerPhone'] = ((isset($data->sender_employer_phone)?$data->sender_employer_phone:null));
+        // $params['Compliance']['ReceiverDateOfBirth'] = ((isset($data->receiver_date_of_birth)?date('Y-m-d', strtotime($data->receiver_date_of_birth)):null));
         $params['Compliance']['SenderDateOfBirth'] = ((isset($data->sender_date_of_birth) ? date('Y-m-d', strtotime($data->sender_date_of_birth)) : null));
         $params['Compliance']['TypeOfId'] = ((isset($data->trans_fast_sender_id_type_id) ? $data->trans_fast_sender_id_type_id : null));
         $params['Compliance']['IdNumber'] = ((isset($data->sender_id_number) ? $data->sender_id_number : null));
@@ -976,7 +976,7 @@ class TransFastApi implements MoneyTransfer
         $params['Compliance']['ReceiverFullName'] = ((isset($data->receiver_first_name) ? $data->receiver_first_name : null).(isset($data->receiver_middle_name) ? ' '.$data->receiver_middle_name : null).(isset($data->receiver_last_name) ? ' '.$data->receiver_last_name : null));
         $params['Compliance']['SenderFullName'] = ((isset($data->sender_first_name) ? $data->sender_first_name : null));
 
-        //dd($params);
+        // dd($params);
         return $this->putPostData($url, $params);
     }
 

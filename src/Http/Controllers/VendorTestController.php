@@ -81,7 +81,7 @@ class VendorTestController extends Controller
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 19, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
         $order_data = $order->order_data;
-        //$order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
+        // $order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
         dump($vendor->fetchAccountDetail($order_data));
     }
 
@@ -110,8 +110,8 @@ class VendorTestController extends Controller
     {
         $vendor = app()->make(IslamiBankApi::class);
         $repo = app()->make(OrderService::class);
-        //$order = $repo->find(265);
-        //$order_data = $order->order_data;
+        // $order = $repo->find(265);
+        // $order_data = $order->order_data;
         $order = [
             'id' => 265,
             'source_country_id' => 231,
@@ -145,7 +145,7 @@ class VendorTestController extends Controller
         $order_data['beneficiary_data']['reference_no'] = 'TEST'.time();
         $order_data['sending_amount'] = $order['amount'];
         $order_data['sending_currency'] = $order['currency'];
-        //dd($order_data);
+        // dd($order_data);
         dump($vendor->directCreditRemittance($order_data));
     }
 
@@ -155,7 +155,7 @@ class VendorTestController extends Controller
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 16, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
         $order_data = $order->order_data;
-        //$order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
+        // $order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
         dump($vendor->validateBeneficiaryWallet($order_data));
     }
 
@@ -177,7 +177,7 @@ class VendorTestController extends Controller
         $repo = app()->make(OrderService::class);
         $order = $repo->list(['service_id' => 17, 'sort' => 'orders.id', 'dir' => 'desc'])->first();
         $order_data = $order->order_data;
-        //$order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
+        // $order_data['beneficiary_data']['receiver_information']['beneficiary_data']['wallet_account_number'] = '016147470541';
         dump($vendor->validateBeneficiaryWallet($order_data));
     }
 

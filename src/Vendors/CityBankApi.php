@@ -155,7 +155,7 @@ class CityBankApi implements MoneyTransfer
         $response1 = str_replace('<SOAP-ENV:Body>', '', $response);
         $response2 = str_replace('</SOAP-ENV:Body>', '', $response1);
         $response = str_replace('xmlns:ns1="urn:dynamicapi"', '', $response2);
-        $response = str_replace('ns1:', '', $response); //dd($response);
+        $response = str_replace('ns1:', '', $response); // dd($response);
         Log::info($method.'<br>'.$response);
 
         return simplexml_load_string($response);

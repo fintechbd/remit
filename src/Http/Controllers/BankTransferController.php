@@ -13,7 +13,6 @@ use Fintech\Core\Exceptions\DeleteOperationException;
 use Fintech\Core\Exceptions\RestoreOperationException;
 use Fintech\Core\Exceptions\StoreOperationException;
 use Fintech\Core\Exceptions\UpdateOperationException;
-use Fintech\Remit\Events\RemitTransferRequested;
 use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\ImportBankTransferRequest;
 use Fintech\Remit\Http\Requests\IndexBankTransferRequest;
@@ -90,6 +89,7 @@ class BankTransferController extends Controller
             return response()->created([
                 'message' => __('core::messages.transaction.request_created', ['service' => 'Bank Transfer']),
                 'id' => $bankTransfer->getKey(),
+                'order_number' => $bankTransfer->order_number ?? $bankTransfer->order_data['purchase_number'],
             ]);
 
         } catch (Exception $exception) {
@@ -372,7 +372,7 @@ class BankTransferController extends Controller
                     throw new Exception('Master User Account not found for '.$request->input('source_country_id', $depositor->profile?->country_id).' country');
                 }
 
-                //set pre defined conditions of deposit
+                // set pre defined conditions of deposit
                 $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'money_transfer'])->getKey();
                 $inputs['user_id'] = $user_id ?? $depositor->getKey();
                 $delayCheck = Transaction::order()->transactionDelayCheck($inputs);
@@ -392,7 +392,7 @@ class BankTransferController extends Controller
                 $inputs['order_data']['created_by_mobile_number'] = $depositor->mobile;
                 $inputs['order_data']['created_at'] = now();
                 $inputs['order_data']['master_user_name'] = $masterUser['name'];
-                //$inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
+                // $inputs['order_data']['operator_short_code'] = $request->input('operator_short_code', null);
                 $inputs['order_data']['assign_order'] = 'no';
                 $inputs['order_data']['system_notification_variable_success'] = 'bank_transfer_success';
                 $inputs['order_data']['system_notification_variable_failed'] = 'bank_transfer_failed';
@@ -413,7 +413,7 @@ class BankTransferController extends Controller
                 $bankTransfer->order_data = $order_data;
                 $userUpdatedBalance = Remit::bankTransfer()->debitTransaction($bankTransfer);
                 $depositedAccount = Transaction::userAccount()->findWhere(['user_id' => $depositor->getKey(), 'country_id' => $bankTransfer->source_country_id]);
-                //update User Account
+                // update User Account
                 $depositedUpdatedAccount = $depositedAccount->toArray();
                 $depositedUpdatedAccount['user_account_data']['spent_amount'] = (float) $depositedUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
                 $depositedUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
@@ -434,7 +434,7 @@ class BankTransferController extends Controller
                         'target_status' => OrderStatus::Success->value,
                     ]));
                 }
-                //TODO ALL Beneficiary Data with bank and branch data
+                // TODO ALL Beneficiary Data with bank and branch data
                 $beneficiaryData = Banco::beneficiary()->manageBeneficiaryData($order_data);
                 $order_data['beneficiary_data'] = $beneficiaryData;
 

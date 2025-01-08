@@ -48,10 +48,10 @@ Route::get('islami-bank-mobile-banking-nagad', [VendorTestController::class, 'is
 Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])
     ->name('islami-bank-account-type-code');
 
-//MEGHNABANK
+// MEGHNABANK
 Route::get('meghna-bank-api-connection-check', [VendorTestController::class, 'meghnaBankConnectionCheck'])
     ->name('meghna-bank-api-connection-check');
 
-//SSL VR
+// SSL VR
 Route::get('ssl-vr-api-connection-check', [VendorTestController::class, 'sslVRConnectionCheck'])
     ->name('ssl-vr-api-connection-check');

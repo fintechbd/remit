@@ -90,6 +90,10 @@ class CashPickupService
      */
     public function create(array $inputs = []): ?BaseModel
     {
+        $allowInsufficientBalance = $inputs['allow_insufficient_balance'] ?? false;
+
+        unset($inputs['allow_insufficient_balance']);
+
         $sender = Auth::user()->find($inputs['user_id']);
 
         if (! $sender) {
@@ -128,7 +132,7 @@ class CashPickupService
         $inputs['order_data']['is_reverse'] = $inputs['reverse'] ?? false;
         $inputs['sender_receiver_id'] = $masterUser->getKey();
         $inputs['is_refunded'] = false;
-        $inputs['status'] = OrderStatus::Pending->value;
+        $inputs['status'] = ($allowInsufficientBalance) ? OrderStatus::PaymentPending : OrderStatus::Pending;
         $inputs['risk'] = $sender->risk_profile ?? RiskProfile::Low;
         $currencyConversion = Business::currencyRate()->convert([
             'role_id' => $inputs['order_data']['role_id'],
@@ -147,7 +151,7 @@ class CashPickupService
         }
         $inputs['order_data']['currency_convert_rate'] = $currencyConversion;
         unset($inputs['reverse']);
-
+        $inputs['order_data']['allow_insufficient_balance'] = $allowInsufficientBalance;
         $inputs['order_data']['created_by'] = $sender->name ?? 'N/A';
         $inputs['order_data']['user_name'] = $sender->name ?? 'N/A';
         $inputs['order_data']['created_by_mobile_number'] = $sender->mobile ?? 'N/A';
@@ -184,8 +188,10 @@ class CashPickupService
             'service_id' => $inputs['service_id'],
         ]);
 
-        if ((float) $inputs['order_data']['service_stat_data']['total_amount'] > (float) $senderAccount->user_account_data['available_amount']) {
-            throw new InsufficientBalanceException($senderAccount->user_account_data['currency']);
+        if (! $allowInsufficientBalance) {
+            if ((float) $inputs['order_data']['service_stat_data']['total_amount'] > (float) $senderAccount->user_account_data['available_amount']) {
+                throw new InsufficientBalanceException($senderAccount->user_account_data['currency']);
+            }
         }
 
         DB::beginTransaction();
@@ -196,30 +202,13 @@ class CashPickupService
 
             $accounting->debitTransaction();
 
-            $accounting->debitBalanceFromUserAccount();
-
-            //            $userUpdatedBalance = $this->debitTransaction($cashPickup);
-            //            $senderUpdatedAccount = $senderAccount->toArray();
-            //            $senderUpdatedAccount['user_account_data']['spent_amount'] = (float) $senderUpdatedAccount['user_account_data']['spent_amount'] + (float) $userUpdatedBalance['spent_amount'];
-            //            $senderUpdatedAccount['user_account_data']['available_amount'] = (float) $userUpdatedBalance['current_amount'];
-            //
-            //            $inputs['order_data']['previous_amount'] = (float) $senderAccount->user_account_data['available_amount'];
-            //            $inputs['order_data']['current_amount'] = ((float) $inputs['order_data']['previous_amount'] + (float) $inputs['converted_currency']);
-            //            $inputs['timeline'][] = [
-            //                'message' => 'Deducted '.currency($userUpdatedBalance['spent_amount'], $inputs['currency']).' from user account successfully',
-            //                'flag' => 'info',
-            //                'timestamp' => now(),
-            //            ];
-            //
-            //            $cashPickup = $this->cashPickupRepository->update($cashPickup->getKey(), ['order_data' => $inputs['order_data'], 'timeline' => $inputs['timeline']]);
-            //
-            //            if (! Transaction::userAccount()->update($senderAccount->getKey(), $senderUpdatedAccount)) {
-            //                throw new \Exception('Failed to update user account balance.');
-            //            }
+            if (! $allowInsufficientBalance) {
+                $accounting->debitBalanceFromUserAccount();
+            }
 
             Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
-            CashPickupRequested::dispatch($cashPickup);
+            event(new CashPickupRequested($cashPickup));
 
             return $cashPickup;
 
@@ -241,7 +230,7 @@ class CashPickupService
             'spent_amount' => null,
         ];
 
-        //Collect Current Balance as Previous Balance
+        // Collect Current Balance as Previous Balance
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
@@ -273,7 +262,7 @@ class CashPickupService
         $orderDetailStoreForMaster->notes = 'Cash Pickup Payment Receive From'.$user_name;
         $orderDetailStoreForMaster->save();
 
-        //For Charge
+        // For Charge
         $data->amount = calculate_flat_percent($amount, $serviceStatData['charge']);
         $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
@@ -292,14 +281,14 @@ class CashPickupService
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
-        //For Discount
+        // For Discount
         $data->amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $data->order_detail_cause_name = 'discount';
         $data->notes = 'Cash Pickup Discount form '.$master_user_name;
         $data->step = 5;
-        //$data->order_detail_parent_id = $orderDetailStore->getKey();
-        //$updateData['order_data']['previous_amount'] = 0;
+        // $data->order_detail_parent_id = $orderDetailStore->getKey();
+        // $updateData['order_data']['previous_amount'] = 0;
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $data->sender_receiver_id;
@@ -311,8 +300,8 @@ class CashPickupService
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
-        //'Point Transfer Commission Send to ' . $masterUser->name;
-        //'Point Transfer Commission Receive from ' . $receiver->name;
+        // 'Point Transfer Commission Send to ' . $masterUser->name;
+        // 'Point Transfer Commission Receive from ' . $receiver->name;
 
         $userAccountData['current_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
@@ -342,7 +331,7 @@ class CashPickupService
             'spent_amount' => null,
         ];
 
-        //Collect Current Balance as Previous Balance
+        // Collect Current Balance as Previous Balance
         $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $cashPickup->user_id,
@@ -372,7 +361,7 @@ class CashPickupService
         $orderDetailStoreForMaster->notes = 'Cash Pickup Send to '.$user_name;
         $orderDetailStoreForMaster->save();
 
-        //For Charge
+        // For Charge
         $cashPickup->amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $cashPickup->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $cashPickup->order_detail_cause_name = 'charge';
@@ -391,14 +380,14 @@ class CashPickupService
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
-        //For Discount
+        // For Discount
         $cashPickup->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $cashPickup->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $cashPickup->order_detail_cause_name = 'discount';
         $cashPickup->notes = 'Cash Pickup Discount form '.$master_user_name;
         $cashPickup->step = 5;
-        //$data->order_detail_parent_id = $orderDetailStore->getKey();
-        //$updateData['order_data']['previous_amount'] = 0;
+        // $data->order_detail_parent_id = $orderDetailStore->getKey();
+        // $updateData['order_data']['previous_amount'] = 0;
         $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($cashPickup));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $cashPickup->sender_receiver_id;
@@ -410,8 +399,8 @@ class CashPickupService
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
-        //'Point Transfer Commission Send to ' . $masterUser->name;
-        //'Point Transfer Commission Receive from ' . $receiver->name;
+        // 'Point Transfer Commission Send to ' . $masterUser->name;
+        // 'Point Transfer Commission Receive from ' . $receiver->name;
 
         $userAccountData['current_amount'] = Transaction::orderDetail()->list([
             'get_order_detail_amount_sum' => true,
