@@ -11,7 +11,9 @@ class RemitOrderPaymentRejected implements ShouldQueue
 {
     /**
      * Handle the event.
-     * @param \Fintech\Reload\Events\DepositRejected $event
+     *
+     * @param  \Fintech\Reload\Events\DepositRejected  $event
+     *
      * @throws \Throwable
      */
     public function handle(object $event): void
