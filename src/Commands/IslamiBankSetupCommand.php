@@ -576,7 +576,7 @@ class IslamiBankSetupCommand extends Command
             'service_vendor_data' => [],
             'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents("{$dir}/logo_png/islamibank.png")),
             'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents("{$dir}/logo_svg/islamibank.svg")),
-            'enabled' => false,
+            'enabled' => true,
         ];
 
         if (Business::serviceVendor()->findWhere(['service_vendor_slug' => $vendor['service_vendor_slug']])) {
