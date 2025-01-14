@@ -57,7 +57,7 @@ class WalletTransferCollection extends ResourceCollection
                 'status' => $walletTransfer->status ?? null,
                 'created_at' => $walletTransfer->created_at ?? null,
                 'updated_at' => $walletTransfer->updated_at ?? null,
-            ];
+            ] + $walletTransfer->commonAttributes();
 
             $data['amount_formatted'] = currency($data['amount'], $data['currency'])->format();
             $data['converted_amount_formatted'] = currency($data['converted_amount'], $data['converted_currency'])->format();
