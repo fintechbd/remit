@@ -57,7 +57,7 @@ class CashPickupCollection extends ResourceCollection
                 'status' => $cashPickup->status ?? null,
                 'created_at' => $cashPickup->created_at ?? null,
                 'updated_at' => $cashPickup->updated_at ?? null,
-            ]+ $cashPickup->commonAttributes();
+            ] + $cashPickup->commonAttributes();
 
             $data['amount_formatted'] = currency($data['amount'], $data['currency'])->format();
             $data['converted_amount_formatted'] = currency($data['converted_amount'], $data['converted_currency'])->format();
