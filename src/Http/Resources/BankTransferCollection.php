@@ -57,7 +57,7 @@ class BankTransferCollection extends ResourceCollection
                 'status' => $bankTransfer->status ?? null,
                 'created_at' => $bankTransfer->created_at ?? null,
                 'updated_at' => $bankTransfer->updated_at ?? null,
-            ];
+            ] + $bankTransfer->commonAttributes();
 
             $data['amount_formatted'] = currency($data['amount'], $data['currency'])->format();
             $data['converted_amount_formatted'] = currency($data['converted_amount'], $data['converted_currency'])->format();

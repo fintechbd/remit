@@ -56,7 +56,7 @@ class BankTransferResource extends JsonResource
             'created_at' => $this->created_at ?? null,
             'updated_at' => $this->updated_at ?? null,
             'timeline' => $this->timeline ?? [],
-        ];
+        ] + $this->commonAttributes();
 
         $data['amount_formatted'] = currency($data['amount'], $data['currency'])->format();
         $data['converted_amount_formatted'] = currency($data['converted_amount'], $data['converted_currency'])->format();
