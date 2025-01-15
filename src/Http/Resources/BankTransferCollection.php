@@ -2,14 +2,10 @@
 
 namespace Fintech\Remit\Http\Resources;
 
-use Fintech\Core\Facades\Core;
 use Fintech\Core\Supports\Constant;
 use Fintech\Core\Traits\RestApi\CompliancePolicyTable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
-use stdClass;
-
-use function currency;
 
 class BankTransferCollection extends ResourceCollection
 {
@@ -18,20 +14,20 @@ class BankTransferCollection extends ResourceCollection
     /**
      * Transform the resource collection into an array.
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return array
      */
     public function toArray($request)
     {
         return $this->collection->map(function ($item) use ($request) {
             $data = [
-                    'risk' => $item->risk ?? null,
-                    'is_refunded' => $item->is_refunded ?? null,
-                    'order_data' => $item->order_data ?? null,
-                    'assigned_user_name' => $item->assignedUser?->name ?? null,
-                    'assignable' => ($item->assigned_user_id == null || $item->assigned_user_id == $request->user()->getKey()),
-                    'trackable' => $item->service_vendor_id != config('fintech.business.default_vendor'),
-                ] + $item->commonAttributes();
+                'risk' => $item->risk ?? null,
+                'is_refunded' => $item->is_refunded ?? null,
+                'order_data' => $item->order_data ?? null,
+                'assigned_user_name' => $item->assignedUser?->name ?? null,
+                'assignable' => ($item->assigned_user_id == null || $item->assigned_user_id == $request->user()->getKey()),
+                'trackable' => $item->service_vendor_id != config('fintech.business.default_vendor'),
+            ] + $item->commonAttributes();
 
             $this->renderPolicyData($item->order_data);
 
