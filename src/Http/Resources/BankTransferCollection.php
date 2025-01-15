@@ -18,72 +18,22 @@ class BankTransferCollection extends ResourceCollection
     /**
      * Transform the resource collection into an array.
      *
-     * @param  Request  $request
+     * @param Request $request
      * @return array
      */
     public function toArray($request)
     {
-        return $this->collection->map(function ($bankTransfer) use ($request) {
+        return $this->collection->map(function ($item) use ($request) {
             $data = [
-                'id' => $bankTransfer->getKey(),
-                'source_country_id' => $bankTransfer->source_country_id ?? null,
-                'source_country_name' => null,
-                'destination_country_id' => $bankTransfer->destination_country_id ?? null,
-                'destination_country_name' => null,
-                'parent_id' => $bankTransfer->parent_id ?? null,
-                'sender_receiver_id' => $bankTransfer->sender_receiver_id ?? null,
-                'sender_receiver_name' => null,
-                'user_id' => $bankTransfer->user_id ?? null,
-                'user_name' => null,
-                'assigned_user_id' => $bankTransfer->assigned_user_id ?? null,
-                'assigned_user_name' => null,
-                'service_id' => $bankTransfer->service_id ?? null,
-                'service_name' => null,
-                'service_vendor_id' => $bankTransfer->service_vendor_id ?? config('fintech.business.default_vendor'),
-                'service_vendor_name' => null,
-                'vendor' => $bankTransfer->vendor ?? config('fintech.business.default_vendor_name'),
-                'transaction_form_id' => $bankTransfer->transaction_form_id ?? null,
-                'transaction_form_name' => $bankTransfer->transaction_form_name ?? null,
-                'ordered_at' => $bankTransfer->ordered_at ?? null,
-                'amount' => $bankTransfer->amount ?? null,
-                'currency' => $bankTransfer->currency ?? null,
-                'converted_amount' => $bankTransfer->converted_amount ?? null,
-                'converted_currency' => $bankTransfer->converted_currency ?? null,
-                'order_number' => $bankTransfer->order_number ?? null,
-                'risk_profile' => $bankTransfer->risk_profile ?? null,
-                'notes' => $bankTransfer->notes ?? null,
-                'is_refunded' => $bankTransfer->is_refunded ?? null,
-                'order_data' => $bankTransfer->order_data ?? new stdClass,
-                'status' => $bankTransfer->status ?? null,
-                'created_at' => $bankTransfer->created_at ?? null,
-                'updated_at' => $bankTransfer->updated_at ?? null,
-            ] + $bankTransfer->commonAttributes();
+                    'risk' => $item->risk ?? null,
+                    'is_refunded' => $item->is_refunded ?? null,
+                    'order_data' => $item->order_data ?? null,
+                    'assigned_user_name' => $item->assignedUser?->name ?? null,
+                    'assignable' => ($item->assigned_user_id == null || $item->assigned_user_id == $request->user()->getKey()),
+                    'trackable' => $item->service_vendor_id != config('fintech.business.default_vendor'),
+                ] + $item->commonAttributes();
 
-            $data['amount_formatted'] = currency($data['amount'], $data['currency'])->format();
-            $data['converted_amount_formatted'] = currency($data['converted_amount'], $data['converted_currency'])->format();
-
-            if (Core::packageExists('MetaData')) {
-                $data['source_country_name'] = $bankTransfer->sourceCountry?->name ?? null;
-                $data['destination_country_name'] = $bankTransfer->destinationCountry?->name ?? null;
-            }
-            if (Core::packageExists('Auth')) {
-                $data['user_name'] = $bankTransfer->user?->name ?? null;
-                $data['sender_receiver_name'] = $bankTransfer->senderReceiver?->name ?? null;
-                $data['assigned_user_name'] = $bankTransfer->assignedUser?->name ?? null;
-            }
-            if (Core::packageExists('Business')) {
-                $data['service_vendor_name'] = $bankTransfer->serviceVendor?->service_vendor_name ?? null;
-                $data['service_name'] = $bankTransfer->service?->service_name ?? null;
-            }
-            if (Core::packageExists('Transaction')) {
-                $data['transaction_form_name'] = $bankTransfer->transactionForm?->name ?? null;
-            }
-
-            $data['assignable'] = ($data['assigned_user_id'] == null || $data['assigned_user_id'] == $request->user()->getKey());
-
-            $data['trackable'] = $data['service_vendor_id'] != config('fintech.business.default_vendor');
-
-            $this->renderPolicyData($data['order_data']);
+            $this->renderPolicyData($item->order_data);
 
             return $data;
         })->toArray();
