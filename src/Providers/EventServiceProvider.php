@@ -2,7 +2,7 @@
 
 namespace Fintech\Remit\Providers;
 
-use Fintech\Core\Listeners\TriggerListener;
+use Fintech\Core\Listeners\TriggerNotification;
 use Fintech\Remit\Events\BankTransferRequested;
 use Fintech\Remit\Events\CashPickupRequested;
 use Fintech\Remit\Events\RemitTransferVendorAssigned;
@@ -22,18 +22,18 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         BankTransferRequested::class => [
             RemitOrderComplianceCheck::class,
-            TriggerListener::class,
+            TriggerNotification::class,
         ],
         CashPickupRequested::class => [
             RemitOrderComplianceCheck::class,
-            TriggerListener::class,
+            TriggerNotification::class,
         ],
         WalletTransferRequested::class => [
             RemitOrderComplianceCheck::class,
-            TriggerListener::class,
+            TriggerNotification::class,
         ],
         RemitTransferVendorAssigned::class => [
-            TriggerListener::class,
+            TriggerNotification::class,
         ],
         \Fintech\Reload\Events\DepositAccepted::class => [
             RemitOrderPaymentAccepted::class,
