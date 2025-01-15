@@ -29,7 +29,7 @@ class WalletTransferCollection extends ResourceCollection
                 'trackable' => $item->service_vendor_id != config('fintech.business.default_vendor'),
             ] + $item->commonAttributes();
 
-            $this->renderPolicyData($item->order_data);
+            $this->renderPolicyData($data['order_data']);
 
             return $data;
         })->toArray();

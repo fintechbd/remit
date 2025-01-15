@@ -27,7 +27,7 @@ class WalletTransferResource extends JsonResource
             'trackable' => $this->service_vendor_id != config('fintech.business.default_vendor'),
         ] + $this->commonAttributes();
 
-        $this->renderPolicyData($this->order_data);
+        $this->renderPolicyData($data['order_data']);
 
         return $data;
     }
