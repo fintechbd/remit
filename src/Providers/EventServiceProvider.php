@@ -3,8 +3,6 @@
 namespace Fintech\Remit\Providers;
 
 use Fintech\Core\Listeners\TriggerListener;
-use Fintech\Reload\Events\DepositAccepted;
-use Fintech\Reload\Events\DepositRejected;
 use Fintech\Remit\Events\BankTransferRequested;
 use Fintech\Remit\Events\CashPickupRequested;
 use Fintech\Remit\Events\RemitTransferVendorAssigned;
@@ -37,13 +35,11 @@ class EventServiceProvider extends ServiceProvider
         RemitTransferVendorAssigned::class => [
             TriggerListener::class
         ],
-        DepositAccepted::class => [
+        \Fintech\Reload\Events\DepositAccepted::class => [
             RemitOrderPaymentAccepted::class,
-            TriggerListener::class
         ],
-        DepositRejected::class => [
+        \Fintech\Reload\Events\DepositRejected::class => [
             RemitOrderPaymentRejected::class,
-            TriggerListener::class
         ],
     ];
 }
