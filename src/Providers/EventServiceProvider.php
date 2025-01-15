@@ -2,6 +2,13 @@
 
 namespace Fintech\Remit\Providers;
 
+use Fintech\Core\Listeners\TriggerListener;
+use Fintech\Reload\Events\DepositAccepted;
+use Fintech\Reload\Events\DepositRejected;
+use Fintech\Remit\Events\BankTransferRequested;
+use Fintech\Remit\Events\CashPickupRequested;
+use Fintech\Remit\Events\RemitTransferVendorAssigned;
+use Fintech\Remit\Events\WalletTransferRequested;
 use Fintech\Remit\Listeners\RemitOrderComplianceCheck;
 use Fintech\Remit\Listeners\RemitOrderPaymentAccepted;
 use Fintech\Remit\Listeners\RemitOrderPaymentRejected;
@@ -15,23 +22,28 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
-        \Fintech\Remit\Events\BankTransferRequested::class => [
+        BankTransferRequested::class => [
             RemitOrderComplianceCheck::class,
+            TriggerListener::class
         ],
-        \Fintech\Remit\Events\CashPickupRequested::class => [
+        CashPickupRequested::class => [
             RemitOrderComplianceCheck::class,
+            TriggerListener::class
         ],
-        \Fintech\Remit\Events\WalletTransferRequested::class => [
+        WalletTransferRequested::class => [
             RemitOrderComplianceCheck::class,
+            TriggerListener::class
         ],
-        \Fintech\Remit\Events\RemitTransferVendorAssigned::class => [
-
+        RemitTransferVendorAssigned::class => [
+            TriggerListener::class
         ],
-        \Fintech\Reload\Events\DepositAccepted::class => [
+        DepositAccepted::class => [
             RemitOrderPaymentAccepted::class,
+            TriggerListener::class
         ],
-        \Fintech\Reload\Events\DepositRejected::class => [
+        DepositRejected::class => [
             RemitOrderPaymentRejected::class,
+            TriggerListener::class
         ],
     ];
 }
