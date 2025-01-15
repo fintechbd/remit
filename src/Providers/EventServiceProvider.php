@@ -22,18 +22,18 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         BankTransferRequested::class => [
             RemitOrderComplianceCheck::class,
-            TriggerListener::class
+            TriggerListener::class,
         ],
         CashPickupRequested::class => [
             RemitOrderComplianceCheck::class,
-            TriggerListener::class
+            TriggerListener::class,
         ],
         WalletTransferRequested::class => [
             RemitOrderComplianceCheck::class,
-            TriggerListener::class
+            TriggerListener::class,
         ],
         RemitTransferVendorAssigned::class => [
-            TriggerListener::class
+            TriggerListener::class,
         ],
         \Fintech\Reload\Events\DepositAccepted::class => [
             RemitOrderPaymentAccepted::class,
