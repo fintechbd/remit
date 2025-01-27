@@ -2,9 +2,9 @@
 
 namespace Fintech\Remit\Http\Controllers\Charts;
 
-use App\Http\Controllers\Controller;
 use Fintech\Remit\Http\Resources\Charts\WithdrawPartnerSummaryCollection;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 class WithdrawPartnerSummaryController extends Controller
 {

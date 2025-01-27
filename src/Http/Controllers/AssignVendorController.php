@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Exception;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Exceptions\AlreadyAssignedException;
@@ -16,6 +15,7 @@ use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 class AssignVendorController extends Controller
 {
