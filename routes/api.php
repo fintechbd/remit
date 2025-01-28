@@ -40,20 +40,10 @@ if (Config::get('fintech.remit.enabled')) {
                         });
                 }
                 Route::apiResource('bank-transfers', BankTransferController::class)->except('update', 'destroy');
-                Route::group(['prefix' => 'bank-transfers'], function () {
-                    Route::post('store-without-insufficient-balance', [BankTransferController::class, 'storeWithoutInsufficientBalance'])
-                        ->name('store-without-insufficient-balance');
-                });
                 Route::apiResource('cash-pickups', CashPickupController::class)->except('update', 'destroy');
-                Route::group(['prefix' => 'cash-pickups'], function () {
-                    Route::post('store-without-insufficient-balance', [CashPickupController::class, 'storeWithoutInsufficientBalance'])
-                        ->name('store-without-insufficient-balance');
-                });
+
                 Route::apiResource('wallet-transfers', WalletTransferController::class)->except('update', 'destroy');
-                Route::group(['prefix' => 'wallet-transfers'], function () {
-                    Route::post('store-without-insufficient-balance', [WalletTransferController::class, 'storeWithoutInsufficientBalance'])
-                        ->name('store-without-insufficient-balance');
-                });
+
                 Route::post('wallet-verification', WalletVerificationController::class)->name('wallet-verification');
                 Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])->name('islami-bank-account-type-code');
                 // DO NOT REMOVE THIS LINE//
