@@ -161,8 +161,8 @@ class MeghnaBankApi implements MoneyTransfer
         //        $ref_number = $data['beneficiary_data']['reference_no'] ?? $order_data['purchase_number'];
         $ref_number = (int) microtime(true);
 
-        $params['ORDER_NO'] = (string)$ref_number;
-        $params['TRANSACTION_PIN'] = (string)$ref_number;
+        $params['ORDER_NO'] = (string) $ref_number;
+        $params['TRANSACTION_PIN'] = (string) $ref_number;
         $params['TRN_DATE'] = (date('Y-m-d', strtotime($order_data['created_at'])) ?? null);
         $params['AMOUNT'] = round(floatval($order_data['sending_amount'] ?? $order->converted_amount), 2);
         // RECEIVER
