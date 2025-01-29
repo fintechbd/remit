@@ -161,8 +161,8 @@ class MeghnaBankApi implements MoneyTransfer
         //        $ref_number = $data['beneficiary_data']['reference_no'] ?? $order_data['purchase_number'];
         $ref_number = (int) microtime(true);
 
-        $params['ORDER_NO'] = $ref_number;
-        $params['TRANSACTION_PIN'] = $ref_number;
+        $params['ORDER_NO'] = (string)$ref_number;
+        $params['TRANSACTION_PIN'] = (string)$ref_number;
         $params['TRN_DATE'] = (date('Y-m-d', strtotime($order_data['created_at'])) ?? null);
         $params['AMOUNT'] = round(floatval($order_data['sending_amount'] ?? $order->converted_amount), 2);
         // RECEIVER
@@ -171,7 +171,7 @@ class MeghnaBankApi implements MoneyTransfer
         $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $order_data['beneficiary_data']['receiver_information']['relation_name'] ?? 'Relatives';
         $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($order_data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
-        $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = intval($order_data['beneficiary_data']['branch_information']['branch_data']['location_no'] ?? '');
+        $params['RECEIVER_BANK_BR_ROUTING_NUMBER'] = $order_data['beneficiary_data']['branch_information']['branch_data']['location_no'] ?? '';
         $params['RECEIVER_BANK'] = ($order_data['beneficiary_data']['bank_information']['bank_name'] ?? null);
         $params['RECEIVER_BANK_BRANCH'] = ($order_data['beneficiary_data']['branch_information']['branch_name'] ?? null);
         $params['RECEIVER_ACCOUNT_NUMBER'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number']);
