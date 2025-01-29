@@ -143,7 +143,7 @@ class MeghnaBankApi implements MoneyTransfer
             'amount' => '0',
             'message' => 'The request was successful',
             'original' => $response,
-            'ref_number' => null,
+            'ref_number' => $order->order_number,
         ]);
     }
 
