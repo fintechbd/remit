@@ -83,6 +83,8 @@ class BankTransferController extends Controller
 
         $inputs['user_id'] = ($request->filled('user_id')) ? $request->input('user_id') : $request->user('sanctum')->getKey();
 
+        dd($inputs['user_id']);
+
         try {
             $bankTransfer = Remit::bankTransfer()->create($inputs);
 
