@@ -190,6 +190,8 @@ class BankTransferService
             'service_id' => $inputs['service_id'],
         ]);
 
+//        dd($inputs['order_data']);
+
         if (! $allowInsufficientBalance) {
             if ((float) $inputs['order_data']['service_stat_data']['total_amount'] > (float) $senderAccount->user_account_data['available_amount']) {
                 throw new InsufficientBalanceException($senderAccount->user_account_data['currency']);
