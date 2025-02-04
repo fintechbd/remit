@@ -134,7 +134,8 @@ class MeghnaBankApi implements MoneyTransfer
     public function requestQuote($order): AssignVendorVerdict
     {
         $response = $this->get('/remitEnquiry', [
-            'queryType' => 2,
+            'queryType' => 1,
+            'confRate' => 'y'
         ]);
 
         return AssignVendorVerdict::make([
