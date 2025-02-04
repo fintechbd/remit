@@ -137,7 +137,7 @@ class MeghnaBankApi implements MoneyTransfer
         ]);
 
         return AssignVendorVerdict::make([
-            'status' => 'TRUE',
+            'status' => 'true',
             'amount' => '0',
             'message' => 'The request was successful',
             'original' => $response,
@@ -214,10 +214,10 @@ class MeghnaBankApi implements MoneyTransfer
         ]);
 
         if (in_array($response['Code'], ['0001', '0002'])) {
-            $verdict->status('TRUE')
+            $verdict->status('true')
                 ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: " . strtolower($response['Message']) . '.');
         } else {
-            $verdict->status('FALSE')
+            $verdict->status('false')
                 ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message']) . '.', 'warn');
         }
 
@@ -256,49 +256,37 @@ class MeghnaBankApi implements MoneyTransfer
      *
      * @throws ErrorException
      */
-    public function trackOrder(BaseModel $order): mixed
+    public function trackOrder(BaseModel $order): AssignVendorVerdict
     {
+        $ref_number = $order->order_data['reference_no'] ?? $order->order_data['purchase_number'];
         $response = $this->get('/remitReport', [
-            'ordpinNo' => $order->order_data['beneficiary_data']['reference_no'] ?? null,
+            'ordpinNo' => $ref_number,
         ]);
 
-        return array_shift($response);
+        $response =  array_shift($response);
 
-        if (isset($response['Fault'])) {
-            return $this->connectionErrorResponse($response)
-                ->ref_number($ref_number);
-        }
-
-        $statusResponse = $response['fetchWSMessageStatusResponse']['return'] ?? '';
-
-        if (str_contains($statusResponse, 'FALSE')) {
-            return $this->apiErrorResponse($response, $statusResponse)
-                ->ref_number($ref_number);
-        }
-
-        $successResponse = json_decode(
-            preg_replace(
-                '/(.+)\|(\d+)(.*)/iu',
-                '{"status":"$1", "code": "$2"}',
-                $statusResponse),
-            true);
-
-        if (in_array($successResponse['code'], array_keys(self::ERROR_MESSAGES))) {
-            $successResponse['message'] = self::ERROR_MESSAGES[$successResponse['code']];
-        } elseif (in_array($successResponse['code'], array_keys(self::STATUS_MESSAGES))) {
-            $successResponse['message'] = self::STATUS_MESSAGES[$successResponse['code']];
-        } else {
-            $successResponse['message'] = "Error: {$statusResponse}";
-        }
-
-        unset($successResponse['code']);
-
-        return AssignVendorVerdict::make([
-            ...$successResponse,
+        $verdict = AssignVendorVerdict::make([
             'original' => $response,
             'ref_number' => $ref_number,
-            'amount' => $order->converted_amount,
-        ])->orderTimeline('(Meghna Bank) responded with '.strtolower($successResponse['message']).'.');
+            'amount' => $order->amount,
+            'charge' => $order->charge_amount,
+            'discount' => $order->discount_amount,
+            'commission' => $order->commission_amount,
+            'status' => 'false'
+        ]);
+
+        if (isset($response['Code'])) {
+            $verdict->message($response['Message'] ?? null)
+                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message'] ?? '').'.');
+
+            return $verdict;
+        }
+
+        $verdict->status('true')
+            ->orderTimeline("(Meghna Bank) responded with  the request was successful.");
+
+        return $verdict;
+
     }
 
     /**
