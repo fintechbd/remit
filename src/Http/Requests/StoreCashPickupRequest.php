@@ -28,7 +28,7 @@ class StoreCashPickupRequest extends FormRequest
             'source_country_id' => ['required', 'integer', 'min:1', 'master_currency'],
             'destination_country_id' => ['required', 'integer', 'min:1', 'master_currency'],
             'service_id' => ['required', 'integer', 'min:1'],
-            'ordered_at' => ['required', 'date', 'date_format:Y-m-d H:i:s', 'before_or_equal:'.date('Y-m-d H:i:s', strtotime('+3 seconds'))],
+            'ordered_at' => ['required', 'date', 'date_format:Y-m-d H:i:s', 'before_or_equal:' . date('Y-m-d H:i:s', strtotime('+3 seconds'))],
             'amount' => ['required', 'numeric'],
             'currency' => ['required', 'string', 'size:3'],
             'converted_currency' => ['required', 'string', 'size:3'],
@@ -37,12 +37,13 @@ class StoreCashPickupRequest extends FormRequest
             'order_data.request_from' => ['string', 'required'],
             'order_data.business_type' => ['string', 'nullable', 'in:personal,corporate'],
             'order_data.transaction_type' => ['string', 'nullable', 'in:fast,low'],
-            'order_data.beneficiary_type_id' => ['integer', 'nullable'],
-            'order_data.beneficiary_id' => ['integer', 'nullable'],
-            'order_data.cash_id' => ['integer', 'nullable'],
-            'order_data.cash_account_number' => ['string', 'nullable'],
-            'order_data.fund_source' => ['string', 'nullable'],
-            'order_data.remittance_purpose' => ['string', 'nullable'], ];
+            'order_data.beneficiary_type_id' => ['integer', 'required'],
+            'order_data.beneficiary_id' => ['integer', 'required'],
+            'order_data.cash_id' => ['integer', 'required'],
+            'order_data.cash_account_number' => ['string', 'required'],
+            'order_data.fund_source' => ['string', 'required'],
+            'order_data.remittance_purpose' => ['string', 'required'],
+        ];
     }
 
     protected function prepareForValidation()

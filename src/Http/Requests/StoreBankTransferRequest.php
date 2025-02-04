@@ -37,13 +37,13 @@ class StoreBankTransferRequest extends FormRequest
             'order_data.request_from' => ['string', 'required'],
             'order_data.business_type' => ['string', 'nullable', 'in:personal,corporate'],
             'order_data.transaction_type' => ['string', 'nullable', 'in:fast,low'],
-            'order_data.beneficiary_type_id' => ['integer', 'nullable'],
-            'order_data.beneficiary_id' => ['integer', 'nullable'],
-            'order_data.bank_id' => ['integer', 'nullable'],
-            'order_data.bank_branch_id' => ['integer', 'nullable'],
-            'order_data.bank_account_number' => ['string', 'nullable'],
-            'order_data.fund_source' => ['string', 'nullable'],
-            'order_data.remittance_purpose' => ['string', 'nullable'],
+            'order_data.beneficiary_type_id' => ['integer', 'required'],
+            'order_data.beneficiary_id' => ['integer', 'required'],
+            'order_data.bank_id' => ['integer', 'required'],
+            'order_data.bank_branch_id' => ['integer', 'required'],
+            'order_data.bank_account_number' => ['string', 'required'],
+            'order_data.fund_source' => ['string', 'required'],
+            'order_data.remittance_purpose' => ['string', 'required'],
         ];
     }
 
