@@ -185,8 +185,6 @@ class AssignVendorService
 
         $verdict = $this->serviceVendorDriver->trackOrder($order);
 
-        dd($verdict);
-
         $timeline[] = $verdict->timeline;
 
         Transaction::order()->update($order->getKey(), ['timeline' => $timeline]);
