@@ -39,7 +39,7 @@ interface MoneyTransfer
      *
      * @throws ErrorException
      */
-    public function trackOrder(BaseModel $order): mixed;
+    public function trackOrder(BaseModel $order): AssignVendorVerdict;
 
     /**
      * Method to make a request to the remittance service provider
