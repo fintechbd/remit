@@ -55,13 +55,13 @@ class StoreWalletTransferRequest extends FormRequest
 
         $order_data['request_from'] = request()->platform()->value;
 
-        if (empty($order_data['business_type'])) {
-            $order_data['business_type'] = 'personal';
-        }
-
-        if (empty($order_data['transaction_type'])) {
-            $order_data['transaction_type'] = 'low';
-        }
+//        if (empty($order_data['business_type'])) {
+//            $order_data['business_type'] = 'personal';
+//        }
+//
+//        if (empty($order_data['transaction_type'])) {
+//            $order_data['transaction_type'] = 'low';
+//        }
 
         $this->merge(['order_data' => $order_data]);
     }
