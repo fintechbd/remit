@@ -135,7 +135,7 @@ class MeghnaBankApi implements MoneyTransfer
     {
         $response = $this->get('/remitEnquiry', [
             'queryType' => 1,
-            'confRate' => 'y'
+            'confRate' => 'y',
         ]);
 
         return AssignVendorVerdict::make([
@@ -217,10 +217,10 @@ class MeghnaBankApi implements MoneyTransfer
 
         if (in_array($response['Code'], ['0001', '0002'])) {
             $verdict->status('true')
-                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: " . strtolower($response['Message']) . '.');
+                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: ".strtolower($response['Message']).'.');
         } else {
             $verdict->status('false')
-                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message']) . '.', 'warn');
+                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message']).'.', 'warn');
         }
 
         return $verdict;
@@ -265,7 +265,7 @@ class MeghnaBankApi implements MoneyTransfer
             'ordpinNo' => $ref_number,
         ]);
 
-        $response =  array_shift($response);
+        $response = array_shift($response);
 
         $verdict = AssignVendorVerdict::make([
             'original' => $response,
@@ -274,7 +274,7 @@ class MeghnaBankApi implements MoneyTransfer
             'charge' => $order->charge_amount,
             'discount' => $order->discount_amount,
             'commission' => $order->commission_amount,
-            'status' => 'false'
+            'status' => 'false',
         ]);
 
         if (isset($response['Code'])) {
@@ -285,7 +285,7 @@ class MeghnaBankApi implements MoneyTransfer
         }
 
         $verdict->status('true')
-            ->orderTimeline("(Meghna Bank) responded with  the request was successful.");
+            ->orderTimeline('(Meghna Bank) responded with  the request was successful.');
 
         return $verdict;
 
