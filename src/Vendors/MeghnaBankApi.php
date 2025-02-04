@@ -102,6 +102,7 @@ class MeghnaBankApi implements MoneyTransfer
         $url = 'remitEnquiry';
         $params['queryType'] = $queryType;
         $params['confRate'] = $confRate;
+
         return $this->get($url, $params);
     }
 
@@ -128,7 +129,7 @@ class MeghnaBankApi implements MoneyTransfer
     }
 
     /**
-     * @param Model|BaseModel $order
+     * @param  Model|BaseModel  $order
      */
     public function requestQuote($order): AssignVendorVerdict
     {
@@ -164,7 +165,7 @@ class MeghnaBankApi implements MoneyTransfer
         // RECEIVER
         $params['RECEIVER_NAME'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
         $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $order_data['beneficiary_data']['receiver_information']['relation_name'] ?? 'Relatives';
         $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($order_data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
         $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = intval($order_data['beneficiary_data']['branch_information']['branch_location_no'] ?? '');
@@ -202,8 +203,8 @@ class MeghnaBankApi implements MoneyTransfer
             unset($response['message']);
         }
 
-        if (!empty($response['missing_field'])) {
-            $response['Message'] = ' [' . implode(',', $response['missing_field']) . ']';
+        if (! empty($response['missing_field'])) {
+            $response['Message'] = ' ['.implode(',', $response['missing_field']).']';
         }
 
         $verdict = AssignVendorVerdict::make([
