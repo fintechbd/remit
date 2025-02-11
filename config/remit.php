@@ -160,7 +160,7 @@ return [
             'wallet_verification' => true,
             'countries' => [19],
             'live' => [
-                'endpoint' => 'https://ibblmtws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
+                'endpoint' => 'https://ws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
                 'username' => env('REMIT_ISLAMI_BANK_USERNAME'),
                 'password' => env('REMIT_ISLAMI_BANK_PASSWORD'),
             ],
