@@ -51,7 +51,7 @@ class MeghnaBankApi implements MoneyTransfer
         $this->client = Http::withoutVerifying()
             ->baseUrl($this->apiUrl)
             ->acceptJson()
-            ->withBasicAuth($this->config[$this->status]['user'], $this->config[$this->status]['password'])
+            ->withBasicAuth($this->config[$this->status]['username'], $this->config[$this->status]['password'])
             ->withHeaders([
                 'bankid' => $this->config[$this->status]['bankid'],
                 'agent' => $this->config[$this->status]['agent'],
