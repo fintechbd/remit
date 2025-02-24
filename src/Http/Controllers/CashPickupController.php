@@ -130,7 +130,7 @@ class CashPickupController extends Controller
 
             return response()->updated(__('core::messages.resource.updated', ['model' => 'Cash Pickup']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -156,7 +156,7 @@ class CashPickupController extends Controller
 
             return new CashPickupResource($cashPickup);
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -190,7 +190,7 @@ class CashPickupController extends Controller
 
             return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Cash Pickup']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -222,7 +222,7 @@ class CashPickupController extends Controller
 
             return response()->restored(__('core::messages.resource.restored', ['model' => 'Cash Pickup']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }

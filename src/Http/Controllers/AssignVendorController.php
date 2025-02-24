@@ -29,7 +29,7 @@ class AssignVendorController extends Controller
 
             return new AssignableVendorCollection($serviceVendors);
 
-        }  catch (AlreadyAssignedException $exception) {
+        } catch (AlreadyAssignedException $exception) {
 
             return response()->locked($exception->getMessage());
 
@@ -64,7 +64,7 @@ class AssignVendorController extends Controller
 
             return new AssignVendorQuotaResource($quotation->toArray());
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -87,7 +87,7 @@ class AssignVendorController extends Controller
 
             return response()->success(__('core::messages.assign_vendor.success', ['slug' => ucfirst($service_vendor_slug)]));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -105,7 +105,7 @@ class AssignVendorController extends Controller
 
             return new AssignVendorStatusResource($verdict);
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -123,7 +123,7 @@ class AssignVendorController extends Controller
 
             return response()->success($jsonResponse);
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -141,7 +141,7 @@ class AssignVendorController extends Controller
 
             return response()->success($jsonResponse);
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -161,7 +161,7 @@ class AssignVendorController extends Controller
 
             return response()->success($jsonResponse);
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -181,7 +181,7 @@ class AssignVendorController extends Controller
 
             return response()->updated(__('core::messages.resource.updated', ['model' => 'Order']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }

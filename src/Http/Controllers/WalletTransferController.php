@@ -130,7 +130,7 @@ class WalletTransferController extends Controller
 
             return response()->updated(__('core::messages.resource.updated', ['model' => 'Wallet Transfer']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -156,7 +156,7 @@ class WalletTransferController extends Controller
 
             return new WalletTransferResource($walletTransfer);
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -190,7 +190,7 @@ class WalletTransferController extends Controller
 
             return response()->deleted(__('core::messages.resource.deleted', ['model' => 'Wallet Transfer']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -222,7 +222,7 @@ class WalletTransferController extends Controller
 
             return response()->restored(__('core::messages.resource.restored', ['model' => 'Wallet Transfer']));
 
-        }  catch (Exception $exception) {
+        } catch (Exception $exception) {
 
             return response()->failed($exception);
         }
