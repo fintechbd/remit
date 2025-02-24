@@ -29,11 +29,7 @@ class AssignVendorController extends Controller
 
             return new AssignableVendorCollection($serviceVendors);
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (AlreadyAssignedException $exception) {
+        }  catch (AlreadyAssignedException $exception) {
 
             return response()->locked($exception->getMessage());
 
@@ -68,11 +64,7 @@ class AssignVendorController extends Controller
 
             return new AssignVendorQuotaResource($quotation->toArray());
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -95,11 +87,7 @@ class AssignVendorController extends Controller
 
             return response()->success(__('core::messages.assign_vendor.success', ['slug' => ucfirst($service_vendor_slug)]));
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -117,11 +105,7 @@ class AssignVendorController extends Controller
 
             return new AssignVendorStatusResource($verdict);
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -139,11 +123,7 @@ class AssignVendorController extends Controller
 
             return response()->success($jsonResponse);
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -161,11 +141,7 @@ class AssignVendorController extends Controller
 
             return response()->success($jsonResponse);
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -185,11 +161,7 @@ class AssignVendorController extends Controller
 
             return response()->success($jsonResponse);
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
@@ -209,11 +181,7 @@ class AssignVendorController extends Controller
 
             return response()->updated(__('core::messages.resource.updated', ['model' => 'Order']));
 
-        } catch (ModelNotFoundException $exception) {
-
-            return response()->notfound($exception->getMessage());
-
-        } catch (Exception $exception) {
+        }  catch (Exception $exception) {
 
             return response()->failed($exception);
         }
