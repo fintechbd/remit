@@ -262,7 +262,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
         $transferData['remitterName'] = ($data['beneficiary_data']['sender_information']['name'] ?? null);
         $transferData['remitterPassportNo'] = '?';
         $transferData['remitterPhoneNo'] = Str::substr(($data['beneficiary_data']['sender_information']['mobile'] ?? '01689553436'), -11);
-        $transferData['secretKey'] = ($data['beneficiary_data']['reference_no'] ?? null);
+        $transferData['secretKey'] = $data['beneficiary_data']['secret_key'] ?? $data['beneficiary_data']['reference_no'] ?? null;
         $transferData['transReferenceNo'] = ($data['beneficiary_data']['reference_no'] ?? null);
 
         switch ($data['service_slug']) {
