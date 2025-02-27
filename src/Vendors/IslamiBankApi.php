@@ -313,10 +313,10 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
                 $transferData['beneficiaryAccNo'] = '';
                 $transferData['paymentType'] = 1;
                 //                $transferData['beneficiaryRoutingNo'] = '?';
-                $transferData['beneficiaryBankCode'] = ($data['beneficiary_data']['cash_information']['vendor_code']['remit']['islamibank'] ?? null);
-                $transferData['beneficiaryBankName'] = ($data['beneficiary_data']['cash_information']['bank_name'] ?? null);
-                $transferData['beneficiaryBranchCode'] = ($data['beneficiary_data']['branch_information']['vendor_code']['remit']['islamibank'] ?? 123);
-                $transferData['beneficiaryBranchName'] = ($data['beneficiary_data']['branch_information']['branch_name'] ?? 'Head Office Complex');
+                $transferData['beneficiaryBankCode'] = 42;
+                $transferData['beneficiaryBankName'] = 'Islami Bank Bangladesh Limited';
+                $transferData['beneficiaryBranchCode'] = 123;
+                $transferData['beneficiaryBranchName'] = 'Head Office Complex';
                 break;
 
             case 'bank_transfer':
