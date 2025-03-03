@@ -863,7 +863,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
                 'amount' => '0',
                 'account_title' => 'N/A',
                 'account_no' => 'N/A',
-                'wallet' => $wallet
+                'wallet' => $wallet,
             ]);
         }
 
