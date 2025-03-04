@@ -597,7 +597,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
      */
     public function fetchAccountDetail($order): mixed
     {
-        //        $accountDetail = $this->__transferData($order);
+//                $accountDetail = $this->__transferData($order);
         $accountDetail = $order;
 
         $method = 'fetchAccountDetail';
@@ -607,7 +607,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
         $service->appendChild($this->xml->createElement('ser:password', $this->config[$this->status]['password']));
         $service->appendChild($this->xml->createElement('ser:accNo', $accountDetail['beneficiaryAccNo'] ?? '?'));
         $service->appendChild($this->xml->createElement('ser:accType', $accountDetail['beneficiaryAccType'] ?? '10'));
-        $service->appendChild($this->xml->createElement('ser:branchCode', $accountDetail['beneficiaryBankCode'] ?? '213'));
+        $service->appendChild($this->xml->createElement('ser:branchCode', $accountDetail['beneficiaryBranchCode'] ?? '213'));
 
         return $this->callApi($method, $service);
     }
