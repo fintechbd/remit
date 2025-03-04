@@ -595,9 +595,10 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
      *
      * @throws Exception
      */
-    public function fetchAccountDetail(BaseModel $order): mixed
+    public function fetchAccountDetail($order): mixed
     {
-        $accountDetail = $this->__transferData($order);
+//        $accountDetail = $this->__transferData($order);
+        $accountDetail = $order;
 
         $method = 'fetchAccountDetail';
 
@@ -858,7 +859,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
         if (isset($response['Fault'])) {
             return WalletVerificationVerdict::make([
                 'status' => 'false',
-                'message' => $response['Fault']['faultstring'],
+                'message' => $response['Fault']['faultstring'] ?? __('remit::messages.wallet_verification.failed'),
                 'original' => $response,
                 'amount' => '0',
                 'account_title' => 'N/A',
@@ -866,6 +867,8 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
                 'wallet' => $wallet,
             ]);
         }
+
+        logger()->debug("Response:", [$response]);
 
         if (Str::startsWith($response, 'TRUE|')) {
 
@@ -878,7 +881,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
 
             return WalletVerificationVerdict::make($json)
                 ->status($json['status'] === 'TRUE')
-                ->message('Wallet verification successful.')
+                ->message( __('remit::messages.wallet_verification.success'))
                 ->wallet($wallet);
         }
 
@@ -891,7 +894,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
 
         return WalletVerificationVerdict::make()
             ->status(false)
-            ->message('Wallet verification failed.')
+            ->message( __('remit::messages.wallet_verification.failed'))
             ->original([$json, 'message' => self::ERROR_MESSAGES[$json['code']] ?? ''])
             ->wallet($wallet);
     }
