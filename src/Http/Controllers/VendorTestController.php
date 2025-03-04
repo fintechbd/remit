@@ -13,7 +13,6 @@ class VendorTestController extends Controller
     {
         $vendor = app()->make(IslamiBankApi::class);
 
-        return ;
     }
 
     public function islamiBankFetchBalance(): void
