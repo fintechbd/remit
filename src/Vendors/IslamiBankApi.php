@@ -597,7 +597,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
      */
     public function fetchAccountDetail($order): mixed
     {
-//        $accountDetail = $this->__transferData($order);
+        //        $accountDetail = $this->__transferData($order);
         $accountDetail = $order;
 
         $method = 'fetchAccountDetail';
@@ -868,7 +868,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
             ]);
         }
 
-        logger()->debug("Response:", [$response]);
+        logger()->debug('Response:', [$response]);
 
         if (Str::startsWith($response, 'TRUE|')) {
 
@@ -881,7 +881,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
 
             return WalletVerificationVerdict::make($json)
                 ->status($json['status'] === 'TRUE')
-                ->message( __('remit::messages.wallet_verification.success'))
+                ->message(__('remit::messages.wallet_verification.success'))
                 ->wallet($wallet);
         }
 
@@ -894,7 +894,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
 
         return WalletVerificationVerdict::make()
             ->status(false)
-            ->message( __('remit::messages.wallet_verification.failed'))
+            ->message(__('remit::messages.wallet_verification.failed'))
             ->original([$json, 'message' => self::ERROR_MESSAGES[$json['code']] ?? ''])
             ->wallet($wallet);
     }

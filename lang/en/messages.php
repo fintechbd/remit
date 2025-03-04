@@ -8,5 +8,5 @@ return [
     'wallet_verification' => [
         'success' => 'Wallet verification successful.',
         'failure' => 'Wallet verification failed.',
-    ]
+    ],
 ];
