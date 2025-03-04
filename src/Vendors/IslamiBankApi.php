@@ -597,7 +597,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer, WalletVerification
      */
     public function fetchAccountDetail($order): mixed
     {
-//                $accountDetail = $this->__transferData($order);
+        //                $accountDetail = $this->__transferData($order);
         $accountDetail = $order;
 
         $method = 'fetchAccountDetail';
