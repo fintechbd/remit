@@ -44,8 +44,11 @@ if (Config::get('fintech.remit.enabled')) {
 
                 Route::apiResource('wallet-transfers', WalletTransferController::class)->except('update', 'destroy');
 
-                Route::post('wallet-verification', WalletVerificationController::class)->name('wallet-verification');
-                Route::get('islami-bank-account-type-code', [VendorTestController::class, 'islamiBankAccountTypeCode'])->name('islami-bank-account-type-code');
+                Route::prefix('account-verification')->name('account-verification.')->group(function () {
+                    Route::post('bank-transfer', WalletVerificationController::class)->name('bank-transfer');
+                    Route::post('wallet', WalletVerificationController::class)->name('wallet');
+                    Route::post('cash-pickups', WalletVerificationController::class)->name('cash-pickups');
+                });
                 // DO NOT REMOVE THIS LINE//
 
                 Route::prefix('charts')->name('charts.')->group(function () {
