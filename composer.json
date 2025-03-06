@@ -22,7 +22,7 @@
         "ext-simplexml": "*",
         "fintech/core": "*",
         "fintech/transaction": "*",
-        "illuminate/contracts": "^12.0||^11.0",
+        "laravel/framework": "^12.0||^11.0",
         "owen-it/laravel-auditing": "^14.0||^13.5"
     },
     "require-dev": {
