@@ -87,7 +87,7 @@ class AgraniBankApi implements MoneyTransfer
      */
     public function __construct()
     {
-        $this->config = config('agrani');
+        $this->config = config('agranibank');
         $this->status = ($this->config['mode'] === 'sandbox') ? 'sandbox' : 'live';
         $this->apiUrl = $this->config[$this->status]['endpoint'];
         $this->encodeCredential();

@@ -120,11 +120,11 @@ return [
                 'session_id' => env('REMIT_VALYOU_AGENT_SESSION_ID'),
             ],
         ],
-        'agrani' => [
+        'agranibank' => [
             'mode' => 'sandbox',
             'driver' => \Fintech\Remit\Vendors\AgraniBankApi::class,
-            'wallet_verification' => false,
-            'countries' => [],
+            'wallet_verification' => true,
+            'countries' => [19],
             'live' => [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
                 'username' => env('REMIT_AGRANI_BANK_USERNAME'),
