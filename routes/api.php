@@ -5,7 +5,6 @@ use Fintech\Remit\Http\Controllers\AssignVendorController;
 use Fintech\Remit\Http\Controllers\BankTransferController;
 use Fintech\Remit\Http\Controllers\CashPickupController;
 use Fintech\Remit\Http\Controllers\Charts\WithdrawPartnerSummaryController;
-use Fintech\Remit\Http\Controllers\VendorTestController;
 use Fintech\Remit\Http\Controllers\WalletTransferController;
 use Fintech\Remit\Http\Controllers\WalletVerificationController;
 use Illuminate\Support\Facades\Config;
