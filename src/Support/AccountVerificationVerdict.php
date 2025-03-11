@@ -12,7 +12,7 @@ use Fintech\Core\Abstracts\DynamicProperty;
  * @method self account_no(string $account_no = '')
  * @method self wallet(\Fintech\Core\Abstracts\BaseModel $wallet)
  */
-class WalletVerificationVerdict extends DynamicProperty
+class AccountVerificationVerdict extends DynamicProperty
 {
     protected array $fillable = ['status', 'message', 'original', 'account_title', 'account_no', 'wallet'];
 

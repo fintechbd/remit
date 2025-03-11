@@ -2,11 +2,12 @@
 
 namespace Fintech\Remit;
 
+use Fintech\Core\Enums\Reload\AccountVerifyOption;
 use Fintech\Remit\Services\AssignVendorService;
 use Fintech\Remit\Services\BankTransferService;
 use Fintech\Remit\Services\CashPickupService;
 use Fintech\Remit\Services\WalletTransferService;
-use Fintech\Remit\Support\WalletVerificationVerdict;
+use Fintech\Remit\Support\AccountVerificationVerdict;
 
 class Remit
 {
@@ -33,21 +34,23 @@ class Remit
     /**
      * @throws \Exception
      */
-    public function verifyWallet(array $inputs = []): WalletVerificationVerdict
+    public function verifyAccount(AccountVerifyOption $type, array $inputs = []): AccountVerificationVerdict
     {
         $wallet = \Fintech\Banco\Facades\Banco::bank()->find($inputs['wallet_id']);
 
-        $provider = collect(config('fintech.remit.providers'))->filter(function ($provider) use ($wallet) {
+        $availableProviders = config('fintech.remit.providers');
+
+        $provider = collect($availableProviders)->filter(function ($provider) use ($wallet) {
             return $provider['wallet_verification'] == true && in_array($wallet->country_id, $provider['countries'], true);
         })->first();
 
-        if (! $provider) {
+        if (!$provider) {
             throw new \ErrorException(__('remit::messages.verification.wallet_provider_not_found', ['wallet' => ucwords(strtolower($wallet->name))]));
         }
 
         $instance = app($provider['driver']);
 
-        if (! $instance instanceof \Fintech\Remit\Contracts\WalletVerification) {
+        if (!$instance instanceof \Fintech\Remit\Contracts\AccountVerification) {
             throw new \ErrorException(__('remit::messages.verification.provider_missing_method', ['provider' => class_basename($provider['driver'])]));
         }
 

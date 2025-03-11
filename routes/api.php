@@ -6,7 +6,7 @@ use Fintech\Remit\Http\Controllers\BankTransferController;
 use Fintech\Remit\Http\Controllers\CashPickupController;
 use Fintech\Remit\Http\Controllers\Charts\WithdrawPartnerSummaryController;
 use Fintech\Remit\Http\Controllers\WalletTransferController;
-use Fintech\Remit\Http\Controllers\WalletVerificationController;
+use Fintech\Remit\Http\Controllers\AccountVerificationController;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 
@@ -43,10 +43,11 @@ if (Config::get('fintech.remit.enabled')) {
 
                 Route::apiResource('wallet-transfers', WalletTransferController::class)->except('update', 'destroy');
 
-                Route::prefix('account-verification')->name('account-verification.')->group(function () {
-                    Route::post('bank-transfer', WalletVerificationController::class)->name('bank-transfer');
-                    Route::post('wallet', WalletVerificationController::class)->name('wallet');
-                    Route::post('cash-pickups', WalletVerificationController::class)->name('cash-pickups');
+                Route::prefix('account-verification')->name('account-verification.')
+                    ->controller(AccountVerificationController::class)->group(function () {
+                    Route::post('bank-transfer', 'bankTransfer')->name('bank-transfer');
+                    Route::post('wallet', 'wallet')->name('wallet');
+                    Route::post('cash-pickup', 'cashPickup')->name('cash-pickup');
                 });
                 // DO NOT REMOVE THIS LINE//
 

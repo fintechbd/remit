@@ -2,9 +2,9 @@
 
 namespace Fintech\Remit\Contracts;
 
-use Fintech\Remit\Support\WalletVerificationVerdict;
+use Fintech\Remit\Support\AccountVerificationVerdict;
 
-interface WalletVerification
+interface AccountVerification
 {
     /**
      * Method to make a request to the remittance service provider
@@ -13,5 +13,5 @@ interface WalletVerification
      *
      * @throws \ErrorException
      */
-    public function validateWallet(array $inputs = []): WalletVerificationVerdict;
+    public function validateWallet(array $inputs = []): AccountVerificationVerdict;
 }
