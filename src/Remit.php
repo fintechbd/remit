@@ -44,13 +44,13 @@ class Remit
             return $provider['wallet_verification'] == true && in_array($wallet->country_id, $provider['countries'], true);
         })->first();
 
-        if (!$provider) {
+        if (! $provider) {
             throw new \ErrorException(__('remit::messages.verification.wallet_provider_not_found', ['wallet' => ucwords(strtolower($wallet->name))]));
         }
 
         $instance = app($provider['driver']);
 
-        if (!$instance instanceof \Fintech\Remit\Contracts\AccountVerification) {
+        if (! $instance instanceof \Fintech\Remit\Contracts\AccountVerification) {
             throw new \ErrorException(__('remit::messages.verification.provider_missing_method', ['provider' => class_basename($provider['driver'])]));
         }
 

@@ -1,12 +1,12 @@
 <?php
 
 use Fintech\Core\Facades\Core;
+use Fintech\Remit\Http\Controllers\AccountVerificationController;
 use Fintech\Remit\Http\Controllers\AssignVendorController;
 use Fintech\Remit\Http\Controllers\BankTransferController;
 use Fintech\Remit\Http\Controllers\CashPickupController;
 use Fintech\Remit\Http\Controllers\Charts\WithdrawPartnerSummaryController;
 use Fintech\Remit\Http\Controllers\WalletTransferController;
-use Fintech\Remit\Http\Controllers\AccountVerificationController;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 
@@ -45,10 +45,10 @@ if (Config::get('fintech.remit.enabled')) {
 
                 Route::prefix('account-verification')->name('account-verification.')
                     ->controller(AccountVerificationController::class)->group(function () {
-                    Route::post('bank-transfer', 'bankTransfer')->name('bank-transfer');
-                    Route::post('wallet', 'wallet')->name('wallet');
-                    Route::post('cash-pickup', 'cashPickup')->name('cash-pickup');
-                });
+                        Route::post('bank-transfer', 'bankTransfer')->name('bank-transfer');
+                        Route::post('wallet', 'wallet')->name('wallet');
+                        Route::post('cash-pickup', 'cashPickup')->name('cash-pickup');
+                    });
                 // DO NOT REMOVE THIS LINE//
 
                 Route::prefix('charts')->name('charts.')->group(function () {

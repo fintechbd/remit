@@ -9,16 +9,16 @@ use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Core\Supports\Utility;
+use Fintech\Remit\Contracts\AccountVerification;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\WalletTransfer;
-use Fintech\Remit\Contracts\AccountVerification;
 use Fintech\Remit\Support\AccountVerificationVerdict;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
-class IslamiBankApi implements MoneyTransfer, WalletTransfer, AccountVerification
+class IslamiBankApi implements AccountVerification, MoneyTransfer, WalletTransfer
 {
     public const ERROR_MESSAGES = [
         1000 => 'OTHER ERROR',
