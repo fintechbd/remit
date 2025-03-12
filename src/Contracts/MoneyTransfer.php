@@ -5,6 +5,7 @@ namespace Fintech\Remit\Contracts;
 use ErrorException;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Supports\AssignVendorVerdict;
+use Fintech\Remit\Support\AccountVerificationVerdict;
 
 interface MoneyTransfer
 {
@@ -56,4 +57,13 @@ interface MoneyTransfer
      * @throws ErrorException
      */
     public function amendmentOrder(BaseModel $order): mixed;
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for a quotation of the order. that include charge, fee,
+     * commission and other information related to order.
+     *
+     * @throws \ErrorException
+     */
+    public function validateBankAccount(array $inputs = []): AccountVerificationVerdict;
 }

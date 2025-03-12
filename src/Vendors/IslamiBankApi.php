@@ -9,7 +9,7 @@ use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Core\Supports\Utility;
-use Fintech\Remit\Contracts\AccountVerification;
+use Fintech\Remit\Contracts\WalletVerification;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\WalletTransfer;
 use Fintech\Remit\Support\AccountVerificationVerdict;
@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
-class IslamiBankApi implements AccountVerification, MoneyTransfer, WalletTransfer
+class IslamiBankApi implements MoneyTransfer, WalletTransfer
 {
     public const ERROR_MESSAGES = [
         1000 => 'OTHER ERROR',
@@ -612,6 +612,8 @@ class IslamiBankApi implements AccountVerification, MoneyTransfer, WalletTransfe
         return $this->callApi($method, $service);
     }
 
+
+
     /**
      * Import/push remittance (importWSMessage)
      *
@@ -897,5 +899,26 @@ class IslamiBankApi implements AccountVerification, MoneyTransfer, WalletTransfe
             ->message(__('remit::messages.wallet_verification.failed'))
             ->original([$json, 'message' => self::ERROR_MESSAGES[$json['code']] ?? ''])
             ->wallet($wallet);
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for a quotation of the order. that include charge, fee,
+     * commission and other information related to order.
+     *
+     * @throws \ErrorException
+     */
+    public function validateBankAccount(array $inputs = []): AccountVerificationVerdict
+    {
+        $method = 'fetchAccountDetail';
+
+        $service = $this->xml->createElement("ser:{$method}");
+        $service->appendChild($this->xml->createElement('ser:userID', $this->config[$this->status]['username']));
+        $service->appendChild($this->xml->createElement('ser:password', $this->config[$this->status]['password']));
+        $service->appendChild($this->xml->createElement('ser:accNo', $inputs['account_no'] ?? '?'));
+        $service->appendChild($this->xml->createElement('ser:accType', $inputs['beneficiaryAccType'] ?? '10'));
+        $service->appendChild($this->xml->createElement('ser:branchCode', $inputs['beneficiaryBranchCode'] ?? '213'));
+
+        return $this->callApi($method, $service);
     }
 }

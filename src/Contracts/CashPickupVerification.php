@@ -4,7 +4,7 @@ namespace Fintech\Remit\Contracts;
 
 use Fintech\Remit\Support\AccountVerificationVerdict;
 
-interface AccountVerification
+interface CashPickupVerification
 {
     /**
      * Method to make a request to the remittance service provider
@@ -13,5 +13,5 @@ interface AccountVerification
      *
      * @throws \ErrorException
      */
-    public function validateWallet(array $inputs = []): AccountVerificationVerdict;
+    public function validateCashPickup(array $inputs = []): AccountVerificationVerdict;
 }
