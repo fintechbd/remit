@@ -2,9 +2,4 @@
 
 namespace Fintech\Remit\Contracts;
 
-use Fintech\Remit\Support\AccountVerificationVerdict;
-
-interface WalletVerification
-{
-
-}
+interface WalletVerification {}

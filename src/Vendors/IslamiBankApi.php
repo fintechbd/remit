@@ -9,7 +9,6 @@ use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Core\Supports\Utility;
-use Fintech\Remit\Contracts\WalletVerification;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\WalletTransfer;
 use Fintech\Remit\Support\AccountVerificationVerdict;
@@ -611,8 +610,6 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         return $this->callApi($method, $service);
     }
-
-
 
     /**
      * Import/push remittance (importWSMessage)

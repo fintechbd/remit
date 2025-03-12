@@ -3,11 +3,9 @@
 namespace Fintech\Remit;
 
 use Fintech\Core\Enums\Reload\AccountVerifyOption;
-use Fintech\Remit\Contracts\BankAccountVerification;
 use Fintech\Remit\Contracts\CashPickupVerification;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\WalletTransfer;
-use Fintech\Remit\Contracts\WalletVerification;
 use Fintech\Remit\Services\AssignVendorService;
 use Fintech\Remit\Services\BankTransferService;
 use Fintech\Remit\Services\CashPickupService;
@@ -52,10 +50,11 @@ class Remit
                     default => false
                 };
             }
+
             return false;
         })->first();
 
-        if (!$provider) {
+        if (! $provider) {
             throw new \ErrorException(
                 __('remit::messages.verification.wallet_provider_not_found',
                     ['wallet' => ucwords(strtolower($bank->name))]
@@ -65,29 +64,29 @@ class Remit
 
         $instance = app($provider['driver']);
 
-        if (!$instance instanceof WalletTransfer) {
+        if (! $instance instanceof WalletTransfer) {
             throw new \ErrorException(
                 __('remit::messages.verification.provider_missing_method', [
                     'type' => 'Wallet',
-                    'provider' => class_basename($provider['driver'])
+                    'provider' => class_basename($provider['driver']),
                 ])
             );
         }
 
-        if (!$instance instanceof MoneyTransfer) {
+        if (! $instance instanceof MoneyTransfer) {
             throw new \ErrorException(
                 __('remit::messages.verification.provider_missing_method', [
                     'type' => 'Bank Transfer',
-                    'provider' => class_basename($provider['driver'])
+                    'provider' => class_basename($provider['driver']),
                 ])
             );
         }
 
-        if (!$instance instanceof CashPickupVerification) {
+        if (! $instance instanceof CashPickupVerification) {
             throw new \ErrorException(
                 __('remit::messages.verification.provider_missing_method', [
                     'type' => 'Cash Pickup',
-                    'provider' => class_basename($provider['driver'])
+                    'provider' => class_basename($provider['driver']),
                 ])
             );
         }
