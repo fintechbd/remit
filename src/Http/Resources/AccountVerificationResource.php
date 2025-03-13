@@ -15,9 +15,9 @@ class AccountVerificationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'account_no' => $this->account_no,
-            'account_title' => $this->account_title,
-            'name' => $this->wallet->name,
+            'account_no' => $this->account_no ?? null,
+            'account_title' => $this->account_title ?? null,
+            'name' => $this->wallet['name'] ?? null,
         ];
     }
 }
