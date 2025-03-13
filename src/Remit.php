@@ -50,10 +50,11 @@ class Remit
                     default => false
                 };
             }
+
             return false;
         })->first();
 
-        if (!$provider) {
+        if (! $provider) {
             throw new \ErrorException(
                 __('remit::messages.verification.wallet_provider_not_found',
                     ['wallet' => ucwords(strtolower($bank->name))]
@@ -69,8 +70,8 @@ class Remit
 
         switch ($verifyType) {
             case AccountVerifyOption::Wallet :
-            {
-                if (!$instance instanceof WalletTransfer) {
+
+                if (! $instance instanceof WalletTransfer) {
                     throw new \ErrorException(
                         __('remit::messages.verification.provider_missing_method', [
                             'type' => 'Wallet',
@@ -80,14 +81,14 @@ class Remit
                 }
 
                 return $instance->validateWallet($inputs);
-            }
+
             case AccountVerifyOption::BankTransfer :
-            {
+
                 $inputs['bank_branch'] = \Fintech\Banco\Facades\Banco::bankBranch()->find($inputs['branch_id'])?->toArray() ?? [];
 
                 $inputs['beneficiary_account_type'] = \Fintech\Banco\Facades\Banco::beneficiaryAccountType()->find($inputs['account_type_id'])?->toArray() ?? [];
 
-                if (!$instance instanceof MoneyTransfer) {
+                if (! $instance instanceof MoneyTransfer) {
                     throw new \ErrorException(
                         __('remit::messages.verification.provider_missing_method', [
                             'type' => 'Bank Transfer',
@@ -97,10 +98,10 @@ class Remit
                 }
 
                 return $instance->validateBankAccount($inputs);
-            }
+
             case AccountVerifyOption::CashPickup :
-            {
-                if (!$instance instanceof CashPickupVerification) {
+
+                if (! $instance instanceof CashPickupVerification) {
                     throw new \ErrorException(
                         __('remit::messages.verification.provider_missing_method', [
                             'type' => 'Cash Pickup',
@@ -108,12 +109,13 @@ class Remit
                         ])
                     );
                 }
+
                 return $instance->validateCashPickup($inputs);
-            }
+
             default:
-            {
+
                 return AccountVerificationVerdict::make();
-            }
+
         }
 
     }
