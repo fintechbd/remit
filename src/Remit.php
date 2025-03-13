@@ -2,7 +2,7 @@
 
 namespace Fintech\Remit;
 
-use Fintech\Core\Enums\Reload\AccountVerifyOption;
+use Fintech\Core\Enums\Remit\AccountVerifyOption;
 use Fintech\Remit\Contracts\CashPickupVerification;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\WalletTransfer;
@@ -39,7 +39,7 @@ class Remit
      */
     public function verifyAccount(AccountVerifyOption $verifyType, array $inputs = []): AccountVerificationVerdict
     {
-        $bank = \Fintech\Banco\Facades\Banco::bank()->firstWhere($inputs['slug']);
+        $bank = \Fintech\Banco\Facades\Banco::bank()->findWhere(['slug' => $inputs['slug']]);
         $availableProviders = config('fintech.remit.providers');
         $provider = collect($availableProviders)->filter(function ($provider) use ($bank, $verifyType, $inputs) {
             if (in_array($bank->country_id, $provider['countries'], true) && in_array($inputs['slug'], $provider['banks'], true)) {
@@ -50,11 +50,10 @@ class Remit
                     default => false
                 };
             }
-
             return false;
         })->first();
 
-        if (! $provider) {
+        if (!$provider) {
             throw new \ErrorException(
                 __('remit::messages.verification.wallet_provider_not_found',
                     ['wallet' => ucwords(strtolower($bank->name))]
@@ -64,43 +63,59 @@ class Remit
 
         $instance = app($provider['driver']);
 
-        if (! $instance instanceof WalletTransfer) {
-            throw new \ErrorException(
-                __('remit::messages.verification.provider_missing_method', [
-                    'type' => 'Wallet',
-                    'provider' => class_basename($provider['driver']),
-                ])
-            );
-        }
-
-        if (! $instance instanceof MoneyTransfer) {
-            throw new \ErrorException(
-                __('remit::messages.verification.provider_missing_method', [
-                    'type' => 'Bank Transfer',
-                    'provider' => class_basename($provider['driver']),
-                ])
-            );
-        }
-
-        if (! $instance instanceof CashPickupVerification) {
-            throw new \ErrorException(
-                __('remit::messages.verification.provider_missing_method', [
-                    'type' => 'Cash Pickup',
-                    'provider' => class_basename($provider['driver']),
-                ])
-            );
-        }
-
-        $inputs['bank'] = $bank;
+        $inputs['bank'] = $bank->toArray();
 
         unset($inputs['slug']);
 
-        return match ($verifyType) {
-            AccountVerifyOption::Wallet => $instance->validateWallet($inputs),
-            AccountVerifyOption::BankTransfer => $instance->validateBankAccount($inputs),
-            AccountVerifyOption::CashPickup => $instance->validateCashPickup($inputs),
-            default => AccountVerificationVerdict::make()
-        };
+        switch ($verifyType) {
+            case AccountVerifyOption::Wallet :
+            {
+                if (!$instance instanceof WalletTransfer) {
+                    throw new \ErrorException(
+                        __('remit::messages.verification.provider_missing_method', [
+                            'type' => 'Wallet',
+                            'provider' => class_basename($provider['driver']),
+                        ])
+                    );
+                }
+
+                return $instance->validateWallet($inputs);
+            }
+            case AccountVerifyOption::BankTransfer :
+            {
+                $inputs['bank_branch'] = \Fintech\Banco\Facades\Banco::bankBranch()->find($inputs['branch_id'])?->toArray() ?? [];
+
+                $inputs['beneficiary_account_type'] = \Fintech\Banco\Facades\Banco::beneficiaryAccountType()->find($inputs['account_type_id'])?->toArray() ?? [];
+
+                if (!$instance instanceof MoneyTransfer) {
+                    throw new \ErrorException(
+                        __('remit::messages.verification.provider_missing_method', [
+                            'type' => 'Bank Transfer',
+                            'provider' => class_basename($provider['driver']),
+                        ])
+                    );
+                }
+
+                return $instance->validateBankAccount($inputs);
+            }
+            case AccountVerifyOption::CashPickup :
+            {
+                if (!$instance instanceof CashPickupVerification) {
+                    throw new \ErrorException(
+                        __('remit::messages.verification.provider_missing_method', [
+                            'type' => 'Cash Pickup',
+                            'provider' => class_basename($provider['driver']),
+                        ])
+                    );
+                }
+                return $instance->validateCashPickup($inputs);
+            }
+            default:
+            {
+                return AccountVerificationVerdict::make();
+            }
+        }
+
     }
 
     // ** Crud Service Method Point Do not Remove **//

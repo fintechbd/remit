@@ -24,7 +24,7 @@ class CashPickupVerificationRequest extends FormRequest
     {
         return [
             'account_no' => ['required', 'string', 'min:5', 'max:255'],
-            'slug' => ['required', 'string', 'min:3'],
+            'slug' => ['required', 'string', 'min:3', 'exists:banks,slug'],
         ];
     }
 }

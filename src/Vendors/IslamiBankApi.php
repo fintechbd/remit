@@ -908,14 +908,59 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     public function validateBankAccount(array $inputs = []): AccountVerificationVerdict
     {
         $method = 'fetchAccountDetail';
+        $bank = $inputs['bank'] ?? [];
+        $bankBranch = $inputs['bank_branch'] ?? [];
+        $beneficiaryAccountType = $inputs['beneficiary_account_type'] ?? [];
 
         $service = $this->xml->createElement("ser:{$method}");
         $service->appendChild($this->xml->createElement('ser:userID', $this->config[$this->status]['username']));
         $service->appendChild($this->xml->createElement('ser:password', $this->config[$this->status]['password']));
         $service->appendChild($this->xml->createElement('ser:accNo', $inputs['account_no'] ?? '?'));
-        $service->appendChild($this->xml->createElement('ser:accType', $inputs['beneficiaryAccType'] ?? '10'));
-        $service->appendChild($this->xml->createElement('ser:branchCode', $inputs['beneficiaryBranchCode'] ?? '213'));
+        $service->appendChild($this->xml->createElement('ser:accType', $beneficiaryAccountType['slug'] ?? '10'));
+        $service->appendChild($this->xml->createElement('ser:branchCode', $bankBranch['beneficiaryBranchCode']['vendor_code']['remit']['islamibank'] ?? '213'));
 
-        return $this->callApi($method, $service);
+        $response = $this->callApi($method, $service);
+
+        if (isset($response['Fault'])) {
+            return AccountVerificationVerdict::make([
+                'status' => 'false',
+                'message' => $response['Fault']['faultstring'] ?? __('remit::messages.wallet_verification.failed'),
+                'original' => $response,
+                'amount' => '0',
+                'account_title' => 'N/A',
+                'account_no' => 'N/A',
+                'wallet' => $bank['name'],
+            ]);
+        }
+
+        logger()->debug('Response:', [$response]);
+
+        if (Str::startsWith($response, 'TRUE|')) {
+
+            $json = json_decode(
+                preg_replace(
+                    '/(TRUE|FALSE)\|(\d+)\|(.+)/iu',
+                    '{"status":"$1", "account_no":"$2", "account_title":"$3", "original":"$0"}',
+                    $response),
+                true);
+
+            return AccountVerificationVerdict::make($json)
+                ->status($json['status'] === 'TRUE')
+                ->message(__('remit::messages.wallet_verification.success'))
+                ->wallet($bank['name']);
+        }
+
+        $json = json_decode(
+            preg_replace(
+                '/(TRUE|FALSE)\|(\d{4})/iu',
+                '{"status":"$1", "code":$2, "original":"$0"}',
+                $response),
+            true);
+
+        return AccountVerificationVerdict::make()
+            ->status('false')
+            ->message(__('remit::messages.wallet_verification.failed'))
+            ->original([$json, 'message' => self::ERROR_MESSAGES[$json['code']] ?? ''])
+            ->wallet($bank['name']);
     }
 }

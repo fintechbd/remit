@@ -3,7 +3,7 @@
 namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
-use Fintech\Core\Enums\Reload\AccountVerifyOption;
+use Fintech\Core\Enums\Remit\AccountVerifyOption;
 use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\BankTransferVerificationRequest;
 use Fintech\Remit\Http\Requests\CashPickupVerificationRequest;

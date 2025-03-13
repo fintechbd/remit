@@ -2,7 +2,7 @@
 
 namespace Fintech\Remit\Facades;
 
-use Fintech\Core\Enums\Reload\AccountVerifyOption;
+use Fintech\Core\Enums\Remit\AccountVerifyOption;
 use Fintech\Remit\Services\AssignVendorService;
 use Fintech\Remit\Services\BankTransferService;
 use Fintech\Remit\Services\CashPickupService;
