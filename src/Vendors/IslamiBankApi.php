@@ -933,7 +933,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
             ]);
         }
 
-        logger()->debug('Response:', [$response]);
+        $response = $response['fetchAccountDetailResponse']['return'] ?: '' ;
 
         if (Str::startsWith($response, 'TRUE|')) {
 
