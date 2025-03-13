@@ -25,7 +25,7 @@ class BankTransferVerificationRequest extends FormRequest
         return [
             'account_no' => ['required', 'string', 'min:5', 'max:255'],
             'slug' => ['required', 'string', 'min:3'],
-            'branch_id' => ['required', 'integer', 'min:1'],
+            'branch_id' => ['nullable', 'integer', 'min:1'],
             'account_type_id' => ['nullable', 'integer', 'min:1'],
         ];
     }
