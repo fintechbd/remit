@@ -23,7 +23,7 @@ class WalletVerificationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'wallet_no' => ['required', 'string', 'min:5', 'max:255'],
+            'account_no' => ['required', 'string', 'min:5', 'max:255'],
             'slug' => ['required', 'string', 'min:3'],
         ];
     }
