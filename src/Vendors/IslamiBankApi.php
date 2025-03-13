@@ -869,6 +869,8 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         logger()->debug('Response:', [$response]);
 
+        $response = $response["{$method}Response"]['return'] ?: '' ;
+
         if (Str::startsWith($response, 'TRUE|')) {
 
             $json = json_decode(
@@ -933,7 +935,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
             ]);
         }
 
-        $response = $response['fetchAccountDetailResponse']['return'] ?: '' ;
+        $response = $response["{$method}Response"]['return'] ?: '' ;
 
         if (Str::startsWith($response, 'TRUE|')) {
 
