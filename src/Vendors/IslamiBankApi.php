@@ -931,7 +931,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
                 'amount' => '0',
                 'account_title' => 'N/A',
                 'account_no' => 'N/A',
-                'wallet' => $bank['name'],
+                'wallet' => $bank,
             ]);
         }
 
@@ -941,7 +941,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
             $json = json_decode(
                 preg_replace(
-                    '/(TRUE|FALSE)\|(\d+)\|(.+)/iu',
+                    '/(TRUE|FALSE)\|(\d+)\|(.+)(\|.*)?/iu',
                     '{"status":"$1", "account_no":"$2", "account_title":"$3", "original":"$0"}',
                     $response),
                 true);
@@ -949,7 +949,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
             return AccountVerificationVerdict::make($json)
                 ->status($json['status'] === 'TRUE')
                 ->message(__('remit::messages.wallet_verification.success'))
-                ->wallet($bank['name']);
+                ->wallet($bank);
         }
 
         $json = json_decode(
@@ -963,6 +963,6 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
             ->status('false')
             ->message(__('remit::messages.wallet_verification.failed'))
             ->original([$json, 'message' => self::ERROR_MESSAGES[$json['code']] ?? ''])
-            ->wallet($bank['name']);
+            ->wallet($bank);
     }
 }

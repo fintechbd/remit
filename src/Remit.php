@@ -44,7 +44,7 @@ class Remit
         $provider = collect($availableProviders)->filter(function ($provider) use ($bank, $verifyType, $inputs) {
             if (in_array($bank->country_id, $provider['countries'], true) && in_array($inputs['slug'], $provider['banks'], true)) {
                 return match ($verifyType) {
-                    AccountVerifyOption::Wallet => $provider['wallet_verification'] == true,
+                    AccountVerifyOption::WalletTransfer => $provider['wallet_verification'] == true,
                     AccountVerifyOption::BankTransfer => $provider['bank_transfer_verification'] == true,
                     AccountVerifyOption::CashPickup => $provider['cash_pickup_verification'] == true,
                     default => false
@@ -69,7 +69,7 @@ class Remit
         unset($inputs['slug']);
 
         switch ($verifyType) {
-            case AccountVerifyOption::Wallet :
+            case AccountVerifyOption::WalletTransfer :
 
                 if (! $instance instanceof WalletTransfer) {
                     throw new \ErrorException(

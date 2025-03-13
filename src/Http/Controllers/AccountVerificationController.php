@@ -17,11 +17,11 @@ class AccountVerificationController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function wallet(WalletVerificationRequest $request): JsonResponse|AccountVerificationResource
+    public function walletTransfer(WalletVerificationRequest $request): JsonResponse|AccountVerificationResource
     {
 
         try {
-            $verification = Remit::verifyAccount(AccountVerifyOption::Wallet, $request->validated());
+            $verification = Remit::verifyAccount(AccountVerifyOption::WalletTransfer, $request->validated());
 
             if (! $verification->status) {
                 throw new Exception($verification->message);

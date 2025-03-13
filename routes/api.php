@@ -46,7 +46,7 @@ if (Config::get('fintech.remit.enabled')) {
                 Route::prefix('account-verification')->name('account-verification.')
                     ->controller(AccountVerificationController::class)->group(function () {
                         Route::post('bank-transfer', 'bankTransfer')->name('bank-transfer');
-                        Route::post('wallet', 'wallet')->name('wallet');
+                        Route::post('wallet-transfer', 'walletTransfer')->name('wallet');
                         Route::post('cash-pickup', 'cashPickup')->name('cash-pickup');
                     });
                 // DO NOT REMOVE THIS LINE//
