@@ -135,7 +135,7 @@ return [
             'wallet_verification' => true,
             'bank_transfer_verification' => true,
             'cash_pickup_verification' => false,
-            'banks' => ['agrani-bank-ltd'],
+            'banks' => ['agrani-bank-ltd', 'mfs-nagad', 'mfs-bkash'],
             'countries' => [19],
             'live' => [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
@@ -175,7 +175,7 @@ return [
             'wallet_verification' => false,
             'bank_transfer_verification' => true,
             'cash_pickup_verification' => false,
-            'banks' => ['islami-bank-bangladesh-limited'],
+            'banks' => ['islami-bank-bangladesh-limited', 'mfs-mcash', 'mfs-nagad', 'mfs-bkash'],
             'countries' => [19],
             'live' => [
                 'endpoint' => 'https://ws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
