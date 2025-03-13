@@ -939,12 +939,11 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         if (Str::startsWith($response, 'TRUE|')) {
 
-            $json = json_decode(
-                preg_replace(
-                    '/(TRUE|FALSE)\|(\d+)\|(.+)(\|.*)?/iu',
-                    '{"status":"$1", "account_no":"$2", "account_title":"$3", "original":"$0"}',
-                    $response),
-                true);
+            $arr = explode("|", $response);
+            $json['status'] = 'TRUE';
+            $json['account_no'] = $arr[1]  ?? null;
+            $json['account_title'] = $arr[2]  ?? null;
+            $json['original'] = $response;
 
             return AccountVerificationVerdict::make($json)
                 ->status($json['status'] === 'TRUE')
