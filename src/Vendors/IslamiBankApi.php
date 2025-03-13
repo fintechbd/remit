@@ -939,10 +939,10 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         if (Str::startsWith($response, 'TRUE|')) {
 
-            $arr = explode("|", $response);
+            $arr = explode('|', $response);
             $json['status'] = 'TRUE';
-            $json['account_no'] = $arr[1]  ?? null;
-            $json['account_title'] = $arr[2]  ?? null;
+            $json['account_no'] = $arr[1] ?? null;
+            $json['account_title'] = $arr[2] ?? null;
             $json['original'] = $response;
 
             return AccountVerificationVerdict::make($json)
