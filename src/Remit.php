@@ -39,8 +39,15 @@ class Remit
      */
     public function verifyAccount(AccountVerifyOption $verifyType, array $inputs = []): AccountVerificationVerdict
     {
-        $bank = \Fintech\Banco\Facades\Banco::bank()->findWhere(['slug' => $inputs['slug']]);
+        $bank = \Fintech\Banco\Facades\Banco::bank()->findWhere([
+            'slug' => $inputs['slug'],
+            'enabled' => true
+        ]);
+
+        dd($bank);
+
         $availableProviders = config('fintech.remit.providers');
+
         $provider = collect($availableProviders)->filter(function ($provider) use ($bank, $verifyType, $inputs) {
             if (in_array($bank->country_id, $provider['countries'], true) && in_array($inputs['slug'], $provider['banks'], true)) {
                 return match ($verifyType) {
