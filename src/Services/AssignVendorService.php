@@ -6,13 +6,17 @@ use ErrorException;
 use Fintech\Auth\Facades\Auth;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Enums\Remit\AccountVerifyOption;
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Core\Exceptions\VendorNotFoundException;
 use Fintech\Core\Supports\AssignVendorVerdict;
+use Fintech\Remit\Contracts\CashPickupVerification;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Fintech\Remit\Contracts\WalletTransfer;
 use Fintech\Remit\Exceptions\AlreadyAssignedException;
 use Fintech\Remit\Exceptions\RemitException;
+use Fintech\Remit\Support\AccountVerificationVerdict;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -282,5 +286,95 @@ class AssignVendorService
         }
 
         $this->serviceVendorDriver = App::make($availableVendors[$slug]['driver']);
+    }
+
+    /**
+     * @param AccountVerifyOption $verifyType
+     * @param array $inputs
+     * @return AccountVerificationVerdict
+     * @throws ErrorException
+     */
+    public function verifyAccount(AccountVerifyOption $verifyType, array $inputs = []): AccountVerificationVerdict
+    {
+        $bank = \Fintech\Banco\Facades\Banco::bank()->findWhere([
+            'slug' => $inputs['slug'],
+            'enabled' => true,
+        ]);
+
+        $inputs['bank'] = $bank->toArray();
+
+        $instance = collect(config('fintech.remit.providers'))
+            ->filter(function ($agent) use ($bank, $verifyType) {
+                if (!in_array($bank->country_id, $agent['countries'])) {
+                    return false;
+                }
+                if (!in_array($bank->slug, $agent['banks'])) {
+                    return false;
+                }
+                return true;
+            })->first();
+
+        if (!$instance) {
+            throw new \ErrorException(
+                __('remit::messages.verification.wallet_provider_not_found',
+                    ['wallet' => ucwords(strtolower($bank->name))]
+                )
+            );
+        }
+
+        $instance = app($instance['driver']);
+
+        unset($inputs['slug']);
+
+        switch ($verifyType) {
+            case AccountVerifyOption::WalletTransfer :
+            {
+                if (!$instance instanceof WalletTransfer) {
+                    throw new \ErrorException(
+                        __('remit::messages.verification.provider_missing_method', [
+                            'type' => 'Wallet',
+                            'provider' => class_basename($instance['driver']),
+                        ])
+                    );
+                }
+
+                return $instance->validateWallet($inputs);
+            }
+            case AccountVerifyOption::BankTransfer :
+            {
+
+                if (!$instance instanceof MoneyTransfer) {
+                    throw new \ErrorException(
+                        __('remit::messages.verification.provider_missing_method', [
+                            'type' => 'Bank Transfer',
+                            'provider' => class_basename($instance['driver']),
+                        ])
+                    );
+                }
+
+                $inputs['bank_branch'] = \Fintech\Banco\Facades\Banco::bankBranch()->find($inputs['branch_id'])?->toArray() ?? [];
+
+                $inputs['beneficiary_account_type'] = \Fintech\Banco\Facades\Banco::beneficiaryAccountType()->find($inputs['account_type_id'])?->toArray() ?? [];
+
+                return $instance->validateBankAccount($inputs);
+            }
+            case AccountVerifyOption::CashPickup :
+            {
+
+                if (!$instance instanceof CashPickupVerification) {
+                    throw new \ErrorException(
+                        __('remit::messages.verification.provider_missing_method', [
+                            'type' => 'Cash Pickup',
+                            'provider' => class_basename($instance['driver']),
+                        ])
+                    );
+                }
+
+                return $instance->validateCashPickup($inputs);
+            }
+            default:
+
+                return AccountVerificationVerdict::make();
+        }
     }
 }

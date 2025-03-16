@@ -842,16 +842,16 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
      */
     public function validateWallet(array $inputs = []): AccountVerificationVerdict
     {
-        $wallet = $inputs['wallet'] ?? null;
+        $wallet = $inputs['bank'] ?? null;
 
-        $walletNo = Str::substr($inputs['wallet_no'], ($wallet->vendor_code['remit']['islamibank'] == '5') ? -12 : -11);
+        $walletNo = Str::substr($inputs['account_no'], ($wallet['vendor_code']['remit']['islamibank'] == '5') ? -12 : -11);
 
         $method = 'validateBeneficiaryWallet';
         $service = $this->xml->createElement("ser:{$method}");
         $service->appendChild($this->xml->createElement('ser:userID', $this->config[$this->status]['username']));
         $service->appendChild($this->xml->createElement('ser:password', $this->config[$this->status]['password']));
         $service->appendChild($this->xml->createElement('ser:walletNo', $walletNo));
-        $service->appendChild($this->xml->createElement('ser:paymentType', $wallet->vendor_code['remit']['islamibank'] ?? ''));
+        $service->appendChild($this->xml->createElement('ser:paymentType', $wallet['vendor_code']['remit']['islamibank'] ?? ''));
 
         $response = $this->callApi($method, $service);
 

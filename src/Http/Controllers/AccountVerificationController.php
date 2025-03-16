@@ -21,7 +21,7 @@ class AccountVerificationController extends Controller
     {
 
         try {
-            $verification = Remit::verifyAccount(AccountVerifyOption::WalletTransfer, $request->validated());
+            $verification = Remit::assignVendor()->verifyAccount(AccountVerifyOption::WalletTransfer, $request->validated());
 
             if (! $verification->status) {
                 throw new Exception($verification->message);
@@ -42,7 +42,7 @@ class AccountVerificationController extends Controller
     {
 
         try {
-            $verification = Remit::verifyAccount(AccountVerifyOption::BankTransfer, $request->validated());
+            $verification = Remit::assignVendor()->verifyAccount(AccountVerifyOption::BankTransfer, $request->validated());
 
             if (! $verification->status) {
                 throw new Exception($verification->message);
@@ -63,7 +63,7 @@ class AccountVerificationController extends Controller
     {
 
         try {
-            $verification = Remit::verifyAccount(AccountVerifyOption::CashPickup, $request->validated());
+            $verification = Remit::assignVendor()->verifyAccount(AccountVerifyOption::CashPickup, $request->validated());
 
             if (! $verification->status) {
                 throw new Exception($verification->message);
