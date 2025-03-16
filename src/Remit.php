@@ -44,22 +44,21 @@ class Remit
             'enabled' => true
         ]);
 
-        dd($bank);
+        $availableProviders = collect(config('fintech.remit.providers'));
 
-        $availableProviders = config('fintech.remit.providers');
-
-        $provider = collect($availableProviders)->filter(function ($provider) use ($bank, $verifyType, $inputs) {
-            if (in_array($bank->country_id, $provider['countries'], true) && in_array($inputs['slug'], $provider['banks'], true)) {
+        $provider = $availableProviders->filter(function ($agent) use ($bank, $verifyType) {
+            if (in_array($bank->country_id, $agent['countries']) && in_array($bank->slug, $agent['banks'])) {
                 return match ($verifyType) {
-                    AccountVerifyOption::WalletTransfer => $provider['wallet_verification'] == true,
-                    AccountVerifyOption::BankTransfer => $provider['bank_transfer_verification'] == true,
-                    AccountVerifyOption::CashPickup => $provider['cash_pickup_verification'] == true,
+                    AccountVerifyOption::WalletTransfer => $agent['wallet_verification'] == true,
+                    AccountVerifyOption::BankTransfer => $agent['bank_transfer_verification'] == true,
+                    AccountVerifyOption::CashPickup => $agent['cash_pickup_verification'] == true,
                     default => false
                 };
             }
-
             return false;
         })->first();
+
+        dd($provider);
 
         if (! $provider) {
             throw new \ErrorException(
