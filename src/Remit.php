@@ -55,6 +55,7 @@ class Remit
                     default => false
                 };
             }
+
             return false;
         })->first();
 
