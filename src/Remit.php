@@ -41,7 +41,7 @@ class Remit
     {
         $bank = \Fintech\Banco\Facades\Banco::bank()->findWhere([
             'slug' => $inputs['slug'],
-            'enabled' => true
+            'enabled' => true,
         ]);
 
         dd($bank);
