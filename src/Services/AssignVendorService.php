@@ -289,9 +289,6 @@ class AssignVendorService
     }
 
     /**
-     * @param AccountVerifyOption $verifyType
-     * @param array $inputs
-     * @return AccountVerificationVerdict
      * @throws ErrorException
      */
     public function verifyAccount(AccountVerifyOption $verifyType, array $inputs = []): AccountVerificationVerdict
@@ -304,17 +301,18 @@ class AssignVendorService
         $inputs['bank'] = $bank->toArray();
 
         $instance = collect(config('fintech.remit.providers'))
-            ->filter(function ($agent) use ($bank, $verifyType) {
-                if (!in_array($bank->country_id, $agent['countries'])) {
+            ->filter(function ($agent) use ($bank) {
+                if (! in_array($bank->country_id, $agent['countries'])) {
                     return false;
                 }
-                if (!in_array($bank->slug, $agent['banks'])) {
+                if (! in_array($bank->slug, $agent['banks'])) {
                     return false;
                 }
+
                 return true;
             })->first();
 
-        if (!$instance) {
+        if (! $instance) {
             throw new \ErrorException(
                 __('remit::messages.verification.wallet_provider_not_found',
                     ['wallet' => ucwords(strtolower($bank->name))]
@@ -328,8 +326,8 @@ class AssignVendorService
 
         switch ($verifyType) {
             case AccountVerifyOption::WalletTransfer :
-            {
-                if (!$instance instanceof WalletTransfer) {
+
+                if (! $instance instanceof WalletTransfer) {
                     throw new \ErrorException(
                         __('remit::messages.verification.provider_missing_method', [
                             'type' => 'Wallet',
@@ -339,11 +337,10 @@ class AssignVendorService
                 }
 
                 return $instance->validateWallet($inputs);
-            }
-            case AccountVerifyOption::BankTransfer :
-            {
 
-                if (!$instance instanceof MoneyTransfer) {
+            case AccountVerifyOption::BankTransfer :
+
+                if (! $instance instanceof MoneyTransfer) {
                     throw new \ErrorException(
                         __('remit::messages.verification.provider_missing_method', [
                             'type' => 'Bank Transfer',
@@ -357,11 +354,10 @@ class AssignVendorService
                 $inputs['beneficiary_account_type'] = \Fintech\Banco\Facades\Banco::beneficiaryAccountType()->find($inputs['account_type_id'])?->toArray() ?? [];
 
                 return $instance->validateBankAccount($inputs);
-            }
-            case AccountVerifyOption::CashPickup :
-            {
 
-                if (!$instance instanceof CashPickupVerification) {
+            case AccountVerifyOption::CashPickup :
+
+                if (! $instance instanceof CashPickupVerification) {
                     throw new \ErrorException(
                         __('remit::messages.verification.provider_missing_method', [
                             'type' => 'Cash Pickup',
@@ -371,7 +367,7 @@ class AssignVendorService
                 }
 
                 return $instance->validateCashPickup($inputs);
-            }
+
             default:
 
                 return AccountVerificationVerdict::make();
