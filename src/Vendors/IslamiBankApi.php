@@ -855,12 +855,13 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         $response = $this->callApi($method, $service);
 
+        logger()->debug('Response:', [$response]);
+
         if (isset($response['Fault'])) {
             return AccountVerificationVerdict::make([
                 'status' => 'false',
                 'message' => $response['Fault']['faultstring'] ?? __('remit::messages.wallet_verification.failed'),
                 'original' => $response,
-                'amount' => '0',
                 'account_title' => 'N/A',
                 'account_no' => 'N/A',
                 'wallet' => $wallet,
@@ -928,7 +929,6 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
                 'status' => 'false',
                 'message' => $response['Fault']['faultstring'] ?? __('remit::messages.wallet_verification.failed'),
                 'original' => $response,
-                'amount' => '0',
                 'account_title' => 'N/A',
                 'account_no' => 'N/A',
                 'wallet' => $bank,
