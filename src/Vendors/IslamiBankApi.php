@@ -860,7 +860,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         if (isset($response['Fault'])) {
             return AccountVerificationVerdict::make([
                 'status' => 'false',
-                'message' => $response['Fault']['faultstring'] ?? __('remit::messages.wallet_verification.failed'),
+                'message' => $response['Fault']['faultstring'] ?? __('remit::messages.wallet_verification.failure'),
                 'original' => $response,
                 'account_title' => 'N/A',
                 'account_no' => 'N/A',
@@ -896,7 +896,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         return AccountVerificationVerdict::make()
             ->status(false)
-            ->message(__('remit::messages.wallet_verification.failed'))
+            ->message(__('remit::messages.wallet_verification.failure'))
             ->original([$json, 'message' => self::ERROR_MESSAGES[$json['code']] ?? ''])
             ->wallet($wallet);
     }
@@ -927,7 +927,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         if (isset($response['Fault'])) {
             return AccountVerificationVerdict::make([
                 'status' => 'false',
-                'message' => $response['Fault']['faultstring'] ?? __('remit::messages.wallet_verification.failed'),
+                'message' => $response['Fault']['faultstring'] ?? __('remit::messages.wallet_verification.failure'),
                 'original' => $response,
                 'account_title' => 'N/A',
                 'account_no' => 'N/A',
@@ -960,7 +960,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
         return AccountVerificationVerdict::make()
             ->status('false')
-            ->message(__('remit::messages.wallet_verification.failed'))
+            ->message(__('remit::messages.wallet_verification.failure'))
             ->original([$json, 'message' => self::ERROR_MESSAGES[$json['code']] ?? ''])
             ->wallet($bank);
     }
