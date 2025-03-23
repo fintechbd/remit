@@ -37,11 +37,6 @@ use Illuminate\Support\Facades\DB;
  */
 class BankTransferController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('imposter', ['only' => ['store']]);
-    }
-
     /**
      * @lrd:start
      * Return a listing of the *BankTransfer* resource as collection.

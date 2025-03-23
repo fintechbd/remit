@@ -38,10 +38,26 @@ if (Config::get('fintech.remit.enabled')) {
                             Route::get('{order_id}/overwrite', 'overwrite')->name('overwrite');
                         });
                 }
-                Route::apiResource('bank-transfers', BankTransferController::class)->except('update', 'destroy');
-                Route::apiResource('cash-pickups', CashPickupController::class)->except('update', 'destroy');
+                Route::apiResource('bank-transfers', BankTransferController::class)
+                    ->except('update', 'store', 'destroy');
 
-                Route::apiResource('wallet-transfers', WalletTransferController::class)->except('update', 'destroy');
+                Route::post('bank-transfers', [BankTransferController::class, 'store'])
+                    ->middleware('imposter')
+                    ->name('bank-transfers.store');
+
+                Route::apiResource('cash-pickups', CashPickupController::class)
+                    ->except('update', 'store', 'destroy');
+
+                Route::post('cash-pickups', [CashPickupController::class, 'store'])
+                    ->middleware('imposter')
+                    ->name('cash-pickups.store');
+
+                Route::apiResource('wallet-transfers', WalletTransferController::class)
+                    ->except('update', 'store', 'destroy');
+
+                Route::post('wallet-transfers', [WalletTransferController::class, 'store'])
+                    ->middleware('imposter')
+                    ->name('wallet-transfers.store');
 
                 Route::prefix('account-verification')->name('account-verification.')
                     ->controller(AccountVerificationController::class)->group(function () {
