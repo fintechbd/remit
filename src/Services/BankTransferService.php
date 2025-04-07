@@ -37,9 +37,7 @@ class BankTransferService
     /**
      * BankTransferService constructor.
      */
-    public function __construct(public BankTransferRepository $bankTransferRepository)
-    {
-    }
+    public function __construct(public BankTransferRepository $bankTransferRepository) {}
 
     public function find($id, bool $onlyTrashed = false): ?BaseModel
     {

@@ -37,9 +37,7 @@ class WalletTransferService
     /**
      * WalletTransferService constructor.
      */
-    public function __construct(public WalletTransferRepository $walletTransferRepository)
-    {
-    }
+    public function __construct(public WalletTransferRepository $walletTransferRepository) {}
 
     public function find($id, bool $onlyTrashed = false): ?BaseModel
     {
