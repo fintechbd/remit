@@ -37,9 +37,8 @@ class WalletTransferService
     /**
      * WalletTransferService constructor.
      */
-    public function __construct(WalletTransferRepository $walletTransferRepository)
+    public function __construct(public WalletTransferRepository $walletTransferRepository)
     {
-        $this->walletTransferRepository = $walletTransferRepository;
     }
 
     public function find($id, bool $onlyTrashed = false): ?BaseModel
@@ -164,7 +163,7 @@ class WalletTransferService
             $inputs['vendor'] = $vendor?->service_vendor_slug ?? null;
         }
         $inputs['timeline'][] = [
-            'message' => 'Cash Pickup entry created successfully',
+            'message' => "Wallet Transfer ($service->service_name) entry created successfully",
             'flag' => 'create',
             'timestamp' => now(),
         ];

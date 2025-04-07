@@ -38,9 +38,8 @@ class CashPickupService
     /**
      * CashPickupService constructor.
      */
-    public function __construct(CashPickupRepository $cashPickupRepository)
+    public function __construct(public CashPickupRepository $cashPickupRepository)
     {
-        $this->cashPickupRepository = $cashPickupRepository;
     }
 
     public function find($id, bool $onlyTrashed = false): ?BaseModel
@@ -96,7 +95,7 @@ class CashPickupService
 
         $sender = Auth::user()->find($inputs['user_id']);
 
-        if (! $sender) {
+        if (!$sender) {
             throw (new ModelNotFoundException)->setModel(config('fintech.auth.auth_model'), $inputs['user_id']);
         }
 
@@ -110,13 +109,13 @@ class CashPickupService
 
         $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
 
-        if (! $senderAccount) {
+        if (!$senderAccount) {
             throw new CurrencyUnavailableException($inputs['source_country_id']);
         }
 
         $masterUser = Auth::user()->findWhere(['role_name' => SystemRole::MasterUser->value, 'country_id' => $inputs['source_country_id']]);
 
-        if (! $masterUser) {
+        if (!$masterUser) {
             throw new MasterCurrencyUnavailableException($inputs['source_country_id']);
         }
 
@@ -166,15 +165,14 @@ class CashPickupService
         $inputs['order_data']['receiving_country_id'] = $inputs['destination_country_id'];
         $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
         $inputs['order_number'] = $inputs['order_data']['purchase_number'];
-        if ($service = Business::service()->find($inputs['service_id'])) {
-            $inputs['order_data']['service_slug'] = $service->service_slug ?? null;
-            $inputs['order_data']['service_name'] = $service->service_name ?? null;
-            $vendor = $service->serviceVendor;
-            $inputs['service_vendor_id'] = $vendor?->getKey() ?? null;
-            $inputs['vendor'] = $vendor?->service_vendor_slug ?? null;
-        }
+        $service = Business::service()->find($inputs['service_id']);
+        $inputs['order_data']['service_slug'] = $service->service_slug ?? null;
+        $inputs['order_data']['service_name'] = $service->service_name ?? null;
+        $vendor = $service->serviceVendor;
+        $inputs['service_vendor_id'] = $vendor?->getKey() ?? null;
+        $inputs['vendor'] = $vendor?->service_vendor_slug ?? null;
         $inputs['timeline'][] = [
-            'message' => 'Cash Pickup entry created successfully',
+            'message' => "Cash Pickup ($service->service_name) entry created successfully",
             'flag' => 'create',
             'timestamp' => now(),
         ];
@@ -188,8 +186,8 @@ class CashPickupService
             'service_id' => $inputs['service_id'],
         ]);
 
-        if (! $allowInsufficientBalance) {
-            if ((float) $inputs['order_data']['service_stat_data']['total_amount'] > (float) $senderAccount->user_account_data['available_amount']) {
+        if (!$allowInsufficientBalance) {
+            if ((float)$inputs['order_data']['service_stat_data']['total_amount'] > (float)$senderAccount->user_account_data['available_amount']) {
                 throw new InsufficientBalanceException($senderAccount->user_account_data['currency']);
             }
         }
@@ -202,7 +200,7 @@ class CashPickupService
 
             $accounting->debitTransaction();
 
-            if (! $allowInsufficientBalance) {
+            if (!$allowInsufficientBalance) {
                 $accounting->debitBalanceFromUserAccount();
             }
 
@@ -248,7 +246,7 @@ class CashPickupService
         $data->order_detail_cause_name = 'cash_withdraw';
         $data->order_detail_number = $data->order_data['purchase_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
-        $data->notes = 'Cash Pickup Payment Send to '.$master_user_name;
+        $data->notes = 'Cash Pickup Payment Send to ' . $master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -259,7 +257,7 @@ class CashPickupService
         $orderDetailStoreForMaster->order_detail_amount = $amount;
         $orderDetailStoreForMaster->converted_amount = $converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Cash Pickup Payment Receive From'.$user_name;
+        $orderDetailStoreForMaster->notes = 'Cash Pickup Payment Receive From' . $user_name;
         $orderDetailStoreForMaster->save();
 
         // For Charge
@@ -267,7 +265,7 @@ class CashPickupService
         $data->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $data->order_detail_cause_name = 'charge';
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $data->notes = 'Cash Pickup Charge Send to '.$master_user_name;
+        $data->notes = 'Cash Pickup Charge Send to ' . $master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
@@ -277,7 +275,7 @@ class CashPickupService
         $orderDetailStoreForChargeForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Cash Pickup Charge Receive from '.$user_name;
+        $orderDetailStoreForChargeForMaster->notes = 'Cash Pickup Charge Receive from ' . $user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
@@ -285,7 +283,7 @@ class CashPickupService
         $data->amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $data->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $data->order_detail_cause_name = 'discount';
-        $data->notes = 'Cash Pickup Discount form '.$master_user_name;
+        $data->notes = 'Cash Pickup Discount form ' . $master_user_name;
         $data->step = 5;
         // $data->order_detail_parent_id = $orderDetailStore->getKey();
         // $updateData['order_data']['previous_amount'] = 0;
@@ -296,7 +294,7 @@ class CashPickupService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Cash Pickup Discount to '.$user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Cash Pickup Discount to ' . $user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 
@@ -345,7 +343,7 @@ class CashPickupService
         $cashPickup->order_detail_cause_name = 'cash_withdraw';
         $cashPickup->order_detail_number = $cashPickup->order_data['accepted_number'];
         $cashPickup->order_detail_response_id = $cashPickup->order_data['purchase_number'];
-        $cashPickup->notes = 'Cash Pickup Refund From '.$master_user_name;
+        $cashPickup->notes = 'Cash Pickup Refund From ' . $master_user_name;
         $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($cashPickup));
         $orderDetailStore->order_detail_parent_id = $cashPickup->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
@@ -358,7 +356,7 @@ class CashPickupService
         $orderDetailStoreForMaster->order_detail_amount = -$amount;
         $orderDetailStoreForMaster->converted_amount = -$converted_amount;
         $orderDetailStoreForMaster->step = 2;
-        $orderDetailStoreForMaster->notes = 'Cash Pickup Send to '.$user_name;
+        $orderDetailStoreForMaster->notes = 'Cash Pickup Send to ' . $user_name;
         $orderDetailStoreForMaster->save();
 
         // For Charge
@@ -366,7 +364,7 @@ class CashPickupService
         $cashPickup->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $cashPickup->order_detail_cause_name = 'charge';
         $cashPickup->order_detail_parent_id = $orderDetailStore->getKey();
-        $cashPickup->notes = 'Cash Pickup Charge Receive from '.$master_user_name;
+        $cashPickup->notes = 'Cash Pickup Charge Receive from ' . $master_user_name;
         $cashPickup->step = 3;
         $cashPickup->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($cashPickup));
@@ -376,7 +374,7 @@ class CashPickupService
         $orderDetailStoreForChargeForMaster->order_detail_amount = calculate_flat_percent($amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['charge']);
         $orderDetailStoreForChargeForMaster->order_detail_cause_name = 'charge';
-        $orderDetailStoreForChargeForMaster->notes = 'Cash Pickup Charge Send to '.$user_name;
+        $orderDetailStoreForChargeForMaster->notes = 'Cash Pickup Charge Send to ' . $user_name;
         $orderDetailStoreForChargeForMaster->step = 4;
         $orderDetailStoreForChargeForMaster->save();
 
@@ -384,7 +382,7 @@ class CashPickupService
         $cashPickup->amount = calculate_flat_percent($amount, $serviceStatData['discount']);
         $cashPickup->converted_amount = calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $cashPickup->order_detail_cause_name = 'discount';
-        $cashPickup->notes = 'Cash Pickup Discount form '.$master_user_name;
+        $cashPickup->notes = 'Cash Pickup Discount form ' . $master_user_name;
         $cashPickup->step = 5;
         // $data->order_detail_parent_id = $orderDetailStore->getKey();
         // $updateData['order_data']['previous_amount'] = 0;
@@ -395,7 +393,7 @@ class CashPickupService
         $orderDetailStoreForDiscountForMaster->order_detail_amount = -calculate_flat_percent($amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->converted_amount = -calculate_flat_percent($converted_amount, $serviceStatData['discount']);
         $orderDetailStoreForDiscountForMaster->order_detail_cause_name = 'discount';
-        $orderDetailStoreForDiscountForMaster->notes = 'Cash Pickup Discount to '.$user_name;
+        $orderDetailStoreForDiscountForMaster->notes = 'Cash Pickup Discount to ' . $user_name;
         $orderDetailStoreForDiscountForMaster->step = 6;
         $orderDetailStoreForDiscountForMaster->save();
 

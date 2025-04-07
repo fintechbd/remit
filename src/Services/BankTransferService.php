@@ -37,9 +37,8 @@ class BankTransferService
     /**
      * BankTransferService constructor.
      */
-    public function __construct(BankTransferRepository $bankTransferRepository)
+    public function __construct(public BankTransferRepository $bankTransferRepository)
     {
-        $this->bankTransferRepository = $bankTransferRepository;
     }
 
     public function find($id, bool $onlyTrashed = false): ?BaseModel
@@ -176,7 +175,7 @@ class BankTransferService
         $inputs['service_vendor_id'] = $vendor?->getKey() ?? null;
         $inputs['vendor'] = $vendor?->service_vendor_slug ?? null;
         $inputs['timeline'][] = [
-            'message' => 'Bank Transfer entry created successfully',
+            'message' => "Bank Transfer ($service->service_name) entry created successfully",
             'flag' => 'create',
             'timestamp' => now(),
         ];
