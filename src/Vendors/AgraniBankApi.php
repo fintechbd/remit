@@ -19,106 +19,100 @@ use stdClass;
 
 class AgraniBankApi implements MoneyTransfer, WalletTransfer
 {
-
     public const ERROR_MESSAGES = [
-		'201' => 'DUPLICATE TRANSACTION NUMBER',
-		'202' => 'SIGN DIFFER',
-		'203' => 'UNHANDLED EXCEPTION',
-		'401' => 'INVALID EXCODE',
-		'402' => 'REMITTER FIRST NAME MORE THAN 96 CHARS',
-		'403' => 'REMITTER LAST NAME MORE THAN 26 CHARS',
-		'404' => 'REMITTER ADDRESS MORE THAN 256 CHARS',
-		'405' => 'REMITTER COUNTRY MUST 2 CHARS',
-		'406' => 'BENEFICIARY NAME MORE THAN 96 CHARS',
-		'407' => 'BENEFICIARY MIDDLE NAME MORE THAN 26 CHARS',
-		'408' => 'BENEFICIARY LAST NAME MORE THAN 26 CHARS',
-		'409' => 'BENEFICIARY ADDRESS MORE THAN 128 CHAR',
-		'410' => 'BENEFICIARY COUNTRY MUST 2 CHAR',
-		'411' => 'BRANCH CODE MUST BE 9 DIGIT',
-		'412' => 'BRANCH CODE IS WRONG',
-		'413' => 'INSUFFICIENT BALANCE',
-		'414' => 'BENEFICIARY A/C 64 CHARS',
-		'417' => 'BENEFICIARY TEL MUST 11 CHAR',
-		'418' => 'BENEFICIARY AC MORE THAN 5 CHAR FOR OTHER BANK ACCOUNT PAYEE(15)',
-		'419' => 'BENEFICIARY AC MUST 13 CHAR FOR CREDIT TO CBS(16)',
-		'420' => 'BENEFICIARY TEL FORMAT WRONG',
-		'421' => 'BENEFICIARY TEL CONTAIN CHARS',
-		'422' => 'ACCOUNT NO IS WRONG',
-		'425' => 'REM TEL CONTAIN CHARS',
-		'423' => 'RATE VALUE 0',
-		'424' => 'REMAMOUNTDEST VALUE 0',
-//		'425' => 'ACCOUNT NO IS WRONG',
-		'430' => 'TRANSACTION NUMBER IS MORE THAN 20 CHARS',
-		'502' => 'REMITTER FIRST NAME IS NULL',
-		'503' => 'REMITTER LAST NAME IS NULL',
-		'504' => 'REMITTER ADDRESS IS NULL',
-		'506' => 'BENEFICIARY NAME IS NULL',
-		'508' => 'BENEFICIARY LAST NAME IS NULL',
-		'530' => 'TRANSACTION NUMBER IS NULL',
+        '201' => 'DUPLICATE TRANSACTION NUMBER',
+        '202' => 'SIGN DIFFER',
+        '203' => 'UNHANDLED EXCEPTION',
+        '401' => 'INVALID EXCODE',
+        '402' => 'REMITTER FIRST NAME MORE THAN 96 CHARS',
+        '403' => 'REMITTER LAST NAME MORE THAN 26 CHARS',
+        '404' => 'REMITTER ADDRESS MORE THAN 256 CHARS',
+        '405' => 'REMITTER COUNTRY MUST 2 CHARS',
+        '406' => 'BENEFICIARY NAME MORE THAN 96 CHARS',
+        '407' => 'BENEFICIARY MIDDLE NAME MORE THAN 26 CHARS',
+        '408' => 'BENEFICIARY LAST NAME MORE THAN 26 CHARS',
+        '409' => 'BENEFICIARY ADDRESS MORE THAN 128 CHAR',
+        '410' => 'BENEFICIARY COUNTRY MUST 2 CHAR',
+        '411' => 'BRANCH CODE MUST BE 9 DIGIT',
+        '412' => 'BRANCH CODE IS WRONG',
+        '413' => 'INSUFFICIENT BALANCE',
+        '414' => 'BENEFICIARY A/C 64 CHARS',
+        '417' => 'BENEFICIARY TEL MUST 11 CHAR',
+        '418' => 'BENEFICIARY AC MORE THAN 5 CHAR FOR OTHER BANK ACCOUNT PAYEE(15)',
+        '419' => 'BENEFICIARY AC MUST 13 CHAR FOR CREDIT TO CBS(16)',
+        '420' => 'BENEFICIARY TEL FORMAT WRONG',
+        '421' => 'BENEFICIARY TEL CONTAIN CHARS',
+        '422' => 'ACCOUNT NO IS WRONG',
+        '425' => 'REM TEL CONTAIN CHARS',
+        '423' => 'RATE VALUE 0',
+        '424' => 'REMAMOUNTDEST VALUE 0',
+        //		'425' => 'ACCOUNT NO IS WRONG',
+        '430' => 'TRANSACTION NUMBER IS MORE THAN 20 CHARS',
+        '502' => 'REMITTER FIRST NAME IS NULL',
+        '503' => 'REMITTER LAST NAME IS NULL',
+        '504' => 'REMITTER ADDRESS IS NULL',
+        '506' => 'BENEFICIARY NAME IS NULL',
+        '508' => 'BENEFICIARY LAST NAME IS NULL',
+        '530' => 'TRANSACTION NUMBER IS NULL',
     ];
 
     public const STATUS_MESSAGES = [
         '01' => 'PENDING',
         '02' => 'PAID',
-        '03' => 'CANCEL'
+        '03' => 'CANCEL',
     ];
 
-//    const OCCUPATION = 'OCC';
-//
-//    const SOURCE_OF_FUND = 'SOF';
-//
-//    const RELATIONSHIP = 'REL';
-//
-//    const PURPOSE_OF_REMITTANCE = 'POR';
-//
-//    const CUSTOMER_DOCUMENT_ID_TYPE = 'DOC';
-//
-//    /**
-//     * @var string|null
-//     */
-//    public $country = null;
-//
-//    /**
-//     * @var string|null
-//     */
-//    public $currency = null;
-//
-    /**
-     * @var DOMDocument
-     */
+    //    const OCCUPATION = 'OCC';
+    //
+    //    const SOURCE_OF_FUND = 'SOF';
+    //
+    //    const RELATIONSHIP = 'REL';
+    //
+    //    const PURPOSE_OF_REMITTANCE = 'POR';
+    //
+    //    const CUSTOMER_DOCUMENT_ID_TYPE = 'DOC';
+    //
+    //    /**
+    //     * @var string|null
+    //     */
+    //    public $country = null;
+    //
+    //    /**
+    //     * @var string|null
+    //     */
+    //    public $currency = null;
+    //
     public DOMDocument $xml;
-//
-//    /**
-//     * @var array
-//     */
-//    public $transactionBody; // base64 encode of auth
-//
+
+    //
+    //    /**
+    //     * @var array
+    //     */
+    //    public $transactionBody; // base64 encode of auth
+    //
     /**
      * Agrani Bank configuration.
-     *
-     * @var array
      */
     private array $config;
 
     private string $apiUrl;
 
     private string $status = 'sandbox';
-//
-//    /**
-//     * @var string|null
-//     */
-//    private $basicAuthHash = null;
-//
-//    /**
-//     * @var CatalogListService
-//     */
-//    private $catalogListService;
-//
-//    /**
-//     * @var CountryService
-//     */
-//    private $countryService;
-
+    //
+    //    /**
+    //     * @var string|null
+    //     */
+    //    private $basicAuthHash = null;
+    //
+    //    /**
+    //     * @var CatalogListService
+    //     */
+    //    private $catalogListService;
+    //
+    //    /**
+    //     * @var CountryService
+    //     */
+    //    private $countryService;
 
     /**
      * Agrani Bank Constructor
@@ -230,7 +224,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
                     default:
 
-                        $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
+                        $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
                         $returnData->status = 'failed';
                         break;
 
@@ -255,7 +249,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
             default:
 
-                $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
+                $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
                 $returnData->status = 'failed';
                 $returnData->status_code = 201;
                 break;
@@ -282,7 +276,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $full_name = $sender_first_name;
         if (strlen($sender_last_name) > 0) {
-            $full_name .= (' ' . $sender_last_name);
+            $full_name .= (' '.$sender_last_name);
         }
 
         $nameArray = preg_split("/\s+(?=\S*+$)/", $full_name);
@@ -305,7 +299,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $transferInfo['remfname'] = $sender_first_name;
         $transferInfo['remlname'] = $sender_last_name;
         $transferInfo['remit_tel'] = isset($data->sender_mobile) ? substr($data->sender_mobile, -11) : null;
-        $transferInfo['remaddress1'] = trim(($data->sender_address ?? null) . ' ' . ($data->sender_city ?? null));
+        $transferInfo['remaddress1'] = trim(($data->sender_address ?? null).' '.($data->sender_city ?? null));
         $transferInfo['remcountry'] = $data->trans_fast_sender_country_iso_code ?? null; // TODO agrani country code needed
         $transferInfo['benename'] = $data->receiver_first_name ?? null;
         $transferInfo['benemname'] = $data->receiver_middle_name ?? ' ';
@@ -415,7 +409,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function putPostData(string $url, array $dataArray = [], string $method = 'POST')
     {
-        $apiUrl = $this->apiUrl . $url;
+        $apiUrl = $this->apiUrl.$url;
         Log::info($apiUrl);
         $jsonArray = json_encode($dataArray);
         Log::info(json_decode($jsonArray, true));
@@ -432,8 +426,8 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
             'cache-control: no-cache',
             'Content-Type: application/xml',
             'Accepts: application/xml',
-            'Username: ' . $this->getUsername(),
-            'Expassword: ' . $this->getPassword(),
+            'Username: '.$this->getUsername(),
+            'Expassword: '.$this->getPassword(),
         ];
 
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
@@ -483,8 +477,8 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     /**
      * Render Emq Response to pointed StdClass
      *
-     * @param array $response emq response
-     * @param stdClass $returnData class that will get rendered response
+     * @param  array  $response  emq response
+     * @param  stdClass  $returnData  class that will get rendered response
      * @return void
      */
     public function renderApiResponse(array $response, stdClass &$returnData)
@@ -568,7 +562,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
 
                     default:
 
-                        $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
+                        $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
                         $returnData->status = 'failed';
                         break;
 
@@ -593,7 +587,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
 
             default:
 
-                $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
+                $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
                 $returnData->status = 'failed';
                 $returnData->status_code = 201;
                 break;
@@ -645,14 +639,14 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     /**
      * Base function that is responsible for interacting directly with the nium api to obtain data
      *
-     * @param array $params
+     * @param  array  $params
      * @return array
      *
      * @throws Exception
      */
     public function getData($url, $params = [])
     {
-        $apiUrl = $this->apiUrl . $url;
+        $apiUrl = $this->apiUrl.$url;
         $apiUrl .= http_build_query($params);
         Log::info($apiUrl);
 
@@ -664,8 +658,8 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
             'cache-control: no-cache',
             'Content-Type: application/json',
             'Accepts: application/json',
-            'Username: ' . $this->getUsername(),
-            'Expassword: ' . $this->getPassword(),
+            'Username: '.$this->getUsername(),
+            'Expassword: '.$this->getPassword(),
         ];
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
@@ -682,7 +676,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
         $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
 
-        Log::info('API Response : ' . $response);
+        Log::info('API Response : '.$response);
 
         echo $response;
 
@@ -694,7 +688,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     }
 
     /**
-     * @param Model|BaseModel $order
+     * @param  Model|BaseModel  $order
      */
     public function requestQuote($order): \Fintech\Core\Supports\AssignVendorVerdict
     {
