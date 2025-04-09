@@ -135,19 +135,19 @@ return [
             'wallet_verification' => true,
             'bank_transfer_verification' => true,
             'cash_pickup_verification' => false,
-            'banks' => ['agrani-bank-ltd', 'mfs-nagad', 'mfs-bkash'],
+            'banks' => ['agrani-bank-ltd', 'mfs-bkash'],
             'countries' => [19],
             'live' => [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
                 'username' => env('REMIT_AGRANI_BANK_USERNAME'),
                 'password' => env('REMIT_AGRANI_BANK_PASSWORD'),
-                'excode' => '7106',
+                'excode' => env('REMIT_AGRANI_BANK_EXCODE'),
             ],
             'sandbox' => [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
                 'username' => env('REMIT_AGRANI_BANK_USERNAME'),
                 'password' => env('REMIT_AGRANI_BANK_PASSWORD'),
-                'excode' => '7086',
+                'excode' => env('REMIT_AGRANI_BANK_EXCODE'),
             ],
         ],
         'citybank' => [
