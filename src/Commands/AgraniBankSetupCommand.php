@@ -418,17 +418,17 @@ class AgraniBankSetupCommand extends Command
     }
 
     // add country code all country
-//    public function addCountryCodeToCountries(): void
-//    {
-//        if (Core::packageExists('MetaData')) {
-//            MetaData::country()
-//                ->list(['paginate' => false])
-//                ->each(function ($country) {
-//                    $countryData = $country->country_data;
-//                    $countryData['vendor_code']['agrani_code'] = self::COUNTRY_CODES[$country->iso3]['agrani_code'] ?? null;
-//                    MetaData::country()->update($country->getKey(), ['country_data' => $countryData]);
-//                    $this->info("Country ID: {$country->getKey()} successful.");
-//                });
-//        }
-//    }
+    //    public function addCountryCodeToCountries(): void
+    //    {
+    //        if (Core::packageExists('MetaData')) {
+    //            MetaData::country()
+    //                ->list(['paginate' => false])
+    //                ->each(function ($country) {
+    //                    $countryData = $country->country_data;
+    //                    $countryData['vendor_code']['agrani_code'] = self::COUNTRY_CODES[$country->iso3]['agrani_code'] ?? null;
+    //                    MetaData::country()->update($country->getKey(), ['country_data' => $countryData]);
+    //                    $this->info("Country ID: {$country->getKey()} successful.");
+    //                });
+    //        }
+    //    }
 }
