@@ -10,7 +10,7 @@ use Throwable;
 
 class AgraniBankSetupCommand extends Command
 {
-    const AGRANI_CODES = [
+    const COUNTRY_CODES = [
         'AFG' => ['name' => 'Afghanistan', 'agrani_code' => 'AF'],
         'ALB' => ['name' => 'Albania', 'agrani_code' => 'AL'],
         'DZA' => ['name' => 'Algeria', 'agrani_code' => 'DZ'],
@@ -287,6 +287,7 @@ class AgraniBankSetupCommand extends Command
         try {
             if (Core::packageExists('MetaData')) {
                 $this->updateRemittancePurpose();
+                $this->addCountryCodeToCountries();
             } else {
                 $this->info('`fintech/metadata` is not installed. Skipped');
             }
@@ -352,13 +353,56 @@ class AgraniBankSetupCommand extends Command
         $this->info('Purpose of remittance metadata updated successfully.');
     }
 
+    private function addCountryCodeToCountries(): void
+    {
+
+        $bar = $this->output->createProgressBar(count(self::COUNTRY_CODES));
+
+        $bar->start();
+
+        foreach (self::COUNTRY_CODES as $code => $countryArray) {
+
+            $country = MetaData::country()
+                ->list(['iso3' => $code])->first();
+
+            if (! $country) {
+                continue;
+            }
+
+            $vendor_code = $country->vendor_code;
+
+            if ($vendor_code == null) {
+                $vendor_code = [];
+            }
+
+            if (is_string($vendor_code)) {
+                $vendor_code = json_decode($vendor_code, true);
+            }
+
+            $vendor_code['remit']['argani'] = $countryArray;
+
+            if (MetaData::remittancePurpose()->update(
+                $country->getKey(),
+                ['vendor_code' => $vendor_code])
+            ) {
+                $this->line("Country ID: {$country->getKey()} updated successful.");
+            }
+
+            $bar->advance();
+        }
+
+        $bar->finish();
+
+        $this->info('Countries code metadata updated successfully.');
+    }
+
     private function addServiceVendor(): void
     {
         $dir = __DIR__.'/../../resources/img/service_vendor/';
 
         $vendor = [
             'service_vendor_name' => 'Agrani Bank',
-            'service_vendor_slug' => 'agrani',
+            'service_vendor_slug' => 'agranibank',
             'service_vendor_data' => [],
             'logo_png' => 'data:image/png;base64,'.base64_encode(file_get_contents("{$dir}/logo_png/agrani.png")),
             'logo_svg' => 'data:image/svg+xml;base64,'.base64_encode(file_get_contents("{$dir}/logo_svg/agrani.svg")),
@@ -374,17 +418,17 @@ class AgraniBankSetupCommand extends Command
     }
 
     // add country code all country
-    public function addCountryCodeToCountries(): void
-    {
-        if (Core::packageExists('MetaData')) {
-            MetaData::country()
-                ->list(['paginate' => false])
-                ->each(function ($country) {
-                    $countryData = $country->country_data;
-                    $countryData['vendor_code']['agrani_code'] = self::AGRANI_CODES[$country->iso3]['agrani_code'] ?? null;
-                    MetaData::country()->update($country->getKey(), ['country_data' => $countryData]);
-                    $this->info("Country ID: {$country->getKey()} successful.");
-                });
-        }
-    }
+//    public function addCountryCodeToCountries(): void
+//    {
+//        if (Core::packageExists('MetaData')) {
+//            MetaData::country()
+//                ->list(['paginate' => false])
+//                ->each(function ($country) {
+//                    $countryData = $country->country_data;
+//                    $countryData['vendor_code']['agrani_code'] = self::COUNTRY_CODES[$country->iso3]['agrani_code'] ?? null;
+//                    MetaData::country()->update($country->getKey(), ['country_data' => $countryData]);
+//                    $this->info("Country ID: {$country->getKey()} successful.");
+//                });
+//        }
+//    }
 }

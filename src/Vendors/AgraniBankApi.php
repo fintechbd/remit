@@ -9,11 +9,13 @@ use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Fintech\Remit\Contracts\WalletTransfer;
+use Fintech\Remit\Support\AccountVerificationVerdict;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use stdClass;
 
-class AgraniBankApi implements MoneyTransfer
+class AgraniBankApi implements MoneyTransfer, WalletTransfer
 {
     const OCCUPATION = 'OCC';
 
@@ -688,5 +690,29 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     public function trackOrder(BaseModel $order): mixed
     {
         // TODO: Implement trackOrder() method.
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for a quotation of the order. that include charge, fee,
+     * commission and other information related to order.
+     *
+     * @throws \ErrorException
+     */
+    public function validateBankAccount(array $inputs = []): AccountVerificationVerdict
+    {
+        // TODO: Implement validateBankAccount() method.
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for a quotation of the order. that include charge, fee,
+     * commission and other information related to order.
+     *
+     * @throws \ErrorException
+     */
+    public function validateWallet(array $inputs = []): AccountVerificationVerdict
+    {
+        // TODO: Implement validateWallet() method.
     }
 }
