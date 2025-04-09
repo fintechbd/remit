@@ -142,7 +142,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
     private DOMDocument $xml;
 
     /**
-     * IslamiBank API constructor.
+     * Islami Bank API constructor.
      */
     public function __construct()
     {
@@ -153,6 +153,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         $this->xml = new DOMDocument('1.0', 'utf-8');
         $this->xml->preserveWhiteSpace = false;
         $this->xml->formatOutput = false;
+        $this->xml->xmlStandalone = true;
     }
 
     /**

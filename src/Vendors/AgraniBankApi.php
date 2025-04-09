@@ -8,98 +8,164 @@ use DOMException;
 use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\WalletTransfer;
 use Fintech\Remit\Support\AccountVerificationVerdict;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use stdClass;
 
 class AgraniBankApi implements MoneyTransfer, WalletTransfer
 {
-    const OCCUPATION = 'OCC';
 
-    const SOURCE_OF_FUND = 'SOF';
+    public const ERROR_MESSAGES = [
+		'201' => 'DUPLICATE TRANSACTION NUMBER',
+		'202' => 'SIGN DIFFER',
+		'203' => 'UNHANDLED EXCEPTION',
+		'401' => 'INVALID EXCODE',
+		'402' => 'REMITTER FIRST NAME MORE THAN 96 CHARS',
+		'403' => 'REMITTER LAST NAME MORE THAN 26 CHARS',
+		'404' => 'REMITTER ADDRESS MORE THAN 256 CHARS',
+		'405' => 'REMITTER COUNTRY MUST 2 CHARS',
+		'406' => 'BENEFICIARY NAME MORE THAN 96 CHARS',
+		'407' => 'BENEFICIARY MIDDLE NAME MORE THAN 26 CHARS',
+		'408' => 'BENEFICIARY LAST NAME MORE THAN 26 CHARS',
+		'409' => 'BENEFICIARY ADDRESS MORE THAN 128 CHAR',
+		'410' => 'BENEFICIARY COUNTRY MUST 2 CHAR',
+		'411' => 'BRANCH CODE MUST BE 9 DIGIT',
+		'412' => 'BRANCH CODE IS WRONG',
+		'413' => 'INSUFFICIENT BALANCE',
+		'414' => 'BENEFICIARY A/C 64 CHARS',
+		'417' => 'BENEFICIARY TEL MUST 11 CHAR',
+		'418' => 'BENEFICIARY AC MORE THAN 5 CHAR FOR OTHER BANK ACCOUNT PAYEE(15)',
+		'419' => 'BENEFICIARY AC MUST 13 CHAR FOR CREDIT TO CBS(16)',
+		'420' => 'BENEFICIARY TEL FORMAT WRONG',
+		'421' => 'BENEFICIARY TEL CONTAIN CHARS',
+		'422' => 'ACCOUNT NO IS WRONG',
+		'425' => 'REM TEL CONTAIN CHARS',
+		'423' => 'RATE VALUE 0',
+		'424' => 'REMAMOUNTDEST VALUE 0',
+//		'425' => 'ACCOUNT NO IS WRONG',
+		'430' => 'TRANSACTION NUMBER IS MORE THAN 20 CHARS',
+		'502' => 'REMITTER FIRST NAME IS NULL',
+		'503' => 'REMITTER LAST NAME IS NULL',
+		'504' => 'REMITTER ADDRESS IS NULL',
+		'506' => 'BENEFICIARY NAME IS NULL',
+		'508' => 'BENEFICIARY LAST NAME IS NULL',
+		'530' => 'TRANSACTION NUMBER IS NULL',
+    ];
 
-    const RELATIONSHIP = 'REL';
+    public const STATUS_MESSAGES = [
+        '01' => 'PENDING',
+        '02' => 'PAID',
+        '03' => 'CANCEL'
+    ];
 
-    const PURPOSE_OF_REMITTANCE = 'POR';
-
-    const CUSTOMER_DOCUMENT_ID_TYPE = 'DOC';
-
-    /**
-     * @var string|null
-     */
-    public $country = null;
-
-    /**
-     * @var string|null
-     */
-    public $currency = null;
-
+//    const OCCUPATION = 'OCC';
+//
+//    const SOURCE_OF_FUND = 'SOF';
+//
+//    const RELATIONSHIP = 'REL';
+//
+//    const PURPOSE_OF_REMITTANCE = 'POR';
+//
+//    const CUSTOMER_DOCUMENT_ID_TYPE = 'DOC';
+//
+//    /**
+//     * @var string|null
+//     */
+//    public $country = null;
+//
+//    /**
+//     * @var string|null
+//     */
+//    public $currency = null;
+//
     /**
      * @var DOMDocument
      */
-    public $xmlBody;
-
+    public DOMDocument $xml;
+//
+//    /**
+//     * @var array
+//     */
+//    public $transactionBody; // base64 encode of auth
+//
     /**
-     * @var array
-     */
-    public $transactionBody; // base64 encode of auth
-
-    /**
-     * EMQ API configuration.
+     * Agrani Bank configuration.
      *
      * @var array
      */
-    private $config;
+    private array $config;
+
+    private string $apiUrl;
+
+    private string $status = 'sandbox';
+//
+//    /**
+//     * @var string|null
+//     */
+//    private $basicAuthHash = null;
+//
+//    /**
+//     * @var CatalogListService
+//     */
+//    private $catalogListService;
+//
+//    /**
+//     * @var CountryService
+//     */
+//    private $countryService;
+
 
     /**
-     * @var mixed|string
-     */
-    private $apiUrl;
-
-    /**
-     * @var string
-     */
-    private $status = 'sandbox';
-
-    /**
-     * @var string|null
-     */
-    private $basicAuthHash = null;
-
-    /**
-     * @var CatalogListService
-     */
-    private $catalogListService;
-
-    /**
-     * @var CountryService
-     */
-    private $countryService;
-
-    /**
-     * EMQApiService constructor.
-     *
-     * @param  CatalogListService  $catalogListService
-     * @param  CountryService  $countryService
+     * Agrani Bank Constructor
      *
      * @throws DOMException
      */
     public function __construct()
     {
-        $this->config = config('agranibank');
-        $this->status = ($this->config['mode'] === 'sandbox') ? 'sandbox' : 'live';
+        $this->config = config('fintech.remit.providers.agranibank');
+        $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
         $this->encodeCredential();
 
-        $this->xmlBody = new DOMDocument('1.0', 'utf-8');
-        $this->xmlBody->preserveWhiteSpace = false;
-        $this->xmlBody->formatOutput = true;
-        $this->xmlBody->xmlStandalone = true;
+        $this->xml = new DOMDocument('1.0', 'utf-8');
+        $this->xml->preserveWhiteSpace = false;
+        $this->xml->formatOutput = false;
+        $this->xml->xmlStandalone = true;
 
-        $this->transactionBody = $this->xmlBody->createElement('Transaction');
+        $this->transactionBody = $this->xml->createElement('Transaction');
+
+    }
+
+    /**
+     * @throws DOMException
+     * @throws Exception
+     */
+    private function callApi($method, $payload)
+    {
+        $envelope = $this->xml->createElement('soapenv:Envelope');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope/');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:ser', 'http://service.ws.mt.ibbl');
+        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xsd', 'http://bean.ws.mt.ibbl/xsd');
+        $envelope->appendChild($this->xml->createElement('soapenv:Header'));
+
+        $envelopeBody = $this->xml->createElement('soapenv:Body');
+
+        $envelopeBody->appendChild($payload);
+
+        $envelope->appendChild($envelopeBody);
+
+        $this->xml->appendChild($envelope);
+
+        $xmlResponse = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
+
+        $response = Utility::parseXml($xmlResponse);
+
+        return $response['Envelope']['Body'] ?? [];
 
     }
 
@@ -164,7 +230,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
                     default:
 
-                        $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
+                        $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
                         $returnData->status = 'failed';
                         break;
 
@@ -189,7 +255,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
             default:
 
-                $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
+                $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
                 $returnData->status = 'failed';
                 $returnData->status_code = 201;
                 break;
@@ -216,7 +282,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $full_name = $sender_first_name;
         if (strlen($sender_last_name) > 0) {
-            $full_name .= (' '.$sender_last_name);
+            $full_name .= (' ' . $sender_last_name);
         }
 
         $nameArray = preg_split("/\s+(?=\S*+$)/", $full_name);
@@ -239,7 +305,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $transferInfo['remfname'] = $sender_first_name;
         $transferInfo['remlname'] = $sender_last_name;
         $transferInfo['remit_tel'] = isset($data->sender_mobile) ? substr($data->sender_mobile, -11) : null;
-        $transferInfo['remaddress1'] = trim(($data->sender_address ?? null).' '.($data->sender_city ?? null));
+        $transferInfo['remaddress1'] = trim(($data->sender_address ?? null) . ' ' . ($data->sender_city ?? null));
         $transferInfo['remcountry'] = $data->trans_fast_sender_country_iso_code ?? null; // TODO agrani country code needed
         $transferInfo['benename'] = $data->receiver_first_name ?? null;
         $transferInfo['benemname'] = $data->receiver_middle_name ?? ' ';
@@ -256,12 +322,12 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $transferInfo['signaturevalue'] = $this->getTransactionSignature($transferInfo);
 
         array_walk($transferInfo, function (&$value, $key) {
-            $this->transactionBody->appendChild($this->xmlBody->createElement($key, $value));
+            $this->transactionBody->appendChild($this->xml->createElement($key, $value));
         });
 
-        $this->xmlBody->appendChild($this->transactionBody);
+        $this->xml->appendChild($this->transactionBody);
 
-        Log::info($this->xmlBody->saveXML());
+        Log::info($this->xml->saveXML());
 
         // die();
         return $this->putPostData('/MyCash', $transferInfo, 'POST');
@@ -349,7 +415,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function putPostData(string $url, array $dataArray = [], string $method = 'POST')
     {
-        $apiUrl = $this->apiUrl.$url;
+        $apiUrl = $this->apiUrl . $url;
         Log::info($apiUrl);
         $jsonArray = json_encode($dataArray);
         Log::info(json_decode($jsonArray, true));
@@ -366,8 +432,8 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
             'cache-control: no-cache',
             'Content-Type: application/xml',
             'Accepts: application/xml',
-            'Username: '.$this->getUsername(),
-            'Expassword: '.$this->getPassword(),
+            'Username: ' . $this->getUsername(),
+            'Expassword: ' . $this->getPassword(),
         ];
 
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
@@ -417,8 +483,8 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     /**
      * Render Emq Response to pointed StdClass
      *
-     * @param  array  $response  emq response
-     * @param  stdClass  $returnData  class that will get rendered response
+     * @param array $response emq response
+     * @param stdClass $returnData class that will get rendered response
      * @return void
      */
     public function renderApiResponse(array $response, stdClass &$returnData)
@@ -502,7 +568,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
 
                     default:
 
-                        $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
+                        $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
                         $returnData->status = 'failed';
                         break;
 
@@ -527,7 +593,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
 
             default:
 
-                $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
+                $returnData->message = 'Something went wrong from vendor API: Status Code :' . $transactionCreateResponse['status'];
                 $returnData->status = 'failed';
                 $returnData->status_code = 201;
                 break;
@@ -579,14 +645,14 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     /**
      * Base function that is responsible for interacting directly with the nium api to obtain data
      *
-     * @param  array  $params
+     * @param array $params
      * @return array
      *
      * @throws Exception
      */
     public function getData($url, $params = [])
     {
-        $apiUrl = $this->apiUrl.$url;
+        $apiUrl = $this->apiUrl . $url;
         $apiUrl .= http_build_query($params);
         Log::info($apiUrl);
 
@@ -598,8 +664,8 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
             'cache-control: no-cache',
             'Content-Type: application/json',
             'Accepts: application/json',
-            'Username: '.$this->getUsername(),
-            'Expassword: '.$this->getPassword(),
+            'Username: ' . $this->getUsername(),
+            'Expassword: ' . $this->getPassword(),
         ];
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
@@ -616,7 +682,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
         $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
 
-        Log::info('API Response : '.$response);
+        Log::info('API Response : ' . $response);
 
         echo $response;
 
@@ -628,7 +694,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     }
 
     /**
-     * @param  Model|BaseModel  $order
+     * @param Model|BaseModel $order
      */
     public function requestQuote($order): \Fintech\Core\Supports\AssignVendorVerdict
     {
