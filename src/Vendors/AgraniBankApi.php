@@ -8,58 +8,61 @@ use DOMException;
 use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\WalletTransfer;
 use Fintech\Remit\Support\AccountVerificationVerdict;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use stdClass;
 
 class AgraniBankApi implements MoneyTransfer, WalletTransfer
 {
     public const ERROR_MESSAGES = [
-        '201' => 'DUPLICATE TRANSACTION NUMBER',
-        '202' => 'SIGN DIFFER',
-        '203' => 'UNHANDLED EXCEPTION',
-        '401' => 'INVALID EXCODE',
-        '402' => 'REMITTER FIRST NAME MORE THAN 96 CHARS',
-        '403' => 'REMITTER LAST NAME MORE THAN 26 CHARS',
-        '404' => 'REMITTER ADDRESS MORE THAN 256 CHARS',
-        '405' => 'REMITTER COUNTRY MUST 2 CHARS',
-        '406' => 'BENEFICIARY NAME MORE THAN 96 CHARS',
-        '407' => 'BENEFICIARY MIDDLE NAME MORE THAN 26 CHARS',
-        '408' => 'BENEFICIARY LAST NAME MORE THAN 26 CHARS',
-        '409' => 'BENEFICIARY ADDRESS MORE THAN 128 CHAR',
-        '410' => 'BENEFICIARY COUNTRY MUST 2 CHAR',
-        '411' => 'BRANCH CODE MUST BE 9 DIGIT',
-        '412' => 'BRANCH CODE IS WRONG',
-        '413' => 'INSUFFICIENT BALANCE',
-        '414' => 'BENEFICIARY A/C 64 CHARS',
-        '417' => 'BENEFICIARY TEL MUST 11 CHAR',
-        '418' => 'BENEFICIARY AC MORE THAN 5 CHAR FOR OTHER BANK ACCOUNT PAYEE(15)',
-        '419' => 'BENEFICIARY AC MUST 13 CHAR FOR CREDIT TO CBS(16)',
-        '420' => 'BENEFICIARY TEL FORMAT WRONG',
-        '421' => 'BENEFICIARY TEL CONTAIN CHARS',
-        '422' => 'ACCOUNT NO IS WRONG',
-        '425' => 'REM TEL CONTAIN CHARS',
-        '423' => 'RATE VALUE 0',
-        '424' => 'REMAMOUNTDEST VALUE 0',
-        //		'425' => 'ACCOUNT NO IS WRONG',
-        '430' => 'TRANSACTION NUMBER IS MORE THAN 20 CHARS',
-        '502' => 'REMITTER FIRST NAME IS NULL',
-        '503' => 'REMITTER LAST NAME IS NULL',
-        '504' => 'REMITTER ADDRESS IS NULL',
-        '506' => 'BENEFICIARY NAME IS NULL',
-        '508' => 'BENEFICIARY LAST NAME IS NULL',
-        '530' => 'TRANSACTION NUMBER IS NULL',
+        201 => 'DUPLICATE TRANSACTION NUMBER',
+        202 => 'SIGN DIFFER',
+        203 => 'UNHANDLED EXCEPTION',
+        401 => 'INVALID EXCODE',
+        402 => 'REMITTER FIRST NAME MORE THAN 96 CHARS',
+        403 => 'REMITTER LAST NAME MORE THAN 26 CHARS',
+        404 => 'REMITTER ADDRESS MORE THAN 256 CHARS',
+        405 => 'REMITTER COUNTRY MUST 2 CHARS',
+        406 => 'BENEFICIARY NAME MORE THAN 96 CHARS',
+        407 => 'BENEFICIARY MIDDLE NAME MORE THAN 26 CHARS',
+        408 => 'BENEFICIARY LAST NAME MORE THAN 26 CHARS',
+        409 => 'BENEFICIARY ADDRESS MORE THAN 128 CHAR',
+        410 => 'BENEFICIARY COUNTRY MUST 2 CHAR',
+        411 => 'BRANCH CODE MUST BE 9 DIGIT',
+        412 => 'BRANCH CODE IS WRONG',
+        413 => 'INSUFFICIENT BALANCE',
+        414 => 'BENEFICIARY A/C 64 CHARS',
+        417 => 'BENEFICIARY TEL MUST 11 CHAR',
+        418 => 'BENEFICIARY AC MORE THAN 5 CHAR FOR OTHER BANK ACCOUNT PAYEE(15)',
+        419 => 'BENEFICIARY AC MUST 13 CHAR FOR CREDIT TO CBS(16)',
+        420 => 'BENEFICIARY TEL FORMAT WRONG',
+        421 => 'BENEFICIARY TEL CONTAIN CHARS',
+        422 => 'ACCOUNT NO IS WRONG',
+        425 => 'REM TEL CONTAIN CHARS',
+        423 => 'RATE VALUE 0',
+        424 => 'REMIT AMOUNT DEST VALUE 0',
+        //		425 => 'ACCOUNT NO IS WRONG',
+        430 => 'TRANSACTION NUMBER IS MORE THAN 20 CHARS',
+        502 => 'REMITTER FIRST NAME IS NULL',
+        503 => 'REMITTER LAST NAME IS NULL',
+        504 => 'REMITTER ADDRESS IS NULL',
+        506 => 'BENEFICIARY NAME IS NULL',
+        508 => 'BENEFICIARY LAST NAME IS NULL',
+        530 => 'TRANSACTION NUMBER IS NULL',
     ];
 
     public const STATUS_MESSAGES = [
-        '01' => 'PENDING',
-        '02' => 'PAID',
-        '03' => 'CANCEL',
+        01 => 'PENDING',
+        02 => 'PAID',
+        03 => 'CANCEL',
     ];
 
     //    const OCCUPATION = 'OCC';
@@ -124,207 +127,11 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $this->config = config('fintech.remit.providers.agranibank');
         $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
-        $this->encodeCredential();
 
         $this->xml = new DOMDocument('1.0', 'utf-8');
         $this->xml->preserveWhiteSpace = false;
         $this->xml->formatOutput = false;
         $this->xml->xmlStandalone = true;
-
-        $this->transactionBody = $this->xml->createElement('Transaction');
-
-    }
-
-    /**
-     * @throws DOMException
-     * @throws Exception
-     */
-    private function callApi($method, $payload)
-    {
-        $envelope = $this->xml->createElement('soapenv:Envelope');
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:soapenv', 'http://schemas.xmlsoap.org/soap/envelope/');
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:ser', 'http://service.ws.mt.ibbl');
-        $envelope->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xsd', 'http://bean.ws.mt.ibbl/xsd');
-        $envelope->appendChild($this->xml->createElement('soapenv:Header'));
-
-        $envelopeBody = $this->xml->createElement('soapenv:Body');
-
-        $envelopeBody->appendChild($payload);
-
-        $envelope->appendChild($envelopeBody);
-
-        $this->xml->appendChild($envelope);
-
-        $xmlResponse = Http::soap($this->apiUrl, $method, $this->xml->saveXML())->body();
-
-        $response = Utility::parseXml($xmlResponse);
-
-        return $response['Envelope']['Body'] ?? [];
-
-    }
-
-    /**
-     * Encode Auth info to base64 and store on $basicAuthHash
-     *
-     * @return void
-     */
-    protected function encodeCredential()
-    {
-        $asciString = '{ "Username=7106UAT", "Expassword=7106@Pass" }';
-        $this->basicAuthHash = $asciString;
-    }
-
-    /**
-     * Agrani Transfer TopUp
-     *
-     * @return stdClass
-     *
-     * @throws Exception
-     */
-    public function topUp($data)
-    {
-        $returnData = new stdClass;
-
-        $reference = $data->reference_no;
-
-        $transactionCreateResponse = $this->postCreateTransaction($data);
-
-        Log::info('Unconfirmed APi Request:', $transactionCreateResponse);
-
-        $returnData->emq_create_response = json_encode($transactionCreateResponse);
-
-        switch ($transactionCreateResponse['status']) {
-            case 200:
-            case 201:
-
-                // send confirmation request
-                $transConfirmResponse = null; // $this->postTransactionConfirm($reference);
-                $returnData->emq_confirm_response = json_encode($transConfirmResponse);
-
-                Log::info('Confirmed APi Request:', $transConfirmResponse);
-
-                switch ($transConfirmResponse['status']) {
-                    case 200:
-                    case 201:
-
-                        $this->renderApiResponse($transConfirmResponse['response'], $returnData);
-                        break;
-
-                    case 400:
-
-                        $returnData->message = $this->errorHandler($transConfirmResponse['response']);
-                        $returnData->status = 'failed';
-                        break;
-
-                    case 500:
-
-                        $returnData->message = $transactionCreateResponse['response']['message'];
-                        $returnData->status = 'failed';
-                        break;
-
-                    default:
-
-                        $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
-                        $returnData->status = 'failed';
-                        break;
-
-                }
-
-                $returnData->status_code = 201;
-                break;
-
-            case 400:
-
-                $returnData->message = $this->errorHandler($transactionCreateResponse['response']);
-                $returnData->status = 'failed';
-                $returnData->status_code = 201;
-                break;
-
-            case 500:
-
-                $returnData->message = $transactionCreateResponse['response']['message'];
-                $returnData->status = 'failed';
-                $returnData->status_code = 201;
-                break;
-
-            default:
-
-                $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
-                $returnData->status = 'failed';
-                $returnData->status_code = 201;
-                break;
-
-        }
-
-        return $returnData;
-    }
-
-    /**
-     * Create bank transfers to for All
-     *
-     * @return array
-     *
-     * @throws Exception
-     */
-    public function postCreateTransaction($data)
-    {
-        $transactionTypes = ['Bank' => '15', 'Cash Pickup' => '05', 'CBS' => '16', 'Bkash' => '17'];
-
-        $sender_last_name = isset($data->sender_last_name) ? $data->sender_last_name : '';
-
-        $sender_first_name = isset($data->sender_first_name) ? $data->sender_first_name : '';
-
-        $full_name = $sender_first_name;
-        if (strlen($sender_last_name) > 0) {
-            $full_name .= (' '.$sender_last_name);
-        }
-
-        $nameArray = preg_split("/\s+(?=\S*+$)/", $full_name);
-
-        if (count($nameArray) > 1) {
-            $sender_first_name = $nameArray[0];
-            $sender_last_name = $nameArray[1];
-        } else {
-            $sender_last_name = $sender_first_name;
-        }
-
-        $transferInfo['tranno'] = $data->reference_no;
-        $transferInfo['traninfosl'] = $data->reference_no;
-        $transferInfo['trmode'] = isset($data->recipient_type_name)
-            ? ($transactionTypes[$data->recipient_type_name] ?? '15')
-            : '15';
-
-        $transferInfo['purpose'] = $data->emq_purpose_of_remittance ?? null; // TODO agrani code needed
-        $transferInfo['remamountdest'] = isset($data->transfer_amount) ? round($data->transfer_amount, 2) : '0.00';
-        $transferInfo['remfname'] = $sender_first_name;
-        $transferInfo['remlname'] = $sender_last_name;
-        $transferInfo['remit_tel'] = isset($data->sender_mobile) ? substr($data->sender_mobile, -11) : null;
-        $transferInfo['remaddress1'] = trim(($data->sender_address ?? null).' '.($data->sender_city ?? null));
-        $transferInfo['remcountry'] = $data->trans_fast_sender_country_iso_code ?? null; // TODO agrani country code needed
-        $transferInfo['benename'] = $data->receiver_first_name ?? null;
-        $transferInfo['benemname'] = $data->receiver_middle_name ?? ' ';
-        $transferInfo['benelname'] = $data->receiver_last_name ?? null;
-        $transferInfo['beneaccountno'] = $data->bank_account_number ?? null;
-        $transferInfo['benetel'] = $data->receiver_contact_number ?? null;
-        $transferInfo['branchcode'] = substr(($data->location_routing_id[1]->bank_branch_location_field_value ?? null), -6);
-        $transferInfo['beneaddress'] = $data->receiver_address ?? null;
-        $transferInfo['benecountry'] = $data->trans_fast_receiver_country_iso_code ?? null;
-        $transferInfo['entereddatetime'] = Carbon::now(config('app.timezone'))->format('Y-m-d\TH:i:s.u');
-        $transferInfo['ratevalue'] = 0;
-        $transferInfo['counttr'] = 0;
-        $transferInfo['excode'] = $this->getExcode();
-        $transferInfo['signaturevalue'] = $this->getTransactionSignature($transferInfo);
-
-        array_walk($transferInfo, function (&$value, $key) {
-            $this->transactionBody->appendChild($this->xml->createElement($key, $value));
-        });
-
-        $this->xml->appendChild($this->transactionBody);
-
-        Log::info($this->xml->saveXML());
-
-        // die();
-        return $this->putPostData('/MyCash', $transferInfo, 'POST');
     }
 
     /**
@@ -332,9 +139,109 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
      *
      * @return string
      */
-    public function getExcode()
+    private function excode(): ?string
     {
-        return $this->config[$this->status]['excode'] ?? 7106;
+        return $this->config[$this->status]['excode'] ?? '7106';
+    }
+
+    /**
+     * Return Username from config
+     *
+     * @return string
+     */
+    private function username(): ?string
+    {
+        return $this->config[$this->status]['username'];
+    }
+
+    /**
+     * Return Password from config
+     *
+     * @return string
+     */
+    private function password(): ?string
+    {
+        return $this->config[$this->status]['password'];
+    }
+
+    /**
+     * @throws ConnectionException
+     * @throws DOMException
+     * @throws Exception
+     */
+    private function get($url, $payload)
+    {
+        $requestBody = $this->preparePayload($payload);
+
+        $xmlResponse = Http::baseUrl($this->apiUrl)
+            ->contentType('text/xml; charset=utf-8')
+            ->accept('application/xml')
+            ->withHeaders([
+                'Host' => parse_url($this->apiUrl, PHP_URL_HOST),
+                'Username' => $this->username(),
+                'Expassword' => $this->password(),
+                'Content-Length' => strlen($requestBody),
+            ])
+            ->withBody($requestBody, 'text/xml;charset=utf-8')
+            ->get($url)
+            ->body();
+
+        $response = Utility::parseXml($xmlResponse);
+
+        dd($response);
+
+    }
+
+    /**
+     * @throws ConnectionException
+     * @throws DOMException
+     * @throws Exception
+     */
+    private function post($url, $payload)
+    {
+        $requestBody = $this->preparePayload($payload);
+
+        $xmlResponse = Http::baseUrl($this->apiUrl)
+            ->contentType('text/xml; charset=utf-8')
+            ->accept('application/xml')
+            ->withHeaders([
+                'Host' => parse_url($this->apiUrl, PHP_URL_HOST),
+                'Username' => $this->username(),
+                'Expassword' => $this->password(),
+                'Content-Length' => strlen($requestBody),
+            ])
+            ->withBody($requestBody, 'text/xml;charset=utf-8')
+            ->post($url)
+            ->body();
+
+        echo($xmlResponse);
+        die();
+
+        $response = Utility::parseXml($xmlResponse);
+
+        dd($response);
+    }
+
+    /**
+     * @throws DOMException
+     */
+    private function preparePayload($payload): string
+    {
+        $order = $this->xml->createElement('TrnOrder');
+
+        $header = $this->xml->createElement('Header');
+        $header->appendChild($this->xml->createElement('excode', $this->excode()));
+        $header->appendChild($this->xml->createElement('Username', $this->username()));
+        $header->appendChild($this->xml->createElement('Expassword', $this->password()));
+        $header->appendChild($this->xml->createElement('entereddatetime', now()->format('Y-m-d\TH:i:s\.v')));
+
+        $order->appendChild($header);
+
+        $order->appendChild($payload);
+
+        $this->xml->appendChild($order);
+
+        return $this->xml->saveXML();
     }
 
     /**
@@ -400,202 +307,6 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
         return base64_encode($signature);
     }
 
-    /**
-     * Base function that is responsible for interacting directly with the nium api to send data
-     *
-     * @return array
-     *
-     * @throws Exception
-     */
-    public function putPostData(string $url, array $dataArray = [], string $method = 'POST')
-    {
-        $apiUrl = $this->apiUrl.$url;
-        Log::info($apiUrl);
-        $jsonArray = json_encode($dataArray);
-        Log::info(json_decode($jsonArray, true));
-
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $apiUrl);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($curl, CURLOPT_POST, count($dataArray));
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonArray);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_VERBOSE, true);
-
-        $headers = [
-            'cache-control: no-cache',
-            'Content-Type: application/xml',
-            'Accepts: application/xml',
-            'Username: '.$this->getUsername(),
-            'Expassword: '.$this->getPassword(),
-        ];
-
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-
-        $response = curl_exec($curl);
-        $info = curl_getinfo($curl);
-        $error = curl_error($curl);
-
-        // dd([$error, $info, $response]);
-        if ($response == false) {
-            Log::info($info);
-            Log::info($error);
-            throw new Exception(curl_error($curl), curl_errno($curl));
-        }
-
-        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        curl_close($curl);
-
-        Log::info(json_decode($response, true));
-
-        return [
-            'status' => $status,
-            'response' => json_decode($response, true),
-        ];
-    }
-
-    /**
-     * Return Username from config
-     *
-     * @return string
-     */
-    public function getUsername()
-    {
-        return $this->config[$this->status]['username'];
-    }
-
-    /**
-     * Return Password from config
-     *
-     * @return string
-     */
-    public function getPassword()
-    {
-        return $this->config[$this->status]['password'];
-    }
-
-    /**
-     * Render Emq Response to pointed StdClass
-     *
-     * @param  array  $response  emq response
-     * @param  stdClass  $returnData  class that will get rendered response
-     * @return void
-     */
-    public function renderApiResponse(array $response, stdClass &$returnData)
-    {
-        $returnData->init_time = $response['created'] ?? date('Y-m-d H:i:s P');
-        $returnData->recharge_time = $response['created'] ?? date('Y-m-d H:i:s P');
-        $returnData->recharge_status = isset($response['info']['state']) ? $response['info']['state'] : null;
-
-        $returnData->reference_no = isset($response['reference']) ? $response['reference'] : null;
-
-        if (isset($response['destination']['type']) && $response['destination']['type'] == 'back_account') {
-            $returnData->operator_name = isset($response['destination']['bank']) ? $response['destination']['bank'] : null;
-            $returnData->operator_id = isset($response['destination']['branch']) ? $response['destination']['branch'] : null;
-        } else {
-            $returnData->operator_name = isset($response['destination']['partner']) ? $response['destination']['partner'] : null;
-            $returnData->operator_id = isset($response['destination']['segment']) ? $response['destination']['segment'] : null;
-        }
-
-        $returnData->connection_type = isset($response['destination']['type']) ? $response['destination']['type'] : null;
-        $returnData->recipient_msisdn = isset($response['destination']['account_number']) ? $response['destination']['account_number'] : null;
-
-        $returnData->amount = isset($response['destination_amount']['units']) ? $response['destination_amount']['units'] : null;
-        $returnData->order_total = isset($response['source_amount']['units']) ? $response['source_amount']['units'] : null;
-
-        $returnData->available_credit = isset($response['info']['state']) ? $response['info']['state'] : null;
-        $returnData->message = json_encode($response['info'], JSON_PRETTY_PRINT);
-
-        // $returnData->vr_guid = $response['info']['code'];
-        $returnData->vr_guid = isset($response['reference']) ? $response['reference'] : null;
-        $returnData->telco_transaction_id = isset($response['info']['code']) ? $response['info']['code'] : null;
-
-    }
-
-    /**
-     * Agrani Transfer TopUp
-     *
-     * @return stdClass
-     *
-     * @throws Exception
-     */
-    public function oldTopUp($data)
-    {
-        $returnData = new stdClass;
-
-        $reference = $data->reference_no;
-
-        $transactionCreateResponse = $this->postCreateTransaction($data);
-
-        Log::info('Unconfirmed APi Request:', $transactionCreateResponse);
-
-        $returnData->emq_create_response = json_encode($transactionCreateResponse);
-
-        switch ($transactionCreateResponse['status']) {
-            case 200:
-            case 201:
-
-                // send confirmation request
-                $transConfirmResponse = $this->postTransactionConfirm($reference);
-                $returnData->emq_confirm_response = json_encode($transConfirmResponse);
-
-                Log::info('Confirmed APi Request:', $transConfirmResponse);
-
-                switch ($transConfirmResponse['status']) {
-                    case 200:
-                    case 201:
-
-                        $this->renderApiResponse($transConfirmResponse['response'], $returnData);
-                        break;
-
-                    case 400:
-
-                        $returnData->message = $this->errorHandler($transConfirmResponse['response']);
-                        $returnData->status = 'failed';
-                        break;
-
-                    case 500:
-
-                        $returnData->message = $transactionCreateResponse['response']['message'];
-                        $returnData->status = 'failed';
-                        break;
-
-                    default:
-
-                        $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
-                        $returnData->status = 'failed';
-                        break;
-
-                }
-
-                $returnData->status_code = 201;
-                break;
-
-            case 400:
-
-                $returnData->message = $this->errorHandler($transactionCreateResponse['response']);
-                $returnData->status = 'failed';
-                $returnData->status_code = 201;
-                break;
-
-            case 500:
-
-                $returnData->message = $transactionCreateResponse['response']['message'];
-                $returnData->status = 'failed';
-                $returnData->status_code = 201;
-                break;
-
-            default:
-
-                $returnData->message = 'Something went wrong from vendor API: Status Code :'.$transactionCreateResponse['status'];
-                $returnData->status = 'failed';
-                $returnData->status_code = 201;
-                break;
-
-        }
-
-        return $returnData;
-    }
 
     /*********************************** Transaction ***************************************/
 
@@ -613,88 +324,17 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     }
 
     /**
-     * Login and obtain session token.
-     *
-     * @param string username
-     * @param string password
-     *
-     * @throws Exception
+     * @param Model|BaseModel $order
+     * @throws DOMException
      */
-    public function postLogin()
+    public function requestQuote($order): AssignVendorVerdict
     {
-        $payLoad = ['username' => $this->getUsername(), 'password' => $this->getPassword()];
-        $this->putPostData('/auth/login', $payLoad, 'POST');
+        $transaction = $this->xml->createElement("Transaction");
+        $transaction->appendChild($this->xml->createElement("beneaccountno", '0200014001577'));
 
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function getTransactionDetails(string $reference)
-    {
-        return $this->getData("/getxmltraninfobyiduat/{$reference}");
-
-    }
-
-    /**
-     * Base function that is responsible for interacting directly with the nium api to obtain data
-     *
-     * @param  array  $params
-     * @return array
-     *
-     * @throws Exception
-     */
-    public function getData($url, $params = [])
-    {
-        $apiUrl = $this->apiUrl.$url;
-        $apiUrl .= http_build_query($params);
-        Log::info($apiUrl);
-
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $apiUrl);
-        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'GET');
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        $headers = [
-            'cache-control: no-cache',
-            'Content-Type: application/json',
-            'Accepts: application/json',
-            'Username: '.$this->getUsername(),
-            'Expassword: '.$this->getPassword(),
-        ];
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-
-        $response = curl_exec($curl);
-        $info = curl_getinfo($curl);
-        $error = curl_error($curl);
-
-        if ($response == false) {
-            Log::info($info);
-            Log::info($error);
-            throw new Exception(curl_error($curl), curl_errno($curl));
-        }
-
-        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        curl_close($curl);
-
-        Log::info('API Response : '.$response);
-
-        echo $response;
-
-        return [
-            'status' => $status,
-            'response' => json_decode($response, true),
-        ];
-
-    }
-
-    /**
-     * @param  Model|BaseModel  $order
-     */
-    public function requestQuote($order): \Fintech\Core\Supports\AssignVendorVerdict
-    {
-        return [
-
-        ];
+        $response = $this->get('/t24validation', $transaction);
+        dd($response);
+        return AssignVendorVerdict::make();
     }
 
     /**
@@ -703,9 +343,9 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      *
      * @throws ErrorException
      */
-    public function executeOrder(BaseModel $order): \Fintech\Core\Supports\AssignVendorVerdict
+    public function executeOrder(BaseModel $order): AssignVendorVerdict
     {
-        // TODO: Implement executeOrder() method.
+        return AssignVendorVerdict::make();
     }
 
     /**
@@ -716,7 +356,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function orderStatus(BaseModel $order): mixed
     {
-        // TODO: Implement orderStatus() method.
+        return [];
     }
 
     /**
@@ -725,9 +365,9 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      *
      * @throws ErrorException
      */
-    public function cancelOrder(BaseModel $order): mixed
+    public function cancelOrder(BaseModel $order): AssignVendorVerdict
     {
-        // TODO: Implement cancelOrder() method.
+        return AssignVendorVerdict::make();
     }
 
     /**
@@ -736,20 +376,19 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      *
      * @throws ErrorException
      */
-    public function amendmentOrder(BaseModel $order): mixed
+    public function amendmentOrder(BaseModel $order): AssignVendorVerdict
     {
-        // TODO: Implement amendmentOrder() method.
+        return AssignVendorVerdict::make();
     }
 
     /**
      * Method to make a request to the remittance service provider
      * for the track real-time progress of the order.
      *
-     * @throws ErrorException
      */
-    public function trackOrder(BaseModel $order): mixed
+    public function trackOrder(BaseModel $order): AssignVendorVerdict
     {
-        // TODO: Implement trackOrder() method.
+        return AssignVendorVerdict::make();
     }
 
     /**
@@ -761,7 +400,56 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function validateBankAccount(array $inputs = []): AccountVerificationVerdict
     {
-        // TODO: Implement validateBankAccount() method.
+        $bank = $inputs['bank'] ?? [];
+        $bankBranch = $inputs['bank_branch'] ?? [];
+        $beneficiaryAccountType = $inputs['beneficiary_account_type'] ?? [];
+
+        $service = $this->xml->createElement("Transaction");
+        $service->appendChild($this->xml->createElement('beneaccountno', $inputs['account_no'] ?? '?'));
+
+        $response = $this->post('/t24validation', $service);
+
+        dd($response);
+
+        if (isset($response['Fault'])) {
+            return AccountVerificationVerdict::make([
+                'status' => 'false',
+                'message' => $response['Fault']['faultstring'] ?? __('remit::messages.wallet_verification.failure'),
+                'original' => $response,
+                'account_title' => 'N/A',
+                'account_no' => 'N/A',
+                'wallet' => $bank,
+            ]);
+        }
+
+        $response = $response["{$method}Response"]['return'] ?: '';
+
+        if (Str::startsWith($response, 'TRUE|')) {
+
+            $arr = explode('|', $response);
+            $json['status'] = 'TRUE';
+            $json['account_no'] = $arr[1] ?? null;
+            $json['account_title'] = $arr[2] ?? null;
+            $json['original'] = $response;
+
+            return AccountVerificationVerdict::make($json)
+                ->status($json['status'] === 'TRUE')
+                ->message(__('remit::messages.wallet_verification.success'))
+                ->wallet($bank);
+        }
+
+        $json = json_decode(
+            preg_replace(
+                '/(TRUE|FALSE)\|(\d{4})/iu',
+                '{"status":"$1", "code":$2, "original":"$0"}',
+                $response),
+            true);
+
+        return AccountVerificationVerdict::make()
+            ->status('false')
+            ->message(__('remit::messages.wallet_verification.failure'))
+            ->original([$json, 'message' => self::ERROR_MESSAGES[$json['code']] ?? ''])
+            ->wallet($bank);
     }
 
     /**
@@ -773,6 +461,64 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function validateWallet(array $inputs = []): AccountVerificationVerdict
     {
-        // TODO: Implement validateWallet() method.
+        $wallet = $inputs['bank'] ?? null;
+
+        $walletNo = Str::substr($inputs['account_no'], ($wallet['vendor_code']['remit']['islamibank'] == '5') ? -12 : -11);
+
+        $method = 'validateBeneficiaryWallet';
+        $transaction = $this->xml->createElement("Transaction");
+        $transaction->appendChild($this->xml->createElement('benename', ''));
+        $transaction->appendChild($this->xml->createElement('benemname', ''));
+        $transaction->appendChild($this->xml->createElement('benlename', ''));
+        $transaction->appendChild($this->xml->createElement('benetel', $walletNo));
+        $transaction->appendChild($this->xml->createElement('rem_tel', $walletNo));
+
+        $response = $this->post('/bkashvalidation', $transaction);
+        dd($response);
+
+        logger()->debug('Response:', [$response]);
+
+        if (isset($response['Fault'])) {
+            return AccountVerificationVerdict::make([
+                'status' => 'false',
+                'message' => $response['Fault']['faultstring'] ?? __('remit::messages.wallet_verification.failure'),
+                'original' => $response,
+                'account_title' => 'N/A',
+                'account_no' => 'N/A',
+                'wallet' => $wallet,
+            ]);
+        }
+
+        logger()->debug('Response:', [$response]);
+
+        $response = $response["{$method}Response"]['return'] ?: '';
+
+        if (Str::startsWith($response, 'TRUE|')) {
+
+            $json = json_decode(
+                preg_replace(
+                    '/(TRUE|FALSE)\|(\d+)\|(.+)/iu',
+                    '{"status":"$1", "account_no":"$2", "account_title":"$3", "original":"$0"}',
+                    $response),
+                true);
+
+            return AccountVerificationVerdict::make($json)
+                ->status($json['status'] === 'TRUE')
+                ->message(__('remit::messages.wallet_verification.success'))
+                ->wallet($wallet);
+        }
+
+        $json = json_decode(
+            preg_replace(
+                '/(TRUE|FALSE)\|(\d{4})/iu',
+                '{"status":"$1", "code":$2, "original":"$0"}',
+                $response),
+            true);
+
+        return AccountVerificationVerdict::make()
+            ->status(false)
+            ->message(__('remit::messages.wallet_verification.failure'))
+            ->original([$json, 'message' => self::ERROR_MESSAGES[$json['code']] ?? ''])
+            ->wallet($wallet);
     }
 }
