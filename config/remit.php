@@ -175,7 +175,7 @@ return [
             'wallet_verification' => false,
             'bank_transfer_verification' => true,
             'cash_pickup_verification' => false,
-            'banks' => ['islami-bank-bangladesh-limited', 'mfs-mcash', 'mfs-nagad', 'mfs-bkash'],
+            'banks' => ['islami-bank-bangladesh-limited', 'mfs-mcash'],
             'countries' => [19],
             'live' => [
                 'endpoint' => 'https://ws.islamibankbd.com/ibblmtws/services/ImportFTTMsgWS?wsdl',
