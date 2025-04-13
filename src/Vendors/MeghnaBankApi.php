@@ -418,7 +418,7 @@ class MeghnaBankApi implements MoneyTransfer
         return AccountVerificationVerdict::make()
             ->status('TRUE')
             ->account_no($inputs['account_no'] ?? '?')
-            ->account_title($inputs['account_no'] ?? '?')
+            ->account_title('')
             ->message(__('remit::messages.wallet_verification.success'))
             ->original([])
             ->wallet($bank);
