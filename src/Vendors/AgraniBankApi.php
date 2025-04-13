@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Vendors;
 
-use Carbon\Carbon;
 use DOMDocument;
 use DOMException;
 use ErrorException;
@@ -16,9 +15,7 @@ use Fintech\Remit\Support\AccountVerificationVerdict;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use stdClass;
 
 class AgraniBankApi implements MoneyTransfer, WalletTransfer
 {
@@ -136,8 +133,6 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
     /**
      * Return Excode from config
-     *
-     * @return string
      */
     private function excode(): ?string
     {
@@ -146,8 +141,6 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
     /**
      * Return Username from config
-     *
-     * @return string
      */
     private function username(): ?string
     {
@@ -156,8 +149,6 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
     /**
      * Return Password from config
-     *
-     * @return string
      */
     private function password(): ?string
     {
@@ -214,8 +205,8 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
             ->post($url)
             ->body();
 
-        echo($xmlResponse);
-        die();
+        echo $xmlResponse;
+        exit();
 
         $response = Utility::parseXml($xmlResponse);
 
@@ -307,7 +298,6 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
         return base64_encode($signature);
     }
 
-
     /*********************************** Transaction ***************************************/
 
     /******************************************* Auth *******************************************/
@@ -324,16 +314,18 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     }
 
     /**
-     * @param Model|BaseModel $order
+     * @param  Model|BaseModel  $order
+     *
      * @throws DOMException
      */
     public function requestQuote($order): AssignVendorVerdict
     {
-        $transaction = $this->xml->createElement("Transaction");
-        $transaction->appendChild($this->xml->createElement("beneaccountno", '0200014001577'));
+        $transaction = $this->xml->createElement('Transaction');
+        $transaction->appendChild($this->xml->createElement('beneaccountno', '0200014001577'));
 
         $response = $this->get('/t24validation', $transaction);
         dd($response);
+
         return AssignVendorVerdict::make();
     }
 
@@ -384,7 +376,6 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     /**
      * Method to make a request to the remittance service provider
      * for the track real-time progress of the order.
-     *
      */
     public function trackOrder(BaseModel $order): AssignVendorVerdict
     {
@@ -404,7 +395,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
         $bankBranch = $inputs['bank_branch'] ?? [];
         $beneficiaryAccountType = $inputs['beneficiary_account_type'] ?? [];
 
-        $service = $this->xml->createElement("Transaction");
+        $service = $this->xml->createElement('Transaction');
         $service->appendChild($this->xml->createElement('beneaccountno', $inputs['account_no'] ?? '?'));
 
         $response = $this->post('/t24validation', $service);
@@ -466,7 +457,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
         $walletNo = Str::substr($inputs['account_no'], ($wallet['vendor_code']['remit']['islamibank'] == '5') ? -12 : -11);
 
         $method = 'validateBeneficiaryWallet';
-        $transaction = $this->xml->createElement("Transaction");
+        $transaction = $this->xml->createElement('Transaction');
         $transaction->appendChild($this->xml->createElement('benename', ''));
         $transaction->appendChild($this->xml->createElement('benemname', ''));
         $transaction->appendChild($this->xml->createElement('benlename', ''));
