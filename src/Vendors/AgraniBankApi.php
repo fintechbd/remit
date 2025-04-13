@@ -392,7 +392,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function validateBankAccount(array $inputs = []): AccountVerificationVerdict
     {
-        logger("testing", ['debug' => debug_backtrace()]);
+        logger('testing', ['debug' => debug_backtrace()]);
 
         Log::info('VALIDATING BANK ACCOUNT');
 
