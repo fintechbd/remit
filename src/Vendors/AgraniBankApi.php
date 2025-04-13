@@ -15,6 +15,7 @@ use Fintech\Remit\Support\AccountVerificationVerdict;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class AgraniBankApi implements MoneyTransfer, WalletTransfer
@@ -391,6 +392,10 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function validateBankAccount(array $inputs = []): AccountVerificationVerdict
     {
+        logger("testing", ['debug' => debug_backtrace()]);
+
+        Log::info('VALIDATING BANK ACCOUNT');
+
         $bank = $inputs['bank'] ?? [];
         $bankBranch = $inputs['bank_branch'] ?? [];
         $beneficiaryAccountType = $inputs['beneficiary_account_type'] ?? [];
