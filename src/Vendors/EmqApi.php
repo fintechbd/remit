@@ -11,6 +11,7 @@ use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Fintech\Remit\Support\AccountVerificationVerdict;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
@@ -1416,4 +1417,16 @@ class EmqApi implements MoneyTransfer
     }
 
     protected function getBalanceFromCurrency(string $currency, $response) {}
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for a quotation of the order. that include charge, fee,
+     * commission and other information related to order.
+     *
+     * @throws \ErrorException
+     */
+    public function validateBankAccount(array $inputs = []): AccountVerificationVerdict
+    {
+        // TODO: Implement validateBankAccount() method.
+    }
 }

@@ -6,11 +6,13 @@ use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Fintech\Remit\Contracts\WalletTransfer;
+use Fintech\Remit\Support\AccountVerificationVerdict;
 use Illuminate\Support\Facades\Log;
 use MongoDB\Laravel\Eloquent\Model;
 use SimpleXMLElement;
 
-class CityBankApi implements MoneyTransfer
+class CityBankApi implements MoneyTransfer, WalletTransfer
 {
     /**
      * CityBank API configuration.
@@ -702,5 +704,29 @@ class CityBankApi implements MoneyTransfer
     public function trackOrder(BaseModel $order): mixed
     {
         // TODO: Implement trackOrder() method.
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for a quotation of the order. that include charge, fee,
+     * commission and other information related to order.
+     *
+     * @throws \ErrorException
+     */
+    public function validateBankAccount(array $inputs = []): AccountVerificationVerdict
+    {
+        // TODO: Implement validateBankAccount() method.
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for a quotation of the order. that include charge, fee,
+     * commission and other information related to order.
+     *
+     * @throws \ErrorException
+     */
+    public function validateWallet(array $inputs = []): AccountVerificationVerdict
+    {
+        // TODO: Implement validateWallet() method.
     }
 }

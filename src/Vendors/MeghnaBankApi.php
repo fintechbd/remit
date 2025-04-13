@@ -7,10 +7,12 @@ use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Remit\Contracts\MoneyTransfer;
+use Fintech\Remit\Support\AccountVerificationVerdict;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class MeghnaBankApi implements MoneyTransfer
 {
@@ -400,5 +402,26 @@ class MeghnaBankApi implements MoneyTransfer
         ];
 
         return $return[$code];
+    }
+
+    /**
+     * Method to make a request to the remittance service provider
+     * for a quotation of the order. that include charge, fee,
+     * commission and other information related to order.
+     *
+     * @throws \ErrorException
+     */
+    public function validateBankAccount(array $inputs = []): AccountVerificationVerdict
+    {
+        $bank = $inputs['bank'] ?? [];
+        $bankBranch = $inputs['bank_branch'] ?? [];
+
+        return AccountVerificationVerdict::make()
+            ->status('TRUE')
+            ->account_no($inputs['account_no'] ?? '?')
+            ->account_title($inputs['account_no'] ?? '?')
+            ->message(__('remit::messages.wallet_verification.success'))
+            ->original([])
+            ->wallet($bank);
     }
 }
