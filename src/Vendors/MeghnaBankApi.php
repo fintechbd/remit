@@ -12,7 +12,6 @@ use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 
 class MeghnaBankApi implements MoneyTransfer
 {
