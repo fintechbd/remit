@@ -194,7 +194,7 @@ return [
             'wallet_verification' => false,
             'bank_transfer_verification' => true,
             'cash_pickup_verification' => false,
-            'banks' => ['meghna-bank-limited'],
+            'banks' => [],
             'countries' => [19],
             'live' => [
                 'endpoint' => 'https://uatrmsapi.meghnabank.com.bd/VSLExchangeAPI/Controller/',

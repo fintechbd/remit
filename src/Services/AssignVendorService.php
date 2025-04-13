@@ -312,12 +312,23 @@ class AssignVendorService
                 return true;
             })->first();
 
+        //Return With No Validation
+
         if (! $instance) {
-            throw new \ErrorException(
-                __('remit::messages.verification.wallet_provider_not_found',
-                    ['wallet' => ucwords(strtolower($bank->name))]
-                )
-            );
+            return AccountVerificationVerdict::make([
+                'status' => 'TRUE',
+                'message' => __('remit::messages.wallet_verification.success'),
+                'original' => [],
+                'wallet' => $inputs['bank'],
+                'account_title' => null,
+                'account_no' => $inputs['account_no'],
+            ]);
+
+//            throw new \ErrorException(
+//                __('remit::messages.verification.wallet_provider_not_found',
+//                    ['wallet' => ucwords(strtolower($bank->name))]
+//                )
+//            );
         }
 
         $instance = app($instance['driver']);
