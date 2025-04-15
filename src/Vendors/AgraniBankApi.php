@@ -401,6 +401,8 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
 
         $response = $this->post('/t24validation', $transaction);
 
+        dd($response);
+
         return AccountVerificationVerdict::make(['original' => $response]);
 
         if (isset($response['Fault'])) {
