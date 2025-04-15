@@ -15,7 +15,6 @@ use Fintech\Remit\Support\AccountVerificationVerdict;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class AgraniBankApi implements MoneyTransfer, WalletTransfer
