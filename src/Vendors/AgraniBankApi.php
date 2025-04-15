@@ -392,20 +392,16 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function validateBankAccount(array $inputs = []): AccountVerificationVerdict
     {
-        logger('testing', ['debug' => debug_backtrace()]);
-
-        Log::info('VALIDATING BANK ACCOUNT');
-
         $bank = $inputs['bank'] ?? [];
         $bankBranch = $inputs['bank_branch'] ?? [];
         $beneficiaryAccountType = $inputs['beneficiary_account_type'] ?? [];
 
-        $service = $this->xml->createElement('Transaction');
-        $service->appendChild($this->xml->createElement('beneaccountno', $inputs['account_no'] ?? '?'));
+        $transaction = $this->xml->createElement('Transaction');
+        $transaction->appendChild($this->xml->createElement('beneaccountno', $inputs['account_no'] ?? '?'));
 
-        $response = $this->post('/t24validation', $service);
+        $response = $this->post('/t24validation', $transaction);
 
-        dd($response);
+        return AccountVerificationVerdict::make(['original' => $response]);
 
         if (isset($response['Fault'])) {
             return AccountVerificationVerdict::make([
