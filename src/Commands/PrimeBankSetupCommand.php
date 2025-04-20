@@ -425,6 +425,10 @@ class PrimeBankSetupCommand extends Command
             $this->info('Service vendor already exists. Skipping');
         } else {
             Business::serviceVendor()->create($vendor);
+
+            Core::setting()->setValue('remit', 'providers.primebank.token', '', 'string');
+            Core::setting()->setValue('remit', 'providers.primebank.expired_at', '', 'string');
+
             $this->info('Service vendor created successfully.');
         }
     }
