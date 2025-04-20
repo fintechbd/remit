@@ -222,12 +222,14 @@ return [
             'live' => [
                 'endpoint' => 'https://primefastlm.primebank.com.bd/primelm/primelmapi',
                 'corporate_id' => env('REMIT_PRIME_BANK_CORPORATE_ID', null),
+                'secret_key' => env('REMIT_PRIME_BANK_SECRET_KEY', null),
                 'username' => env('REMIT_PRIME_BANK_USERNAME', null),
                 'password' => env('REMIT_PRIME_BANK_PASSWORD', null),
             ],
             'sandbox' => [
                 'endpoint' => 'https://primefastlm.primebank.com.bd/primelm/primelmapi',
                 'corporate_id' => env('REMIT_PRIME_CORPORATE_ID', null),
+                'secret_key' => env('REMIT_PRIME_SECRET_KEY', null),
                 'username' => env('REMIT_PRIME_BANK_USERNAME', null),
                 'password' => env('REMIT_PRIME_BANK_PASSWORD', null),
             ],

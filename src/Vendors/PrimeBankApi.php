@@ -11,8 +11,8 @@ use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Support\AccountVerificationVerdict;
 use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
@@ -39,7 +39,11 @@ class PrimeBankApi implements MoneyTransfer
 
     private string $status = 'sandbox';
 
+    private ?string $secretKey;
+
     private PendingRequest $client;
+
+    private Encrypter $encrypter;
 
     /**
      * PrimeBankApiApiService constructor.
@@ -51,11 +55,15 @@ class PrimeBankApi implements MoneyTransfer
 
         if ($this->config['mode'] === 'sandbox') {
             $this->apiUrl = $this->config[$this->status]['endpoint'];
+            $this->secretKey = $this->config[$this->status]['secret_key'];
             $this->status = 'sandbox';
+
 
         } else {
             $this->apiUrl = $this->config[$this->status]['endpoint'];
+            $this->secretKey = $this->config[$this->status]['secret_key'];
             $this->status = 'live';
+
         }
 
         $this->client = Http::withoutVerifying()
@@ -63,7 +71,10 @@ class PrimeBankApi implements MoneyTransfer
             ->acceptJson();
 
         $this->token = $this->config['token'] ?? null;
+
         $this->expiredAt = empty($this->config['expired_at']) ? null : CarbonImmutable::parse($this->config['expired_at']);
+
+        $this->encrypter = new Encrypter($this->secretKey, 'aes-256-cbc');
 
         $this->syncAuthToken();
     }
@@ -102,7 +113,7 @@ class PrimeBankApi implements MoneyTransfer
 
     private function encryptedRequest(string $plainText): string
     {
-        return Crypt::encryptString($plainText);
+        return $this->encrypter->encryptString($plainText);
     }
 
     /**
@@ -112,7 +123,7 @@ class PrimeBankApi implements MoneyTransfer
     {
         try {
 
-            return Crypt::decryptString($cipherText);
+            return $this->encrypter->decryptString($cipherText);
 
         } catch (DecryptException $e) {
             throw new ErrorException($e->getMessage());
