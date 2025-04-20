@@ -921,7 +921,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         $service->appendChild($this->xml->createElement('ser:password', $this->config[$this->status]['password']));
         $service->appendChild($this->xml->createElement('ser:accNo', $inputs['account_no'] ?? '?'));
         $service->appendChild($this->xml->createElement('ser:accType', $beneficiaryAccountType['slug'] ?? '10'));
-        $service->appendChild($this->xml->createElement('ser:branchCode', $bankBranch['beneficiaryBranchCode']['vendor_code']['remit']['islamibank'] ?? '213'));
+        $service->appendChild($this->xml->createElement('ser:branchCode', $bankBranch['vendor_code']['remit']['islamibank'] ?? '213'));
 
         $response = $this->callApi($method, $service);
 

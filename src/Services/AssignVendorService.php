@@ -24,8 +24,6 @@ use Illuminate\Support\Facades\App;
 
 class AssignVendorService
 {
-    use \Fintech\Core\Traits\HasFindWhereSearch;
-
     private $serviceVendorModel;
 
     private MoneyTransfer $serviceVendorDriver;
