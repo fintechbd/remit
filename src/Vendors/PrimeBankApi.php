@@ -2,14 +2,17 @@
 
 namespace Fintech\Remit\Vendors;
 
+use Carbon\CarbonImmutable;
 use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Facades\Core;
 use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Support\AccountVerificationVerdict;
 use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
@@ -29,12 +32,17 @@ class PrimeBankApi implements MoneyTransfer
      */
     private mixed $apiUrl;
 
+    private string $token;
+
+    private $expiredAt;
+
     private string $status = 'sandbox';
 
     private PendingRequest $client;
 
     /**
      * PrimeBankApiApiService constructor.
+     * @throws ConnectionException
      */
     public function __construct()
     {
@@ -51,12 +59,44 @@ class PrimeBankApi implements MoneyTransfer
 
         $this->client = Http::withoutVerifying()
             ->baseUrl($this->apiUrl)
-            ->acceptJson()
-            ->withBasicAuth($this->config[$this->status]['username'], $this->config[$this->status]['password'])
-            ->withHeaders([
-                'bankid' => $this->config[$this->status]['bankid'],
-                'agent' => $this->config[$this->status]['agent'],
-            ]);
+            ->acceptJson();
+
+        $this->token = $this->config['token'] ?? null;
+        $this->expiredAt = empty($this->config['expired_at']) ? null : CarbonImmutable::parse($this->config['expired_at']);
+
+        $this->syncAuthToken();
+    }
+
+    private function post(string $url, array $params = []): array
+    {
+        return $this->client->withBody(base64_encode(json_encode($params)))
+            ->contentType('text/plain')
+            ->post($url)->json();
+    }
+
+    /**
+     * @throws ConnectionException
+     * @throws Exception
+     */
+    private function syncAuthToken(): void
+    {
+        if (!$this->token || (!$this->expiredAt || $this->expiredAt->isPast())) {
+
+            $response = $this->client->post('/getToken', [
+                'CorporateId' => $this->config[$this->status]['corporate_id'],
+                'UserId' => $this->config[$this->status]['username'],
+                'Password' => $this->config[$this->status]['password'],
+            ])->json();
+
+            if (!empty($response['Error'])) {
+                throw new \InvalidArgumentException($response ['Error']);
+            }
+
+            if (!empty($response['Token'])) {
+                Core::setting()->setValue('remit', 'providers.primebank.token', $response['Token'], 'string');
+                Core::setting()->setValue('remit', 'providers.primebank.expired_at', \now()->format('Y-m-d H:i:s'), 'string');
+            }
+        }
     }
 
     /**
@@ -220,13 +260,6 @@ class PrimeBankApi implements MoneyTransfer
         return $verdict;
     }
 
-    private function post(string $url, array $params = []): array
-    {
-        return $this->client->withBody(base64_encode(json_encode($params)))
-            ->contentType('text/plain')
-            ->post($url)->json();
-    }
-
     /**
      * Method to make a request to the remittance service provider
      * for the progress status of the order.
@@ -313,87 +346,6 @@ class PrimeBankApi implements MoneyTransfer
             'queryCode' => 1,
             'info' => 'Cancelled By User',
         ]);
-    }
-
-    /**
-     * Balance, Treasury Deal& Amendment Enquiry Code List
-     */
-    private function __enquiryCode(?int $code = null): string
-    {
-        $return = [
-            1 => 'Current rate',
-            2 => 'Balance enquiry',
-            3 => 'Amendment enquiry',
-            4 => 'Cancellation enquiry',
-        ];
-
-        if (is_null($code) || $code <= 0) {
-            $returnEnquiryCode = $return;
-        } else {
-            $returnEnquiryCode = $return[$code];
-        }
-
-        return $returnEnquiryCode;
-    }
-
-    /**
-     * Status Code List
-     */
-    private function __statusCodeList(string $code): string
-    {
-        $return = [
-            0 => 'Unpaid',
-            1 => 'Paid',
-            2 => 'Unprocessed',
-            3 => 'Return',
-            4 => 'Amendment',
-            5 => 'Cancelled',
-            6 => 'Pending Cancellation',
-            null => 'Error',
-        ];
-
-        return $return[$code];
-    }
-
-    /**
-     * Response Status Code List
-     */
-    private function __responseCodeList(string $code): string
-    {
-        $return = [
-            '0000' => 'Mandatory field(s) missing',
-            '0001' => 'Successfully insert cash',
-            '0002' => 'Transaction Paid Successfully',
-            '0003' => 'Transaction Failed',
-            '0004' => 'Duplicate order number found',
-            '0091' => 'The routing number must be integer value!',
-            '0092' => 'Wrong routing number format',
-            '0070' => 'Data not found \n No found against the provided value',
-            '0030' => 'Length violation \n Order number length not longer than 25 characters',
-            '0051' => 'Inquiry value does not match',
-            '0052' => 'Order Number or Pin number does not match',
-            '0050' => 'Missing data type or field empty',
-            '404' => 'Object not found',
-            '0044' => 'Amount field value must be numeric type',
-            '0045' => 'Transaction type field value must be A (Bank Deposit) or C(Cash)',
-            '0046' => 'Transaction date field value must be Y-m-d format',
-            '0047' => 'Mobile number must be integer & within 11 digit',
-            '0011' => 'The request resource does not support',
-            '0068' => 'Bank code must be an integer',
-            '0012' => 'The request resource does not support HTTP method',
-            '0013' => 'Please provide bank code \n Invalid Bank Code/Empty bank code',
-            '0022' => 'Unauthorized Access \n Invalid User Credential (IP, username, password, etc.)',
-            '0010' => 'Fund Limit crossed \n Not Enough Fund to Process This Transaction',
-            'CBS-0001' => 'CBS Transaction Already Made \n Already paid through CBS',
-            'CBS-0002' => 'Failed to Process Transaction for BEFTN Register',
-            'CBS-0003' => 'Failed to Transfer Amount from NRTA to BEFTN GL',
-            'CBS-0004' => 'Failed to Transfer Amount From BEFTN GL to BB GL',
-            'CBS-0005' => 'Failed to Transfer Amount From ONLINE GL to CUSTOMER AC',
-            'CBS-0006' => 'Failed to Transfer Amount from NRTA to ONLINE GL',
-            'CBS-0007' => 'Invalid Account No Found in CBS',
-        ];
-
-        return $return[$code];
     }
 
     /**
