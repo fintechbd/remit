@@ -190,7 +190,7 @@ return [
         ],
         'meghnabank' => [
             'mode' => env('REMIT_MEGHNA_BANK_MODE', 'sandbox'),
-            'driver' => \Fintech\Remit\Vendors\PrimeBankApi::class,
+            'driver' => \Fintech\Remit\Vendors\MeghnaBankApi::class,
             'wallet_verification' => false,
             'bank_transfer_verification' => false,
             'cash_pickup_verification' => false,
