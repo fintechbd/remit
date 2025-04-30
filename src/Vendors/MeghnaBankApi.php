@@ -158,6 +158,10 @@ class MeghnaBankApi implements MoneyTransfer
     public function executeOrder(BaseModel $order): AssignVendorVerdict
     {
         $order_data = $order->order_data ?? [];
+        $sender_data = $order_data['beneficiary_data']['sender_information'] ?? [];
+        $beneficiary_data = $order_data['beneficiary_data']['receiver_information'] ?? [];
+        $bank_data = $order_data['beneficiary_data']['bank_information'] ?? [];
+        $branch_data = $order_data['beneficiary_data']['branch_information'] ?? [];
 
         $ref_number = $order_data['beneficiary_data']['reference_no'] ?? $order_data['purchase_number'];
         $params['ORDER_NO'] = $ref_number;
@@ -165,25 +169,25 @@ class MeghnaBankApi implements MoneyTransfer
         $params['TRN_DATE'] = (date('Y-m-d', strtotime($order_data['created_at'])) ?? null);
         $params['AMOUNT'] = round(floatval($order_data['sending_amount'] ?? $order->converted_amount), 2);
         // RECEIVER
-        $params['RECEIVER_NAME'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
-        $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
-        $params['RECEIVER_AND_SENDER_RELATION'] = $order_data['beneficiary_data']['receiver_information']['relation_name'] ?? 'Relatives';
-        $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($order_data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
-        $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = intval($order_data['beneficiary_data']['branch_information']['branch_location_no'] ?? '');
-        $params['RECEIVER_BANK'] = ($order_data['beneficiary_data']['bank_information']['bank_name'] ?? null);
-        $params['RECEIVER_BANK_BRANCH'] = ($order_data['beneficiary_data']['branch_information']['branch_name'] ?? null);
-        $params['RECEIVER_ACCOUNT_NUMBER'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_data']['bank_account_number']);
+        $params['RECEIVER_NAME'] = ($beneficiary_data['beneficiary_name'] ?? null);
+        $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($beneficiary_data['city_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($beneficiary_data['city_name'] ?? null).','.($beneficiary_data['country_name'] ?? null);
+        $params['RECEIVER_AND_SENDER_RELATION'] = $beneficiary_data['relation_name'] ?? 'Relatives';
+        $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($beneficiary_data['beneficiary_mobile'] ?? null));
+        $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = intval($branch_data['branch_location_no'] ?? '');
+        $params['RECEIVER_BANK'] = ($bank_data['bank_name'] ?? null);
+        $params['RECEIVER_BANK_BRANCH'] = ($branch_data['branch_name'] ?? null);
+        $params['RECEIVER_ACCOUNT_NUMBER'] = ($beneficiary_data['beneficiary_data']['bank_account_number'] ?? null);
         // SENDER
-        $params['SENDER_NAME'] = ($order_data['beneficiary_data']['sender_information']['name'] ?? null);
-        $params['SENDER_PASSPORT_NO'] = ($order_data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
-        $params['SENDER_OTHER_ID_TYPE'] = ($order_data['beneficiary_data']['sender_information']['profile']['id_doc']['id_vendor']['remit']['meghnabank'] ?? '8');
-        $params['SENDER_OTHER_ID_NO'] = ($order_data['beneficiary_data']['sender_information']['profile']['id_doc']['id_no'] ?? null);
-        $params['SENDER_COUNTRY'] = ($order_data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
-        $params['SENDER_SUB_COUNTRY_LEVEL_2'] = ($order_data['beneficiary_data']['sender_information']['profile']['present_address']['city_name'] ?? null);
+        $params['SENDER_NAME'] = ($sender_data['name'] ?? null);
+        $params['SENDER_PASSPORT_NO'] = ($sender_data['profile']['id_doc']['id_no'] ?? null);
+        $params['SENDER_OTHER_ID_TYPE'] = ($sender_data['profile']['id_doc']['id_vendor']['remit']['meghnabank'] ?? '8');
+        $params['SENDER_OTHER_ID_NO'] = ($sender_data['profile']['id_doc']['id_no'] ?? null);
+        $params['SENDER_COUNTRY'] = ($sender_data['profile']['present_address']['country_name'] ?? null);
+        $params['SENDER_SUB_COUNTRY_LEVEL_2'] = ($sender_data['profile']['present_address']['city_name'] ?? null);
         //        $params['SENDER_ADDRESS_LINE'] = ($data['beneficiary_data']['sender_information']['profile']['present_address']['country_name'] ?? null);
-        $params['SENDER_CONTACT'] = ($order_data['beneficiary_data']['sender_information']['mobile'] ?? null);
-        $params['PURPOSE'] = ($order_data['beneficiary_data']['sender_information']['profile']['remittance_purpose']['name'] ?? 'Compensation');
+        $params['SENDER_CONTACT'] = ($sender_data['mobile'] ?? null);
+        $params['PURPOSE'] = ($sender_data['profile']['remittance_purpose']['name'] ?? 'Compensation');
 
         $params['TRNTP'] = match ($order_data['service_slug']) {
             'cash_pickup' => 'C',
