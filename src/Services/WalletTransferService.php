@@ -4,6 +4,7 @@ namespace Fintech\Remit\Services;
 
 use Fintech\Auth\Facades\Auth;
 use Fintech\Banco\Facades\Banco;
+use Fintech\Business\Exceptions\BusinessException;
 use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Auth\RiskProfile;
@@ -75,6 +76,15 @@ class WalletTransferService
         return $this->walletTransferRepository->create($filters);
     }
 
+    /**
+     * @throws BusinessException
+     * @throws RequestAmountExistsException
+     * @throws RequestOrderExistsException
+     * @throws CurrencyUnavailableException
+     * @throws InsufficientBalanceException
+     * @throws OrderRequestFailedException
+     * @throws MasterCurrencyUnavailableException
+     */
     public function create(array $inputs = []): ?BaseModel
     {
         $allowInsufficientBalance = $inputs['allow_insufficient_balance'] ?? false;
@@ -92,7 +102,7 @@ class WalletTransferService
         }
 
         $inputs['order_data']['order_type'] = OrderType::WalletTransfer;
-        $inputs['description'] = 'Bank Transfer';
+        $inputs['description'] = 'Wallet Transfer';
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
 
         $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
@@ -154,6 +164,7 @@ class WalletTransferService
         $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
         $inputs['order_number'] = $inputs['order_data']['purchase_number'];
         if ($service = Business::service()->find($inputs['service_id'])) {
+            $inputs['description'] .= " ({$service->service_name})";
             $inputs['order_data']['service_slug'] = $service->service_slug ?? null;
             $inputs['order_data']['service_name'] = $service->service_name ?? null;
             $vendor = $service->serviceVendor;
