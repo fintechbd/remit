@@ -79,11 +79,23 @@ class PrimeBankApi implements MoneyTransfer
         $this->syncAuthToken();
     }
 
+    /**
+     * @throws ConnectionException
+     * @throws ErrorException
+     */
     private function post(string $url, array $params = []): array
     {
-        return $this->client->withBody()
+        $requestBody = $this->encryptedRequest($params);
+
+        $responseBody = $this->client->withBody($requestBody)
             ->contentType('text/plain')
-            ->post($url)->json();
+            ->post($url)
+            ->body();
+
+        $response = $this->decryptedRequest($responseBody);
+
+        return json_decode($response, true);
+
     }
 
     /**
@@ -111,8 +123,10 @@ class PrimeBankApi implements MoneyTransfer
         }
     }
 
-    private function encryptedRequest(string $plainText): string
+    private function encryptedRequest(array $payload = []): string
     {
+        $plainText = json_encode($payload);
+
         return $this->encrypter->encryptString($plainText);
     }
 
