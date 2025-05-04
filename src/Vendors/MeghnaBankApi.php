@@ -10,7 +10,6 @@ use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Support\AccountVerificationVerdict;
 use Fintech\Remit\Vendors\Enums\MeghnaBank\QueryType;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
@@ -33,6 +32,7 @@ class MeghnaBankApi implements MoneyTransfer
     private string $status = 'sandbox';
 
     private PendingRequest $client;
+
 
     /**
      * MeghnaBankApiService constructor.
@@ -230,6 +230,7 @@ class MeghnaBankApi implements MoneyTransfer
     public function trackOrder(BaseModel $order): AssignVendorVerdict
     {
         $ref_number = $order->order_data['reference_no'] ?? $order->order_data['purchase_number'];
+
         $response = $this->get('/remitReport', [
             'ordpinNo' => $ref_number,
         ]);
