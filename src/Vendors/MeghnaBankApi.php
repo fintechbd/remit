@@ -2,14 +2,15 @@
 
 namespace Fintech\Remit\Vendors;
 
+use Carbon\CarbonImmutable;
 use ErrorException;
-use Exception;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Support\AccountVerificationVerdict;
-use Fintech\Transaction\Facades\Transaction;
+use Fintech\Remit\Vendors\Enums\MeghnaBank\QueryType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
@@ -61,36 +62,60 @@ class MeghnaBankApi implements MoneyTransfer
 
     private function get(string $url, array $params = []): array
     {
-        return $this->client
-            ->contentType('application/json')
-            ->get($url, $params)
-            ->json();
+        try {
+
+            return $this->client
+                ->contentType('application/json')
+                ->get($url, $params)
+                ->json();
+
+        } catch (\Throwable $throwable) {
+
+            logger()->error($throwable);
+
+            return [];
+        }
     }
 
     private function post(string $url, array $params = []): array
     {
-        return $this->client->withBody(base64_encode(json_encode($params)))
-            ->contentType('text/plain')
-            ->post($url)->json();
+        try {
+
+            return $this->client
+                ->withBody(base64_encode(json_encode($params)))
+                ->contentType('text/plain')
+                ->post($url)
+                ->json();
+
+        } catch (\Throwable $throwable) {
+
+            logger()->error($throwable);
+
+            return [];
+        }
     }
 
     /**
-     * @param  Model|BaseModel  $order
+     * @param Model|BaseModel $order
      */
     public function requestQuote($order): AssignVendorVerdict
     {
         $response = $this->get('/remitEnquiry', [
-            'queryType' => 1,
+            'queryType' => QueryType::CurrentRate->value,
             'confRate' => 'y',
         ]);
 
         return AssignVendorVerdict::make([
-            'status' => 'true',
-            'amount' => '0',
+            'status' => 'TRUE',
             'message' => 'The request was successful',
+            'amount' => $order->amount,
             'original' => $response,
             'ref_number' => $order->order_number,
-        ]);
+            'charge' => $order->charge_amount,
+            'discount' => $order->discount_amount,
+            'commission' => $order->commission_amount,
+        ])
+            ->orderTimeline('The requestQuote method was made internal successful', 'success');
     }
 
     /**
@@ -111,12 +136,13 @@ class MeghnaBankApi implements MoneyTransfer
         $ref_number = $order_data['beneficiary_data']['reference_no'] ?? $order_data['purchase_number'];
         $params['ORDER_NO'] = $ref_number;
         $params['TRANSACTION_PIN'] = $ref_number;
-        $params['TRN_DATE'] = (date('Y-m-d', strtotime($order_data['created_at'])) ?? null);
-        $params['AMOUNT'] = round(floatval($order_data['sending_amount'] ?? $order->converted_amount), 2);
+
+        $params['TRN_DATE'] = CarbonImmutable::parse($order->created_at)->format('Y-m-d');
+        $params['AMOUNT'] = currency($order->converted_amount, $order->converted_currency)->float();
         // RECEIVER
         $params['RECEIVER_NAME'] = ($beneficiary_data['beneficiary_name'] ?? null);
         $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($beneficiary_data['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($beneficiary_data['city_name'] ?? null).','.($beneficiary_data['country_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($beneficiary_data['city_name'] ?? null) . ',' . ($beneficiary_data['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $beneficiary_data['relation_name'] ?? 'Relatives';
         $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($beneficiary_data['beneficiary_mobile'] ?? null));
         $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = intval($branch_data['branch_location_no'] ?? '');
@@ -154,8 +180,8 @@ class MeghnaBankApi implements MoneyTransfer
             unset($response['message']);
         }
 
-        if (! empty($response['missing_field'])) {
-            $response['Message'] = ' ['.implode(',', $response['missing_field']).']';
+        if (!empty($response['missing_field'])) {
+            $response['Message'] = ' [' . implode(',', $response['missing_field']) . ']';
         }
 
         $verdict = AssignVendorVerdict::make([
@@ -167,10 +193,10 @@ class MeghnaBankApi implements MoneyTransfer
 
         if (in_array($response['Code'], ['0001', '0002'])) {
             $verdict->status('true')
-                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: ".strtolower($response['Message']).'.');
+                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: " . strtolower($response['Message']) . '.');
         } else {
             $verdict->status('false')
-                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message']).'.', 'warn');
+                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message']) . '.', 'warn');
         }
 
         return $verdict;
@@ -222,7 +248,7 @@ class MeghnaBankApi implements MoneyTransfer
 
         if (isset($response['Code'])) {
             $verdict->message($response['Message'] ?? null)
-                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message'] ?? '').'.');
+                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message'] ?? '') . '.');
 
             return $verdict;
         }
