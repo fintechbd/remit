@@ -62,34 +62,8 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         03 => 'CANCEL',
     ];
 
-    //    const OCCUPATION = 'OCC';
-    //
-    //    const SOURCE_OF_FUND = 'SOF';
-    //
-    //    const RELATIONSHIP = 'REL';
-    //
-    //    const PURPOSE_OF_REMITTANCE = 'POR';
-    //
-    //    const CUSTOMER_DOCUMENT_ID_TYPE = 'DOC';
-    //
-    //    /**
-    //     * @var string|null
-    //     */
-    //    public $country = null;
-    //
-    //    /**
-    //     * @var string|null
-    //     */
-    //    public $currency = null;
-    //
     public DOMDocument $xml;
 
-    //
-    //    /**
-    //     * @var array
-    //     */
-    //    public $transactionBody; // base64 encode of auth
-    //
     /**
      * Agrani Bank configuration.
      */
