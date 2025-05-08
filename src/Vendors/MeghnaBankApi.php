@@ -33,7 +33,6 @@ class MeghnaBankApi implements MoneyTransfer
 
     private PendingRequest $client;
 
-
     /**
      * MeghnaBankApiService constructor.
      */
@@ -96,7 +95,7 @@ class MeghnaBankApi implements MoneyTransfer
     }
 
     /**
-     * @param Model|BaseModel $order
+     * @param  Model|BaseModel  $order
      */
     public function requestQuote($order): AssignVendorVerdict
     {
@@ -142,7 +141,7 @@ class MeghnaBankApi implements MoneyTransfer
         // RECEIVER
         $params['RECEIVER_NAME'] = ($beneficiary_data['beneficiary_name'] ?? null);
         $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($beneficiary_data['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($beneficiary_data['city_name'] ?? null) . ',' . ($beneficiary_data['country_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($beneficiary_data['city_name'] ?? null).','.($beneficiary_data['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $beneficiary_data['relation_name'] ?? 'Relatives';
         $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($beneficiary_data['beneficiary_mobile'] ?? null));
         $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = intval($branch_data['branch_location_no'] ?? '');
@@ -180,8 +179,8 @@ class MeghnaBankApi implements MoneyTransfer
             unset($response['message']);
         }
 
-        if (!empty($response['missing_field'])) {
-            $response['Message'] = ' [' . implode(',', $response['missing_field']) . ']';
+        if (! empty($response['missing_field'])) {
+            $response['Message'] = ' ['.implode(',', $response['missing_field']).']';
         }
 
         $verdict = AssignVendorVerdict::make([
@@ -193,10 +192,10 @@ class MeghnaBankApi implements MoneyTransfer
 
         if (in_array($response['Code'], ['0001', '0002'])) {
             $verdict->status('true')
-                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: " . strtolower($response['Message']) . '.');
+                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: ".strtolower($response['Message']).'.');
         } else {
             $verdict->status('false')
-                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message']) . '.', 'warn');
+                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message']).'.', 'warn');
         }
 
         return $verdict;
@@ -249,7 +248,7 @@ class MeghnaBankApi implements MoneyTransfer
 
         if (isset($response['Code'])) {
             $verdict->message($response['Message'] ?? null)
-                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message'] ?? '') . '.');
+                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message'] ?? '').'.');
 
             return $verdict;
         }
