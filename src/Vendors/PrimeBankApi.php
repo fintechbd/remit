@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -60,7 +59,6 @@ class PrimeBankApi implements MoneyTransfer
         $this->apiUrl = $this->config[$this->status]['endpoint'];
         $this->secretKey = $this->config[$this->status]['secret_key'];
 
-
         $this->client = Http::withoutVerifying()
             ->baseUrl($this->apiUrl);
 
@@ -98,7 +96,7 @@ class PrimeBankApi implements MoneyTransfer
      */
     private function syncAuthToken(): void
     {
-        if (!$this->token || (!$this->expiredAt || $this->expiredAt->isPast())) {
+        if (! $this->token || (! $this->expiredAt || $this->expiredAt->isPast())) {
 
             $response = $this->post('/getToken', [
                 'CorporateId' => $this->config[$this->status]['corporate_id'],
@@ -108,11 +106,11 @@ class PrimeBankApi implements MoneyTransfer
 
             dd($response);
 
-            if (!empty($response['Error'])) {
+            if (! empty($response['Error'])) {
                 throw new \InvalidArgumentException($response['Error']);
             }
 
-            if (!empty($response['Token'])) {
+            if (! empty($response['Token'])) {
                 Core::setting()->setValue('remit', 'providers.primebank.token', $response['Token'], 'string');
                 Core::setting()->setValue('remit', 'providers.primebank.expired_at', \now()->format('Y-m-d H:i:s'), 'string');
             }
@@ -141,7 +139,7 @@ class PrimeBankApi implements MoneyTransfer
     }
 
     /**
-     * @param Model|BaseModel $order
+     * @param  Model|BaseModel  $order
      */
     public function requestQuote($order): AssignVendorVerdict
     {
@@ -241,7 +239,7 @@ class PrimeBankApi implements MoneyTransfer
         // RECEIVER
         $params['RECEIVER_NAME'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
         $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $order_data['beneficiary_data']['receiver_information']['relation_name'] ?? 'Relatives';
         $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($order_data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
         $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = intval($order_data['beneficiary_data']['branch_information']['branch_location_no'] ?? '');
@@ -279,8 +277,8 @@ class PrimeBankApi implements MoneyTransfer
             unset($response['message']);
         }
 
-        if (!empty($response['missing_field'])) {
-            $response['Message'] = ' [' . implode(',', $response['missing_field']) . ']';
+        if (! empty($response['missing_field'])) {
+            $response['Message'] = ' ['.implode(',', $response['missing_field']).']';
         }
 
         $verdict = AssignVendorVerdict::make([
@@ -292,10 +290,10 @@ class PrimeBankApi implements MoneyTransfer
 
         if (in_array($response['Code'], ['0001', '0002'])) {
             $verdict->status('true')
-                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: " . strtolower($response['Message']) . '.');
+                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: ".strtolower($response['Message']).'.');
         } else {
             $verdict->status('false')
-                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message']) . '.', 'warn');
+                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message']).'.', 'warn');
         }
 
         return $verdict;
@@ -347,7 +345,7 @@ class PrimeBankApi implements MoneyTransfer
 
         if (isset($response['Code'])) {
             $verdict->message($response['Message'] ?? null)
-                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message'] ?? '') . '.');
+                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message'] ?? '').'.');
 
             return $verdict;
         }
