@@ -213,12 +213,14 @@ return [
         ],
         'primebank' => [
             'mode' => env('REMIT_PRIME_BANK_MODE', 'sandbox'),
-            'driver' => \Fintech\Remit\Vendors\MeghnaBankApi::class,
+            'driver' => \Fintech\Remit\Vendors\PrimeBankApi::class,
             'wallet_verification' => false,
             'bank_transfer_verification' => true,
             'cash_pickup_verification' => false,
             'banks' => [],
             'countries' => [19],
+            'token' => null,
+            'expired_at' => null,
             'live' => [
                 'endpoint' => 'https://primefastlm.primebank.com.bd/primelm/primelmapi',
                 'corporate_id' => env('REMIT_PRIME_BANK_CORPORATE_ID', null),
@@ -228,8 +230,8 @@ return [
             ],
             'sandbox' => [
                 'endpoint' => 'https://primefastlm.primebank.com.bd/primelm/primelmapi',
-                'corporate_id' => env('REMIT_PRIME_CORPORATE_ID', null),
-                'secret_key' => env('REMIT_PRIME_SECRET_KEY', null),
+                'corporate_id' => env('REMIT_PRIME_BANK_CORPORATE_ID', null),
+                'secret_key' => env('REMIT_PRIME_BANK_SECRET_KEY', null),
                 'username' => env('REMIT_PRIME_BANK_USERNAME', null),
                 'password' => env('REMIT_PRIME_BANK_PASSWORD', null),
             ],

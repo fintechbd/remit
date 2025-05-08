@@ -2,6 +2,7 @@
 
 namespace Fintech\Remit\Vendors;
 
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use ErrorException;
 use Exception;
@@ -15,7 +16,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class PrimeBankApi implements MoneyTransfer
 {
@@ -33,17 +36,17 @@ class PrimeBankApi implements MoneyTransfer
      */
     private mixed $apiUrl;
 
-    private string $token;
+    private ?string $token;
 
-    private $expiredAt;
+    private ?Carbon $expiredAt;
 
-    private string $status = 'sandbox';
+    private string $status;
 
     private ?string $secretKey;
 
     private PendingRequest $client;
 
-    private Encrypter $encrypter;
+    private Encrypter $crypto;
 
     /**
      * PrimeBankApiApiService constructor.
@@ -53,28 +56,21 @@ class PrimeBankApi implements MoneyTransfer
     public function __construct()
     {
         $this->config = config('fintech.remit.providers.primebank');
+        $this->status = $this->config['mode'];
+        $this->apiUrl = $this->config[$this->status]['endpoint'];
+        $this->secretKey = $this->config[$this->status]['secret_key'];
 
-        if ($this->config['mode'] === 'sandbox') {
-            $this->apiUrl = $this->config[$this->status]['endpoint'];
-            $this->secretKey = $this->config[$this->status]['secret_key'];
-            $this->status = 'sandbox';
-
-        } else {
-            $this->apiUrl = $this->config[$this->status]['endpoint'];
-            $this->secretKey = $this->config[$this->status]['secret_key'];
-            $this->status = 'live';
-
-        }
 
         $this->client = Http::withoutVerifying()
-            ->baseUrl($this->apiUrl)
-            ->acceptJson();
+            ->baseUrl($this->apiUrl);
 
         $this->token = $this->config['token'] ?? null;
 
         $this->expiredAt = empty($this->config['expired_at']) ? null : CarbonImmutable::parse($this->config['expired_at']);
 
-        $this->encrypter = new Encrypter($this->secretKey, 'aes-256-cbc');
+        dd($this->secretKey);
+
+        $this->crypto = new Encrypter($this->secretKey, 'AES-128-CBC');
 
         $this->syncAuthToken();
     }
@@ -87,15 +83,13 @@ class PrimeBankApi implements MoneyTransfer
     {
         $requestBody = $this->encryptedRequest($params);
 
-        $responseBody = $this->client->withBody($requestBody)
+        $responseBody = $this->client
+            ->withBody($requestBody)
             ->contentType('text/plain')
             ->post($url)
             ->body();
 
-        $response = $this->decryptedRequest($responseBody);
-
-        return json_decode($response, true);
-
+        return $this->decryptedResponse($responseBody);
     }
 
     /**
@@ -104,19 +98,21 @@ class PrimeBankApi implements MoneyTransfer
      */
     private function syncAuthToken(): void
     {
-        if (! $this->token || (! $this->expiredAt || $this->expiredAt->isPast())) {
+        if (!$this->token || (!$this->expiredAt || $this->expiredAt->isPast())) {
 
-            $response = $this->client->post('/getToken', [
+            $response = $this->post('/getToken', [
                 'CorporateId' => $this->config[$this->status]['corporate_id'],
                 'UserId' => $this->config[$this->status]['username'],
                 'Password' => $this->config[$this->status]['password'],
-            ])->json();
+            ]);
 
-            if (! empty($response['Error'])) {
+            dd($response);
+
+            if (!empty($response['Error'])) {
                 throw new \InvalidArgumentException($response['Error']);
             }
 
-            if (! empty($response['Token'])) {
+            if (!empty($response['Token'])) {
                 Core::setting()->setValue('remit', 'providers.primebank.token', $response['Token'], 'string');
                 Core::setting()->setValue('remit', 'providers.primebank.expired_at', \now()->format('Y-m-d H:i:s'), 'string');
             }
@@ -127,17 +123,17 @@ class PrimeBankApi implements MoneyTransfer
     {
         $plainText = json_encode($payload);
 
-        return $this->encrypter->encryptString($plainText);
+        return Str::upper($this->crypto->encryptString($plainText));
     }
 
     /**
      * @throws ErrorException
      */
-    private function decryptedRequest(string $cipherText): string
+    private function decryptedResponse(string $cipherText): array
     {
         try {
 
-            return $this->encrypter->decryptString($cipherText);
+            return json_decode($this->crypto->decryptString($cipherText), true);
 
         } catch (DecryptException $e) {
             throw new ErrorException($e->getMessage());
@@ -145,7 +141,7 @@ class PrimeBankApi implements MoneyTransfer
     }
 
     /**
-     * @param  Model|BaseModel  $order
+     * @param Model|BaseModel $order
      */
     public function requestQuote($order): AssignVendorVerdict
     {
@@ -245,7 +241,7 @@ class PrimeBankApi implements MoneyTransfer
         // RECEIVER
         $params['RECEIVER_NAME'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
         $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $order_data['beneficiary_data']['receiver_information']['relation_name'] ?? 'Relatives';
         $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($order_data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
         $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = intval($order_data['beneficiary_data']['branch_information']['branch_location_no'] ?? '');
@@ -283,8 +279,8 @@ class PrimeBankApi implements MoneyTransfer
             unset($response['message']);
         }
 
-        if (! empty($response['missing_field'])) {
-            $response['Message'] = ' ['.implode(',', $response['missing_field']).']';
+        if (!empty($response['missing_field'])) {
+            $response['Message'] = ' [' . implode(',', $response['missing_field']) . ']';
         }
 
         $verdict = AssignVendorVerdict::make([
@@ -296,10 +292,10 @@ class PrimeBankApi implements MoneyTransfer
 
         if (in_array($response['Code'], ['0001', '0002'])) {
             $verdict->status('true')
-                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: ".strtolower($response['Message']).'.');
+                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: " . strtolower($response['Message']) . '.');
         } else {
             $verdict->status('false')
-                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message']).'.', 'warn');
+                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message']) . '.', 'warn');
         }
 
         return $verdict;
@@ -351,7 +347,7 @@ class PrimeBankApi implements MoneyTransfer
 
         if (isset($response['Code'])) {
             $verdict->message($response['Message'] ?? null)
-                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message'] ?? '').'.');
+                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message'] ?? '') . '.');
 
             return $verdict;
         }
