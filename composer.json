@@ -18,8 +18,6 @@
     "require": {
         "php": "^8.2",
         "ext-curl": "*",
-        "ext-dom": "*",
-        "ext-simplexml": "*",
         "fintech/core": "*",
         "fintech/transaction": "*",
         "laravel/framework": "^12.0||^11.0",
@@ -75,6 +73,9 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "suggest": {
-        "fintech/reload": "To use payment via interac-e-transfer"
+        "fintech/reload": "To use payment via interac-e-transfer",
+        "ext-openssl": "To use Prime Bank Remit API",
+        "ext-dom": "Required for CityBank, Islamic Bank & Agrani Bank.",
+        "ext-simplexml": "Required for CityBank, Islamic Bank & Agrani Bank."
     }
 }

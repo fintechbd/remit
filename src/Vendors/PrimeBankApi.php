@@ -11,9 +11,7 @@ use Fintech\Core\Facades\Core;
 use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Support\AccountVerificationVerdict;
-use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
@@ -45,7 +43,7 @@ class PrimeBankApi implements MoneyTransfer
 
     private PendingRequest $client;
 
-    private Encrypter $crypto;
+    private Encrypt $crypto;
 
     /**
      * PrimeBankApiApiService constructor.
@@ -71,6 +69,26 @@ class PrimeBankApi implements MoneyTransfer
         $this->crypto = new Encrypter($this->secretKey, 'AES-128-CBC');
 
         $this->syncAuthToken();
+    }
+
+    public function encrypt_decrypt($action, $string, $auth_key)
+    {
+        $encryptedReplaceVal = '~';
+        $encryptedActualVal = '/';
+        if ($encryptedReplaceVal <> NULL) {
+            $string = preg_replace("/" . $encryptedReplaceVal . "/", $encryptedActualVal, $string);
+        }
+        $output = false;
+        $encrypt_method = "AES-128-ECB"; // Changed to ECB
+        $secret_key = substr($auth_key, 0, 16);
+        $secret_iv = substr($secret_key, 0, 16); //This is not used in ECB mode, but we keep it for consistency.
+        // hash
+        $key = $secret_key; // No need to hash for AES-128-ECB
+        $iv = $secret_iv;  // IV is NOT used in ECB mode.  Important!
+
+        return ($action == 'ENC')
+            ? base64_encode(openssl_encrypt($string, $encrypt_method, $key, OPENSSL_RAW_DATA))
+            : openssl_decrypt(base64_decode($string), $encrypt_method, $key, OPENSSL_RAW_DATA);
     }
 
     /**
@@ -119,6 +137,28 @@ class PrimeBankApi implements MoneyTransfer
 
     private function encryptedRequest(array $payload = []): string
     {
+        $encryptedReplaceVal = '~';
+        $encryptedActualVal = '/';
+        if ($encryptedReplaceVal <> NULL) {
+            $string = preg_replace("/" . $encryptedReplaceVal . "/", $encryptedActualVal, $string);
+        }
+        $output = false;
+        $encrypt_method = "AES-128-ECB"; // Changed to ECB
+        $secret_key = substr($auth_key, 0, 16);
+        $secret_iv = substr($secret_key, 0, 16); //This is not used in ECB mode, but we keep it for consistency.
+        // hash
+        $key = $secret_key; // No need to hash for AES-128-ECB
+        $iv = $secret_iv;  // IV is NOT used in ECB mode.  Important!
+
+        if ($action == 'ENC') {
+            $output = openssl_encrypt($string, $encrypt_method, $key, OPENSSL_RAW_DATA); // Removed 1, added OPENSSL_RAW_DATA
+            $output = base64_encode($output);
+        } else if ($action == 'DEC') {
+            $output = openssl_decrypt(base64_decode($string), $encrypt_method, $key, OPENSSL_RAW_DATA); // Removed 1, added OPENSSL_RAW_DATA
+        }
+        return $output;
+
+
         $plainText = json_encode($payload);
 
         return Str::upper($this->crypto->encryptString($plainText));
