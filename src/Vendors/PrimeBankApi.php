@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 
 class PrimeBankApi implements MoneyTransfer
 {
@@ -71,13 +70,13 @@ class PrimeBankApi implements MoneyTransfer
     {
         $encryptedReplaceVal = '~';
         $encryptedActualVal = '/';
-        if ($encryptedReplaceVal <> NULL) {
-            $string = preg_replace("/" . $encryptedReplaceVal . "/", $encryptedActualVal, $string);
+        if ($encryptedReplaceVal != null) {
+            $string = preg_replace('/'.$encryptedReplaceVal.'/', $encryptedActualVal, $string);
         }
         $output = false;
-        $encrypt_method = "AES-128-ECB"; // Changed to ECB
+        $encrypt_method = 'AES-128-ECB'; // Changed to ECB
         $secret_key = substr($auth_key, 0, 16);
-        $secret_iv = substr($secret_key, 0, 16); //This is not used in ECB mode, but we keep it for consistency.
+        $secret_iv = substr($secret_key, 0, 16); // This is not used in ECB mode, but we keep it for consistency.
         // hash
         $key = $secret_key; // No need to hash for AES-128-ECB
         $iv = $secret_iv;  // IV is NOT used in ECB mode.  Important!
@@ -85,9 +84,10 @@ class PrimeBankApi implements MoneyTransfer
         if ($action == 'ENC') {
             $output = openssl_encrypt($string, $encrypt_method, $key, OPENSSL_RAW_DATA); // Removed 1, added OPENSSL_RAW_DATA
             $output = base64_encode($output);
-        } else if ($action == 'DEC') {
+        } elseif ($action == 'DEC') {
             $output = openssl_decrypt(base64_decode($string), $encrypt_method, $key, OPENSSL_RAW_DATA); // Removed 1, added OPENSSL_RAW_DATA
         }
+
         return $output;
     }
 
@@ -99,10 +99,9 @@ class PrimeBankApi implements MoneyTransfer
     private function post(string $url, array $params = []): array
     {
         $requestBody = $this->encryptedRequest($params);
-//        dump($requestBody);
-//
-//        dd($this->encrypt_decrypt('ENC', json_encode($params), $this->secretKey));
-
+        //        dump($requestBody);
+        //
+        //        dd($this->encrypt_decrypt('ENC', json_encode($params), $this->secretKey));
 
         $responseBody = $this->client
             ->withBody($requestBody)
@@ -121,7 +120,7 @@ class PrimeBankApi implements MoneyTransfer
      */
     private function syncAuthToken(): void
     {
-        if (!$this->token || (!$this->expiredAt || $this->expiredAt->isPast())) {
+        if (! $this->token || (! $this->expiredAt || $this->expiredAt->isPast())) {
 
             $response = $this->post('/getToken', [
                 'CorporateId' => $this->config[$this->status]['corporate_id'],
@@ -131,11 +130,11 @@ class PrimeBankApi implements MoneyTransfer
 
             dd($response);
 
-            if (!empty($response['Error'])) {
+            if (! empty($response['Error'])) {
                 throw new \InvalidArgumentException($response['Error']);
             }
 
-            if (!empty($response['Token'])) {
+            if (! empty($response['Token'])) {
                 Core::setting()->setValue('remit', 'providers.primebank.token', $response['Token'], 'string');
                 Core::setting()->setValue('remit', 'providers.primebank.expired_at', \now()->format('Y-m-d H:i:s'), 'string');
             }
@@ -153,6 +152,7 @@ class PrimeBankApi implements MoneyTransfer
             return base64_encode(openssl_encrypt($plainText, $this->cipher, $this->secretKey, OPENSSL_RAW_DATA));
         } catch (Exception $e) {
             throw new ErrorException($e->getMessage());
+
             return null;
         }
     }
@@ -166,12 +166,13 @@ class PrimeBankApi implements MoneyTransfer
             return json_decode(base64_encode(openssl_encrypt($cipherText, $this->cipher, $this->secretKey, OPENSSL_RAW_DATA)));
         } catch (Exception $e) {
             throw new ErrorException($e->getMessage());
+
             return null;
         }
     }
 
     /**
-     * @param Model|BaseModel $order
+     * @param  Model|BaseModel  $order
      */
     public function requestQuote($order): AssignVendorVerdict
     {
@@ -271,7 +272,7 @@ class PrimeBankApi implements MoneyTransfer
         // RECEIVER
         $params['RECEIVER_NAME'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
         $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $order_data['beneficiary_data']['receiver_information']['relation_name'] ?? 'Relatives';
         $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($order_data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
         $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = intval($order_data['beneficiary_data']['branch_information']['branch_location_no'] ?? '');
@@ -309,8 +310,8 @@ class PrimeBankApi implements MoneyTransfer
             unset($response['message']);
         }
 
-        if (!empty($response['missing_field'])) {
-            $response['Message'] = ' [' . implode(',', $response['missing_field']) . ']';
+        if (! empty($response['missing_field'])) {
+            $response['Message'] = ' ['.implode(',', $response['missing_field']).']';
         }
 
         $verdict = AssignVendorVerdict::make([
@@ -322,10 +323,10 @@ class PrimeBankApi implements MoneyTransfer
 
         if (in_array($response['Code'], ['0001', '0002'])) {
             $verdict->status('true')
-                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: " . strtolower($response['Message']) . '.');
+                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: ".strtolower($response['Message']).'.');
         } else {
             $verdict->status('false')
-                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message']) . '.', 'warn');
+                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message']).'.', 'warn');
         }
 
         return $verdict;
@@ -377,7 +378,7 @@ class PrimeBankApi implements MoneyTransfer
 
         if (isset($response['Code'])) {
             $verdict->message($response['Message'] ?? null)
-                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message'] ?? '') . '.');
+                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message'] ?? '').'.');
 
             return $verdict;
         }
