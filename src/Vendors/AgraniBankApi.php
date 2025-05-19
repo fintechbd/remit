@@ -92,12 +92,17 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
      * Agrani Bank Constructor
      *
      * @throws DOMException
+     * @throws Exception
      */
     public function __construct()
     {
         $this->config = config('fintech.remit.providers.agranibank');
         $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
+
+        if(!extension_loaded('dom')) {
+            throw new Exception("PHP DOM extension not installed.");
+        }
 
         $this->xml = new DOMDocument('1.0', 'utf-8');
         $this->xml->preserveWhiteSpace = false;

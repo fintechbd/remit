@@ -49,6 +49,7 @@ class PrimeBankApi implements MoneyTransfer
      * PrimeBankApiApiService constructor.
      *
      * @throws ConnectionException
+     * @throws Exception
      */
     public function __construct()
     {
@@ -63,6 +64,8 @@ class PrimeBankApi implements MoneyTransfer
         $this->token = $this->config['token'] ?? null;
 
         $this->expiredAt = empty($this->config['expired_at']) ? null : CarbonImmutable::parse($this->config['expired_at']);
+
+        throw new Exception("PHP OpenSSL extension not installed.");
 
         $this->syncAuthToken();
     }
