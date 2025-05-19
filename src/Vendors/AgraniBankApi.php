@@ -2,8 +2,6 @@
 
 namespace Fintech\Remit\Vendors;
 
-use DOMDocument;
-use DOMException;
 use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
@@ -62,7 +60,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         03 => 'CANCEL',
     ];
 
-    public DOMDocument $xml;
+    public \DOMDocument $xml;
 
     /**
      * Agrani Bank configuration.
@@ -91,7 +89,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     /**
      * Agrani Bank Constructor
      *
-     * @throws DOMException
+     * @throws \DOMException
      * @throws Exception
      */
     public function __construct()
@@ -100,11 +98,11 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
 
-        if (! extension_loaded('dom')) {
+        if (!extension_loaded('dom')) {
             throw new Exception('PHP DOM extension not installed.');
         }
 
-        $this->xml = new DOMDocument('1.0', 'UTF-8');
+        $this->xml = new \DOMDocument('1.0', 'UTF-8');
         $this->xml->preserveWhiteSpace = false;
         $this->xml->formatOutput = false;
         $this->xml->xmlStandalone = true;
@@ -136,7 +134,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
     /**
      * @throws ConnectionException
-     * @throws DOMException
+     * @throws \DOMException
      * @throws Exception
      */
     private function get($url, $payload)
@@ -164,14 +162,13 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
     /**
      * @throws ConnectionException
-     * @throws DOMException
+     * @throws \DOMException
      * @throws Exception
      */
-    private function post($url, $payload)
+    private function post($url, $payload): array
     {
-        $requestBody = $this->preparePayload($payload);
 
-        dump($requestBody);
+        $requestBody = $this->preparePayload($payload);
 
         $xmlResponse = Http::baseUrl($this->apiUrl)
             ->contentType('text/xml; charset=utf-8')
@@ -186,15 +183,31 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
             ->post($url)
             ->body();
 
-        dump($xmlResponse);
-
-        $response = Utility::parseXml($xmlResponse);
-
-        dd($response);
+        return Str::contains($xmlResponse, '<!doctype html>', true)
+            ? $this->parseHtmlError($xmlResponse)
+            : Utility::parseXml($xmlResponse);
     }
 
     /**
-     * @throws DOMException
+     * @param string $response
+     * @return array
+     * @throws \DOMException
+     */
+    private function parseHtmlError(string $response): array
+    {
+        $html = (new \DOMDocument())->loadHTML($response);
+
+        $xpath = new \DOMXPath($html);
+
+        $message = $xpath->query('/html/head/title')->item(0)?->nodeValue ?? 'Internal Server Error';
+
+        $description = $xpath->query('/html/body/p[2]')->item(0)?->nodeValue ?? 'Something went wrong';
+
+        return ['message' => $message, 'description' => $description];
+    }
+
+    /**
+     * @throws \DOMException
      */
     private function preparePayload($payload): string
     {
@@ -282,9 +295,9 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     }
 
     /**
-     * @param  Model|BaseModel  $order
+     * @param Model|BaseModel $order
      *
-     * @throws DOMException
+     * @throws \DOMException
      */
     public function requestQuote($order): AssignVendorVerdict
     {
