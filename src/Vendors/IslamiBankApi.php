@@ -143,6 +143,7 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
 
     /**
      * Islami Bank API constructor.
+     *
      * @throws Exception
      */
     public function __construct()
@@ -151,8 +152,8 @@ class IslamiBankApi implements MoneyTransfer, WalletTransfer
         $this->status = config('fintech.remit.providers.islamibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
 
-        if(!extension_loaded('dom')) {
-            throw new Exception("PHP DOM extension not installed.");
+        if (! extension_loaded('dom')) {
+            throw new Exception('PHP DOM extension not installed.');
         }
 
         $this->xml = new DOMDocument('1.0', 'utf-8');
