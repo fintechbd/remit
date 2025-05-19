@@ -199,17 +199,17 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
      */
     private function preparePayload($payload): string
     {
-//        $order = $this->xml->createElement('TrnOrder');
-//
-//        $header = $this->xml->createElement('Header');
-//        $header->appendChild($this->xml->createElement('excode', $this->excode()));
-//        $header->appendChild($this->xml->createElement('Username', $this->username()));
-//        $header->appendChild($this->xml->createElement('Expassword', $this->password()));
-//        $header->appendChild($this->xml->createElement('entereddatetime', now()->format('Y-m-d\TH:i:s\.v')));
-//
-//        $order->appendChild($header);
-//
-//        $order->appendChild($payload);
+        //        $order = $this->xml->createElement('TrnOrder');
+        //
+        //        $header = $this->xml->createElement('Header');
+        //        $header->appendChild($this->xml->createElement('excode', $this->excode()));
+        //        $header->appendChild($this->xml->createElement('Username', $this->username()));
+        //        $header->appendChild($this->xml->createElement('Expassword', $this->password()));
+        //        $header->appendChild($this->xml->createElement('entereddatetime', now()->format('Y-m-d\TH:i:s\.v')));
+        //
+        //        $order->appendChild($header);
+        //
+        //        $order->appendChild($payload);
 
         $this->xml->appendChild($payload);
 
