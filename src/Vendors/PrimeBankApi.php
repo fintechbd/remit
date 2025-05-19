@@ -64,8 +64,7 @@ class PrimeBankApi implements MoneyTransfer
 
         $this->expiredAt = empty($this->config['expired_at']) ? null : CarbonImmutable::parse($this->config['expired_at']);
 
-        throw new Exception("PHP OpenSSL extension not installed.");
-
+        throw new Exception('PHP OpenSSL extension not installed.');
         $this->syncAuthToken();
     }
 
