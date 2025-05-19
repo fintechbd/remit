@@ -171,7 +171,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     {
         $requestBody = $this->preparePayload($payload);
 
-        dd($requestBody);
+        dump($requestBody);
 
         $xmlResponse = Http::baseUrl($this->apiUrl)
             ->contentType('text/xml; charset=utf-8')
