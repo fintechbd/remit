@@ -104,7 +104,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
             throw new Exception("PHP DOM extension not installed.");
         }
 
-        $this->xml = new DOMDocument('1.0', 'utf-8');
+        $this->xml = new DOMDocument('1.0', 'UTF-8');
         $this->xml->preserveWhiteSpace = false;
         $this->xml->formatOutput = false;
         $this->xml->xmlStandalone = true;
@@ -171,6 +171,8 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     {
         $requestBody = $this->preparePayload($payload);
 
+        dd($requestBody);
+
         $xmlResponse = Http::baseUrl($this->apiUrl)
             ->contentType('text/xml; charset=utf-8')
             ->accept('application/xml')
@@ -184,7 +186,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
             ->post($url)
             ->body();
 
-        echo $xmlResponse;
+        dd($xmlResponse);
         exit();
 
         $response = Utility::parseXml($xmlResponse);
@@ -197,19 +199,19 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
      */
     private function preparePayload($payload): string
     {
-        $order = $this->xml->createElement('TrnOrder');
+//        $order = $this->xml->createElement('TrnOrder');
+//
+//        $header = $this->xml->createElement('Header');
+//        $header->appendChild($this->xml->createElement('excode', $this->excode()));
+//        $header->appendChild($this->xml->createElement('Username', $this->username()));
+//        $header->appendChild($this->xml->createElement('Expassword', $this->password()));
+//        $header->appendChild($this->xml->createElement('entereddatetime', now()->format('Y-m-d\TH:i:s\.v')));
+//
+//        $order->appendChild($header);
+//
+//        $order->appendChild($payload);
 
-        $header = $this->xml->createElement('Header');
-        $header->appendChild($this->xml->createElement('excode', $this->excode()));
-        $header->appendChild($this->xml->createElement('Username', $this->username()));
-        $header->appendChild($this->xml->createElement('Expassword', $this->password()));
-        $header->appendChild($this->xml->createElement('entereddatetime', now()->format('Y-m-d\TH:i:s\.v')));
-
-        $order->appendChild($header);
-
-        $order->appendChild($payload);
-
-        $this->xml->appendChild($order);
+        $this->xml->appendChild($payload);
 
         return $this->xml->saveXML();
     }
