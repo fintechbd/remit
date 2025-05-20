@@ -18,6 +18,7 @@ use Illuminate\Support\Str;
 class AgraniBankApi implements MoneyTransfer, WalletTransfer
 {
     public const ERROR_MESSAGES = [
+        200 => 'SUCCESSFUL',
         201 => 'DUPLICATE TRANSACTION NUMBER',
         202 => 'SIGN DIFFER',
         203 => 'UNHANDLED EXCEPTION',
@@ -98,7 +99,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
 
-        if (! extension_loaded('dom')) {
+        if (!extension_loaded('dom')) {
             throw new Exception('PHP DOM extension not installed.');
         }
 
@@ -300,7 +301,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     }
 
     /**
-     * @param  Model|BaseModel  $order
+     * @param Model|BaseModel $order
      *
      * @throws \DOMException
      */
@@ -398,35 +399,16 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
             ]);
         }
 
-        dd($response);
+        $accountTitle = $response["Response"]['fullname'] ?: null;
 
-        $response = $response["{$method}Response"]['return'] ?: '';
+        $json['status'] = 'TRUE';
+        $json['account_no'] = $inputs['account_no'] ?? null;
+        $json['account_title'] = $accountTitle ?? null;
+        $json['original'] = $response;
 
-        if (Str::startsWith($response, 'TRUE|')) {
-
-            $arr = explode('|', $response);
-            $json['status'] = 'TRUE';
-            $json['account_no'] = $arr[1] ?? null;
-            $json['account_title'] = $arr[2] ?? null;
-            $json['original'] = $response;
-
-            return AccountVerificationVerdict::make($json)
-                ->status($json['status'] === 'TRUE')
-                ->message(__('remit::messages.wallet_verification.success'))
-                ->wallet($bank);
-        }
-
-        $json = json_decode(
-            preg_replace(
-                '/(TRUE|FALSE)\|(\d{4})/iu',
-                '{"status":"$1", "code":$2, "original":"$0"}',
-                $response),
-            true);
-
-        return AccountVerificationVerdict::make()
-            ->status('false')
-            ->message(__('remit::messages.wallet_verification.failure'))
-            ->original([$json, 'message' => self::ERROR_MESSAGES[$json['code']] ?? ''])
+        return AccountVerificationVerdict::make($json)
+            ->status( 'TRUE')
+            ->message(__('remit::messages.wallet_verification.success'))
             ->wallet($bank);
     }
 
@@ -452,14 +434,11 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
         $transaction->appendChild($this->xml->createElement('rem_tel', $walletNo));
 
         $response = $this->post('/bkashvalidation', $transaction);
-        dd($response);
 
-        logger()->debug('Response:', [$response]);
-
-        if (isset($response['Fault'])) {
+        if (isset($response['status'])) {
             return AccountVerificationVerdict::make([
                 'status' => 'false',
-                'message' => $response['Fault']['faultstring'] ?? __('remit::messages.wallet_verification.failure'),
+                'message' => $response['message'] ?? __('remit::messages.wallet_verification.failure'),
                 'original' => $response,
                 'account_title' => 'N/A',
                 'account_no' => 'N/A',
@@ -467,36 +446,16 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
             ]);
         }
 
-        logger()->debug('Response:', [$response]);
+        $accountTitle = $response["Response"]['fullname'] ?: null;
 
-        $response = $response["{$method}Response"]['return'] ?: '';
+        $json['status'] = 'TRUE';
+        $json['account_no'] = $walletNo ?? null;
+        $json['account_title'] = $accountTitle ?? null;
+        $json['original'] = $response;
 
-        if (Str::startsWith($response, 'TRUE|')) {
-
-            $json = json_decode(
-                preg_replace(
-                    '/(TRUE|FALSE)\|(\d+)\|(.+)/iu',
-                    '{"status":"$1", "account_no":"$2", "account_title":"$3", "original":"$0"}',
-                    $response),
-                true);
-
-            return AccountVerificationVerdict::make($json)
-                ->status($json['status'] === 'TRUE')
-                ->message(__('remit::messages.wallet_verification.success'))
-                ->wallet($wallet);
-        }
-
-        $json = json_decode(
-            preg_replace(
-                '/(TRUE|FALSE)\|(\d{4})/iu',
-                '{"status":"$1", "code":$2, "original":"$0"}',
-                $response),
-            true);
-
-        return AccountVerificationVerdict::make()
-            ->status(false)
-            ->message(__('remit::messages.wallet_verification.failure'))
-            ->original([$json, 'message' => self::ERROR_MESSAGES[$json['code']] ?? ''])
+        return AccountVerificationVerdict::make($json)
+            ->status( 'TRUE')
+            ->message(__('remit::messages.wallet_verification.success'))
             ->wallet($wallet);
     }
 }
