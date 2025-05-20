@@ -99,7 +99,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
 
-        if (!extension_loaded('dom')) {
+        if (! extension_loaded('dom')) {
             throw new Exception('PHP DOM extension not installed.');
         }
 
@@ -299,7 +299,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     }
 
     /**
-     * @param Model|BaseModel $order
+     * @param  Model|BaseModel  $order
      *
      * @throws \DOMException
      */
@@ -397,7 +397,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
             ]);
         }
 
-        $accountTitle = $response["Response"]['fullname'] ?: null;
+        $accountTitle = $response['Response']['fullname'] ?: null;
 
         $json['status'] = 'TRUE';
         $json['account_no'] = $inputs['account_no'] ?? null;
@@ -405,7 +405,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
         $json['original'] = $response;
 
         return AccountVerificationVerdict::make($json)
-            ->status( 'TRUE')
+            ->status('TRUE')
             ->message(__('remit::messages.wallet_verification.success'))
             ->wallet($bank);
     }
@@ -444,7 +444,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
             ]);
         }
 
-        $accountTitle = $response["Response"]['fullname'] ?: null;
+        $accountTitle = $response['Response']['fullname'] ?: null;
 
         $json['status'] = 'TRUE';
         $json['account_no'] = $walletNo ?? null;
@@ -452,7 +452,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
         $json['original'] = $response;
 
         return AccountVerificationVerdict::make($json)
-            ->status( 'TRUE')
+            ->status('TRUE')
             ->message(__('remit::messages.wallet_verification.success'))
             ->wallet($wallet);
     }
