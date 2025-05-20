@@ -161,31 +161,34 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     }
 
     /**
-     * @throws ConnectionException
      * @throws \DOMException
      * @throws Exception
      */
     private function post($url, $payload): array
     {
+        try {
 
-        $requestBody = $this->preparePayload($payload);
+            $requestBody = $this->preparePayload($payload);
 
-        $xmlResponse = Http::baseUrl($this->apiUrl)
-            ->contentType('text/xml; charset=utf-8')
-            ->accept('text/xml;charset=utf-8')
-            ->withHeaders([
-                'Host' => parse_url($this->apiUrl, PHP_URL_HOST),
-                'Username' => $this->username(),
-                'Expassword' => $this->password(),
-                'Content-Length' => strlen($requestBody),
-            ])
-            ->withBody($requestBody, 'text/xml;charset=utf-8')
-            ->post($url)
-            ->body();
+            $xmlResponse = Http::baseUrl($this->apiUrl)
+                ->contentType('text/xml; charset=utf-8')
+                ->accept('text/xml;charset=utf-8')
+                ->withHeaders([
+                    'Host' => parse_url($this->apiUrl, PHP_URL_HOST),
+                    'Username' => $this->username(),
+                    'Expassword' => $this->password(),
+                    'Content-Length' => strlen($requestBody),
+                ])
+                ->withBody($requestBody, 'text/xml;charset=utf-8')
+                ->post($url)
+                ->body();
 
-        return Str::contains($xmlResponse, '<!doctype html>', true)
-            ? $this->parseHtmlError($xmlResponse)
-            : Utility::parseXml($xmlResponse);
+            return Str::contains($xmlResponse, '<!doctype html>', true)
+                ? $this->parseHtml($xmlResponse)
+                : Utility::parseXml($xmlResponse);
+        } catch (\Exception $e) {
+            return ['status' => 'FALSE', 'message' => $e->getMessage()];
+        }
     }
 
     /**
@@ -193,17 +196,19 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
      * @return array
      * @throws \DOMException
      */
-    private function parseHtmlError(string $response): array
+    private function parseHtml(string $response): array
     {
-        $html = (new \DOMDocument())->loadHTML($response);
+        $html = new \DOMDocument();
+
+        $html->loadHTML($response);
 
         $xpath = new \DOMXPath($html);
 
-        $message = $xpath->query('/html/head/title')->item(0)?->nodeValue ?? 'Internal Server Error';
+        $message = trim(strip_tags($xpath->query('/html/body/h1[1]')->item(0)?->textContent ?? 'Internal Server Error'));
 
-        $description = $xpath->query('/html/body/p[2]')->item(0)?->nodeValue ?? 'Something went wrong';
+        $description = str_replace('Description ', '', trim(strip_tags($xpath->query('/html/body/p[2]')->item(0)?->textContent ?? 'Something went wrong')));
 
-        return ['message' => $message, 'description' => $description];
+        return ['status' => 'FALSE', 'message' => "$message ($description)"];
     }
 
     /**
@@ -369,6 +374,7 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      * commission and other information related to order.
      *
      * @throws \ErrorException
+     * @throws \DOMException
      */
     public function validateBankAccount(array $inputs = []): AccountVerificationVerdict
     {
@@ -381,20 +387,18 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
 
         $response = $this->post('/t24validation', $transaction);
 
-        dd($response);
-
-        return AccountVerificationVerdict::make(['original' => $response]);
-
-        if (isset($response['Fault'])) {
+        if (isset($response['status'])) {
             return AccountVerificationVerdict::make([
                 'status' => 'false',
-                'message' => $response['Fault']['faultstring'] ?? __('remit::messages.wallet_verification.failure'),
+                'message' => $response['message'] ?? __('remit::messages.wallet_verification.failure'),
                 'original' => $response,
                 'account_title' => 'N/A',
                 'account_no' => 'N/A',
                 'wallet' => $bank,
             ]);
         }
+
+        dd($response);
 
         $response = $response["{$method}Response"]['return'] ?: '';
 
