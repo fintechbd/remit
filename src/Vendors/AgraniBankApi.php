@@ -88,6 +88,8 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     //     */
     //    private $countryService;
 
+    private $pfxPath = 'app/private/agrani_signature.pfx';
+
     /**
      * Agrani Bank Constructor
      *
@@ -96,6 +98,8 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
      */
     public function __construct()
     {
+        $this->pfxPath = storage_path($this->pfxPath);
+
         $this->config = config('fintech.remit.providers.agranibank');
         $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
@@ -273,11 +277,21 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $signature = '';
 
-        $privateKey = $this->getPrivateKeyFromPfx();
+        $plainText = "CAN0000000000000000817Hafijul IslamDemetrius O'Kon1234578995150136016895534342025-05-20T18:15:08.062";
 
-        if (!openssl_sign($plainText, $signature, $privateKey)) {
+        $stdCipher = "HjdK+LN2LT1oSLh59srouWqnFy7jSwDA5mws0bHMgKvHcbHlQRAefJ+N+PaWi6DHjvkCTThE0vEjquBn2JcKb3WOI6zp2AUgpgLnkgMqA8j3kb9JtBjhgnlUVyqeburgdNVUl2iG+JtRN8Rx0dmEZ1HxuckgJgrrIPOd9l+G5/uMF/YhdO6AdTV/JnPVCt9haQ8ipjjp3M6HKIGqB787KO9gfB6ToZTJfJFrSUF6TugVbd6XeMuNvpXhzcxFwYWPpRiyDSjCi+78GpUe16/zKcZJRkUMrzayu83vGYMHMyDRsgnKoXksf93mdv/orjF0NU5q26iDwl4mp45kQNnWEg==";
+
+        $srtCipher = "HjdK+LN2LT1oSLh59srouWqnFy7jSwDA5mws0bHMgKvHcbHlQRAefJ+N+PaWi6DHjvkCTThE0vEjquBn2JcKb3WOI6zp2AUgpgLnkgMqA8j3kb9JtBjhgnlUVyqeburgdNVUl2iG+JtRN8Rx0dmEZ1HxuckgJgrrIPOd9l+G5/uMF/YhdO6AdTV/JnPVCt9haQ8ipjjp3M6HKIGqB787KO9gfB6ToZTJfJFrSUF6TugVbd6XeMuNvpXhzcxFwYWPpRiyDSjCi+78GpUe16/zKcZJRkUMrzayu83vGYMHMyDRsgnKoXksf93mdv/orjF0NU5q26iDwl4mp45kQNnWEg==";
+
+        dd($stdCipher == $srtCipher);
+
+//        $privateKey = $this->getPrivateKeyFromPfx();
+
+        if (!openssl_sign($plainText, $signature, $this->sslPrivateKeyContent(), OPENSSL_ALGO_SHA256)) {
             throw new Exception("Unable to sign message");
         }
+
+        dd(base64_encode($signature));
 
         return base64_encode($signature);
     }
@@ -286,18 +300,29 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
     /**
      * @throws FileNotFoundException
+     * @throws Exception
      */
-
-    private function getPrivateKeyFromPfx()
+    private function getPrivateKeyFromPfx(): mixed
     {
-        $certificate = $this->sslCertificateContent();
-        $output_filepath = storage_path('app/private/agrani_signature.pfx');
-        $private_key = $this->sslPrivateKeyContent();
-        openssl_pkcs12_export_to_file($certificate, $output_filepath, $private_key, $this->password());
+        if (!is_file($this->pfxPath)) {
+            $certificate = $this->sslCertificateContent();
 
-        if (!$private_key) {
-            throw new \RuntimeException("Private key not found in [{$output_filepath}]");
+            $private_key = $this->sslPrivateKeyContent();
+
+            if (!openssl_pkcs12_export_to_file($certificate, $this->pfxPath, $private_key, $this->password())) {
+                throw new ErrorException("Unable to generate .pfx file");
+            }
         }
+
+        $pfxContents = file_get_contents($this->pfxPath);
+
+        $certs = [];
+
+        if (!openssl_pkcs12_read($pfxContents, $certs, $this->password())) {
+            throw new ErrorException("Failed to parse PFX file. Check password or file format.");
+        }
+
+        return $certs['pkey'];
     }
 
     /**
@@ -372,6 +397,9 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         dd($xmlResponse = $this->post('/***method', $envelope));
     }
 
+    /**
+     * @throws Exception
+     */
     private function __transferData(BaseModel $order): array
     {
         $data = $order->order_data;
