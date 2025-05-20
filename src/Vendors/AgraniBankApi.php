@@ -10,6 +10,7 @@ use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\WalletTransfer;
 use Fintech\Remit\Support\AccountVerificationVerdict;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
@@ -103,6 +104,10 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
             throw new Exception('PHP DOM extension not installed.');
         }
 
+        if (!extension_loaded('openssl')) {
+            throw new Exception('PHP OpenSSL extension not installed.');
+        }
+
         $this->xml = new \DOMDocument('1.0', 'UTF-8');
         $this->xml->preserveWhiteSpace = false;
         $this->xml->formatOutput = true;
@@ -131,6 +136,36 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     private function password(): ?string
     {
         return $this->config[$this->status]['password'];
+    }
+
+    /**
+     * Return Password from config
+     * @throws FileNotFoundException
+     */
+    private function sslPrivateKeyContent(): ?string
+    {
+        $filepath = $this->config[$this->status]['private_key'];
+
+        if (!is_file($filepath)) {
+            throw new FileNotFoundException("SSL Private key File does not exists in [$filepath].");
+        }
+
+        return file_get_contents($filepath);
+    }
+
+    /**
+     * Return Password from config
+     * @throws FileNotFoundException
+     */
+    private function sslCertificateContent(): ?string
+    {
+        $filepath = $this->config[$this->status]['certificate'];
+
+        if (!is_file($filepath)) {
+            throw new FileNotFoundException("SSL Certificate File does not exists in [$filepath].");
+        }
+
+        return file_get_contents($filepath);
     }
 
     /**
@@ -223,81 +258,46 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     }
 
     /**
-     * @return string|null
+     * @throws Exception
      */
-    public function getTransactionSignature(array $transferInfo = [])
+    public function encryptSignature(array $transferData = []): string
     {
+        $plainText = $transferData['tranno'];
+        $plainText .= $transferData['trmode'];
+        $plainText .= $transferData['benename'];
+        $plainText .= $transferData['remfname'];
+        $plainText .= $transferData['beneaccountno'];
+        $plainText .= $transferData['branchcode'];
+        $plainText .= $transferData['benetel'];
+        $plainText .= $transferData['entereddatetime'];
+
         $signature = '';
-        $signature .= $transferInfo['tranno'];
-        $signature .= $transferInfo['trmode'];
-        $signature .= $transferInfo['benename'];
-        $signature .= $transferInfo['remfname'];
-        $signature .= $transferInfo['beneaccountno'];
-        $signature .= $transferInfo['branchcode'];
-        $signature .= $transferInfo['benetel'];
-        $signature .= $transferInfo['remamountdest'];
-        $signature .= $transferInfo['entereddatetime'];
 
-        return $this->encryptSignature($signature, '');
+        $privateKey = $this->getPrivateKeyFromPfx();
 
-    }
-
-    public function encryptSignature(string $plainText, $privateKey)
-    {
-        /*$signature = '';
-
-        openssl_sign($plainText,$signature, $privateKey);*/
-        $key = '-----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA71FijlOQ4FfKc0VKtjc7Mv6aZmSR9oLjq3uDw/88avOSrIpw
-qaTCrwtk2zsFMl1YA3hByhF+TP95E0dDwGWXk1JkLWfZ/sjep+694PtS1oiyvOB8
-hTPYk6U42leHIZDldKk1eu7n0wUph5/5GfahXrHY+8qr38s/QVvG7ohh/dVs3rvs
-VJ+QBZz5X9WNYcWIWsEySkyAmtppNVUuf6pwtAkCO4565cNoTk+5zCXpRxsxkgkv
-HyTB+Nk4QuXibdC3slscZs75G9tc0TO7sC6lcnZFtTd4z5qk6f6LeI2/asviehc7
-awOl8nm9C3VKjZlgOYIejHhx0A5+lkzFdrk+JwIDAQABAoIBAQDNaZGqkFe9+Byx
-LDyggm+xqY9la9VNPbOlMPM8fAuj0UWIC5wAQIdKMAF1mwcu36f38nSluLYr6OxH
-e9fPgGPF8+ZAgu8+HbPfeLBKN+42bkbcj+LRglrW/+34m0BFs1T/+W0KA53AJqIq
-40iw3FxOJ2ETXjaAdLfqpZfujeluMOW+Rjhe2VpILpWurgX07kWphP09TqK3yuja
-At4lBKYFQth7a773uzSy8cy0Ohl+lvRHa/oVS0SXsiLo1iA1NYpXzKi0ww3+sSnw
-kfoacFImVuqm2rxikTgSu9GUkC1REoseT5FRj8uHzyBm/wXAM1lniUGr6Moh9Yl2
-a9KNbj8hAoGBAPpHuaWIboumderokBXOwjWcW0EBDx1+SiR3kFHoYvpck9wAe2BM
-vdva8IbFomCllq8UUGaW6vXEqVEUITwgGjZBQWeOgSWjo4p0b7o63ftZrsI+/Bl7
-1KJSSR/O45DTXrfD/jxMgTbnYqxbyBCQz54Om9aq338XICsFJkPsU2GzAoGBAPTJ
-hkvxxkPOEHmuNjWbxJluFtWfw1Sg5dLMrd6csPB/pczW/TZJwKCJslHH1/SA5PVm
-nroSkYgJDMas5caZogvuIO5YIdVIM0SVU0Hl1wYkK4nz2Zpt1YH7peQrjx9iuiGy
-UTYpjdxb4nkz6WL8Zp0AIG+5Wxm9IzYKZmpFPO+9AoGACI/fl/wc3AYrzod6NmTG
-XBMnRAgHPlkNrEWy2Dp8+Femb0ZM8jRt4lGRHOsx7OB9USv+vCO5kgLSUAXCRU5L
-10NQO3yyilkYxSnKkLJm2axtwBNriGumEI+EFOR9AH1apiq8Tc/IM9qik4boRzjN
-AXk6d5OM5coivZYFgxlYmOUCgYEA07hqO82GWqckgNo5cOylgr9BaMuiOtRfc5As
-4lpMf/coBJ/+qrHntfLjFPDwzD2fytFTgEUHMs4BCuYIZ1oCWqdAPGZl/P9RuIQf
-WuPcsycdsVgEYhmVjbOGrG8wf0j5DKQaseoHFQ00OPi5aDA+4JR3eaqsLPr2NYuR
-QWFZb1ECgYBYagQ16rdG/aBU0sOd745EskY9F6Z+vpQ7U1J2gA6hdqT3Pl8epSOY
-k6aHAHli0D9xC3UQzJSYVIGx6PDR8q5TgADSLyPDwejCArLUpchYrFz3R1FWRs/W
-egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
------END RSA PRIVATE KEY-----';
-        $certs = [];
-        openssl_pkcs12_read(file_get_contents(public_path('Certificate.crt')), $certs, '1'); // where 1106@123 is your certificate password
-        // dd($certs);
-
-        // if (! $certs ) return ;
-        $signature = '';
-        openssl_sign($plainText, $signature, $key);
+        if (!openssl_sign($plainText, $signature, $privateKey)) {
+            throw new Exception("Unable to sign message");
+        }
 
         return base64_encode($signature);
     }
 
     /*********************************** Transaction ***************************************/
 
-    /******************************************* Auth *******************************************/
+    /**
+     * @throws FileNotFoundException
+     */
 
-    public function createPfxFile()
+    private function getPrivateKeyFromPfx()
     {
-        $certificate = file_get_contents($this->config['signature']['certificate']);
-        $output_filepath = $this->config['signature']['target_pfx'];
-        $private_key = file_get_contents($this->config['signature']['private_key']);
-        $password = $this->config['signature']['passphase'];
+        $certificate = $this->sslCertificateContent();
+        $output_filepath = storage_path('app/private/agrani_signature.pfx');
+        $private_key = $this->sslPrivateKeyContent();
+        openssl_pkcs12_export_to_file($certificate, $output_filepath, $private_key, $this->password());
 
-        openssl_pkcs12_export_to_file($certificate, $output_filepath, $private_key, $password);
-
+        if (!$private_key) {
+            throw new \RuntimeException("Private key not found in [{$output_filepath}]");
+        }
     }
 
     /**
@@ -318,22 +318,101 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function executeOrder(BaseModel $order): AssignVendorVerdict
     {
-        $order = $this->xml->createElement('TrnOrder');
+        $transferData = $this->__transferData($order);
+
+        $envelope = $this->xml->createElement('TrnOrder');
 
         $header = $this->xml->createElement('Header');
         $header->appendChild($this->xml->createElement('excode', $this->excode()));
-        $header->appendChild($this->xml->createElement('entereddatetime', date('Y-m-d\TH:i:s\.v')));
+        $header->appendChild($this->xml->createElement('entereddatetime', $transferData['entereddatetime']));
         $header->appendChild($this->xml->createElement('Username', $this->username()));
         $header->appendChild($this->xml->createElement('Expassword', $this->password()));
 
+
         $transaction = $this->xml->createElement('Transaction');
-        $transaction->
+        $transaction->appendChild($this->xml->createElement('tranno', $transferData['tranno'] ?? null));
+        $transaction->appendChild($this->xml->createElement('traninfosl', $transferData['traninfosl'] ?? null));
+        $transaction->appendChild($this->xml->createElement('trmode', $transferData['trmode'] ?? null));
+        $transaction->appendChild($this->xml->createElement('purpose', $transferData['purpose'] ?? null));
+        $transaction->appendChild($this->xml->createElement('remamountsource', $transferData['remamountsource'] ?? null));
+        $transaction->appendChild($this->xml->createElement('remamountdest', $transferData['remamountdest'] ?? null));
+        $transaction->appendChild($this->xml->createElement('incentiveamount', $transferData['incentiveamount'] ?? null));
 
-        $order->appendChild($header);
+        $transaction->appendChild($this->xml->createElement('incentiveamountagr', $transferData['incentiveamountagr'] ?? null));
+        $transaction->appendChild($this->xml->createElement('ratevalue', $transferData['ratevalue'] ?? null));
+        $transaction->appendChild($this->xml->createElement('remid', $transferData['remid'] ?? null));
+        $transaction->appendChild($this->xml->createElement('remfname', $transferData['remfname'] ?? null));
+        $transaction->appendChild($this->xml->createElement('remlname', $transferData['remlname'] ?? null));
+        $transaction->appendChild($this->xml->createElement('rem_tel', $transferData['rem_tel'] ?? null));
+        $transaction->appendChild($this->xml->createElement('remaddress1', $transferData['remaddress1'] ?? null));
+        $transaction->appendChild($this->xml->createElement('remcountry', $transferData['remcountry'] ?? null));
+        $transaction->appendChild($this->xml->createElement('benename', $transferData['benename'] ?? null));
+        $transaction->appendChild($this->xml->createElement('benemname', $transferData['benemname'] ?? null));
+        $transaction->appendChild($this->xml->createElement('benlename', $transferData['benlename'] ?? null));
+        $transaction->appendChild($this->xml->createElement('beneaccountno', $transferData['beneaccountno'] ?? null));
+        $transaction->appendChild($this->xml->createElement('benetel', $transferData['benetel'] ?? null));
+        $transaction->appendChild($this->xml->createElement('branchcode', $transferData['branchcode'] ?? null));
+        $transaction->appendChild($this->xml->createElement('benebeftncode', $transferData['benebeftncode'] ?? null));
+        $transaction->appendChild($this->xml->createElement('beneaddress', $transferData['beneaddress'] ?? null));
+        $transaction->appendChild($this->xml->createElement('benecountry', $transferData['benecountry'] ?? null));
+        $transaction->appendChild($this->xml->createElement('excode', $this->excode()));
+        $transaction->appendChild($this->xml->createElement('entereddatetime', $transferData['entereddatetime'] ?? null));
+        $transaction->appendChild($this->xml->createElement('signaturevalue', $transferData['signaturevalue'] ?? null));
 
-        $order->appendChild($transaction);
 
-        dd($xmlResponse = $this->post('/***method', $order));
+        $signature = $this->xml->createElement('Signature');
+        $signature->appendChild($this->xml->createElement('SignatureValue', $transferData['signaturevalue'] ?? null));
+
+        $envelope->appendChild($header);
+
+        $envelope->appendChild($transaction);
+
+        $envelope->appendChild($signature);
+
+        dd($xmlResponse = $this->post('/***method', $envelope));
+    }
+
+    private function __transferData(BaseModel $order): array
+    {
+        $data = $order->order_data;
+
+        $sender_data = $data['beneficiary_data']['sender_information'] ?? [];
+        $beneficiary_data = $data['beneficiary_data']['receiver_information'] ?? [];
+        $bank_data = $data['beneficiary_data']['bank_information'] ?? [];
+        $branch_data = $data['beneficiary_data']['branch_information'] ?? [];
+
+        $transferData['tranno'] = ($data['beneficiary_data']['reference_no'] ?? null);
+        $transferData['traninfosl'] = ($data['purchase_number'] ?? null);
+        $transferData['trmode'] = 17;
+        $transferData['purpose'] = $sender_data['profile']['remittance_purpose']['vendor_code']['remit']['agranibank'] ?? "04";
+        $transferData['remamountsource'] = floatval($order->amount);
+        $transferData['remamountdest'] = round($data['sending_amount'] ?? '0');
+        $transferData['incentiveamount'] = 0;
+        $transferData['incentiveamountagr'] = 0;
+        $transferData['ratevalue'] = $data['currency_convert_rate']['rate'] ?? '0';
+        $transferData['remid'] = $sender_data['profile']['id_doc']['id_no'] ?? '';
+        $transferData['remfname'] = $sender_data['name'] ?? null;
+        $transferData['remlname'] = '';
+        $transferData['rem_tel'] = '';
+        $transferData['remaddress1'] = $sender_data['profile']['present_address']['city_name'] ?? null;
+        $transferData['remcountry'] = $sender_data['profile']['present_address']['country_name'] ?? null;
+        $transferData['beneid'] = '0';
+        $transferData['benename'] = ($beneficiary_data['beneficiary_name'] ?? null);
+        $transferData['benemname'] = '';
+        $transferData['benlename'] = '';
+        $transferData['beneaccountno'] = ($beneficiary_data['beneficiary_data']['bank_account_number'] ?? $beneficiary_data['beneficiary_data']['wallet_account_number'] ?? null);
+        $transferData['benetel'] = Str::substr(($beneficiary_data['beneficiary_mobile'] ?? ''), -11);
+        $transferData['branchcode'] = ($branch_data['branch_data']['location_no'] ?? '?');
+        $transferData['benebeftncode'] = '';
+        $transferData['beneaddress'] = implode(', ', [$beneficiary_data['city_name'] ?? '', $beneficiary_data['state_name'] ?? '']);
+        $transferData['benecountry'] = '';
+        $transferData['entereddatetime'] = now('Asia/Dhaka')->format('Y-m-d\TH:i:s\.v');
+        $transferData['counttr'] = '0';
+        $transferData['transtatus'] = '2';
+        $transferData['signaturevalue'] = $this->encryptSignature($transferData);
+
+        return $transferData;
+
     }
 
     /**
