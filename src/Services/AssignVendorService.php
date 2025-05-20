@@ -297,6 +297,7 @@ class AssignVendorService
         ]);
 
         $inputs['bank'] = $bank->toArray();
+        $inputs['user'] = \Fintech\Auth\Facades\Auth::user()->find($inputs['user_id'])->toArray();
 
         $instance = collect(config('fintech.remit.providers'))
             ->filter(function ($agent) use ($bank) {

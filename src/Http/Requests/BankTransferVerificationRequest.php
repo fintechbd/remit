@@ -23,6 +23,7 @@ class BankTransferVerificationRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => 'required|integer|exists:users,id',
             'account_no' => ['required', 'string', 'min:5', 'max:255'],
             'slug' => ['required', 'string', 'min:3', 'exists:banks,slug'],
             'branch_id' => ['nullable', 'integer', 'min:1', 'exists:bank_branches,id'],

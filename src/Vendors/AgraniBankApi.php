@@ -99,13 +99,13 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
 
-        if (! extension_loaded('dom')) {
+        if (!extension_loaded('dom')) {
             throw new Exception('PHP DOM extension not installed.');
         }
 
         $this->xml = new \DOMDocument('1.0', 'UTF-8');
         $this->xml->preserveWhiteSpace = false;
-        $this->xml->formatOutput = false;
+        $this->xml->formatOutput = true;
         $this->xml->xmlStandalone = true;
     }
 
@@ -170,6 +170,8 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         try {
 
             $requestBody = $this->preparePayload($payload);
+
+            dd($requestBody);
 
             $xmlResponse = Http::baseUrl($this->apiUrl)
                 ->contentType('text/xml; charset=utf-8')
@@ -299,18 +301,12 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
     }
 
     /**
-     * @param  Model|BaseModel  $order
+     * @param Model|BaseModel $order
      *
      * @throws \DOMException
      */
     public function requestQuote($order): AssignVendorVerdict
     {
-        $transaction = $this->xml->createElement('Transaction');
-        $transaction->appendChild($this->xml->createElement('beneaccountno', '0200014001577'));
-
-        $response = $this->get('/t24validation', $transaction);
-        dd($response);
-
         return AssignVendorVerdict::make();
     }
 
@@ -322,7 +318,22 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      */
     public function executeOrder(BaseModel $order): AssignVendorVerdict
     {
-        return AssignVendorVerdict::make();
+        $order = $this->xml->createElement('TrnOrder');
+
+        $header = $this->xml->createElement('Header');
+        $header->appendChild($this->xml->createElement('excode', $this->excode()));
+        $header->appendChild($this->xml->createElement('entereddatetime', date('Y-m-d\TH:i:s\.v')));
+        $header->appendChild($this->xml->createElement('Username', $this->username()));
+        $header->appendChild($this->xml->createElement('Expassword', $this->password()));
+
+        $transaction = $this->xml->createElement('Transaction');
+        $transaction->
+
+        $order->appendChild($header);
+
+        $order->appendChild($transaction);
+
+        dd($xmlResponse = $this->post('/***method', $order));
     }
 
     /**
@@ -416,20 +427,21 @@ egQQX++y13mrQFJVKA7RCQPWEynD29lwP2oizhGIfEiqGfJZd3pTXQ==
      * commission and other information related to order.
      *
      * @throws \ErrorException
+     * @throws \DOMException
      */
     public function validateWallet(array $inputs = []): AccountVerificationVerdict
     {
-        $wallet = $inputs['bank'] ?? null;
+        $wallet = $inputs['bank'] ?? [];
+        $remitter = $inputs['user'] ?? [];
 
         $walletNo = Str::substr($inputs['account_no'], ($wallet['vendor_code']['remit']['islamibank'] == '5') ? -12 : -11);
 
-        $method = 'validateBeneficiaryWallet';
         $transaction = $this->xml->createElement('Transaction');
         $transaction->appendChild($this->xml->createElement('benename', ''));
         $transaction->appendChild($this->xml->createElement('benemname', ''));
         $transaction->appendChild($this->xml->createElement('benlename', ''));
         $transaction->appendChild($this->xml->createElement('benetel', $walletNo));
-        $transaction->appendChild($this->xml->createElement('rem_tel', $walletNo));
+        $transaction->appendChild($this->xml->createElement('rem_tel', $remitter['mobile'] ?? '?'));
 
         $response = $this->post('/bkashvalidation', $transaction);
 
