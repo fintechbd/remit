@@ -193,13 +193,11 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     }
 
     /**
-     * @param string $response
-     * @return array
      * @throws \DOMException
      */
     private function parseHtml(string $response): array
     {
-        $html = new \DOMDocument();
+        $html = new \DOMDocument;
 
         $html->loadHTML($response);
 
