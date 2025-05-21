@@ -233,7 +233,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $signature = '';
 
-        if (!openssl_sign($plainText, $signature, $this->sslPrivateKeyContent(), OPENSSL_ALGO_SHA256)) {
+        if (! openssl_sign($plainText, $signature, $this->sslPrivateKeyContent(), OPENSSL_ALGO_SHA256)) {
             throw new Exception('Unable to sign message');
         }
 
