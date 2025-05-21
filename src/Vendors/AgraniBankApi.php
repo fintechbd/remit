@@ -9,6 +9,7 @@ use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\WalletTransfer;
+use Fintech\Remit\Services\AssignVendorService;
 use Fintech\Remit\Support\AccountVerificationVerdict;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
@@ -104,11 +105,11 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
 
-        if (! extension_loaded('dom')) {
+        if (!extension_loaded('dom')) {
             throw new Exception('PHP DOM extension not installed.');
         }
 
-        if (! extension_loaded('openssl')) {
+        if (!extension_loaded('openssl')) {
             throw new Exception('PHP OpenSSL extension not installed.');
         }
 
@@ -151,7 +152,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     {
         $filepath = $this->config[$this->status]['private_key'];
 
-        if (! is_file($filepath)) {
+        if (!is_file($filepath)) {
             throw new FileNotFoundException("SSL Private key File does not exists in [$filepath].");
         }
 
@@ -167,7 +168,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     {
         $filepath = $this->config[$this->status]['certificate'];
 
-        if (! is_file($filepath)) {
+        if (!is_file($filepath)) {
             throw new FileNotFoundException("SSL Certificate File does not exists in [$filepath].");
         }
 
@@ -212,18 +213,10 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
             $requestBody = $this->preparePayload($payload);
 
-            $xmlResponse = Http::baseUrl($this->apiUrl)
-                ->contentType('text/xml; charset=utf-8')
-                ->accept('text/xml;charset=utf-8')
-                ->withHeaders([
-                    'Host' => parse_url($this->apiUrl, PHP_URL_HOST),
-                    'Username' => $this->username(),
-                    'Expassword' => $this->password(),
-                    'Content-Length' => strlen($requestBody),
-                ])
-                ->withBody($requestBody, 'text/xml;charset=utf-8')
-                ->post($url)
-                ->body();
+            $xmlResponse = Http::soap($this->apiUrl . $url, '', $requestBody, [
+                'Username' => $this->username(),
+                'Expassword' => $this->password(),
+            ])->body();
 
             return Str::contains($xmlResponse, '<!doctype html>', true)
                 ? $this->parseHtml($xmlResponse)
@@ -264,7 +257,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     /**
      * @throws Exception
      */
-    public function encryptSignature(array $transferData = []): string
+    private function encryptSignature(array $transferData = []): string
     {
         $plainText = $transferData['tranno'];
         $plainText .= $transferData['trmode'];
@@ -279,11 +272,25 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         //        $privateKey = $this->getPrivateKeyFromPfx();
 
-        if (! openssl_sign($plainText, $signature, $this->sslPrivateKeyContent(), OPENSSL_ALGO_SHA256)) {
+        if (!openssl_sign($plainText, $signature, $this->sslPrivateKeyContent(), OPENSSL_ALGO_SHA256)) {
             throw new Exception('Unable to sign message');
         }
 
         return base64_encode($signature);
+    }
+
+    private function connectionException(array $response): AssignVendorVerdict
+    {
+        $verdict = AssignVendorVerdict::make([
+            'status' => 'false',
+            'original' => $response,
+            'amount' => '0',
+        ]);
+
+        $verdict->message($response['message'])
+            ->orderTimeline('(Agrani Bank) reported error: ' . strtolower($response['message']), 'warn');
+
+        return $verdict;
     }
 
     /*********************************** Transaction ***************************************/
@@ -294,12 +301,12 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
      */
     private function getPrivateKeyFromPfx(): mixed
     {
-        if (! is_file($this->pfxPath)) {
+        if (!is_file($this->pfxPath)) {
             $certificate = $this->sslCertificateContent();
 
             $private_key = $this->sslPrivateKeyContent();
 
-            if (! openssl_pkcs12_export_to_file($certificate, $this->pfxPath, $private_key, $this->password())) {
+            if (!openssl_pkcs12_export_to_file($certificate, $this->pfxPath, $private_key, $this->password())) {
                 throw new ErrorException('Unable to generate .pfx file');
             }
         }
@@ -308,7 +315,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $certs = [];
 
-        if (! openssl_pkcs12_read($pfxContents, $certs, $this->password())) {
+        if (!openssl_pkcs12_read($pfxContents, $certs, $this->password())) {
             throw new ErrorException('Failed to parse PFX file. Check password or file format.');
         }
 
@@ -316,7 +323,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     }
 
     /**
-     * @param  Model|BaseModel  $order
+     * @param Model|BaseModel $order
      *
      * @throws \DOMException
      */
@@ -382,9 +389,28 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $envelope->appendChild($signature);
 
-        $xmlResponse = $this->post('/CMoney', $envelope);
+        $response = $this->post('/clavis', $envelope);
 
-        dd($xmlResponse);
+        if (isset($response['status'])) {
+            return $this->connectionException($response);
+        }
+
+        $verdict = new AssignVendorVerdict([
+            'original' => $response,
+            'ref_number' => $transferData['tranno'],
+            'amount' => $transferData['remamountdest'],
+            'charge' => $order->charge_amount,
+            'discount' => $order->discount_amount,
+            'commission' => $order->commission_amount,
+        ]);
+
+//        $response = $response['Response'];
+
+        dd($response);
+
+//        if ($response['ResponseCode'] == 200) {
+//
+//        }
 
     }
 
