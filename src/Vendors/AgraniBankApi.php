@@ -5,6 +5,7 @@ namespace Fintech\Remit\Vendors;
 use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Enums\Transaction\OrderType;
 use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\MoneyTransfer;
@@ -85,15 +86,15 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
 
-        if (! extension_loaded('dom')) {
+        if (!extension_loaded('dom')) {
             throw new Exception('PHP DOM extension not installed.');
         }
 
-        if (! extension_loaded('openssl')) {
+        if (!extension_loaded('openssl')) {
             throw new Exception('PHP OpenSSL extension not installed.');
         }
 
-        $this->xml = new \DOMDocument('1.0', 'UTF-8');
+        $this->xml = new \DOMDocument('1.0', 'utf-8');
         $this->xml->preserveWhiteSpace = false;
         $this->xml->formatOutput = false;
         $this->xml->xmlStandalone = true;
@@ -132,7 +133,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     {
         $filepath = $this->config[$this->status]['private_key'];
 
-        if (! is_file($filepath)) {
+        if (!is_file($filepath)) {
             throw new FileNotFoundException("SSL Private key File does not exists in [$filepath].");
         }
 
@@ -176,7 +177,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         try {
             $requestBody = $this->preparePayload($payload);
 
-            $xmlResponse = Http::soap($this->apiUrl.$url, '', $requestBody, [
+            $xmlResponse = Http::soap($this->apiUrl . $url, '', $requestBody, [
                 'Username' => $this->username(),
                 'Expassword' => $this->password(),
             ])->body();
@@ -233,7 +234,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $signature = '';
 
-        if (! openssl_sign($plainText, $signature, $this->sslPrivateKeyContent(), OPENSSL_ALGO_SHA256)) {
+        if (!openssl_sign($plainText, $signature, $this->sslPrivateKeyContent(), OPENSSL_ALGO_SHA256)) {
             throw new Exception('Unable to sign message');
         }
 
@@ -249,13 +250,13 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         ]);
 
         $verdict->message($response['message'])
-            ->orderTimeline('(Agrani Bank) reported error: '.strtolower($response['message']), 'warn');
+            ->orderTimeline('(Agrani Bank) reported error: ' . strtolower($response['message']), 'warn');
 
         return $verdict;
     }
 
     /**
-     * @param  Model|BaseModel  $order
+     * @param Model|BaseModel $order
      *
      * @throws \DOMException
      */
@@ -295,7 +296,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $transaction->appendChild($this->xml->createElement('ratevalue', $transferData['ratevalue'] ?? null));
         $transaction->appendChild($this->xml->createElement('remid', $transferData['remid'] ?? null));
         $transaction->appendChild($this->xml->createElement('remfname', $transferData['remfname'] ?? null));
-        $transaction->appendChild($this->xml->createElement('remlname', $transferData['remlname'] ?? null));
+        $transaction->appendChild($this->xml->createElement('remlname', $transferData['remlname'] ?? '.'));
         $transaction->appendChild($this->xml->createElement('rem_tel', $transferData['rem_tel'] ?? null));
         $transaction->appendChild($this->xml->createElement('remaddress1', $transferData['remaddress1'] ?? null));
         $transaction->appendChild($this->xml->createElement('remcountry', $transferData['remcountry'] ?? null));
@@ -362,12 +363,11 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $transferData['tranno'] = ($data['beneficiary_data']['reference_no'] ?? null);
         $transferData['traninfosl'] = ($data['purchase_number'] ?? null);
-        $transferData['trmode'] = 17;
         $transferData['purpose'] = $sender_data['profile']['remittance_purpose']['vendor_code']['remit']['agranibank'] ?? '04';
         $transferData['remamountsource'] = floatval($order->amount);
         $transferData['remamountdest'] = round($data['sending_amount'] ?? '0');
-        $transferData['incentiveamount'] = 0;
-        $transferData['incentiveamountagr'] = 0;
+        $transferData['incentiveamount'] = '0.0';
+        $transferData['incentiveamountagr'] = '0.0';
         $transferData['ratevalue'] = $data['currency_convert_rate']['rate'] ?? '0';
         $transferData['remid'] = $sender_data['profile']['id_doc']['id_no'] ?? '';
         $transferData['remfname'] = $sender_data['name'] ?? null;
@@ -377,8 +377,8 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $transferData['remcountry'] = $sender_data['profile']['present_address']['country_name'] ?? null;
         $transferData['beneid'] = '0';
         $transferData['benename'] = ($beneficiary_data['beneficiary_name'] ?? null);
-        $transferData['benemname'] = '';
-        $transferData['benlename'] = '';
+        $transferData['benemname'] = ' ';
+        $transferData['benlename'] = ' ';
         $transferData['beneaccountno'] = ($beneficiary_data['beneficiary_data']['bank_account_number'] ?? $beneficiary_data['beneficiary_data']['wallet_account_number'] ?? null);
         $transferData['benetel'] = Str::substr(($beneficiary_data['beneficiary_mobile'] ?? ''), -11);
         $transferData['branchcode'] = ($branch_data['branch_data']['location_no'] ?? '?');
@@ -388,6 +388,25 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $transferData['entereddatetime'] = now('Asia/Dhaka')->format('Y-m-d\TH:i:s\.v');
         $transferData['counttr'] = '0';
         $transferData['transtatus'] = '2';
+
+        switch ($order->order_type->value) {
+            case OrderType::BankTransfer->value:
+                $transferData['trmode'] = ($bank_data['bank_slug'] == 'agrani-bank-ltd')
+                    ? '16'
+                    : '15';
+                break;
+
+            case OrderType::CashPickup->value:
+                $transferData['trmode'] = '05';
+                break;
+
+            case OrderType::WalletTransfer->value:
+                $transferData['trmode'] = ($bank_data['bank_slug'] == 'mfs-bkash')
+                    ? '17'
+                    : '5';
+                break;
+        }
+
         $transferData['signaturevalue'] = $this->encryptSignature($transferData);
 
         return $transferData;
