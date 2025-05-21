@@ -28,4 +28,11 @@ class CashPickupVerificationRequest extends FormRequest
             'slug' => ['required', 'string', 'min:3', 'exists:banks,slug'],
         ];
     }
+
+    protected function prepareForValidation()
+    {
+        $this->mergeIfMissing([
+            'user_id' => auth()->id()
+        ]);
+    }
 }

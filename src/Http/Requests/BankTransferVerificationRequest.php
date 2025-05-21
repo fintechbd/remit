@@ -30,4 +30,11 @@ class BankTransferVerificationRequest extends FormRequest
             'account_type_id' => ['nullable', 'integer', 'min:1'],
         ];
     }
+
+    protected function prepareForValidation()
+    {
+        $this->mergeIfMissing([
+            'user_id' => auth()->id()
+        ]);
+    }
 }
