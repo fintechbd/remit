@@ -174,7 +174,6 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     private function post($url, $payload): array
     {
         try {
-
             $requestBody = $this->preparePayload($payload);
 
             $xmlResponse = Http::soap($this->apiUrl.$url, '', $requestBody, [
@@ -323,6 +322,8 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $envelope->appendChild($signature);
 
         $response = $this->post('/clavis', $envelope);
+
+        dd($response);
 
         if (isset($response['status'])) {
             return $this->connectionException($response);
