@@ -277,21 +277,11 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $signature = '';
 
-        $plainText = "CAN0000000000000000817Hafijul IslamDemetrius O'Kon1234578995150136016895534342025-05-20T18:15:08.062";
-
-        $stdCipher = "HjdK+LN2LT1oSLh59srouWqnFy7jSwDA5mws0bHMgKvHcbHlQRAefJ+N+PaWi6DHjvkCTThE0vEjquBn2JcKb3WOI6zp2AUgpgLnkgMqA8j3kb9JtBjhgnlUVyqeburgdNVUl2iG+JtRN8Rx0dmEZ1HxuckgJgrrIPOd9l+G5/uMF/YhdO6AdTV/JnPVCt9haQ8ipjjp3M6HKIGqB787KO9gfB6ToZTJfJFrSUF6TugVbd6XeMuNvpXhzcxFwYWPpRiyDSjCi+78GpUe16/zKcZJRkUMrzayu83vGYMHMyDRsgnKoXksf93mdv/orjF0NU5q26iDwl4mp45kQNnWEg==";
-
-        $srtCipher = "HjdK+LN2LT1oSLh59srouWqnFy7jSwDA5mws0bHMgKvHcbHlQRAefJ+N+PaWi6DHjvkCTThE0vEjquBn2JcKb3WOI6zp2AUgpgLnkgMqA8j3kb9JtBjhgnlUVyqeburgdNVUl2iG+JtRN8Rx0dmEZ1HxuckgJgrrIPOd9l+G5/uMF/YhdO6AdTV/JnPVCt9haQ8ipjjp3M6HKIGqB787KO9gfB6ToZTJfJFrSUF6TugVbd6XeMuNvpXhzcxFwYWPpRiyDSjCi+78GpUe16/zKcZJRkUMrzayu83vGYMHMyDRsgnKoXksf93mdv/orjF0NU5q26iDwl4mp45kQNnWEg==";
-
-        dd($stdCipher == $srtCipher);
-
 //        $privateKey = $this->getPrivateKeyFromPfx();
 
         if (!openssl_sign($plainText, $signature, $this->sslPrivateKeyContent(), OPENSSL_ALGO_SHA256)) {
             throw new Exception("Unable to sign message");
         }
-
-        dd(base64_encode($signature));
 
         return base64_encode($signature);
     }
