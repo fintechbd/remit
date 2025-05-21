@@ -104,11 +104,11 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
 
-        if (!extension_loaded('dom')) {
+        if (! extension_loaded('dom')) {
             throw new Exception('PHP DOM extension not installed.');
         }
 
-        if (!extension_loaded('openssl')) {
+        if (! extension_loaded('openssl')) {
             throw new Exception('PHP OpenSSL extension not installed.');
         }
 
@@ -144,13 +144,14 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
     /**
      * Return Password from config
+     *
      * @throws FileNotFoundException
      */
     private function sslPrivateKeyContent(): ?string
     {
         $filepath = $this->config[$this->status]['private_key'];
 
-        if (!is_file($filepath)) {
+        if (! is_file($filepath)) {
             throw new FileNotFoundException("SSL Private key File does not exists in [$filepath].");
         }
 
@@ -159,13 +160,14 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
     /**
      * Return Password from config
+     *
      * @throws FileNotFoundException
      */
     private function sslCertificateContent(): ?string
     {
         $filepath = $this->config[$this->status]['certificate'];
 
-        if (!is_file($filepath)) {
+        if (! is_file($filepath)) {
             throw new FileNotFoundException("SSL Certificate File does not exists in [$filepath].");
         }
 
@@ -275,10 +277,10 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $signature = '';
 
-//        $privateKey = $this->getPrivateKeyFromPfx();
+        //        $privateKey = $this->getPrivateKeyFromPfx();
 
-        if (!openssl_sign($plainText, $signature, $this->sslPrivateKeyContent(), OPENSSL_ALGO_SHA256)) {
-            throw new Exception("Unable to sign message");
+        if (! openssl_sign($plainText, $signature, $this->sslPrivateKeyContent(), OPENSSL_ALGO_SHA256)) {
+            throw new Exception('Unable to sign message');
         }
 
         return base64_encode($signature);
@@ -292,13 +294,13 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
      */
     private function getPrivateKeyFromPfx(): mixed
     {
-        if (!is_file($this->pfxPath)) {
+        if (! is_file($this->pfxPath)) {
             $certificate = $this->sslCertificateContent();
 
             $private_key = $this->sslPrivateKeyContent();
 
-            if (!openssl_pkcs12_export_to_file($certificate, $this->pfxPath, $private_key, $this->password())) {
-                throw new ErrorException("Unable to generate .pfx file");
+            if (! openssl_pkcs12_export_to_file($certificate, $this->pfxPath, $private_key, $this->password())) {
+                throw new ErrorException('Unable to generate .pfx file');
             }
         }
 
@@ -306,15 +308,15 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $certs = [];
 
-        if (!openssl_pkcs12_read($pfxContents, $certs, $this->password())) {
-            throw new ErrorException("Failed to parse PFX file. Check password or file format.");
+        if (! openssl_pkcs12_read($pfxContents, $certs, $this->password())) {
+            throw new ErrorException('Failed to parse PFX file. Check password or file format.');
         }
 
         return $certs['pkey'];
     }
 
     /**
-     * @param Model|BaseModel $order
+     * @param  Model|BaseModel  $order
      *
      * @throws \DOMException
      */
@@ -340,7 +342,6 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $header->appendChild($this->xml->createElement('entereddatetime', $transferData['entereddatetime']));
         $header->appendChild($this->xml->createElement('Username', $this->username()));
         $header->appendChild($this->xml->createElement('Expassword', $this->password()));
-
 
         $transaction = $this->xml->createElement('Transaction');
         $transaction->appendChild($this->xml->createElement('tranno', $transferData['tranno'] ?? null));
@@ -372,7 +373,6 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $transaction->appendChild($this->xml->createElement('entereddatetime', $transferData['entereddatetime'] ?? null));
         $transaction->appendChild($this->xml->createElement('signaturevalue', $transferData['signaturevalue'] ?? null));
 
-
         $signature = $this->xml->createElement('Signature');
         $signature->appendChild($this->xml->createElement('SignatureValue', $transferData['signaturevalue'] ?? null));
 
@@ -403,7 +403,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $transferData['tranno'] = ($data['beneficiary_data']['reference_no'] ?? null);
         $transferData['traninfosl'] = ($data['purchase_number'] ?? null);
         $transferData['trmode'] = 17;
-        $transferData['purpose'] = $sender_data['profile']['remittance_purpose']['vendor_code']['remit']['agranibank'] ?? "04";
+        $transferData['purpose'] = $sender_data['profile']['remittance_purpose']['vendor_code']['remit']['agranibank'] ?? '04';
         $transferData['remamountsource'] = floatval($order->amount);
         $transferData['remamountdest'] = round($data['sending_amount'] ?? '0');
         $transferData['incentiveamount'] = 0;
