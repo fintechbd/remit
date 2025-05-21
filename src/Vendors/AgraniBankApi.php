@@ -382,7 +382,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $envelope->appendChild($signature);
 
-        $xmlResponse = $this->post('/***method', $envelope);
+        $xmlResponse = $this->post('/CMoney', $envelope);
 
         dd($xmlResponse);
 
