@@ -196,6 +196,7 @@ class AssignVendorService
 
     /**
      * @throws ErrorException
+     * @throws VendorNotFoundException
      */
     public function cancelOrder(BaseModel $order): mixed
     {
@@ -259,6 +260,10 @@ class AssignVendorService
         return $verdict;
     }
 
+    /**
+     * @throws ErrorException
+     * @throws VendorNotFoundException
+     */
     public function amendmentOrder(BaseModel $order): mixed
     {
         $this->initiateVendor($order->vendor);

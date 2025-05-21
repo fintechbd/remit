@@ -210,8 +210,6 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
             $requestBody = $this->preparePayload($payload);
 
-            dd($requestBody);
-
             $xmlResponse = Http::baseUrl($this->apiUrl)
                 ->contentType('text/xml; charset=utf-8')
                 ->accept('text/xml;charset=utf-8')
@@ -384,7 +382,10 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $envelope->appendChild($signature);
 
-        dd($xmlResponse = $this->post('/***method', $envelope));
+        $xmlResponse = $this->post('/***method', $envelope);
+
+        dd($xmlResponse);
+
     }
 
     /**
