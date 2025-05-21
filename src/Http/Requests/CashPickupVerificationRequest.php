@@ -32,7 +32,7 @@ class CashPickupVerificationRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->mergeIfMissing([
-            'user_id' => auth()->id()
+            'user_id' => auth()->id(),
         ]);
     }
 }
