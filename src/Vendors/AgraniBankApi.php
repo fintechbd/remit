@@ -213,7 +213,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $message = trim(strip_tags($xpath->query('/html/body/h1[1]')->item(0)?->textContent ?? 'Internal Server Error'));
 
-        $description = str_replace('Description ', '', trim(strip_tags($xpath->query('/html/body/p[2]')->item(0)?->textContent ?? 'Something went wrong')));
+        $description = str_replace(['Description ', 'â€“'], ['', '-'], trim(strip_tags($xpath->query('/html/body/p[2]')->item(0)?->textContent ?? 'Something went wrong')));
 
         return ['status' => 'FALSE', 'message' => "$message ($description)"];
     }
@@ -225,7 +225,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     {
         $this->xml->appendChild($payload);
 
-        return $this->xml->saveXML();
+        return trim($this->xml->saveXML());
     }
 
     /**
