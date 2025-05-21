@@ -180,6 +180,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
             $xmlResponse = Http::soap($this->apiUrl.$url, '', $requestBody, [
                 'Username' => $this->username(),
                 'Expassword' => $this->password(),
+                'Accept' => 'application/xml',
             ])->body();
 
             return Str::contains($xmlResponse, '<!doctype html>', true)
