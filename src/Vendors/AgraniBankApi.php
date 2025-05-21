@@ -9,7 +9,6 @@ use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Core\Supports\Utility;
 use Fintech\Remit\Contracts\MoneyTransfer;
 use Fintech\Remit\Contracts\WalletTransfer;
-use Fintech\Remit\Services\AssignVendorService;
 use Fintech\Remit\Support\AccountVerificationVerdict;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\Model;
@@ -86,11 +85,11 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
 
-        if (!extension_loaded('dom')) {
+        if (! extension_loaded('dom')) {
             throw new Exception('PHP DOM extension not installed.');
         }
 
-        if (!extension_loaded('openssl')) {
+        if (! extension_loaded('openssl')) {
             throw new Exception('PHP OpenSSL extension not installed.');
         }
 
@@ -133,7 +132,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     {
         $filepath = $this->config[$this->status]['private_key'];
 
-        if (!is_file($filepath)) {
+        if (! is_file($filepath)) {
             throw new FileNotFoundException("SSL Private key File does not exists in [$filepath].");
         }
 
@@ -178,7 +177,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
             $requestBody = $this->preparePayload($payload);
 
-            $xmlResponse = Http::soap($this->apiUrl . $url, '', $requestBody, [
+            $xmlResponse = Http::soap($this->apiUrl.$url, '', $requestBody, [
                 'Username' => $this->username(),
                 'Expassword' => $this->password(),
             ])->body();
@@ -251,13 +250,13 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         ]);
 
         $verdict->message($response['message'])
-            ->orderTimeline('(Agrani Bank) reported error: ' . strtolower($response['message']), 'warn');
+            ->orderTimeline('(Agrani Bank) reported error: '.strtolower($response['message']), 'warn');
 
         return $verdict;
     }
 
     /**
-     * @param Model|BaseModel $order
+     * @param  Model|BaseModel  $order
      *
      * @throws \DOMException
      */
@@ -338,13 +337,13 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
             'commission' => $order->commission_amount,
         ]);
 
-//        $response = $response['Response'];
+        //        $response = $response['Response'];
 
         dd($response);
 
-//        if ($response['ResponseCode'] == 200) {
-//
-//        }
+        //        if ($response['ResponseCode'] == 200) {
+        //
+        //        }
 
     }
 
