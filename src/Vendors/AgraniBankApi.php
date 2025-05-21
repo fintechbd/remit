@@ -73,23 +73,6 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
     private string $apiUrl;
 
     private string $status = 'sandbox';
-    //
-    //    /**
-    //     * @var string|null
-    //     */
-    //    private $basicAuthHash = null;
-    //
-    //    /**
-    //     * @var CatalogListService
-    //     */
-    //    private $catalogListService;
-    //
-    //    /**
-    //     * @var CountryService
-    //     */
-    //    private $countryService;
-
-    private $pfxPath = 'app/private/agrani_signature.pfx';
 
     /**
      * Agrani Bank Constructor
@@ -99,8 +82,6 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
      */
     public function __construct()
     {
-        $this->pfxPath = storage_path($this->pfxPath);
-
         $this->config = config('fintech.remit.providers.agranibank');
         $this->status = config('fintech.remit.providers.agranibank.mode');
         $this->apiUrl = $this->config[$this->status]['endpoint'];
@@ -115,7 +96,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $this->xml = new \DOMDocument('1.0', 'UTF-8');
         $this->xml->preserveWhiteSpace = false;
-        $this->xml->formatOutput = true;
+        $this->xml->formatOutput = false;
         $this->xml->xmlStandalone = true;
     }
 
@@ -154,22 +135,6 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         if (!is_file($filepath)) {
             throw new FileNotFoundException("SSL Private key File does not exists in [$filepath].");
-        }
-
-        return file_get_contents($filepath);
-    }
-
-    /**
-     * Return Password from config
-     *
-     * @throws FileNotFoundException
-     */
-    private function sslCertificateContent(): ?string
-    {
-        $filepath = $this->config[$this->status]['certificate'];
-
-        if (!is_file($filepath)) {
-            throw new FileNotFoundException("SSL Certificate File does not exists in [$filepath].");
         }
 
         return file_get_contents($filepath);
@@ -270,8 +235,6 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
 
         $signature = '';
 
-        //        $privateKey = $this->getPrivateKeyFromPfx();
-
         if (!openssl_sign($plainText, $signature, $this->sslPrivateKeyContent(), OPENSSL_ALGO_SHA256)) {
             throw new Exception('Unable to sign message');
         }
@@ -291,35 +254,6 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
             ->orderTimeline('(Agrani Bank) reported error: ' . strtolower($response['message']), 'warn');
 
         return $verdict;
-    }
-
-    /*********************************** Transaction ***************************************/
-
-    /**
-     * @throws FileNotFoundException
-     * @throws Exception
-     */
-    private function getPrivateKeyFromPfx(): mixed
-    {
-        if (!is_file($this->pfxPath)) {
-            $certificate = $this->sslCertificateContent();
-
-            $private_key = $this->sslPrivateKeyContent();
-
-            if (!openssl_pkcs12_export_to_file($certificate, $this->pfxPath, $private_key, $this->password())) {
-                throw new ErrorException('Unable to generate .pfx file');
-            }
-        }
-
-        $pfxContents = file_get_contents($this->pfxPath);
-
-        $certs = [];
-
-        if (!openssl_pkcs12_read($pfxContents, $certs, $this->password())) {
-            throw new ErrorException('Failed to parse PFX file. Check password or file format.');
-        }
-
-        return $certs['pkey'];
     }
 
     /**

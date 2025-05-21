@@ -143,7 +143,6 @@ return [
                 'password' => env('REMIT_AGRANI_BANK_PASSWORD'),
                 'excode' => env('REMIT_AGRANI_BANK_EXCODE'),
                 'private_key' => env('REMIT_AGRANI_SSL_PRIVATE_KEY_PATH', storage_path('app/private/private.key')),
-                'certificate' => env('REMIT_AGRANI_SSL_CERT_KEY_PATH', storage_path('app/private/ca_certificate.crt')),
             ],
             'sandbox' => [
                 'endpoint' => 'https://fex.agranibank.org/remapiuat',
@@ -151,7 +150,6 @@ return [
                 'password' => env('REMIT_AGRANI_BANK_PASSWORD'),
                 'excode' => env('REMIT_AGRANI_BANK_EXCODE'),
                 'private_key' => env('REMIT_AGRANI_SSL_PRIVATE_KEY_PATH', storage_path('app/private/private.key')),
-                'certificate' => env('REMIT_AGRANI_SSL_CERT_KEY_PATH', storage_path('app/private/ca_certificate.crt')),
             ],
         ],
         'citybank' => [
