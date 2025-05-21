@@ -20,7 +20,7 @@ use Illuminate\Support\Str;
 class AgraniBankApi implements MoneyTransfer, WalletTransfer
 {
     public const ERROR_MESSAGES = [
-        200 => 'SUCCESSFUL',
+        200 => 'TRANSACTION SUCCESSFUL',
         201 => 'DUPLICATE TRANSACTION NUMBER',
         202 => 'SIGN DIFFER',
         203 => 'UNHANDLED EXCEPTION',
@@ -44,9 +44,9 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
         420 => 'BENEFICIARY TEL FORMAT WRONG',
         421 => 'BENEFICIARY TEL CONTAIN CHARS',
         422 => 'ACCOUNT NO IS WRONG',
-        425 => 'REM TEL CONTAIN CHARS',
         423 => 'RATE VALUE 0',
         424 => 'REMIT AMOUNT DEST VALUE 0',
+        425 => 'REM TEL CONTAIN CHARS',
         //		425 => 'ACCOUNT NO IS WRONG',
         430 => 'TRANSACTION NUMBER IS MORE THAN 20 CHARS',
         502 => 'REMITTER FIRST NAME IS NULL',
