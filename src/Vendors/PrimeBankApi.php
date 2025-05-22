@@ -81,7 +81,7 @@ class PrimeBankApi implements MoneyTransfer
         $requestBody = $this->encryptedRequest($params);
 
         $responseBody = $this->client
-            ->withBody($requestBody,'text/plain')
+            ->withBody($requestBody, 'text/plain')
             ->post($url)
             ->body();
 
