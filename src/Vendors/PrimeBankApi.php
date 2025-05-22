@@ -100,6 +100,8 @@ class PrimeBankApi implements MoneyTransfer
                 'Password' => $this->config[$this->status]['password'],
             ]);
 
+            dd($response);
+
             if (!empty($response['Error'])) {
                 throw new \InvalidArgumentException($response['Error']);
             }
