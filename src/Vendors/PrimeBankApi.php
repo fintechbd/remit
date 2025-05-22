@@ -83,6 +83,10 @@ class PrimeBankApi implements MoneyTransfer
             ->post($url)
             ->body();
 
+        if (Utility::isJson($responseBody)) {
+            return json_decode($responseBody);
+        }
+
         return $this->decryptedResponse($responseBody);
     }
 
