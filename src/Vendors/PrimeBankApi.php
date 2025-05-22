@@ -73,7 +73,6 @@ class PrimeBankApi implements MoneyTransfer
 
     /**
      * @throws ConnectionException
-     * @throws ErrorException
      * @throws Exception
      */
     private function post(string $url, array $params = []): ?array
@@ -101,8 +100,6 @@ class PrimeBankApi implements MoneyTransfer
                 'CorporateId' => $this->config[$this->status]['corporate_id'],
                 'Password' => $this->config[$this->status]['password'],
             ]);
-
-            dd($response);
 
             if (! empty($response['Error'])) {
                 throw new \InvalidArgumentException($response['Error']);
