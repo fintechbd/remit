@@ -8,6 +8,7 @@ use Fintech\Remit\Commands\CityBankSetupCommand;
 use Fintech\Remit\Commands\InstallCommand;
 use Fintech\Remit\Commands\IslamiBankSetupCommand;
 use Fintech\Remit\Commands\MeghnaBankSetupCommand;
+use Fintech\Remit\Commands\PrimeBankSetupCommand;
 use Fintech\Remit\Commands\RemitCommand;
 use Fintech\Remit\Commands\RemitOrderStatusUpdateCommand;
 use Fintech\Remit\Providers\EventServiceProvider;
@@ -68,6 +69,7 @@ class RemitServiceProvider extends ServiceProvider
                 CityBankSetupCommand::class,
                 IslamiBankSetupCommand::class,
                 MeghnaBankSetupCommand::class,
+                PrimeBankSetupCommand::class,
                 InstallCommand::class,
                 RemitCommand::class,
                 RemitOrderStatusUpdateCommand::class,

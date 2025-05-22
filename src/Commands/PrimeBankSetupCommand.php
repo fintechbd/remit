@@ -10,7 +10,7 @@ use Throwable;
 
 class PrimeBankSetupCommand extends Command
 {
-    // comment are agrani bank doc serial
+    // comment are prime bank doc serial
 
     const COUNTRY_CODES = [
         ['name' => 'Afghanistan', 'iso3' => 'AFG', 'revised_code' => 'AF'],
@@ -300,9 +300,9 @@ class PrimeBankSetupCommand extends Command
         'travel-expenses' => '13',
     ];
 
-    public $signature = 'remit:agrani-bank-setup';
+    public $signature = 'remit:prime-bank-setup';
 
-    public $description = 'install/update required fields for agrani bank';
+    public $description = 'install/update required fields for prime bank';
 
     public function handle(): int
     {
@@ -320,7 +320,7 @@ class PrimeBankSetupCommand extends Command
                 $this->info('`fintech/business` is not installed. Skipped');
             }
 
-            $this->info('Agrani Bank Remit service vendor setup completed.');
+            $this->info('Prime Bank Remit service vendor setup completed.');
 
             return self::SUCCESS;
 
@@ -353,7 +353,7 @@ class PrimeBankSetupCommand extends Command
                         $vendor_code = json_decode($vendor_code, true);
                     }
 
-                    $vendor_code['remit']['agranibank'] = $code;
+                    $vendor_code['remit']['primebank'] = $code;
 
                     if (! MetaData::remittancePurpose()->update($purposeOfRemittance->getKey(), ['vendor_code' => $vendor_code])) {
                         throw new \Exception("Purpose of Remittance ID: {$purposeOfRemittance->getKey()} update failed.");
@@ -391,7 +391,7 @@ class PrimeBankSetupCommand extends Command
                         $vendor_code = json_decode($vendor_code, true);
                     }
 
-                    $vendor_code['remit']['agranibank'] = $countryArray['revised_code'];
+                    $vendor_code['remit']['primebank'] = $countryArray['revised_code'];
 
                     if (! MetaData::remittancePurpose()->update($country->getKey(), ['vendor_code' => $vendor_code])) {
                         throw new \Exception("Country ID: {$country->getKey()} update failed.");
