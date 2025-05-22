@@ -272,7 +272,7 @@ class AgraniBankApi implements MoneyTransfer, WalletTransfer
      */
     public function requestQuote($order): AssignVendorVerdict
     {
-        return AssignVendorVerdict::make();
+        return $order->defaultRequestQuoteResponse(['vendor' => class_basename(__CLASS__)]);
     }
 
     /**

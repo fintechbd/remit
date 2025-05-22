@@ -104,17 +104,7 @@ class MeghnaBankApi implements MoneyTransfer
             'confRate' => 'y',
         ]);
 
-        return AssignVendorVerdict::make([
-            'status' => 'TRUE',
-            'message' => 'The request was successful',
-            'amount' => $order->amount,
-            'original' => $response,
-            'ref_number' => $order->order_number,
-            'charge' => $order->charge_amount,
-            'discount' => $order->discount_amount,
-            'commission' => $order->commission_amount,
-        ])
-            ->orderTimeline('The requestQuote method was made internal successful', 'success');
+        return $order->defaultRequestQuoteResponse(['vendor' => class_basename(__CLASS__)]);
     }
 
     /**

@@ -156,18 +156,7 @@ class PrimeBankApi implements MoneyTransfer
      */
     public function requestQuote($order): AssignVendorVerdict
     {
-        //        $response = $this->get('/remitEnquiry', [
-        //            'queryType' => 1,
-        //            'confRate' => 'y',
-        //        ]);
-
-        return AssignVendorVerdict::make([
-            'status' => 'true',
-            'amount' => '0',
-            'message' => 'The request was successful',
-            'original' => $response ?? [],
-            'ref_number' => $order->order_number,
-        ]);
+        return $order->defaultRequestQuoteResponse(['vendor' => class_basename(__CLASS__)]);
     }
 
     /**
