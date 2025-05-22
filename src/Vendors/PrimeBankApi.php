@@ -7,6 +7,7 @@ use Carbon\CarbonImmutable;
 use ErrorException;
 use Exception;
 use Fintech\Core\Abstracts\BaseModel;
+use Fintech\Core\Enums\Transaction\OrderType;
 use Fintech\Core\Facades\Core;
 use Fintech\Core\Supports\AssignVendorVerdict;
 use Fintech\Core\Supports\Utility;
@@ -76,10 +77,8 @@ class PrimeBankApi implements MoneyTransfer
      */
     private function post(string $url, array $params = []): ?array
     {
-        $requestBody = $this->encryptedRequest($params);
-
         $responseBody = $this->client
-            ->withBody($requestBody, 'text/plain')
+            ->withBody($this->encryptedRequest($params), 'text/plain')
             ->post($url)
             ->body();
 
@@ -96,23 +95,25 @@ class PrimeBankApi implements MoneyTransfer
      */
     private function syncAuthToken(): void
     {
-        if (! $this->token || (! $this->expiredAt || $this->expiredAt->isPast())) {
+        if (!$this->token || (!$this->expiredAt || $this->expiredAt->isPast())) {
 
-            $response = $this->post('/getToken', [
-                'UserId' => $this->config[$this->status]['username'],
-                'CorporateId' => $this->config[$this->status]['corporate_id'],
-                'Password' => $this->config[$this->status]['password'],
-            ]);
+            $response = $this->client
+                ->withBody(
+                    $this->encryptedRequest([
+                        'UserId' => $this->config[$this->status]['username'],
+                        'CorporateId' => $this->config[$this->status]['corporate_id'],
+                        'Password' => $this->config[$this->status]['password'],
+                    ]), 'text/plain')
+                ->post('/getToken')
+                ->json();
 
-            dd($response);
-
-            if (! empty($response['Error'])) {
+            if (!empty($response['Error'])) {
                 throw new \InvalidArgumentException($response['Error']);
             }
 
-            if (! empty($response['Token'])) {
+            if (!empty($response['Token'])) {
                 Core::setting()->setValue('remit', 'providers.primebank.token', $response['Token'], 'string');
-                Core::setting()->setValue('remit', 'providers.primebank.expired_at', \now()->format('Y-m-d H:i:s'), 'string');
+                Core::setting()->setValue('remit', 'providers.primebank.expired_at', \now()->addHour()->format('Y-m-d H:i:s'), 'string');
             }
         }
     }
@@ -124,7 +125,7 @@ class PrimeBankApi implements MoneyTransfer
     {
         $plainText = json_encode($payload);
 
-        if (! Utility::isJson($plainText)) {
+        if (!Utility::isJson($plainText)) {
             throw new JsonException('Unable to encode the data');
         }
 
@@ -141,7 +142,7 @@ class PrimeBankApi implements MoneyTransfer
      * @throws DecryptException
      * @throws JsonException
      */
-    public function decryptedResponse(string $cipherText): ?array
+    private function decryptedResponse(string $cipherText): ?array
     {
         $cipherText = hex2bin($cipherText);
 
@@ -155,7 +156,7 @@ class PrimeBankApi implements MoneyTransfer
             throw new DecryptException('Unable to decrypt the data');
         }
 
-        if (! Utility::isJson($plainText)) {
+        if (!Utility::isJson($plainText)) {
             throw new JsonException('Unable to decode the data');
         }
 
@@ -163,7 +164,7 @@ class PrimeBankApi implements MoneyTransfer
     }
 
     /**
-     * @param  Model|BaseModel  $order
+     * @param Model|BaseModel $order
      */
     public function requestQuote($order): AssignVendorVerdict
     {
@@ -186,36 +187,42 @@ class PrimeBankApi implements MoneyTransfer
         $bank_data = $order_data['beneficiary_data']['bank_information'] ?? [];
         $branch_data = $order_data['beneficiary_data']['branch_information'] ?? [];
         $ref_number = $order_data['beneficiary_data']['reference_no'] ?? $order_data['purchase_number'];
+        $secretKey = $order_data['beneficiary_data']['secret_key'] ?? null;
 
-        $transactionDetail['BeneficiaryAccountNo'] = '1101115000412';
-        $transactionDetail['MandateType'] = 'BEFTN';
-        $transactionDetail['PurposeCode'] = '123';
-        $transactionDetail['PurposeDescription'] = 'FAMILY MAINTENANCE';
-        $transactionDetail['TransactionDate'] = '05/02/2020';
-        $transactionDetail['TransactionReferenceNo'] = 'TT42741108580091';
-        $transactionDetail['TransferAmount'] = '6666';
-        $transactionDetail['Currency'] = 'BDT';
-        $transactionDetail['BankName'] = 'PRIME BANK LTD.';
-        $transactionDetail['BankBranch'] = 'BARISAL';
-        $transactionDetail['BranchCode'] = '';
-        $transactionDetail['RoutingNumber'] = '';
+        $transactionDetail['BeneficiaryAccountNo'] = $beneficiary_data['beneficiary_data']['bank_account_number'] ?? '';
+//        $transactionDetail['MandateType'] = 'BEFTN';
+//        $transactionDetail['PurposeCode'] = '123';
+        $transactionDetail['PurposeDescription'] = $sender_data['profile']['remittance_purpose']['name'] ?? 'FAMILY MAINTENANCE';
+        $transactionDetail['TransactionDate'] = $order->created_at->format('d/m/Y');
+        $transactionDetail['TransactionReferenceNo'] = $ref_number;
+        $transactionDetail['TransferAmount'] = (string)$order->converted_amount;
+        $transactionDetail['Currency'] = $order->converted_currency;
+        $transactionDetail['BankName'] = $bank_data['bank_name'] ?? '';
+        $transactionDetail['BankBranch'] = $branch_data['branch_name'] ?? '';
+        $transactionDetail['BranchCode'] = ($bank_data['bank_slug'] == 'prime-bank-limited') ? "PRIME" : '';
+        $transactionDetail['RoutingNumber'] = (string)($branch_data['branch_location_no'] ?? '');
         $transactionDetail['BeneBankAddress'] = '';
         $transactionDetail['CashAgentName'] = '';
         $transactionDetail['CashAgentBranch'] = '';
-        $transactionDetail['CashPayOutPin'] = '';
-        $transactionDetail['WalletName'] = '';
-        $transactionDetail['WalletNo'] = '';
-        $transactionDetail['TwoPercentageConsent'] = '';
+        $transactionDetail['CashPayOutPin'] = ($order->order_type->value == OrderType::CashPickup->value) ? $secretKey : '';
+        $transactionDetail['WalletName'] = $bank_data['bank_name'] ?? '';
+        $transactionDetail['WalletNo'] = $beneficiary_data['beneficiary_data']['bank_account_number'] ?? '';
+        $transactionDetail['TwoPercentageConsent'] = 'Y';
 
         $remitterDetail['RemitterName'] = $sender_data['name'] ?? '';
         $remitterDetail['RemitterIDType'] = ($sender_data['profile']['id_doc']['id_vendor']['remit']['primebank'] ?? '8');
         $remitterDetail['RemitterIDNo'] = $sender_data['profile']['id_doc']['id_no'] ?? '';
         if (isset($sender_data['profile']['id_doc']['id_doc_type_id']) && $sender_data['profile']['id_doc']['id_doc_type_id'] == 'passport') {
             $remitterDetail['RemitterPassportNumber'] = $sender_data['profile']['id_doc']['id_no'] ?? '';
+            $remitterDetail['PassportExpiryDate'] = $sender_data['profile']['id_doc']['id_expired_at'] ?? '';
+            $remitterDetail['RemitterOtherID'] = '';
+            $remitterDetail['RemitterOtherIdExpDate'] = '';
+        } else {
+            $remitterDetail['RemitterPassportNumber'] = '';
+            $remitterDetail['PassportExpiryDate'] = '';
+            $remitterDetail['RemitterOtherID'] = $sender_data['profile']['id_doc']['id_no'] ?? '';
+            $remitterDetail['RemitterOtherIdExpDate'] = $sender_data['profile']['id_doc']['id_expired_at'] ?? '';
         }
-        $remitterDetail['PassportExpiryDate'] = $sender_data['profile']['id_doc']['id_expired_at'] ?? '';
-        $remitterDetail['RemitterOtherID'] = $sender_data['profile']['id_doc']['id_no'] ?? '';
-        $remitterDetail['RemitterOtherIdExpDate'] = $sender_data['profile']['id_doc']['id_expired_at'] ?? '';
         $remitterDetail['RemitterAddress'] = 'lodha amara';
         $remitterDetail['RemitterZipCode'] = '123456';
         $remitterDetail['RemitterEmailID'] = '';
@@ -226,14 +233,14 @@ class PrimeBankApi implements MoneyTransfer
         $remitterDetail['RemitterDob'] = '07-05-1992';
         $remitterDetail['RemitterOccupation'] = 'BUSINESS_IN_TRADING';
 
-        $beneficiaryDetail['BeneficiaryName'] = 'UAE EXCHANGE CENTRE L.L.C.';
-        $beneficiaryDetail['BeneficiaryAddress'] = 'dhaka';
+        $beneficiaryDetail['BeneficiaryName'] = $beneficiary_data['beneficiary_name'] ?? '';
+        $beneficiaryDetail['BeneficiaryAddress'] = ($beneficiary_data['city_name'] ?? null) . ',' . ($beneficiary_data['country_name'] ?? null);
         $beneficiaryDetail['BeneficiaryCountry'] = 'BD';
-        $beneficiaryDetail['BeneficiaryState'] = 'BANDARBAN';
-        $beneficiaryDetail['BeneficiaryZipNo'] = '111111';
-        $beneficiaryDetail['BeneficiaryEmailId'] = 'abc@test.com';
-        $beneficiaryDetail['BeneficiaryMobileNo'] = '880-1234567890';
-        $beneficiaryDetail['BeneficiaryIDType'] = 'NATIONAL ID';
+        $beneficiaryDetail['BeneficiaryState'] = $beneficiary_data['state_name'] ?? '';
+        $beneficiaryDetail['BeneficiaryZipNo'] = '';
+        $beneficiaryDetail['BeneficiaryEmailId'] = '';
+        $beneficiaryDetail['BeneficiaryMobileNo'] = str_replace('+88', '', ($beneficiary_data['beneficiary_mobile'] ?? null));
+        $beneficiaryDetail['BeneficiaryIDType'] = '';
         $beneficiaryDetail['BeneficiaryIDNo'] = '';
         $beneficiaryDetail['BeneficiaryDob'] = '';
 
@@ -247,21 +254,9 @@ class PrimeBankApi implements MoneyTransfer
             ],
         ];
 
-        $params['ORDER_NO'] = $ref_number;
-        $params['TRANSACTION_PIN'] = $ref_number;
-
-        $params['TRN_DATE'] = CarbonImmutable::parse($order->created_at)->format('Y-m-d');
-        $params['AMOUNT'] = currency($order->converted_amount, $order->converted_currency)->float();
         // RECEIVER
-        $params['RECEIVER_NAME'] = ($beneficiary_data['beneficiary_name'] ?? null);
         $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($beneficiary_data['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($beneficiary_data['city_name'] ?? null).','.($beneficiary_data['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $beneficiary_data['relation_name'] ?? 'Relatives';
-        $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($beneficiary_data['beneficiary_mobile'] ?? null));
-        $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = intval($branch_data['branch_location_no'] ?? '');
-        $params['RECEIVER_BANK'] = ($bank_data['bank_name'] ?? null);
-        $params['RECEIVER_BANK_BRANCH'] = ($branch_data['branch_name'] ?? null);
-        $params['RECEIVER_ACCOUNT_NUMBER'] = ($beneficiary_data['beneficiary_data']['bank_account_number'] ?? null);
         // SENDER
         $params['SENDER_NAME'] = ($sender_data['name'] ?? null);
         $params['SENDER_PASSPORT_NO'] = ($sender_data['profile']['id_doc']['id_no'] ?? null);
@@ -279,7 +274,8 @@ class PrimeBankApi implements MoneyTransfer
             default => null
         };
 
-        $response = $this->post('/remitAccCrTransfer', $params);
+
+        $response = $this->post('/sendTransaction', $params);
 
         $response = array_shift($response);
 
@@ -293,8 +289,8 @@ class PrimeBankApi implements MoneyTransfer
             unset($response['message']);
         }
 
-        if (! empty($response['missing_field'])) {
-            $response['Message'] = ' ['.implode(',', $response['missing_field']).']';
+        if (!empty($response['missing_field'])) {
+            $response['Message'] = ' [' . implode(',', $response['missing_field']) . ']';
         }
 
         $verdict = AssignVendorVerdict::make([
@@ -306,10 +302,10 @@ class PrimeBankApi implements MoneyTransfer
 
         if (in_array($response['Code'], ['0001', '0002'])) {
             $verdict->status('true')
-                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: ".strtolower($response['Message']).'.');
+                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: " . strtolower($response['Message']) . '.');
         } else {
             $verdict->status('false')
-                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message']).'.', 'warn');
+                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message']) . '.', 'warn');
         }
 
         $order_data = $order->order_data ?? [];
@@ -322,7 +318,7 @@ class PrimeBankApi implements MoneyTransfer
         // RECEIVER
         $params['RECEIVER_NAME'] = ($order_data['beneficiary_data']['receiver_information']['beneficiary_name'] ?? null);
         $params['RECEIVER_SUB_COUNTRY_LEVEL_2'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null);
-        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null).','.($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
+        $params['RECEIVER_ADDRESS'] = ($order_data['beneficiary_data']['receiver_information']['city_name'] ?? null) . ',' . ($order_data['beneficiary_data']['receiver_information']['country_name'] ?? null);
         $params['RECEIVER_AND_SENDER_RELATION'] = $order_data['beneficiary_data']['receiver_information']['relation_name'] ?? 'Relatives';
         $params['RECEIVER_CONTACT'] = str_replace('+88', '', ($order_data['beneficiary_data']['receiver_information']['beneficiary_mobile'] ?? null));
         $params['RECIEVER_BANK_BR_ROUTING_NUMBER'] = intval($order_data['beneficiary_data']['branch_information']['branch_location_no'] ?? '');
@@ -346,7 +342,7 @@ class PrimeBankApi implements MoneyTransfer
             default => null
         };
 
-        $response = $this->post('/sendTransaction', $params);
+        $response = $this->post('/sendTransaction', $payload);
 
         $response = array_shift($response);
 
@@ -360,8 +356,8 @@ class PrimeBankApi implements MoneyTransfer
             unset($response['message']);
         }
 
-        if (! empty($response['missing_field'])) {
-            $response['Message'] = ' ['.implode(',', $response['missing_field']).']';
+        if (!empty($response['missing_field'])) {
+            $response['Message'] = ' [' . implode(',', $response['missing_field']) . ']';
         }
 
         $verdict = AssignVendorVerdict::make([
@@ -373,10 +369,10 @@ class PrimeBankApi implements MoneyTransfer
 
         if (in_array($response['Code'], ['0001', '0002'])) {
             $verdict->status('true')
-                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: ".strtolower($response['Message']).'.');
+                ->orderTimeline("(Meghna Bank) responded code: {$response['Code']}, message: " . strtolower($response['Message']) . '.');
         } else {
             $verdict->status('false')
-                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message']).'.', 'warn');
+                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message']) . '.', 'warn');
         }
 
         return $verdict;
@@ -428,7 +424,7 @@ class PrimeBankApi implements MoneyTransfer
 
         if (isset($response['Code'])) {
             $verdict->message($response['Message'] ?? null)
-                ->orderTimeline('(Meghna Bank) reported error: '.strtolower($response['Message'] ?? '').'.');
+                ->orderTimeline('(Meghna Bank) reported error: ' . strtolower($response['Message'] ?? '') . '.');
 
             return $verdict;
         }
