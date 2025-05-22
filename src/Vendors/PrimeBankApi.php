@@ -51,7 +51,6 @@ class PrimeBankApi implements MoneyTransfer
     /**
      * PrimeBankApiApiService constructor.
      *
-     * @throws ConnectionException
      * @throws Exception
      */
     public function __construct()
@@ -68,7 +67,7 @@ class PrimeBankApi implements MoneyTransfer
 
         $this->expiredAt = empty($this->config['expired_at']) ? null : CarbonImmutable::parse($this->config['expired_at']);
 
-        $this->syncAuthToken();
+//        $this->syncAuthToken();
     }
 
     /**
@@ -129,16 +128,22 @@ class PrimeBankApi implements MoneyTransfer
             throw new DecryptException('Unable to encrypt the data');
         }
 
-        return Str::upper(bin2hex($cipherText));
+        return bin2hex($cipherText);
     }
 
     /**
      * @throws DecryptException
      * @throws JsonException
      */
-    private function decryptedResponse(string $cipherText): ?array
+    public function decryptedResponse(string $cipherText): ?array
     {
-        $plainText = openssl_decrypt(hex2bin(Str::lower($cipherText)), $this->cipher, $this->secretKey, OPENSSL_RAW_DATA);
+        $cipherText = hex2bin($cipherText);
+
+        if ($cipherText === false) {
+            throw new \InvalidArgumentException('Invalid Hex Data');
+        }
+
+        $plainText = openssl_decrypt($cipherText, $this->cipher, $this->secretKey, OPENSSL_RAW_DATA);
 
         if (empty($plainText)) {
             throw new DecryptException('Unable to decrypt the data');
