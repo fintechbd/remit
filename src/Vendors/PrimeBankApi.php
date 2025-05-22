@@ -106,11 +106,11 @@ class PrimeBankApi implements MoneyTransfer
 
             dd($response);
 
-            if (!empty($response['Error'])) {
+            if (! empty($response['Error'])) {
                 throw new \InvalidArgumentException($response['Error']);
             }
 
-            if (!empty($response['Token'])) {
+            if (! empty($response['Token'])) {
                 Core::setting()->setValue('remit', 'providers.primebank.token', $response['Token'], 'string');
                 Core::setting()->setValue('remit', 'providers.primebank.expired_at', \now()->format('Y-m-d H:i:s'), 'string');
             }
