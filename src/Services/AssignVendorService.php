@@ -56,7 +56,7 @@ class AssignVendorService
         ];
 
         if ($order->assigned_user_id == null
-            && !transaction()->order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId, 'timeline' => $timeline])) {
+            && ! transaction()->order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId, 'timeline' => $timeline])) {
             throw new UpdateOperationException(__('core::messages.assign_vendor.assigned_user_failed'));
         }
 
@@ -95,7 +95,7 @@ class AssignVendorService
             ];
         }
 
-        if (!transaction()->order()->update($order->getKey(), ['status' => OrderStatus::Processing, 'timeline' => $timeline])) {
+        if (! transaction()->order()->update($order->getKey(), ['status' => OrderStatus::Processing, 'timeline' => $timeline])) {
             throw new UpdateOperationException;
         }
 
@@ -150,7 +150,7 @@ class AssignVendorService
             ];
         }
 
-        if (!transaction()->order()->update($order->getKey(), $data)) {
+        if (! transaction()->order()->update($order->getKey(), $data)) {
             throw new \ErrorException(__('core::messages.assign_vendor.failed', [
                 'slug' => $vendor_slug,
             ]));
@@ -249,7 +249,7 @@ class AssignVendorService
             ];
         }
 
-        if (!transaction()->order()->update($order->getKey(), $data)) {
+        if (! transaction()->order()->update($order->getKey(), $data)) {
             throw new \ErrorException(__('core::messages.assign_vendor.failed', [
                 'slug' => $order->vendor,
             ]));

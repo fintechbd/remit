@@ -115,7 +115,7 @@ class WalletTransferController extends Controller
 
             $inputs = $request->validated();
 
-            if (!remit()->walletTransfer()->update($id, $inputs)) {
+            if (! remit()->walletTransfer()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
@@ -175,7 +175,7 @@ class WalletTransferController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            if (!remit()->walletTransfer()->destroy($id)) {
+            if (! remit()->walletTransfer()->destroy($id)) {
 
                 throw (new DeleteOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
@@ -207,7 +207,7 @@ class WalletTransferController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
 
-            if (!remit()->walletTransfer()->restore($id)) {
+            if (! remit()->walletTransfer()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.remit.wallet_transfer_model'), $id);
             }
@@ -354,7 +354,7 @@ class WalletTransferController extends Controller
 
                 $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
                 $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
-                if (!transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                if (! transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'current_status' => $walletTransfer->currentStatus(),
                         'target_status' => OrderStatus::Success->value,

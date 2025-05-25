@@ -172,7 +172,7 @@ class AssignVendorController extends Controller
         try {
             $order = $this->getOrder($order_id);
 
-            if (!transaction()->order()->update($order->getKey(), ['assigned_user_id' => null, 'service_vendor_id' => null, 'vendor' => null])) {
+            if (! transaction()->order()->update($order->getKey(), ['assigned_user_id' => null, 'service_vendor_id' => null, 'vendor' => null])) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $order_id);
             }

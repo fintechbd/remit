@@ -109,7 +109,7 @@ class BankTransferController extends Controller
 
             $inputs = $request->validated();
 
-            if (!remit()->bankTransfer()->update($id, $inputs)) {
+            if (! remit()->bankTransfer()->update($id, $inputs)) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
@@ -167,7 +167,7 @@ class BankTransferController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
-            if (!remit()->bankTransfer()->destroy($id)) {
+            if (! remit()->bankTransfer()->destroy($id)) {
 
                 throw (new DeleteOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
@@ -240,7 +240,7 @@ class BankTransferController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
-            if (!remit()->bankTransfer()->restore($id)) {
+            if (! remit()->bankTransfer()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
@@ -270,7 +270,7 @@ class BankTransferController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
-            if (!remit()->bankTransfer()->restore($id)) {
+            if (! remit()->bankTransfer()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
@@ -299,7 +299,7 @@ class BankTransferController extends Controller
                 throw (new ModelNotFoundException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
 
-            if (!remit()->bankTransfer()->restore($id)) {
+            if (! remit()->bankTransfer()->restore($id)) {
 
                 throw (new RestoreOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $id);
             }
@@ -396,7 +396,7 @@ class BankTransferController extends Controller
                 $order_data['previous_amount'] = (float) $depositedAccount->user_account_data['available_amount'];
                 $order_data['current_amount'] = ((float) $order_data['previous_amount'] + (float) $inputs['converted_currency']);
 
-                if (!transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
+                if (! transaction()->userAccount()->update($depositedAccount->getKey(), $depositedUpdatedAccount)) {
                     throw new Exception(__('User Account Balance does not update', [
                         'current_status' => $bankTransfer->currentStatus(),
                         'target_status' => OrderStatus::Success->value,
