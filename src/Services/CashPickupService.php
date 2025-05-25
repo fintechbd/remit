@@ -3,9 +3,7 @@
 namespace Fintech\Remit\Services;
 
 use Fintech\Auth\Facades\Auth;
-use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Exceptions\BusinessException;
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Auth\SystemRole;
@@ -105,7 +103,7 @@ class CashPickupService
         $inputs['description'] = 'Cash Pickup';
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
 
-        $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
+        $senderAccount = transaction()->userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
 
         if (! $senderAccount) {
             throw new CurrencyUnavailableException($inputs['source_country_id']);
@@ -117,7 +115,7 @@ class CashPickupService
             throw new MasterCurrencyUnavailableException($inputs['source_country_id']);
         }
 
-        $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'money_transfer'])->getKey();
+        $inputs['transaction_form_id'] = transaction()->transactionForm()->findWhere(['code' => 'money_transfer'])->getKey();
 
         if (Transaction::order()->transactionDelayCheck($inputs)['countValue'] > 0) {
             throw new RequestAmountExistsException;
@@ -131,7 +129,7 @@ class CashPickupService
         $inputs['is_refunded'] = false;
         $inputs['status'] = ($allowInsufficientBalance) ? OrderStatus::PaymentPending : OrderStatus::Pending;
         $inputs['risk'] = $sender->risk_profile ?? RiskProfile::Low;
-        $currencyConversion = Business::currencyRate()->convert([
+        $currencyConversion = business()->currencyRate()->convert([
             'role_id' => $inputs['order_data']['role_id'],
             'reverse' => $inputs['order_data']['is_reverse'],
             'source_country_id' => $inputs['source_country_id'],
@@ -163,7 +161,7 @@ class CashPickupService
         $inputs['order_data']['receiving_country_id'] = $inputs['destination_country_id'];
         $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
         $inputs['order_number'] = $inputs['order_data']['purchase_number'];
-        $service = Business::service()->find($inputs['service_id']);
+        $service = business()->service()->find($inputs['service_id']);
         $inputs['order_data']['service_slug'] = $service->service_slug ?? null;
         $inputs['order_data']['service_name'] = $service->service_name ?? null;
         $vendor = $service->serviceVendor;
@@ -174,8 +172,8 @@ class CashPickupService
             'flag' => 'create',
             'timestamp' => now(),
         ];
-        $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData([...$inputs['order_data'], 'source_country_id' => $inputs['source_country_id']]);
-        $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([
+        $inputs['order_data']['beneficiary_data'] = banco()->beneficiary()->manageBeneficiaryData([...$inputs['order_data'], 'source_country_id' => $inputs['source_country_id']]);
+        $inputs['order_data']['service_stat_data'] = business()->serviceStat()->serviceStateData([
             'role_id' => $inputs['order_data']['role_id'],
             'reverse' => false,
             'source_country_id' => $inputs['source_country_id'],
@@ -194,7 +192,7 @@ class CashPickupService
         try {
             $cashPickup = $this->cashPickupRepository->create($inputs);
             DB::commit();
-            $accounting = Transaction::accounting($cashPickup);
+            $accounting = transaction()->accounting($cashPickup);
 
             $accounting->debitTransaction();
 
@@ -202,7 +200,7 @@ class CashPickupService
                 $accounting->debitBalanceFromUserAccount();
             }
 
-            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            transaction()->orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
             event(new CashPickupRequested($cashPickup));
 
@@ -210,7 +208,7 @@ class CashPickupService
 
         } catch (\Exception $exception) {
             DB::rollBack();
-            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            transaction()->orderQueue()->removeFromQueueUserWise($inputs['user_id']);
             throw new OrderRequestFailedException(OrderType::CashPickup->value, 0, $exception);
         }
     }
@@ -227,7 +225,7 @@ class CashPickupService
         ];
 
         // Collect Current Balance as Previous Balance
-        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['previous_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_detail_currency' => $data->currency,
@@ -245,7 +243,7 @@ class CashPickupService
         $data->order_detail_number = $data->order_data['purchase_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
         $data->notes = 'Cash Pickup Payment Send to '.$master_user_name;
-        $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStore = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
         $orderDetailStore->fresh();
@@ -266,7 +264,7 @@ class CashPickupService
         $data->notes = 'Cash Pickup Charge Send to '.$master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStoreForCharge = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForChargeForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForChargeForMaster->sender_receiver_id = $data->user_id;
@@ -285,7 +283,7 @@ class CashPickupService
         $data->step = 5;
         // $data->order_detail_parent_id = $orderDetailStore->getKey();
         // $updateData['order_data']['previous_amount'] = 0;
-        $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStoreForDiscount = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $data->user_id;
@@ -299,13 +297,13 @@ class CashPickupService
         // 'Point Transfer Commission Send to ' . $masterUser->name;
         // 'Point Transfer Commission Receive from ' . $receiver->name;
 
-        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['current_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_detail_currency' => $data->currency,
         ]);
 
-        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['spent_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_id' => $data->getKey(),
@@ -328,7 +326,7 @@ class CashPickupService
         ];
 
         // Collect Current Balance as Previous Balance
-        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['previous_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $cashPickup->user_id,
             'order_detail_currency' => $cashPickup->currency,
@@ -342,7 +340,7 @@ class CashPickupService
         $cashPickup->order_detail_number = $cashPickup->order_data['accepted_number'];
         $cashPickup->order_detail_response_id = $cashPickup->order_data['purchase_number'];
         $cashPickup->notes = 'Cash Pickup Refund From '.$master_user_name;
-        $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($cashPickup));
+        $orderDetailStore = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($cashPickup));
         $orderDetailStore->order_detail_parent_id = $cashPickup->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
         $orderDetailStore->fresh();
@@ -365,7 +363,7 @@ class CashPickupService
         $cashPickup->notes = 'Cash Pickup Charge Receive from '.$master_user_name;
         $cashPickup->step = 3;
         $cashPickup->order_detail_parent_id = $orderDetailStore->getKey();
-        $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($cashPickup));
+        $orderDetailStoreForCharge = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($cashPickup));
         $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForChargeForMaster->user_id = $cashPickup->sender_receiver_id;
         $orderDetailStoreForChargeForMaster->sender_receiver_id = $cashPickup->user_id;
@@ -384,7 +382,7 @@ class CashPickupService
         $cashPickup->step = 5;
         // $data->order_detail_parent_id = $orderDetailStore->getKey();
         // $updateData['order_data']['previous_amount'] = 0;
-        $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($cashPickup));
+        $orderDetailStoreForDiscount = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($cashPickup));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $cashPickup->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $cashPickup->user_id;
@@ -398,13 +396,13 @@ class CashPickupService
         // 'Point Transfer Commission Send to ' . $masterUser->name;
         // 'Point Transfer Commission Receive from ' . $receiver->name;
 
-        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['current_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $cashPickup->user_id,
             'order_detail_currency' => $cashPickup->currency,
         ]);
 
-        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['spent_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $cashPickup->user_id,
             'order_id' => $cashPickup->getKey(),

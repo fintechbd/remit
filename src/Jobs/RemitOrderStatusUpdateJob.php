@@ -2,8 +2,6 @@
 
 namespace Fintech\Remit\Jobs;
 
-use Fintech\Remit\Facades\Remit;
-use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -21,7 +19,7 @@ class RemitOrderStatusUpdateJob implements ShouldQueue
      */
     public function __construct($orderId)
     {
-        $this->order = Transaction::order()->find($orderId);
+        $this->order = transaction()->order()->find($orderId);
     }
 
     /**
@@ -29,7 +27,7 @@ class RemitOrderStatusUpdateJob implements ShouldQueue
      */
     public function handle(): void
     {
-        Remit::assignVendor()->orderStatus($this->order);
+        remit()->assignVendor()->orderStatus($this->order);
 
         $this->removeFromQueue();
     }
@@ -38,7 +36,7 @@ class RemitOrderStatusUpdateJob implements ShouldQueue
     {
         $order_data = $this->order->order_data;
         $order_data['queued'] = false;
-        Transaction::order()->update($this->order->getKey(), ['order_data' => $order_data]);
+        transaction()->order()->update($this->order->getKey(), ['order_data' => $order_data]);
     }
 
     public function failed(\Throwable $exception): void
@@ -46,7 +44,7 @@ class RemitOrderStatusUpdateJob implements ShouldQueue
         $order_data = $this->order->order_data;
         $order_data['queued'] = false;
 
-        Transaction::order()->update($this->order->getKey(), [
+        transaction()->order()->update($this->order->getKey(), [
             'status' => \Fintech\Core\Enums\Transaction\OrderStatus::AdminVerification->value,
             'notes' => $exception->getMessage(),
             'order_data' => $order_data,

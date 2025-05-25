@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Listeners;
 
-use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Bus\Batch;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -23,7 +22,7 @@ class RemitOrderComplianceCheck implements ShouldQueue
             'flag' => 'info',
             'timestamp' => now(),
         ];
-        Transaction::order()->update($order_id, ['timeline' => $timeline]);
+        transaction()->order()->update($order_id, ['timeline' => $timeline]);
 
         \Illuminate\Support\Facades\Bus::batch([
             new \Fintech\Transaction\Jobs\Compliance\LargeCashTransferPolicy($order_id),
@@ -52,7 +51,7 @@ class RemitOrderComplianceCheck implements ShouldQueue
                     'flag' => 'info',
                     'timestamp' => now(),
                 ];
-                Transaction::order()->update($event->transfer->getKey(), ['timeline' => $timeline]);
+                transaction()->order()->update($event->transfer->getKey(), ['timeline' => $timeline]);
             })
             ->name('Remit compliance verification')
             ->withOption('allowFailures', true)
@@ -64,7 +63,7 @@ class RemitOrderComplianceCheck implements ShouldQueue
      */
     public function failed(object $event, \Throwable $exception): void
     {
-        Transaction::order()->update($event->transfer->getKey(), [
+        transaction()->order()->update($event->transfer->getKey(), [
             'status' => \Fintech\Core\Enums\Transaction\OrderStatus::AdminVerification->value,
             'notes' => $exception->getMessage(),
         ]);

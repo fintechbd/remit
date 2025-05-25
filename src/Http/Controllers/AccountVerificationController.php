@@ -4,7 +4,6 @@ namespace Fintech\Remit\Http\Controllers;
 
 use Exception;
 use Fintech\Core\Enums\Remit\AccountVerifyOption;
-use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\BankTransferVerificationRequest;
 use Fintech\Remit\Http\Requests\CashPickupVerificationRequest;
 use Fintech\Remit\Http\Requests\WalletVerificationRequest;
@@ -21,7 +20,7 @@ class AccountVerificationController extends Controller
     {
 
         try {
-            $verification = Remit::assignVendor()->verifyAccount(AccountVerifyOption::WalletTransfer, $request->validated());
+            $verification = remit()->assignVendor()->verifyAccount(AccountVerifyOption::WalletTransfer, $request->validated());
 
             if (! $verification->status) {
                 throw new Exception($verification->message);
@@ -42,7 +41,7 @@ class AccountVerificationController extends Controller
     {
 
         try {
-            $verification = Remit::assignVendor()->verifyAccount(AccountVerifyOption::BankTransfer, $request->validated());
+            $verification = remit()->assignVendor()->verifyAccount(AccountVerifyOption::BankTransfer, $request->validated());
 
             if (! $verification->status) {
                 throw new Exception($verification->message);
@@ -63,7 +62,7 @@ class AccountVerificationController extends Controller
     {
 
         try {
-            $verification = Remit::assignVendor()->verifyAccount(AccountVerifyOption::CashPickup, $request->validated());
+            $verification = remit()->assignVendor()->verifyAccount(AccountVerifyOption::CashPickup, $request->validated());
 
             if (! $verification->status) {
                 throw new Exception($verification->message);

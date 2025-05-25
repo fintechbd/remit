@@ -2,8 +2,6 @@
 
 namespace Fintech\Remit\Events;
 
-use Fintech\Business\Facades\Business;
-use Fintech\Remit\Facades\Remit;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -21,7 +19,7 @@ class BankTransferRequested
     {
         $timeline = $bankTransfer->timeline;
 
-        $service = Business::service()->find($bankTransfer->service_id);
+        $service = business()->service()->find($bankTransfer->service_id);
 
         $timeline[] = [
             'message' => ucwords(strtolower($service->service_name)).' bank transfer requested',
@@ -29,6 +27,6 @@ class BankTransferRequested
             'timestamp' => now(),
         ];
 
-        $this->transfer = Remit::bankTransfer()->update($bankTransfer->getKey(), ['timeline' => $timeline]);
+        $this->transfer = remit()->bankTransfer()->update($bankTransfer->getKey(), ['timeline' => $timeline]);
     }
 }

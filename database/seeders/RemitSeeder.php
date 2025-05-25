@@ -3,7 +3,6 @@
 namespace Fintech\Remit\Seeders;
 
 use Fintech\Banco\Facades\Banco;
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Illuminate\Database\Seeder;
 
@@ -16,10 +15,10 @@ class RemitSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $parent = Business::serviceType()->findWhere(['service_type_slug' => 'money_transfer']);
+            $parent = business()->serviceType()->findWhere(['service_type_slug' => 'money_transfer']);
 
             foreach ($this->data() as $entry) {
-                Business::serviceTypeManager($entry, $parent)
+                business()->serviceTypeManager($entry, $parent)
                     ->hasService()
                     ->distCountries($countries)
                     ->enabled()

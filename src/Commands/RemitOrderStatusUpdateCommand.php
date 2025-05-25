@@ -4,7 +4,6 @@ namespace Fintech\Remit\Commands;
 
 use Fintech\Core\Enums\Transaction\OrderStatus;
 use Fintech\Remit\Jobs\RemitOrderStatusUpdateJob;
-use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Console\Command;
 
 class RemitOrderStatusUpdateCommand extends Command
@@ -33,10 +32,10 @@ class RemitOrderStatusUpdateCommand extends Command
         $filters['limit'] = 5;
         $filters['attempt_threshold'] = config('fintech.remit.attempt_threshold', 5);
 
-        Transaction::order()->list($filters)->each(function ($order) {
+        transaction()->order()->list($filters)->each(function ($order) {
             $order_data = $order->order_data;
             $order_data['queued'] = true;
-            Transaction::order()->update($order->getKey(), ['order_data' => $order_data]);
+            transaction()->order()->update($order->getKey(), ['order_data' => $order_data]);
             RemitOrderStatusUpdateJob::dispatch($order->getKey());
             sleep(1);
         });

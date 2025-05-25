@@ -5,13 +5,11 @@ namespace Fintech\Remit\Http\Controllers;
 use Exception;
 use Fintech\Core\Exceptions\UpdateOperationException;
 use Fintech\Remit\Exceptions\AlreadyAssignedException;
-use Fintech\Remit\Facades\Remit;
 use Fintech\Remit\Http\Requests\AssignableVendorInfoRequest;
 use Fintech\Remit\Http\Requests\RemitCancelAmendmentRequest;
 use Fintech\Remit\Http\Resources\AssignableVendorCollection;
 use Fintech\Remit\Http\Resources\AssignVendorQuotaResource;
 use Fintech\Remit\Http\Resources\AssignVendorStatusResource;
-use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,7 +23,7 @@ class AssignVendorController extends Controller
 
             $order = $this->getOrder($order_Id);
 
-            $serviceVendors = Remit::assignVendor()->availableVendors($order, request()->user()->id);
+            $serviceVendors = remit()->assignVendor()->availableVendors($order, request()->user()->id);
 
             return new AssignableVendorCollection($serviceVendors);
 
@@ -41,7 +39,7 @@ class AssignVendorController extends Controller
 
     private function getOrder($id)
     {
-        $order = Transaction::order()->find($id);
+        $order = transaction()->order()->find($id);
 
         if (! $order) {
             throw (new ModelNotFoundException)->setModel(config('fintech.transaction.order_model'), $id);
@@ -60,7 +58,7 @@ class AssignVendorController extends Controller
 
             $order = $this->getOrder($order_id);
 
-            $quotation = Remit::assignVendor()->requestQuote($order, $service_vendor_slug);
+            $quotation = remit()->assignVendor()->requestQuote($order, $service_vendor_slug);
 
             return new AssignVendorQuotaResource($quotation->toArray());
 
@@ -79,7 +77,7 @@ class AssignVendorController extends Controller
         try {
             $order = $this->getOrder($order_id);
 
-            $verdict = Remit::assignVendor()->processOrder($order, $service_vendor_slug);
+            $verdict = remit()->assignVendor()->processOrder($order, $service_vendor_slug);
 
             if (! $verdict->status) {
                 throw new UpdateOperationException(__('core::messages.assign_vendor.failed', ['slug' => ucfirst($service_vendor_slug), 'error' => $verdict->message]));
@@ -99,7 +97,7 @@ class AssignVendorController extends Controller
 
             $order = $this->getOrder($order_id);
 
-            $verdict = Remit::assignVendor()->trackOrder($order, $request->user());
+            $verdict = remit()->assignVendor()->trackOrder($order, $request->user());
 
             unset($verdict->amount, $verdict->charge, $verdict->discount, $verdict->commission);
 
@@ -119,7 +117,7 @@ class AssignVendorController extends Controller
 
             $order = $this->getOrder($order_id);
 
-            $jsonResponse = Remit::assignVendor()->cancelOrder($order);
+            $jsonResponse = remit()->assignVendor()->cancelOrder($order);
 
             return response()->success($jsonResponse);
 
@@ -137,7 +135,7 @@ class AssignVendorController extends Controller
 
             $order = $this->getOrder($order_id);
 
-            $jsonResponse = Remit::assignVendor()->amendmentOrder($order);
+            $jsonResponse = remit()->assignVendor()->amendmentOrder($order);
 
             return response()->success($jsonResponse);
 
@@ -157,7 +155,7 @@ class AssignVendorController extends Controller
 
             $order = $this->getOrder($order_id);
 
-            $jsonResponse = Remit::assignVendor()->amendmentOrder($order, $service_vendor_slug);
+            $jsonResponse = remit()->assignVendor()->amendmentOrder($order, $service_vendor_slug);
 
             return response()->success($jsonResponse);
 
@@ -174,7 +172,7 @@ class AssignVendorController extends Controller
         try {
             $order = $this->getOrder($order_id);
 
-            if (! Transaction::order()->update($order->getKey(), ['assigned_user_id' => null, 'service_vendor_id' => null, 'vendor' => null])) {
+            if (!transaction()->order()->update($order->getKey(), ['assigned_user_id' => null, 'service_vendor_id' => null, 'vendor' => null])) {
 
                 throw (new UpdateOperationException)->setModel(config('fintech.remit.bank_transfer_model'), $order_id);
             }

@@ -3,7 +3,6 @@
 namespace Fintech\Remit\Commands;
 
 use Fintech\Banco\Facades\Banco;
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Console\Command;
@@ -579,10 +578,10 @@ class IslamiBankSetupCommand extends Command
             'enabled' => true,
         ];
 
-        if (Business::serviceVendor()->findWhere(['service_vendor_slug' => $vendor['service_vendor_slug']])) {
+        if (business()->serviceVendor()->findWhere(['service_vendor_slug' => $vendor['service_vendor_slug']])) {
             $this->info('Service vendor already exists. Skipping');
         } else {
-            Business::serviceVendor()->create($vendor);
+            business()->serviceVendor()->create($vendor);
             $this->info('Service vendor created successfully.');
         }
     }
@@ -596,7 +595,7 @@ class IslamiBankSetupCommand extends Command
 
         foreach (self::BD_BANKS as $code => $name) {
 
-            $bank = Banco::bank()->findWhere(['slug' => $code]);
+            $bank = banco()->bank()->findWhere(['slug' => $code]);
 
             if (! $bank) {
                 continue;
@@ -635,7 +634,7 @@ class IslamiBankSetupCommand extends Command
 
         foreach (self::ISLAMI_BRANCHES as $code => $name) {
 
-            $branch = Banco::bankBranch()->findWhere(['location_no' => $code]);
+            $branch = banco()->bankBranch()->findWhere(['location_no' => $code]);
 
             if (! $branch) {
                 continue;
@@ -667,7 +666,7 @@ class IslamiBankSetupCommand extends Command
 
     private function addBeneficiaryAccountTypeCodes(): void
     {
-        $bank = Banco::bank()
+        $bank = banco()->bank()
             ->list(['country_id' => 19, 'slug' => 'islami-bank-bangladesh-limited'])
             ->first();
 
@@ -757,7 +756,7 @@ class IslamiBankSetupCommand extends Command
         ];
 
         foreach ($accounts as $entry) {
-            Banco::beneficiaryAccountType()->create($entry);
+            banco()->beneficiaryAccountType()->create($entry);
         }
     }
 }

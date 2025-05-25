@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Commands;
 
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Fintech\Core\Traits\HasCoreSetting;
 use Illuminate\Console\Command;
@@ -51,7 +50,7 @@ class InstallCommand extends Command
                 'enabled' => true,
             ];
 
-            Business::serviceTypeManager($entry)->execute();
+            business()->serviceTypeManager($entry)->execute();
         });
     }
 

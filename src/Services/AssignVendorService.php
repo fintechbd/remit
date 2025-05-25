@@ -4,7 +4,6 @@ namespace Fintech\Remit\Services;
 
 use ErrorException;
 use Fintech\Auth\Facades\Auth;
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Remit\AccountVerifyOption;
 use Fintech\Core\Enums\Transaction\OrderStatus;
@@ -17,7 +16,6 @@ use Fintech\Remit\Contracts\WalletTransfer;
 use Fintech\Remit\Exceptions\AlreadyAssignedException;
 use Fintech\Remit\Exceptions\RemitException;
 use Fintech\Remit\Support\AccountVerificationVerdict;
-use Fintech\Transaction\Facades\Transaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\App;
@@ -58,11 +56,11 @@ class AssignVendorService
         ];
 
         if ($order->assigned_user_id == null
-            && ! Transaction::order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId, 'timeline' => $timeline])) {
+            && !transaction()->order()->update($order->getKey(), ['assigned_user_id' => $requestingUserId, 'timeline' => $timeline])) {
             throw new UpdateOperationException(__('core::messages.assign_vendor.assigned_user_failed'));
         }
 
-        return Business::serviceVendor()->list([
+        return business()->serviceVendor()->list([
             'service_id_array' => [$order->service_id],
             'enabled' => true,
             'paginate' => false,
@@ -97,7 +95,7 @@ class AssignVendorService
             ];
         }
 
-        if (! Transaction::order()->update($order->getKey(), ['status' => OrderStatus::Processing, 'timeline' => $timeline])) {
+        if (!transaction()->order()->update($order->getKey(), ['status' => OrderStatus::Processing, 'timeline' => $timeline])) {
             throw new UpdateOperationException;
         }
 
@@ -152,7 +150,7 @@ class AssignVendorService
             ];
         }
 
-        if (! Transaction::order()->update($order->getKey(), $data)) {
+        if (!transaction()->order()->update($order->getKey(), $data)) {
             throw new \ErrorException(__('core::messages.assign_vendor.failed', [
                 'slug' => $vendor_slug,
             ]));
@@ -189,7 +187,7 @@ class AssignVendorService
 
         $timeline[] = $verdict->timeline;
 
-        Transaction::order()->update($order->getKey(), ['timeline' => $timeline]);
+        transaction()->order()->update($order->getKey(), ['timeline' => $timeline]);
 
         return $verdict;
     }
@@ -251,7 +249,7 @@ class AssignVendorService
             ];
         }
 
-        if (! Transaction::order()->update($order->getKey(), $data)) {
+        if (!transaction()->order()->update($order->getKey(), $data)) {
             throw new \ErrorException(__('core::messages.assign_vendor.failed', [
                 'slug' => $order->vendor,
             ]));
@@ -282,7 +280,7 @@ class AssignVendorService
             throw new VendorNotFoundException(ucfirst($slug));
         }
 
-        $this->serviceVendorModel = Business::serviceVendor()->findWhere(['service_vendor_slug' => $slug, 'enabled']);
+        $this->serviceVendorModel = business()->serviceVendor()->findWhere(['service_vendor_slug' => $slug, 'enabled']);
 
         if (! $this->serviceVendorModel) {
             throw (new ModelNotFoundException)->setModel(config('fintech.business.service_vendor_model'), $slug);

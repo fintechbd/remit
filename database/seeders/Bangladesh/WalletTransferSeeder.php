@@ -3,7 +3,6 @@
 namespace Fintech\Remit\Seeders\Bangladesh;
 
 use Fintech\Banco\Facades\Banco;
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Facades\Core;
 use Fintech\MetaData\Facades\MetaData;
 use Illuminate\Database\Seeder;
@@ -17,14 +16,14 @@ class WalletTransferSeeder extends Seeder
     {
         if (Core::packageExists('Business')) {
 
-            $parent = Business::serviceType()->findWhere(['service_type_slug' => 'wallet_transfer']);
+            $parent = business()->serviceType()->findWhere(['service_type_slug' => 'wallet_transfer']);
 
             $country = MetaData::country()->findWhere(['iso2' => 'BD'])->id;
 
             $walletTransferId = (int) (Banco::beneficiaryType()->findWhere(['slug' => 'wallet-transfer'])?->id ?? 1);
 
             foreach ($this->data() as $entry) {
-                Business::serviceTypeManager($entry, $parent)
+                business()->serviceTypeManager($entry, $parent)
                     ->hasService()
                     ->distCountries([$country])
                     ->serviceSettings([

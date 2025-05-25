@@ -2,7 +2,6 @@
 
 namespace Fintech\Remit\Seeders;
 
-use Fintech\Business\Facades\Business;
 use Illuminate\Database\Seeder;
 
 class ServiceVendorSeeder extends Seeder
@@ -22,7 +21,7 @@ class ServiceVendorSeeder extends Seeder
                 $image_svg = __DIR__.'/../../resources/img/service_vendor/logo_svg/'.$entry['logo_svg'];
                 $entry['logo_svg'] = 'data:image/svg+xml;base64,'.base64_encode(file_get_contents($image_svg));
             }
-            Business::serviceVendor()->create($entry);
+            business()->serviceVendor()->create($entry);
         }
     }
 

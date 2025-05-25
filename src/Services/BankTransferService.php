@@ -3,8 +3,6 @@
 namespace Fintech\Remit\Services;
 
 use Fintech\Auth\Facades\Auth;
-use Fintech\Banco\Facades\Banco;
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Auth\SystemRole;
@@ -108,7 +106,7 @@ class BankTransferService
         $inputs['description'] = 'Bank Transfer';
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
 
-        $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
+        $senderAccount = transaction()->userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
 
         if (! $senderAccount) {
             throw new CurrencyUnavailableException($inputs['source_country_id']);
@@ -120,7 +118,7 @@ class BankTransferService
             throw new MasterCurrencyUnavailableException($inputs['source_country_id']);
         }
 
-        $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'money_transfer'])->getKey();
+        $inputs['transaction_form_id'] = transaction()->transactionForm()->findWhere(['code' => 'money_transfer'])->getKey();
 
         if (Transaction::order()->transactionDelayCheck($inputs)['countValue'] > 0) {
             throw new RequestAmountExistsException;
@@ -134,7 +132,7 @@ class BankTransferService
         $inputs['is_refunded'] = false;
         $inputs['status'] = ($allowInsufficientBalance) ? OrderStatus::PaymentPending : OrderStatus::Pending;
         $inputs['risk'] = $sender->risk_profile ?? RiskProfile::Low;
-        $currencyConversion = Business::currencyRate()->convert([
+        $currencyConversion = business()->currencyRate()->convert([
             'role_id' => $inputs['order_data']['role_id'],
             'reverse' => $inputs['order_data']['is_reverse'],
             'source_country_id' => $inputs['source_country_id'],
@@ -164,7 +162,7 @@ class BankTransferService
         $inputs['order_data']['system_notification_variable_failed'] = 'bank_transfer_failed';
         $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
         $inputs['order_number'] = $inputs['order_data']['purchase_number'];
-        $service = Business::service()->find($inputs['service_id']);
+        $service = business()->service()->find($inputs['service_id']);
         $inputs['order_data']['service_slug'] = $service->service_slug ?? null;
         $inputs['order_data']['service_name'] = $service->service_name ?? null;
         $inputs['order_data']['serving_country_id'] = $inputs['source_country_id'];
@@ -177,8 +175,8 @@ class BankTransferService
             'flag' => 'create',
             'timestamp' => now(),
         ];
-        $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData([...$inputs['order_data'], 'source_country_id' => $inputs['source_country_id']]);
-        $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([
+        $inputs['order_data']['beneficiary_data'] = banco()->beneficiary()->manageBeneficiaryData([...$inputs['order_data'], 'source_country_id' => $inputs['source_country_id']]);
+        $inputs['order_data']['service_stat_data'] = business()->serviceStat()->serviceStateData([
             'role_id' => $inputs['order_data']['role_id'],
             'reverse' => false,
             'source_country_id' => $inputs['source_country_id'],
@@ -201,13 +199,13 @@ class BankTransferService
 
             DB::commit();
 
-            $accounting = Transaction::accounting($bankTransfer);
+            $accounting = transaction()->accounting($bankTransfer);
 
             $accounting->debitTransaction();
 
             $accounting->debitBalanceFromUserAccount();
 
-            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            transaction()->orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
             event(new BankTransferRequested($bankTransfer));
 
@@ -217,7 +215,7 @@ class BankTransferService
 
         } catch (\Exception $exception) {
             DB::rollBack();
-            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            transaction()->orderQueue()->removeFromQueueUserWise($inputs['user_id']);
             throw new OrderRequestFailedException(OrderType::BankTransfer->value, 0, $exception);
         }
     }

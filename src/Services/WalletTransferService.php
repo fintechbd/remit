@@ -3,9 +3,7 @@
 namespace Fintech\Remit\Services;
 
 use Fintech\Auth\Facades\Auth;
-use Fintech\Banco\Facades\Banco;
 use Fintech\Business\Exceptions\BusinessException;
-use Fintech\Business\Facades\Business;
 use Fintech\Core\Abstracts\BaseModel;
 use Fintech\Core\Enums\Auth\RiskProfile;
 use Fintech\Core\Enums\Auth\SystemRole;
@@ -105,7 +103,7 @@ class WalletTransferService
         $inputs['description'] = 'Wallet Transfer';
         $inputs['source_country_id'] = $inputs['source_country_id'] ?? $sender->profile?->present_country_id;
 
-        $senderAccount = Transaction::userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
+        $senderAccount = transaction()->userAccount()->findWhere(['user_id' => $sender->getKey(), 'country_id' => $inputs['source_country_id']]);
 
         if (! $senderAccount) {
             throw new CurrencyUnavailableException($inputs['source_country_id']);
@@ -117,7 +115,7 @@ class WalletTransferService
             throw new MasterCurrencyUnavailableException($inputs['source_country_id']);
         }
 
-        $inputs['transaction_form_id'] = Transaction::transactionForm()->findWhere(['code' => 'wallet_transfer'])->getKey();
+        $inputs['transaction_form_id'] = transaction()->transactionForm()->findWhere(['code' => 'wallet_transfer'])->getKey();
 
         if (Transaction::order()->transactionDelayCheck($inputs)['countValue'] > 0) {
             throw new RequestAmountExistsException;
@@ -131,7 +129,7 @@ class WalletTransferService
         $inputs['is_refunded'] = false;
         $inputs['status'] = ($allowInsufficientBalance) ? OrderStatus::PaymentPending : OrderStatus::Pending;
         $inputs['risk'] = $sender->risk_profile ?? RiskProfile::Low;
-        $currencyConversion = Business::currencyRate()->convert([
+        $currencyConversion = business()->currencyRate()->convert([
             'role_id' => $inputs['order_data']['role_id'],
             'reverse' => $inputs['order_data']['is_reverse'],
             'source_country_id' => $inputs['source_country_id'],
@@ -163,7 +161,7 @@ class WalletTransferService
         $inputs['order_data']['receiving_country_id'] = $inputs['destination_country_id'];
         $inputs['order_data']['purchase_number'] = next_purchase_number(MetaData::country()->find($inputs['source_country_id'])->iso3);
         $inputs['order_number'] = $inputs['order_data']['purchase_number'];
-        if ($service = Business::service()->find($inputs['service_id'])) {
+        if ($service = business()->service()->find($inputs['service_id'])) {
             $inputs['description'] .= " ({$service->service_name})";
             $inputs['order_data']['service_slug'] = $service->service_slug ?? null;
             $inputs['order_data']['service_name'] = $service->service_name ?? null;
@@ -176,8 +174,8 @@ class WalletTransferService
             'flag' => 'create',
             'timestamp' => now(),
         ];
-        $inputs['order_data']['beneficiary_data'] = Banco::beneficiary()->manageBeneficiaryData([...$inputs['order_data'], 'source_country_id' => $inputs['source_country_id']]);
-        $inputs['order_data']['service_stat_data'] = Business::serviceStat()->serviceStateData([
+        $inputs['order_data']['beneficiary_data'] = banco()->beneficiary()->manageBeneficiaryData([...$inputs['order_data'], 'source_country_id' => $inputs['source_country_id']]);
+        $inputs['order_data']['service_stat_data'] = business()->serviceStat()->serviceStateData([
             'role_id' => $inputs['order_data']['role_id'],
             'reverse' => false,
             'source_country_id' => $inputs['source_country_id'],
@@ -196,7 +194,7 @@ class WalletTransferService
         try {
             $walletTransfer = $this->walletTransferRepository->create($inputs);
             DB::commit();
-            $accounting = Transaction::accounting($walletTransfer);
+            $accounting = transaction()->accounting($walletTransfer);
 
             $accounting->debitTransaction();
 
@@ -204,7 +202,7 @@ class WalletTransferService
                 $accounting->debitBalanceFromUserAccount();
             }
 
-            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            transaction()->orderQueue()->removeFromQueueUserWise($inputs['user_id']);
 
             event(new WalletTransferRequested($walletTransfer));
 
@@ -212,7 +210,7 @@ class WalletTransferService
 
         } catch (\Exception $exception) {
             DB::rollBack();
-            Transaction::orderQueue()->removeFromQueueUserWise($inputs['user_id']);
+            transaction()->orderQueue()->removeFromQueueUserWise($inputs['user_id']);
             throw new OrderRequestFailedException(OrderType::WalletTransfer->value, 0, $exception);
         }
     }
@@ -229,7 +227,7 @@ class WalletTransferService
         ];
 
         // Collect Current Balance as Previous Balance
-        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['previous_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_detail_currency' => $data->currency,
@@ -247,7 +245,7 @@ class WalletTransferService
         $data->order_detail_number = $data->order_data['purchase_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
         $data->notes = 'Wallet Transfer Payment Send to '.$master_user_name;
-        $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStore = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
         $orderDetailStore->fresh();
@@ -268,7 +266,7 @@ class WalletTransferService
         $data->notes = 'Wallet Transfer Charge Send to '.$master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStoreForCharge = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForChargeForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForChargeForMaster->sender_receiver_id = $data->user_id;
@@ -287,7 +285,7 @@ class WalletTransferService
         $data->step = 5;
         // $data->order_detail_parent_id = $orderDetailStore->getKey();
         // $updateData['order_data']['previous_amount'] = 0;
-        $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStoreForDiscount = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $data->user_id;
@@ -301,13 +299,13 @@ class WalletTransferService
         // 'Point Transfer Commission Send to ' . $masterUser->name;
         // 'Point Transfer Commission Receive from ' . $receiver->name;
 
-        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['current_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_detail_currency' => $data->currency,
         ]);
 
-        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['spent_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_id' => $data->getKey(),
@@ -330,7 +328,7 @@ class WalletTransferService
         ];
 
         // Collect Current Balance as Previous Balance
-        $userAccountData['previous_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['previous_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_detail_currency' => $data->currency,
@@ -344,7 +342,7 @@ class WalletTransferService
         $data->order_detail_number = $data->order_data['accepted_number'];
         $data->order_detail_response_id = $data->order_data['purchase_number'];
         $data->notes = 'Wallet Transfer Refund From '.$master_user_name;
-        $orderDetailStore = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStore = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStore->order_detail_parent_id = $data->order_detail_parent_id = $orderDetailStore->getKey();
         $orderDetailStore->save();
         $orderDetailStore->fresh();
@@ -367,7 +365,7 @@ class WalletTransferService
         $data->notes = 'Wallet Transfer Charge Receive from '.$master_user_name;
         $data->step = 3;
         $data->order_detail_parent_id = $orderDetailStore->getKey();
-        $orderDetailStoreForCharge = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStoreForCharge = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForChargeForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForChargeForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForChargeForMaster->sender_receiver_id = $data->user_id;
@@ -386,7 +384,7 @@ class WalletTransferService
         $data->step = 5;
         // $data->order_detail_parent_id = $orderDetailStore->getKey();
         $updateData['order_data']['previous_amount'] = 0;
-        $orderDetailStoreForDiscount = Transaction::orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
+        $orderDetailStoreForDiscount = transaction()->orderDetail()->create(Transaction::orderDetail()->orderDetailsDataArrange($data));
         $orderDetailStoreForDiscountForMaster = $orderDetailStoreForCharge->replicate();
         $orderDetailStoreForDiscountForMaster->user_id = $data->sender_receiver_id;
         $orderDetailStoreForDiscountForMaster->sender_receiver_id = $data->user_id;
@@ -400,13 +398,13 @@ class WalletTransferService
         // 'Point Transfer Commission Send to ' . $masterUser->name;
         // 'Point Transfer Commission Receive from ' . $receiver->name;
 
-        $userAccountData['current_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['current_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_detail_currency' => $data->currency,
         ]);
 
-        $userAccountData['spent_amount'] = Transaction::orderDetail()->list([
+        $userAccountData['spent_amount'] = transaction()->orderDetail()->list([
             'get_order_detail_amount_sum' => true,
             'user_id' => $data->user_id,
             'order_id' => $data->getKey(),
