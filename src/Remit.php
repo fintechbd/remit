@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Collection;
 class Remit
 {
     /**
-     * @param $filters
      * @return BankTransferService|Collection|BaseModel
      */
     public function bankTransfer($filters = null)
@@ -21,7 +20,6 @@ class Remit
     }
 
     /**
-     * @param $filters
      * @return CashPickupService|Collection|BaseModel
      */
     public function cashPickup($filters = null)
@@ -30,7 +28,6 @@ class Remit
     }
 
     /**
-     * @param $filters
      * @return WalletTransferService|Collection|BaseModel
      */
     public function walletTransfer($filters = null)
