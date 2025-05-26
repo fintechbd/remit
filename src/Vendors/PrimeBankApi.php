@@ -82,10 +82,6 @@ class PrimeBankApi implements MoneyTransfer
             ->post($url)
             ->body();
 
-        if (Utility::isJson($responseBody)) {
-            return json_decode($responseBody, true);
-        }
-
         return $this->decryptedResponse($responseBody);
     }
 
@@ -144,6 +140,8 @@ class PrimeBankApi implements MoneyTransfer
      */
     private function decryptedResponse(string $cipherText): ?array
     {
+        logger()->info("Cipher Text: " . $cipherText);
+
         $cipherText = hex2bin($cipherText);
 
         if ($cipherText === false) {
@@ -274,7 +272,9 @@ class PrimeBankApi implements MoneyTransfer
             default => null
         };
 
-        $response = $this->post('/sendTransaction', $params);
+        $response = $this->post('/sendTransaction', $payload);
+
+        dd($response);
 
         $response = array_shift($response);
 
