@@ -140,7 +140,7 @@ class PrimeBankApi implements MoneyTransfer
      */
     private function decryptedResponse(string $cipherText): ?array
     {
-        logger()->info("Cipher Text: " . $cipherText);
+        logger()->info('Cipher Text: '.$cipherText);
 
         $cipherText = hex2bin($cipherText);
 
